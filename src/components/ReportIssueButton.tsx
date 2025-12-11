@@ -12,7 +12,7 @@ interface ReportIssueButtonProps {
 }
 
 export function ReportIssueButton({ context }: ReportIssueButtonProps) {
-  const email = "feedback@example.com"; // Replace with your email
+  const email = "info@stefanbuttigieg.com"; // Replace with your email
   const subject = encodeURIComponent("EHDS Explorer - Issue Report");
   
   const body = encodeURIComponent(

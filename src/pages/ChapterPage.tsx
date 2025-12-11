@@ -8,6 +8,7 @@ import { articles } from "@/data/articles";
 import Layout from "@/components/Layout";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import PrintButton from "@/components/PrintButton";
 
 const ChapterPage = () => {
   const { id } = useParams();
@@ -34,8 +35,13 @@ const ChapterPage = () => {
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
         <Breadcrumbs items={[{ label: `Chapter ${chapter.id}` }]} />
 
-        <Badge variant="outline" className="mb-2">Chapter {chapter.id}</Badge>
-        <h1 className="text-3xl font-bold font-serif mb-4">{chapter.title}</h1>
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div>
+            <Badge variant="outline" className="mb-2">Chapter {chapter.id}</Badge>
+            <h1 className="text-3xl font-bold font-serif">{chapter.title}</h1>
+          </div>
+          <PrintButton />
+        </div>
         <p className="text-muted-foreground mb-4">{chapter.description}</p>
         
         {/* Reading Progress */}

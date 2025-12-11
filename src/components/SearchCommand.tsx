@@ -23,11 +23,34 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
 
-  const fuse = useMemo(() => ({
-    articles: new Fuse(articles, { keys: ['title', 'content'], threshold: 0.3 }),
-    recitals: new Fuse(recitals, { keys: ['content'], threshold: 0.3 }),
-    definitions: new Fuse(definitions, { keys: ['term', 'definition'], threshold: 0.3 }),
+  // Create searchable data with ID variations
+  const searchableData = useMemo(() => ({
+    articles: articles.map(a => ({
+      ...a,
+      searchId: `article ${a.id} art ${a.id} art. ${a.id}`,
+    })),
+    recitals: recitals.map(r => ({
+      ...r,
+      searchId: `recital ${r.id} rec ${r.id}`,
+    })),
   }), []);
+
+  const fuse = useMemo(() => ({
+    articles: new Fuse(searchableData.articles, { 
+      keys: ['title', 'content', 'searchId'], 
+      threshold: 0.3,
+      ignoreLocation: true,
+    }),
+    recitals: new Fuse(searchableData.recitals, { 
+      keys: ['content', 'searchId'], 
+      threshold: 0.3,
+      ignoreLocation: true,
+    }),
+    definitions: new Fuse(definitions, { 
+      keys: ['term', 'definition'], 
+      threshold: 0.3 
+    }),
+  }), [searchableData]);
 
   const results = useMemo(() => {
     if (!query.trim()) {
@@ -37,6 +60,31 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
         definitions: definitions.slice(0, 3),
       };
     }
+
+    // Check for direct ID match patterns like "article 42", "art 15", "recital 5"
+    const articleMatch = query.match(/^(?:article|art\.?)\s*(\d+)$/i);
+    const recitalMatch = query.match(/^(?:recital|rec\.?)\s*(\d+)$/i);
+    
+    if (articleMatch) {
+      const id = parseInt(articleMatch[1]);
+      const article = articles.find(a => a.id === id);
+      return {
+        articles: article ? [article] : [],
+        recitals: [],
+        definitions: [],
+      };
+    }
+    
+    if (recitalMatch) {
+      const id = parseInt(recitalMatch[1]);
+      const recital = recitals.find(r => r.id === id);
+      return {
+        articles: [],
+        recitals: recital ? [recital] : [],
+        definitions: [],
+      };
+    }
+
     return {
       articles: fuse.articles.search(query).slice(0, 5).map(r => r.item),
       recitals: fuse.recitals.search(query).slice(0, 3).map(r => r.item),

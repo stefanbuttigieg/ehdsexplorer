@@ -1,17 +1,40 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Book, FileText, Scale, ListChecks, Bookmark, ChevronRight, Files } from "lucide-react";
+import { Search, Book, FileText, Scale, ListChecks, Bookmark, ChevronRight, Files, Clock, MessageSquare, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import { chapters } from "@/data/chapters";
-import { getActStats } from "@/data/implementingActs";
+import { getActStats, implementingActs, themeLabels } from "@/data/implementingActs";
 import Layout from "@/components/Layout";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
 import { RecitalsQuickExplorer } from "@/components/RecitalsQuickExplorer";
 import { ArticlesQuickExplorer } from "@/components/ArticlesQuickExplorer";
 import { ContinueReading } from "@/components/ContinueReading";
+import { differenceInDays, parse, isAfter, isBefore } from "date-fns";
+
+const getFeedbackStatus = (deadline: string) => {
+  const parts = deadline.split(" - ");
+  if (parts.length !== 2) return null;
+  
+  const startDate = parse(parts[0].trim(), "dd MMMM yyyy", new Date());
+  const endDate = parse(parts[1].trim(), "dd MMMM yyyy", new Date());
+  const now = new Date();
+  
+  if (isBefore(now, startDate)) {
+    const days = differenceInDays(startDate, now);
+    return { status: 'upcoming', days, label: `Opens in ${days} days` };
+  }
+  
+  if (isAfter(now, endDate)) {
+    return null; // Don't show closed ones
+  }
+  
+  const days = differenceInDays(endDate, now);
+  return { status: 'active', days, label: `${days} days remaining` };
+};
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -64,6 +87,56 @@ const Index = () => {
 
         {/* Continue Reading */}
         <ContinueReading />
+
+        {/* Open for Feedback Section */}
+        {(() => {
+          const feedbackActs = implementingActs
+            .filter(act => act.status === 'feedback' && act.feedbackDeadline)
+            .map(act => ({ ...act, feedbackStatus: getFeedbackStatus(act.feedbackDeadline!) }))
+            .filter(act => act.feedbackStatus !== null);
+          
+          if (feedbackActs.length === 0) return null;
+          
+          return (
+            <section className="py-8 px-4 border-b border-border bg-primary/5">
+              <div className="max-w-6xl mx-auto">
+                <div className="flex items-center gap-2 mb-4">
+                  <MessageSquare className="h-5 w-5 text-primary" />
+                  <h2 className="text-xl font-bold font-serif">Open for Feedback</h2>
+                </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {feedbackActs.map(act => (
+                    <Card key={act.id} className="border-primary/20 bg-background">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <Badge variant="outline">{act.articleReference}</Badge>
+                          <Badge variant="default" className="bg-primary">
+                            <Clock className="h-3 w-3 mr-1" />
+                            {act.feedbackStatus?.label}
+                          </Badge>
+                        </div>
+                        <h3 className="font-semibold mb-1">{act.title}</h3>
+                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{act.description}</p>
+                        <div className="flex items-center gap-2">
+                          <Link to={`/implementing-acts/${act.id}`}>
+                            <Button variant="outline" size="sm">View details</Button>
+                          </Link>
+                          {act.officialLink && (
+                            <a href={act.officialLink} target="_blank" rel="noopener noreferrer">
+                              <Button variant="default" size="sm">
+                                Submit feedback <ExternalLink className="h-3 w-3 ml-1" />
+                              </Button>
+                            </a>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            </section>
+          );
+        })()}
 
         {/* Quick Links */}
         <section className="py-8 px-4 border-b border-border bg-muted/30">

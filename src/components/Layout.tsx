@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { AccessibilityControls } from "@/components/AccessibilityControls";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { KeyboardShortcutsDialog } from "@/components/KeyboardShortcutsDialog";
-
+import { ReportIssueButton } from "@/components/ReportIssueButton";
 interface LayoutProps {
   children: ReactNode;
 }
@@ -45,6 +45,7 @@ const Layout = ({ children }: LayoutProps) => {
         </Button>
         <Link to="/" className="font-serif font-bold text-lg">EHDS Explorer</Link>
         <div className="flex items-center gap-1">
+          <ReportIssueButton />
           <AccessibilityControls />
           <Link to="/search">
             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -67,7 +68,8 @@ const Layout = ({ children }: LayoutProps) => {
         <div className="h-14 border-b border-sidebar-border flex items-center justify-between px-4">
           <Link to="/" className="font-serif font-bold text-lg text-sidebar-foreground">EHDS Explorer</Link>
           <div className="flex items-center gap-1">
-            <div className="hidden md:flex">
+            <div className="hidden md:flex items-center gap-1">
+              <ReportIssueButton />
               <AccessibilityControls />
             </div>
             <Button variant="ghost" size="icon" className="md:hidden h-8 w-8" onClick={() => setSidebarOpen(false)}>

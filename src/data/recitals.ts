@@ -171,6 +171,111 @@ export const recitals: Recital[] = [
     relatedArticles: [27],
   },
   {
+    id: 34,
+    content: "The essential requirements for EHR systems should ensure that those systems achieve the performance intended by the manufacturer while ensuring data protection, security, safety and interoperability.",
+    relatedArticles: [28],
+  },
+  {
+    id: 35,
+    content: "The essential requirements should be complemented by common specifications adopted by the Commission to provide detailed technical guidance on how to meet those requirements.",
+    relatedArticles: [28, 31],
+  },
+  {
+    id: 36,
+    content: "EHR systems should only be placed on the market or put into service if they comply with the requirements of this Regulation. Manufacturers should be responsible for ensuring compliance.",
+    relatedArticles: [29],
+  },
+  {
+    id: 37,
+    content: "The Commission should adopt common specifications to ensure consistent implementation of the essential requirements across the Union.",
+    relatedArticles: [31],
+  },
+  {
+    id: 38,
+    content: "Manufacturers should draw up an EU declaration of conformity to demonstrate that their EHR systems comply with the essential requirements.",
+    relatedArticles: [32],
+  },
+  {
+    id: 39,
+    content: "Conformity assessment procedures should verify that EHR systems meet the essential requirements before they are placed on the market.",
+    relatedArticles: [35],
+  },
+  {
+    id: 40,
+    content: "Manufacturers should be able to choose between different conformity assessment procedures, including internal control and third-party assessment.",
+    relatedArticles: [35],
+  },
+  {
+    id: 41,
+    content: "Manufacturers of EHR systems should have specific obligations to ensure that their products comply with this Regulation throughout their lifetime.",
+    relatedArticles: [38],
+  },
+  {
+    id: 42,
+    content: "Market surveillance activities should ensure that EHR systems placed on the market continue to comply with the requirements of this Regulation.",
+    relatedArticles: [43],
+  },
+  {
+    id: 43,
+    content: "The Commission should establish an EU database on EHR systems to provide information on EHR systems placed on the market.",
+    relatedArticles: [45],
+  },
+  {
+    id: 44,
+    content: "Wellness applications that claim interoperability with EHR systems should be subject to labelling requirements to ensure transparency for users.",
+    relatedArticles: [47],
+  },
+  {
+    id: 45,
+    content: "Transitional provisions should allow existing EHR systems to continue to be used while manufacturers bring them into compliance with the new requirements.",
+    relatedArticles: [50],
+  },
+  {
+    id: 46,
+    content: "The secondary use of electronic health data can provide significant benefits for society, including improving public health, advancing research, and supporting innovation in healthcare.",
+    relatedArticles: [51],
+  },
+  {
+    id: 47,
+    content: "Secondary use refers to the processing of electronic health data for purposes other than the provision of healthcare, such as research, policy-making, and innovation.",
+    relatedArticles: [51],
+  },
+  {
+    id: 48,
+    content: "The framework for secondary use should ensure that electronic health data can be accessed for legitimate purposes while protecting the rights of natural persons.",
+    relatedArticles: [51],
+  },
+  {
+    id: 49,
+    content: "Health data holders should be required to make electronic health data available for secondary use in accordance with the provisions of this Regulation.",
+    relatedArticles: [54],
+  },
+  {
+    id: 50,
+    content: "The obligations of health data holders should be proportionate and should not impose an undue burden, particularly on smaller entities.",
+    relatedArticles: [54],
+  },
+  {
+    id: 51,
+    content: "Secondary use of electronic health data should support the development of new treatments, medical devices, and healthcare services that benefit patients and society.",
+    relatedArticles: [51, 53],
+  },
+  {
+    id: 52,
+    content: "Research and innovation in the health sector are essential for improving healthcare outcomes and addressing public health challenges.",
+    relatedArticles: [53],
+  },
+  {
+    id: 53,
+    content: "The chapter on secondary use should apply to a wide range of health data holders, including healthcare providers, research institutions, and public health authorities.",
+    relatedArticles: [51],
+  },
+  {
+    id: 54,
+    content: "The secondary use framework should complement existing data protection legislation and should not undermine the protection afforded to personal data.",
+    relatedArticles: [51],
+  },
+  {
     id: 55,
     content: "A wide range of electronic health data should be available for secondary use, including data from electronic health records, disease registries, biobanks, clinical trials, medical devices, and administrative databases.",
     relatedArticles: [52],
@@ -206,6 +311,21 @@ export const recitals: Recital[] = [
     relatedArticles: [53],
   },
   {
+    id: 62,
+    content: "Health data holders should provide electronic health data to health data access bodies in a timely manner and in the format specified by this Regulation.",
+    relatedArticles: [54],
+  },
+  {
+    id: 63,
+    content: "Data quality is essential for the effective use of electronic health data for secondary purposes. Health data access bodies should assess and label the quality of datasets.",
+    relatedArticles: [55],
+  },
+  {
+    id: 64,
+    content: "Dataset catalogues should provide information about available datasets to facilitate discovery and access by health data users.",
+    relatedArticles: [56],
+  },
+  {
     id: 65,
     content: "Health data access bodies should be responsible for granting access to electronic health data for secondary use. They should process applications, issue data permits, and ensure compliance with the conditions of access.",
     relatedArticles: [67],
@@ -219,6 +339,66 @@ export const recitals: Recital[] = [
     id: 67,
     content: "Health data access bodies should operate secure processing environments for the processing of electronic health data for secondary use.",
     relatedArticles: [67],
+  },
+  {
+    id: 68,
+    content: "Applications for access to electronic health data should include sufficient information to enable health data access bodies to assess whether the purposes are permitted and the request is proportionate.",
+    relatedArticles: [58],
+  },
+  {
+    id: 69,
+    content: "Health data access bodies should assess applications within a reasonable timeframe and should provide reasoned decisions to applicants.",
+    relatedArticles: [59],
+  },
+  {
+    id: 70,
+    content: "Data permits should specify the conditions under which electronic health data may be accessed and processed, including the purposes, duration, and security requirements.",
+    relatedArticles: [60],
+  },
+  {
+    id: 71,
+    content: "Health data requests for anonymised statistical data should provide an alternative to full data access for health data users who do not need access to personal data.",
+    relatedArticles: [61],
+  },
+  {
+    id: 72,
+    content: "Multi-country access requests should be coordinated among the relevant health data access bodies to ensure consistent and efficient processing.",
+    relatedArticles: [62],
+  },
+  {
+    id: 73,
+    content: "Fees for access to electronic health data should be transparent, non-discriminatory, and proportionate to the costs of providing access.",
+    relatedArticles: [63],
+  },
+  {
+    id: 74,
+    content: "Health data holders should receive fair compensation for making electronic health data available for secondary use.",
+    relatedArticles: [64],
+  },
+  {
+    id: 75,
+    content: "Health data users should comply with strict obligations to protect electronic health data and should not attempt to re-identify natural persons.",
+    relatedArticles: [65],
+  },
+  {
+    id: 76,
+    content: "Secure processing environments should provide a high level of security and should prevent the extraction of personal electronic health data.",
+    relatedArticles: [66],
+  },
+  {
+    id: 77,
+    content: "Health data access bodies should be independent and should have the necessary powers to perform their tasks effectively.",
+    relatedArticles: [68],
+  },
+  {
+    id: 78,
+    content: "Health data access bodies should publish annual activity reports containing information on applications processed, permits issued, and fees collected.",
+    relatedArticles: [71],
+  },
+  {
+    id: 79,
+    content: "Health data access bodies should supervise health data holders and health data users to ensure compliance with the provisions of this Regulation.",
+    relatedArticles: [72],
   },
   {
     id: 80,
@@ -236,6 +416,26 @@ export const recitals: Recital[] = [
     relatedArticles: [81],
   },
   {
+    id: 83,
+    content: "The HealthData@EU infrastructure should provide common services for discovery, access, and analysis of electronic health data across borders.",
+    relatedArticles: [82],
+  },
+  {
+    id: 84,
+    content: "Third countries may be authorised to participate in HealthData@EU where they have adopted compatible rules and adequate safeguards for data protection.",
+    relatedArticles: [84],
+  },
+  {
+    id: 85,
+    content: "International transfers of electronic health data should be subject to the provisions of Regulation (EU) 2016/679 to ensure adequate protection.",
+    relatedArticles: [85],
+  },
+  {
+    id: 86,
+    content: "Cross-border infrastructure for primary and secondary use should be developed in cooperation between the Commission and Member States.",
+    relatedArticles: [88],
+  },
+  {
     id: 87,
     content: "The EHDS Board should be established to facilitate cooperation among Member States and ensure consistent application of this Regulation. The Board should be composed of representatives of digital health authorities and health data access bodies.",
     relatedArticles: [92],
@@ -244,6 +444,36 @@ export const recitals: Recital[] = [
     id: 88,
     content: "The EHDS Board should have advisory functions and should assist the Commission in ensuring consistent application of this Regulation across the Union.",
     relatedArticles: [92],
+  },
+  {
+    id: 89,
+    content: "The EHDS Board may establish subgroups to examine specific matters, such as primary use, secondary use, and interoperability.",
+    relatedArticles: [93],
+  },
+  {
+    id: 90,
+    content: "The Commission and the EHDS Board should consult relevant stakeholders, including patients, healthcare providers, researchers, and industry, in the implementation of this Regulation.",
+    relatedArticles: [94],
+  },
+  {
+    id: 91,
+    content: "Member States should lay down rules on penalties applicable to infringements of this Regulation. Penalties should be effective, proportionate, and dissuasive.",
+    relatedArticles: [95],
+  },
+  {
+    id: 92,
+    content: "Administrative fines for serious infringements by health data holders and health data users may amount to significant sums to ensure effective deterrence.",
+    relatedArticles: [95],
+  },
+  {
+    id: 93,
+    content: "The Commission should evaluate this Regulation periodically to assess its effectiveness and impact, and should propose amendments where appropriate.",
+    relatedArticles: [97],
+  },
+  {
+    id: 94,
+    content: "The evaluation should assess the functioning of health data access bodies, the operation of cross-border infrastructure, and the impact on research and innovation.",
+    relatedArticles: [97],
   },
   {
     id: 95,

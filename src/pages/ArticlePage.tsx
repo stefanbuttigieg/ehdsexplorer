@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect } from "react";
-import { ChevronLeft, ChevronRight, Bookmark, ExternalLink } from "lucide-react";
+import { ChevronLeft, ChevronRight, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,7 @@ import { useBookmarks } from "@/hooks/useBookmarks";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import PrintButton from "@/components/PrintButton";
 
 const ArticlePage = () => {
   const { id } = useParams();
@@ -63,13 +64,16 @@ const ArticlePage = () => {
             <Badge variant="outline" className="mb-2">Article {article.id}</Badge>
             <h1 className="text-3xl font-bold font-serif">{article.title}</h1>
           </div>
-          <Button
-            variant={isBookmarked('article', articleId) ? "default" : "outline"}
-            size="icon"
-            onClick={() => toggleBookmark('article', articleId)}
-          >
-            <Bookmark className={isBookmarked('article', articleId) ? "fill-current" : ""} />
-          </Button>
+          <div className="flex gap-2">
+            <PrintButton />
+            <Button
+              variant={isBookmarked('article', articleId) ? "default" : "outline"}
+              size="icon"
+              onClick={() => toggleBookmark('article', articleId)}
+            >
+              <Bookmark className={isBookmarked('article', articleId) ? "fill-current" : ""} />
+            </Button>
+          </div>
         </div>
 
         {/* Article Content */}

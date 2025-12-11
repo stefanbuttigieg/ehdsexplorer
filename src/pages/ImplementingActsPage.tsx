@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { implementingActs, themeLabels, statusLabels, ActStatus, ActTheme, getActStats } from "@/data/implementingActs";
 import Layout from "@/components/Layout";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 const ImplementingActsPage = () => {
   const [filterStatus, setFilterStatus] = useState<ActStatus | 'all'>('all');
@@ -27,6 +28,7 @@ const ImplementingActsPage = () => {
   return (
     <Layout>
       <div className="max-w-5xl mx-auto p-6 animate-fade-in">
+        <Breadcrumbs items={[{ label: "Implementing Acts" }]} />
         <h1 className="text-3xl font-bold font-serif mb-2">Implementing Acts Tracker</h1>
         <p className="text-muted-foreground mb-8">Track the progress of delegated and implementing acts required by the EHDS Regulation</p>
 

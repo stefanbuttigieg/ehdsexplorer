@@ -4,17 +4,19 @@ import { Badge } from "@/components/ui/badge";
 import { annexes } from "@/data/annexes";
 import { FileText, ArrowRight } from "lucide-react";
 import Layout from "@/components/Layout";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 const AnnexesPage = () => {
   return (
     <Layout>
       <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-serif font-bold text-foreground">Annexes</h1>
-        <p className="text-muted-foreground mt-2">
-          Technical specifications, essential requirements, and conformity assessment documentation
-        </p>
-      </div>
+        <div>
+          <Breadcrumbs items={[{ label: "Annexes" }]} />
+          <h1 className="text-3xl font-serif font-bold text-foreground">Annexes</h1>
+          <p className="text-muted-foreground mt-2">
+            Technical specifications, essential requirements, and conformity assessment documentation
+          </p>
+        </div>
 
       <div className="grid gap-4">
         {annexes.map((annex) => (

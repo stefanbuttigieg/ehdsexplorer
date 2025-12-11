@@ -7,6 +7,7 @@ import { getChapterById, chapters } from "@/data/chapters";
 import { articles } from "@/data/articles";
 import Layout from "@/components/Layout";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 const ChapterPage = () => {
   const { id } = useParams();
@@ -31,11 +32,7 @@ const ChapterPage = () => {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <Link to="/" className="hover:text-foreground">Home</Link>
-          <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground">Chapter {chapter.id}</span>
-        </nav>
+        <Breadcrumbs items={[{ label: `Chapter ${chapter.id}` }]} />
 
         <Badge variant="outline" className="mb-2">Chapter {chapter.id}</Badge>
         <h1 className="text-3xl font-bold font-serif mb-4">{chapter.title}</h1>

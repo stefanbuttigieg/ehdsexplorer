@@ -8,6 +8,7 @@ import { getArticleById } from "@/data/articles";
 import { ChevronLeft, FileText, Link as LinkIcon, Bookmark, BookmarkCheck } from "lucide-react";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import Layout from "@/components/Layout";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 const AnnexDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,14 +18,17 @@ const AnnexDetailPage = () => {
   if (!annex) {
     return (
       <Layout>
-        <div className="text-center py-12">
-          <h2 className="text-2xl font-semibold mb-4">Annex not found</h2>
-          <Link to="/annexes">
-            <Button variant="outline">
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              Back to Annexes
-            </Button>
-          </Link>
+        <div className="p-6">
+          <Breadcrumbs items={[{ label: "Annexes", href: "/annexes" }, { label: "Not Found" }]} />
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-semibold mb-4">Annex not found</h2>
+            <Link to="/annexes">
+              <Button variant="outline">
+                <ChevronLeft className="mr-2 h-4 w-4" />
+                Back to Annexes
+              </Button>
+            </Link>
+          </div>
         </div>
       </Layout>
     );
@@ -35,14 +39,7 @@ const AnnexDetailPage = () => {
   return (
     <Layout>
       <div className="p-6 space-y-6">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link to="/" className="hover:text-foreground">Home</Link>
-        <span>/</span>
-        <Link to="/annexes" className="hover:text-foreground">Annexes</Link>
-        <span>/</span>
-        <span className="text-foreground">Annex {annex.id}</span>
-      </div>
+        <Breadcrumbs items={[{ label: "Annexes", href: "/annexes" }, { label: `Annex ${annex.id}` }]} />
 
       {/* Header */}
       <div className="flex items-start justify-between">

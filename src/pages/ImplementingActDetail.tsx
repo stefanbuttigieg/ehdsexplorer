@@ -7,6 +7,7 @@ import { getActById, statusLabels, themeLabels } from "@/data/implementingActs";
 import { getArticleById } from "@/data/articles";
 import Layout from "@/components/Layout";
 import { useBookmarks } from "@/hooks/useBookmarks";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 const ImplementingActDetail = () => {
   const { id } = useParams();
@@ -27,13 +28,7 @@ const ImplementingActDetail = () => {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <Link to="/" className="hover:text-foreground">Home</Link>
-          <ChevronRight className="h-4 w-4" />
-          <Link to="/implementing-acts" className="hover:text-foreground">Implementing Acts</Link>
-          <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground">{act.articleReference}</span>
-        </nav>
+        <Breadcrumbs items={[{ label: "Implementing Acts", href: "/implementing-acts" }, { label: act.articleReference }]} />
 
         <div className="flex items-start justify-between gap-4 mb-6">
           <div>

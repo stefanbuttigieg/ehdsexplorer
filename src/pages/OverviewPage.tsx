@@ -2,11 +2,13 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Layout from "@/components/Layout";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 const OverviewPage = () => {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
+        <Breadcrumbs items={[{ label: "Overview" }]} />
         <Badge variant="outline" className="mb-2">Regulation (EU) 2025/327</Badge>
         <h1 className="text-3xl font-bold font-serif mb-4">European Health Data Space Regulation</h1>
         <p className="text-lg text-muted-foreground mb-8">Quick overview of the EHDS Regulation</p>

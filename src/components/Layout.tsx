@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { chapters } from "@/data/chapters";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { AccessibilityControls } from "@/components/AccessibilityControls";
 
 interface LayoutProps {
   children: ReactNode;
@@ -36,11 +37,14 @@ const Layout = ({ children }: LayoutProps) => {
           <Menu className="h-5 w-5" />
         </Button>
         <Link to="/" className="font-serif font-bold text-lg">EHDS Explorer</Link>
-        <Link to="/search">
-          <Button variant="ghost" size="icon">
-            <Search className="h-5 w-5" />
-          </Button>
-        </Link>
+        <div className="flex items-center gap-1">
+          <AccessibilityControls />
+          <Link to="/search">
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Search className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
       </header>
 
       {/* Sidebar Overlay */}
@@ -55,9 +59,14 @@ const Layout = ({ children }: LayoutProps) => {
       )}>
         <div className="h-14 border-b border-sidebar-border flex items-center justify-between px-4">
           <Link to="/" className="font-serif font-bold text-lg text-sidebar-foreground">EHDS Explorer</Link>
-          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSidebarOpen(false)}>
-            <X className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <div className="hidden md:flex">
+              <AccessibilityControls />
+            </div>
+            <Button variant="ghost" size="icon" className="md:hidden h-8 w-8" onClick={() => setSidebarOpen(false)}>
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
         
         <ScrollArea className="h-[calc(100vh-3.5rem)]">

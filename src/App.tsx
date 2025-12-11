@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import Index from "./pages/Index";
 import ArticlePage from "./pages/ArticlePage";
 import ChapterPage from "./pages/ChapterPage";
@@ -21,28 +22,30 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/overview" element={<OverviewPage />} />
-          <Route path="/chapter/:id" element={<ChapterPage />} />
-          <Route path="/article/:id" element={<ArticlePage />} />
-          <Route path="/recitals" element={<RecitalsPage />} />
-          <Route path="/recital/:id" element={<RecitalsPage />} />
-          <Route path="/definitions" element={<DefinitionsPage />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/implementing-acts" element={<ImplementingActsPage />} />
-          <Route path="/implementing-acts/:id" element={<ImplementingActDetail />} />
-          <Route path="/annexes" element={<AnnexesPage />} />
-          <Route path="/annex/:id" element={<AnnexDetailPage />} />
-          <Route path="/bookmarks" element={<BookmarksPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider defaultTheme="system" storageKey="ehds-theme">
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/overview" element={<OverviewPage />} />
+            <Route path="/chapter/:id" element={<ChapterPage />} />
+            <Route path="/article/:id" element={<ArticlePage />} />
+            <Route path="/recitals" element={<RecitalsPage />} />
+            <Route path="/recital/:id" element={<RecitalsPage />} />
+            <Route path="/definitions" element={<DefinitionsPage />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/implementing-acts" element={<ImplementingActsPage />} />
+            <Route path="/implementing-acts/:id" element={<ImplementingActDetail />} />
+            <Route path="/annexes" element={<AnnexesPage />} />
+            <Route path="/annex/:id" element={<AnnexDetailPage />} />
+            <Route path="/bookmarks" element={<BookmarksPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

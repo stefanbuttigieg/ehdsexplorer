@@ -4,16 +4,27 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { recitals, getRecitalById } from "@/data/recitals";
 import Layout from "@/components/Layout";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 const RecitalsPage = () => {
   const { id } = useParams();
   const selectedId = id ? parseInt(id) : null;
+  const selectedRecital = selectedId ? getRecitalById(selectedId) : null;
+
+  const breadcrumbItems = selectedId
+    ? [{ label: "Recitals", href: "/recitals" }, { label: `Recital ${selectedId}` }]
+    : [{ label: "Recitals" }];
 
   return (
     <Layout>
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
-        <h1 className="text-3xl font-bold font-serif mb-2">Recitals</h1>
-        <p className="text-muted-foreground mb-6">The 96 recitals providing context and interpretation guidance</p>
+        <Breadcrumbs items={breadcrumbItems} />
+        <h1 className="text-3xl font-bold font-serif mb-2">
+          {selectedId ? `Recital ${selectedId}` : "Recitals"}
+        </h1>
+        <p className="text-muted-foreground mb-6">
+          {selectedId ? "Context and interpretation guidance" : "The 96 recitals providing context and interpretation guidance"}
+        </p>
 
         <div className="space-y-4">
           {recitals.map((recital) => (

@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { definitions, searchDefinitions } from "@/data/definitions";
 import Layout from "@/components/Layout";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 const DefinitionsPage = () => {
   const [query, setQuery] = useState("");
@@ -14,6 +15,7 @@ const DefinitionsPage = () => {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
+        <Breadcrumbs items={[{ label: "Definitions" }]} />
         <h1 className="text-3xl font-bold font-serif mb-2">Definitions</h1>
         <p className="text-muted-foreground mb-6">Article 2 definitions from the EHDS Regulation</p>
 

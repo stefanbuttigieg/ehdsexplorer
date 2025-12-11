@@ -8,6 +8,7 @@ import { getArticleById } from "@/data/articles";
 import { getRecitalById } from "@/data/recitals";
 import { getActById } from "@/data/implementingActs";
 import Layout from "@/components/Layout";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 const BookmarksPage = () => {
   const { bookmarks, getBookmarksByType, toggleBookmark } = useBookmarks();
@@ -19,11 +20,14 @@ const BookmarksPage = () => {
   if (bookmarks.length === 0) {
     return (
       <Layout>
-        <div className="max-w-4xl mx-auto p-6 text-center animate-fade-in">
-          <Bookmark className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-          <h1 className="text-2xl font-bold mb-2">No bookmarks yet</h1>
-          <p className="text-muted-foreground mb-6">Save articles, recitals, and implementing acts for quick access</p>
-          <Link to="/"><Button>Start exploring</Button></Link>
+        <div className="max-w-4xl mx-auto p-6 animate-fade-in">
+          <Breadcrumbs items={[{ label: "Bookmarks" }]} />
+          <div className="text-center py-12">
+            <Bookmark className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+            <h1 className="text-2xl font-bold mb-2">No bookmarks yet</h1>
+            <p className="text-muted-foreground mb-6">Save articles, recitals, and implementing acts for quick access</p>
+            <Link to="/"><Button>Start exploring</Button></Link>
+          </div>
         </div>
       </Layout>
     );
@@ -32,6 +36,7 @@ const BookmarksPage = () => {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
+        <Breadcrumbs items={[{ label: "Bookmarks" }]} />
         <h1 className="text-3xl font-bold font-serif mb-6">Bookmarks</h1>
 
         {articleBookmarks.length > 0 && (

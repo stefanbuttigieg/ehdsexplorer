@@ -9,6 +9,7 @@ import { articles } from "@/data/articles";
 import { recitals } from "@/data/recitals";
 import { definitions } from "@/data/definitions";
 import Layout from "@/components/Layout";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import Fuse from "fuse.js";
 
 const SearchPage = () => {
@@ -42,6 +43,7 @@ const SearchPage = () => {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
+        <Breadcrumbs items={[{ label: "Search" }]} />
         <h1 className="text-3xl font-bold font-serif mb-6">Search</h1>
 
         <div className="relative mb-6">

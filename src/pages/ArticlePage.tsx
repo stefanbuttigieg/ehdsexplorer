@@ -12,6 +12,7 @@ import Layout from "@/components/Layout";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 const ArticlePage = () => {
   const { id } = useParams();
@@ -47,21 +48,14 @@ const ArticlePage = () => {
     );
   }
 
+  const breadcrumbItems = chapter
+    ? [{ label: `Chapter ${chapter.id}`, href: `/chapter/${chapter.id}` }, { label: `Article ${article.id}` }]
+    : [{ label: `Article ${article.id}` }];
+
   return (
     <Layout>
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
-        {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <Link to="/" className="hover:text-foreground">Home</Link>
-          <ChevronRight className="h-4 w-4" />
-          {chapter && (
-            <>
-              <Link to={`/chapter/${chapter.id}`} className="hover:text-foreground">Chapter {chapter.id}</Link>
-              <ChevronRight className="h-4 w-4" />
-            </>
-          )}
-          <span className="text-foreground">Article {article.id}</span>
-        </nav>
+        <Breadcrumbs items={breadcrumbItems} />
 
         {/* Article Header */}
         <div className="flex items-start justify-between gap-4 mb-8">

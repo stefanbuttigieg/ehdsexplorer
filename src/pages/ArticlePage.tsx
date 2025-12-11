@@ -4,7 +4,8 @@ import { ChevronLeft, ChevronRight, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getArticleById, articles } from "@/data/articles";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useArticle, useArticles } from "@/hooks/useArticles";
 import { getChapterByArticle } from "@/data/chapters";
 import { getRecitalsByArticle } from "@/data/recitals";
 import { getActsByArticle } from "@/data/implementingActs";
@@ -18,7 +19,8 @@ import PrintButton from "@/components/PrintButton";
 const ArticlePage = () => {
   const { id } = useParams();
   const articleId = parseInt(id || "1");
-  const article = getArticleById(articleId);
+  const { data: article, isLoading } = useArticle(articleId);
+  const { data: articles } = useArticles();
   const chapter = getChapterByArticle(articleId);
   const relatedRecitals = getRecitalsByArticle(articleId);
   const relatedActs = getActsByArticle(articleId);
@@ -35,8 +37,20 @@ const ArticlePage = () => {
     }
   }, [articleId, article, markAsRead]);
 
-  const prevArticle = articles.find(a => a.id === articleId - 1);
-  const nextArticle = articles.find(a => a.id === articleId + 1);
+  const prevArticle = articles?.find(a => a.article_number === articleId - 1);
+  const nextArticle = articles?.find(a => a.article_number === articleId + 1);
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="max-w-4xl mx-auto p-6">
+          <Skeleton className="h-8 w-48 mb-4" />
+          <Skeleton className="h-12 w-full mb-8" />
+          <Skeleton className="h-64 w-full" />
+        </div>
+      </Layout>
+    );
+  }
 
   if (!article) {
     return (
@@ -50,8 +64,8 @@ const ArticlePage = () => {
   }
 
   const breadcrumbItems = chapter
-    ? [{ label: `Chapter ${chapter.id}`, href: `/chapter/${chapter.id}` }, { label: `Article ${article.id}` }]
-    : [{ label: `Article ${article.id}` }];
+    ? [{ label: `Chapter ${chapter.id}`, href: `/chapter/${chapter.id}` }, { label: `Article ${article.article_number}` }]
+    : [{ label: `Article ${article.article_number}` }];
 
   return (
     <Layout>
@@ -61,7 +75,7 @@ const ArticlePage = () => {
         {/* Article Header */}
         <div className="flex items-start justify-between gap-4 mb-8">
           <div>
-            <Badge variant="outline" className="mb-2">Article {article.id}</Badge>
+            <Badge variant="outline" className="mb-2">Article {article.article_number}</Badge>
             <h1 className="text-3xl font-bold font-serif">{article.title}</h1>
           </div>
           <div className="flex gap-2">
@@ -129,17 +143,17 @@ const ArticlePage = () => {
         {/* Navigation */}
         <div className="flex items-center justify-between pt-6 border-t border-border">
           {prevArticle ? (
-            <Link to={`/article/${prevArticle.id}`}>
+            <Link to={`/article/${prevArticle.article_number}`}>
               <Button variant="outline" className="gap-2">
                 <ChevronLeft className="h-4 w-4" />
-                Art. {prevArticle.id}
+                Art. {prevArticle.article_number}
               </Button>
             </Link>
           ) : <div />}
           {nextArticle && (
-            <Link to={`/article/${nextArticle.id}`}>
+            <Link to={`/article/${nextArticle.article_number}`}>
               <Button variant="outline" className="gap-2">
-                Art. {nextArticle.id}
+                Art. {nextArticle.article_number}
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </Link>

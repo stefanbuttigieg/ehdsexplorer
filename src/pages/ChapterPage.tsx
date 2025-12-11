@@ -1,10 +1,11 @@
 import { useParams, Link } from "react-router-dom";
 import { ChevronRight, CheckCircle2 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { getChapterById, chapters } from "@/data/chapters";
-import { articles } from "@/data/articles";
+import { Skeleton } from "@/components/ui/skeleton";
+import { getChapterById } from "@/data/chapters";
+import { useArticles } from "@/hooks/useArticles";
 import Layout from "@/components/Layout";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -14,6 +15,7 @@ const ChapterPage = () => {
   const { id } = useParams();
   const chapterId = parseInt(id || "1");
   const chapter = getChapterById(chapterId);
+  const { data: articles, isLoading } = useArticles();
   const { isRead, getChapterProgress } = useReadingProgress();
 
   if (!chapter) {
@@ -26,9 +28,25 @@ const ChapterPage = () => {
     );
   }
 
-  const chapterArticles = articles.filter(
-    (a) => a.id >= chapter.articleRange[0] && a.id <= chapter.articleRange[1]
-  );
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="max-w-4xl mx-auto p-6">
+          <Skeleton className="h-8 w-48 mb-4" />
+          <Skeleton className="h-12 w-full mb-8" />
+          <div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-20 w-full" />
+            ))}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  const chapterArticles = articles?.filter(
+    (a) => a.article_number >= chapter.articleRange[0] && a.article_number <= chapter.articleRange[1]
+  ) || [];
 
   return (
     <Layout>
@@ -63,22 +81,22 @@ const ChapterPage = () => {
         {chapter.sections ? (
           chapter.sections.map((section, idx) => {
             const sectionArticles = chapterArticles.filter(
-              (a) => a.id >= section.articleRange[0] && a.id <= section.articleRange[1]
+              (a) => a.article_number >= section.articleRange[0] && a.article_number <= section.articleRange[1]
             );
             return (
               <div key={idx} className="mb-8">
                 <h2 className="text-xl font-semibold mb-4">{section.title}</h2>
                 <div className="space-y-3">
                   {sectionArticles.map((article) => (
-                    <Link key={article.id} to={`/article/${article.id}`}>
-                      <Card className={`hover:border-primary transition-colors cursor-pointer ${isRead(article.id) ? 'border-primary/30 bg-primary/5' : ''}`}>
+                    <Link key={article.article_number} to={`/article/${article.article_number}`}>
+                      <Card className={`hover:border-primary transition-colors cursor-pointer ${isRead(article.article_number) ? 'border-primary/30 bg-primary/5' : ''}`}>
                         <CardContent className="p-4 flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            {isRead(article.id) && (
+                            {isRead(article.article_number) && (
                               <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
                             )}
                             <div>
-                              <span className="text-sm text-muted-foreground">Article {article.id}</span>
+                              <span className="text-sm text-muted-foreground">Article {article.article_number}</span>
                               <h3 className="font-medium">{article.title}</h3>
                             </div>
                           </div>
@@ -94,15 +112,15 @@ const ChapterPage = () => {
         ) : (
           <div className="space-y-3">
             {chapterArticles.map((article) => (
-              <Link key={article.id} to={`/article/${article.id}`}>
-                <Card className={`hover:border-primary transition-colors cursor-pointer ${isRead(article.id) ? 'border-primary/30 bg-primary/5' : ''}`}>
+              <Link key={article.article_number} to={`/article/${article.article_number}`}>
+                <Card className={`hover:border-primary transition-colors cursor-pointer ${isRead(article.article_number) ? 'border-primary/30 bg-primary/5' : ''}`}>
                   <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      {isRead(article.id) && (
+                      {isRead(article.article_number) && (
                         <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
                       )}
                       <div>
-                        <span className="text-sm text-muted-foreground">Article {article.id}</span>
+                        <span className="text-sm text-muted-foreground">Article {article.article_number}</span>
                         <h3 className="font-medium">{article.title}</h3>
                       </div>
                     </div>

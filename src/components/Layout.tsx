@@ -1,6 +1,6 @@
 import { ReactNode, useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard } from "lucide-react";
+import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { chapters } from "@/data/chapters";
@@ -137,6 +137,21 @@ const Layout = ({ children }: LayoutProps) => {
               <span className="truncate">Keyboard shortcuts</span>
               <kbd className="ml-auto text-xs px-1.5 py-0.5 bg-muted rounded">?</kbd>
             </Button>
+
+            {/* GitHub Link */}
+            <a
+              href="https://github.com/Omarkh2021/EHDS-Regulation-Digital-Explorer"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-2 text-muted-foreground"
+              >
+                <Github className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">View on GitHub</span>
+              </Button>
+            </a>
           </div>
         </ScrollArea>
       </aside>

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut } from 'lucide-react';
+import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -55,10 +55,10 @@ const AdminDashboard = () => {
     },
     {
       title: 'Recitals',
-      description: 'Manage the 96 recitals providing context',
+      description: 'Manage all 115 recitals providing context',
       icon: BookOpen,
       href: '/admin/recitals',
-      count: 96,
+      count: 115,
     },
     {
       title: 'Definitions',
@@ -151,6 +151,12 @@ const AdminDashboard = () => {
             </Link>
             <Link to="/admin/recitals">
               <Button>Edit Recitals</Button>
+            </Link>
+            <Link to="/admin/bulk-import">
+              <Button variant="secondary">
+                <Upload className="h-4 w-4 mr-2" />
+                Bulk Import
+              </Button>
             </Link>
           </CardContent>
         </Card>

@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import ArticlePage from "./pages/ArticlePage";
 import ChapterPage from "./pages/ChapterPage";
 import RecitalsPage from "./pages/RecitalsPage";
+import RecitalPage from "./pages/RecitalPage";
 import DefinitionsPage from "./pages/DefinitionsPage";
 import SearchPage from "./pages/SearchPage";
 import ImplementingActsPage from "./pages/ImplementingActsPage";
@@ -33,7 +34,7 @@ const App = () => (
             <Route path="/chapter/:id" element={<ChapterPage />} />
             <Route path="/article/:id" element={<ArticlePage />} />
             <Route path="/recitals" element={<RecitalsPage />} />
-            <Route path="/recital/:id" element={<RecitalsPage />} />
+            <Route path="/recital/:id" element={<RecitalPage />} />
             <Route path="/definitions" element={<DefinitionsPage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/implementing-acts" element={<ImplementingActsPage />} />

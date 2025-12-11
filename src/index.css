@@ -183,3 +183,114 @@
     border-radius: 3px;
   }
 }
+
+/* Print Styles */
+@media print {
+  /* Hide navigation and interactive elements */
+  aside,
+  header,
+  nav,
+  button,
+  .no-print,
+  [role="navigation"],
+  [data-radix-scroll-area-viewport] + div {
+    display: none !important;
+  }
+
+  /* Reset colors for print */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+
+  /* Main content takes full width */
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Card styles for print */
+  .card,
+  [class*="Card"] {
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 1rem;
+  }
+
+  /* Typography for print */
+  h1 {
+    font-size: 24pt !important;
+    margin-bottom: 0.5rem;
+  }
+
+  h2 {
+    font-size: 18pt !important;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  h3 {
+    font-size: 14pt !important;
+  }
+
+  /* Legal text formatting */
+  .legal-text,
+  .article-content {
+    font-size: 11pt !important;
+    line-height: 1.6 !important;
+  }
+
+  /* Badge styles for print */
+  [class*="Badge"],
+  .badge {
+    border: 1px solid #999 !important;
+    background: #f5f5f5 !important;
+    color: black !important;
+    padding: 2px 8px !important;
+  }
+
+  /* Links - show URL */
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #666;
+  }
+
+  /* Don't show URL for internal navigation links */
+  a[href^="/"]:after,
+  a[href^="#"]:after {
+    content: "";
+  }
+
+  /* Page breaks */
+  h1, h2 {
+    page-break-after: avoid;
+  }
+
+  p, li {
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Progress bars - hide for print */
+  [role="progressbar"] {
+    display: none !important;
+  }
+
+  /* Print header */
+  @page {
+    margin: 2cm;
+    size: A4;
+  }
+
+  /* First page */
+  @page :first {
+    margin-top: 3cm;
+  }
+}

@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Scale, Book, Search, Layers, ScrollText } from "lucide-react";
+import { FileText, Scale, Book, Layers, ScrollText, FileStack } from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -14,12 +14,37 @@ import { recitals } from "@/data/recitals";
 import { definitions } from "@/data/definitions";
 import { chapters } from "@/data/chapters";
 import { implementingActs } from "@/data/implementingActs";
+import { annexes } from "@/data/annexes";
 import Fuse from "fuse.js";
 
 interface SearchCommandProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+// Helper functions for Roman numerals
+const romanToNumber = (roman: string): number => {
+  const map: Record<string, number> = { I: 1, V: 5, X: 10 };
+  let result = 0;
+  for (let i = 0; i < roman.length; i++) {
+    const curr = map[roman[i]] || 0;
+    const next = map[roman[i + 1]] || 0;
+    result += curr < next ? -curr : curr;
+  }
+  return result;
+};
+
+const numberToRoman = (num: number): string => {
+  const romanNumerals: [number, string][] = [[10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']];
+  let result = '';
+  for (const [value, symbol] of romanNumerals) {
+    while (num >= value) {
+      result += symbol;
+      num -= value;
+    }
+  }
+  return result;
+};
 
 export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
   const [query, setQuery] = useState("");
@@ -42,6 +67,11 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
     acts: implementingActs.map(a => ({
       ...a,
       searchId: `${a.articleReference} implementing delegated act`,
+    })),
+    annexes: annexes.map(a => ({
+      ...a,
+      searchId: `annex ${a.id} annex ${romanToNumber(a.id)}`,
+      sectionContent: a.sections.map(s => s.title + ' ' + s.content).join(' '),
     })),
   }), []);
 
@@ -70,6 +100,11 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
       threshold: 0.3,
       ignoreLocation: true,
     }),
+    annexes: new Fuse(searchableData.annexes, {
+      keys: ['title', 'description', 'searchId', 'sectionContent'],
+      threshold: 0.3,
+      ignoreLocation: true,
+    }),
   }), [searchableData]);
 
   const results = useMemo(() => {
@@ -80,6 +115,7 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
         definitions: definitions.slice(0, 3),
         chapters: chapters.slice(0, 3),
         acts: implementingActs.slice(0, 3),
+        annexes: annexes.slice(0, 2),
       };
     }
 
@@ -87,6 +123,7 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
     const articleMatch = query.match(/^(?:article|art\.?)\s*(\d+)$/i);
     const recitalMatch = query.match(/^(?:recital|rec\.?)\s*(\d+)$/i);
     const chapterMatch = query.match(/^(?:chapter|ch\.?)\s*(\d+)$/i);
+    const annexMatch = query.match(/^(?:annex)\s*([IVX]+|\d+)$/i);
     
     if (articleMatch) {
       const id = parseInt(articleMatch[1]);
@@ -97,6 +134,7 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
         definitions: [],
         chapters: [],
         acts: [],
+        annexes: [],
       };
     }
     
@@ -109,6 +147,7 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
         definitions: [],
         chapters: [],
         acts: [],
+        annexes: [],
       };
     }
 
@@ -121,6 +160,22 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
         definitions: [],
         chapters: chapter ? [chapter] : [],
         acts: [],
+        annexes: [],
+      };
+    }
+
+    if (annexMatch) {
+      const input = annexMatch[1].toUpperCase();
+      // Handle both Roman numerals and Arabic numbers
+      const annexId = /^\d+$/.test(input) ? numberToRoman(parseInt(input)) : input;
+      const annex = annexes.find(a => a.id === annexId);
+      return {
+        articles: [],
+        recitals: [],
+        definitions: [],
+        chapters: [],
+        acts: [],
+        annexes: annex ? [annex] : [],
       };
     }
 
@@ -130,6 +185,7 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
       definitions: fuse.definitions.search(query).slice(0, 3).map(r => r.item),
       chapters: fuse.chapters.search(query).slice(0, 3).map(r => r.item),
       acts: fuse.acts.search(query).slice(0, 3).map(r => r.item),
+      annexes: fuse.annexes.search(query).slice(0, 2).map(r => r.item),
     };
   }, [query, fuse]);
 
@@ -197,6 +253,22 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
                 <ScrollText className="mr-2 h-4 w-4 text-orange-500" />
                 <span className="font-medium mr-2">{act.articleReference}</span>
                 <span className="text-muted-foreground truncate">{act.title}</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
+
+        {results.annexes.length > 0 && (
+          <CommandGroup heading="Annexes">
+            {results.annexes.map(annex => (
+              <CommandItem
+                key={`annex-${annex.id}`}
+                value={`annex-${annex.id}-${annex.title}`}
+                onSelect={() => handleSelect(`/annex/${annex.id}`)}
+              >
+                <FileStack className="mr-2 h-4 w-4 text-emerald-500" />
+                <span className="font-medium mr-2">Annex {annex.id}</span>
+                <span className="text-muted-foreground truncate">{annex.title}</span>
               </CommandItem>
             ))}
           </CommandGroup>

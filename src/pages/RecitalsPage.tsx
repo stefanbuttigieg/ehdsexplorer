@@ -1,25 +1,38 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect } from "react";
-import { ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { recitals, getRecitalById } from "@/data/recitals";
+import { Skeleton } from "@/components/ui/skeleton";
 import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const RecitalsPage = () => {
   const { id } = useParams();
   const selectedId = id ? parseInt(id) : null;
-  const selectedRecital = selectedId ? getRecitalById(selectedId) : null;
+
+  const { data: recitals, isLoading } = useQuery({
+    queryKey: ['recitals'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('recitals')
+        .select('*')
+        .order('recital_number', { ascending: true });
+      
+      if (error) throw error;
+      return data;
+    }
+  });
 
   useEffect(() => {
-    if (selectedId) {
+    if (selectedId && recitals) {
       const element = document.getElementById(`recital-${selectedId}`);
       if (element) {
         element.scrollIntoView({ behavior: "smooth", block: "center" });
       }
     }
-  }, [selectedId]);
+  }, [selectedId, recitals]);
 
   const breadcrumbItems = selectedId
     ? [{ label: "Recitals", href: "/recitals" }, { label: `Recital ${selectedId}` }]
@@ -33,28 +46,51 @@ const RecitalsPage = () => {
           {selectedId ? `Recital ${selectedId}` : "Recitals"}
         </h1>
         <p className="text-muted-foreground mb-6">
-          {selectedId ? "Context and interpretation guidance" : "The 96 recitals providing context and interpretation guidance"}
+          {selectedId 
+            ? "Context and interpretation guidance" 
+            : `The ${recitals?.length || ''} recitals providing context and interpretation guidance`}
         </p>
 
-        <div className="space-y-4">
-          {recitals.map((recital) => (
-            <Card key={recital.id} id={`recital-${recital.id}`} className={selectedId === recital.id ? 'border-primary' : ''}>
-              <CardContent className="p-5">
-                <div className="flex items-center gap-2 mb-2">
-                  <Badge variant="outline">Recital {recital.id}</Badge>
-                  {recital.relatedArticles.length > 0 && (
-                    <span className="text-xs text-muted-foreground">
-                      Related: {recital.relatedArticles.map(a => (
-                        <Link key={a} to={`/article/${a}`} className="hover:underline mx-1">Art. {a}</Link>
-                      ))}
-                    </span>
-                  )}
-                </div>
-                <p className="text-muted-foreground legal-text">{recital.content}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="space-y-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Card key={i}>
+                <CardContent className="p-5">
+                  <Skeleton className="h-6 w-24 mb-3" />
+                  <Skeleton className="h-20 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {recitals?.map((recital) => (
+              <Card 
+                key={recital.id} 
+                id={`recital-${recital.recital_number}`} 
+                className={selectedId === recital.recital_number ? 'border-primary' : ''}
+              >
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Link to={`/recital/${recital.recital_number}`}>
+                      <Badge variant="outline" className="hover:bg-primary/10 cursor-pointer">
+                        Recital {recital.recital_number}
+                      </Badge>
+                    </Link>
+                    {recital.related_articles && recital.related_articles.length > 0 && (
+                      <span className="text-xs text-muted-foreground">
+                        Related: {recital.related_articles.map((a: number) => (
+                          <Link key={a} to={`/article/${a}`} className="hover:underline mx-1">Art. {a}</Link>
+                        ))}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-muted-foreground legal-text">{recital.content}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </Layout>
   );

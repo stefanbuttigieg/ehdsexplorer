@@ -19,6 +19,8 @@ export interface ImplementingAct {
   consultationDeadline?: string;
   adoptionDate?: string;
   officialLink?: string;
+  deliverableLink?: string;
+  deliverableName?: string;
   relatedArticles: number[];
 }
 
@@ -103,6 +105,8 @@ export const implementingActs: ImplementingAct[] = [
     type: "implementing",
     theme: "ehr-systems",
     status: "pending",
+    deliverableLink: "https://acceptance.data.health.europa.eu/ehr-systems",
+    deliverableName: "EU Database of registered EHR systems and wellness applications",
     relatedArticles: [49],
   },
   {
@@ -236,6 +240,8 @@ export const implementingActs: ImplementingAct[] = [
     type: "implementing",
     theme: "cross-border",
     status: "pending",
+    deliverableLink: "https://acceptance.data.health.europa.eu/healthdata-central-platform",
+    deliverableName: "HealthData@EU Central Platform",
     relatedArticles: [81],
   },
   {

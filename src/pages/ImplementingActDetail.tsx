@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { ChevronRight, ExternalLink, Calendar, Bookmark, Globe } from "lucide-react";
+import { ChevronRight, ExternalLink, Calendar, Bookmark, Globe, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,37 @@ import { getArticleById } from "@/data/articles";
 import Layout from "@/components/Layout";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { differenceInDays, parse, isAfter, isBefore } from "date-fns";
+
+const parseFeedbackDeadline = (deadline: string) => {
+  const parts = deadline.split(" - ");
+  if (parts.length !== 2) return null;
+  
+  const startDate = parse(parts[0].trim(), "dd MMMM yyyy", new Date());
+  const endDate = parse(parts[1].trim(), "dd MMMM yyyy", new Date());
+  
+  return { startDate, endDate };
+};
+
+const getFeedbackStatus = (deadline: string) => {
+  const dates = parseFeedbackDeadline(deadline);
+  if (!dates) return null;
+  
+  const now = new Date();
+  const { startDate, endDate } = dates;
+  
+  if (isBefore(now, startDate)) {
+    const daysUntilStart = differenceInDays(startDate, now);
+    return { status: 'upcoming', days: daysUntilStart, label: `Opens in ${daysUntilStart} day${daysUntilStart !== 1 ? 's' : ''}` };
+  }
+  
+  if (isAfter(now, endDate)) {
+    return { status: 'closed', days: 0, label: 'Feedback period closed' };
+  }
+  
+  const daysRemaining = differenceInDays(endDate, now);
+  return { status: 'active', days: daysRemaining, label: `${daysRemaining} day${daysRemaining !== 1 ? 's' : ''} remaining` };
+};
 
 const ImplementingActDetail = () => {
   const { id } = useParams();
@@ -66,19 +97,33 @@ const ImplementingActDetail = () => {
               </div>
             )}
 
-            {act.status === 'feedback' && act.feedbackDeadline && (
-              <div className="mt-6 p-4 rounded-lg bg-accent border border-accent-foreground/20">
-                <div className="flex items-center gap-2 text-accent-foreground">
-                  <Calendar className="h-5 w-5" />
-                  <span className="font-medium">Feedback deadline: {act.feedbackDeadline}</span>
+            {act.status === 'feedback' && act.feedbackDeadline && (() => {
+              const feedbackStatus = getFeedbackStatus(act.feedbackDeadline);
+              return (
+                <div className="mt-6 p-4 rounded-lg bg-accent border border-accent-foreground/20">
+                  <div className="flex items-center justify-between gap-4 flex-wrap">
+                    <div className="flex items-center gap-2 text-accent-foreground">
+                      <Calendar className="h-5 w-5" />
+                      <span className="font-medium">Feedback period: {act.feedbackDeadline}</span>
+                    </div>
+                    {feedbackStatus && (
+                      <Badge 
+                        variant={feedbackStatus.status === 'active' ? 'default' : feedbackStatus.status === 'upcoming' ? 'secondary' : 'outline'}
+                        className={feedbackStatus.status === 'active' ? 'bg-primary' : ''}
+                      >
+                        <Clock className="h-3 w-3 mr-1" />
+                        {feedbackStatus.label}
+                      </Badge>
+                    )}
+                  </div>
+                  {act.officialLink && (
+                    <a href={act.officialLink} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1 text-sm text-primary hover:underline">
+                      Submit feedback <ExternalLink className="h-4 w-4" />
+                    </a>
+                  )}
                 </div>
-                {act.officialLink && (
-                  <a href={act.officialLink} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 text-sm text-primary hover:underline">
-                    Submit feedback <ExternalLink className="h-4 w-4" />
-                  </a>
-                )}
-              </div>
-            )}
+              );
+            })()}
           </CardContent>
         </Card>
 

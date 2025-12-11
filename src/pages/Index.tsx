@@ -10,6 +10,7 @@ import { getActStats } from "@/data/implementingActs";
 import Layout from "@/components/Layout";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
 import { RecitalsQuickExplorer } from "@/components/RecitalsQuickExplorer";
+import { ArticlesQuickExplorer } from "@/components/ArticlesQuickExplorer";
 import { ContinueReading } from "@/components/ContinueReading";
 
 const Index = () => {
@@ -163,8 +164,21 @@ const Index = () => {
             </div>
           </div>
         </section>
-        {/* Recitals Quick Explorer */}
+        {/* Articles Quick Explorer */}
         <section className="py-12 px-4 border-t border-border bg-muted/30">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold font-serif">Articles</h2>
+              <Link to="/chapter/1" className="text-sm text-primary hover:underline">
+                Browse by chapter →
+              </Link>
+            </div>
+            <ArticlesQuickExplorer />
+          </div>
+        </section>
+
+        {/* Recitals Quick Explorer */}
+        <section className="py-12 px-4 border-t border-border">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold font-serif">Recitals</h2>

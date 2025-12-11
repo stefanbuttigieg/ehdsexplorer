@@ -3,22 +3,23 @@ import { BookOpen, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
-import { getArticleById, articles } from "@/data/articles";
+import { useArticles, getArticleById } from "@/hooks/useArticles";
 import { getChapterByArticle } from "@/data/chapters";
 
 export const ContinueReading = () => {
   const { lastRead, readArticles } = useReadingProgress();
+  const { data: articles, isLoading } = useArticles();
 
-  if (!lastRead) return null;
+  if (!lastRead || isLoading || !articles) return null;
 
-  const lastArticle = getArticleById(lastRead);
+  const lastArticle = getArticleById(articles, lastRead);
   const lastChapter = lastArticle ? getChapterByArticle(lastRead) : null;
 
   // Find next unread article
   const nextUnread = articles.find(
-    (a) => a.id > lastRead && !readArticles.includes(a.id)
+    (a) => a.article_number > lastRead && !readArticles.includes(a.article_number)
   );
-  const nextChapter = nextUnread ? getChapterByArticle(nextUnread.id) : null;
+  const nextChapter = nextUnread ? getChapterByArticle(nextUnread.article_number) : null;
 
   return (
     <section className="py-8 px-4 border-b border-border">
@@ -36,7 +37,7 @@ export const ContinueReading = () => {
                   <span className="text-xs text-muted-foreground uppercase tracking-wide">
                     Last read
                   </span>
-                  <h3 className="font-medium mt-1">Article {lastArticle.id}</h3>
+                  <h3 className="font-medium mt-1">Article {lastArticle.article_number}</h3>
                   <p className="text-sm text-muted-foreground line-clamp-1">
                     {lastArticle.title}
                   </p>
@@ -52,13 +53,13 @@ export const ContinueReading = () => {
 
           {/* Next Suggested */}
           {nextUnread ? (
-            <Link to={`/article/${nextUnread.id}`}>
+            <Link to={`/article/${nextUnread.article_number}`}>
               <Card className="h-full hover:border-primary transition-colors bg-primary/5 border-primary/20">
                 <CardContent className="p-4">
                   <span className="text-xs text-primary uppercase tracking-wide font-medium">
                     Up next
                   </span>
-                  <h3 className="font-medium mt-1">Article {nextUnread.id}</h3>
+                  <h3 className="font-medium mt-1">Article {nextUnread.article_number}</h3>
                   <p className="text-sm text-muted-foreground line-clamp-1">
                     {nextUnread.title}
                   </p>

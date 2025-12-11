@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { articles } from "@/data/articles";
+import { useArticles } from "@/hooks/useArticles";
 import { recitals } from "@/data/recitals";
 import { definitions } from "@/data/definitions";
 import { chapters } from "@/data/chapters";
@@ -46,12 +46,14 @@ const SearchPage = () => {
   const initialQuery = searchParams.get("q") || "";
   const [query, setQuery] = useState(initialQuery);
   const [filter, setFilter] = useState<FilterType>('all');
+  const { data: articles = [] } = useArticles();
 
   // Create searchable data with ID variations
   const searchableData = useMemo(() => ({
     articles: articles.map(a => ({
       ...a,
-      searchId: `article ${a.id} art ${a.id} art. ${a.id}`,
+      id: a.article_number,
+      searchId: `article ${a.article_number} art ${a.article_number} art. ${a.article_number}`,
     })),
     recitals: recitals.map(r => ({
       ...r,
@@ -70,7 +72,7 @@ const SearchPage = () => {
       searchId: `annex ${a.id} annex ${romanToNumber(a.id)}`,
       sectionContent: a.sections.map(s => s.title + ' ' + s.content).join(' '),
     })),
-  }), []);
+  }), [articles]);
 
   const fuse = useMemo(() => ({
     articles: new Fuse(searchableData.articles, { 
@@ -117,9 +119,9 @@ const SearchPage = () => {
 
     if (articleMatch) {
       const id = parseInt(articleMatch[1]);
-      const article = articles.find(a => a.id === id);
+      const article = articles.find(a => a.article_number === id);
       return {
-        articles: article ? [article] : [],
+        articles: article ? [{ ...article, id: article.article_number }] : [],
         recitals: [],
         definitions: [],
         chapters: [],
@@ -176,7 +178,7 @@ const SearchPage = () => {
       acts: fuse.acts.search(query).map(r => r.item),
       annexes: fuse.annexes.search(query).map(r => r.item),
     };
-  }, [query, fuse]);
+  }, [query, fuse, articles]);
 
   const handleSearch = (value: string) => {
     setQuery(value);

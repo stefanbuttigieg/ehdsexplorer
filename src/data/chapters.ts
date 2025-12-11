@@ -83,8 +83,8 @@ export const chapters: Chapter[] = [
   {
     id: 10,
     title: "Final Provisions",
-    description: "Amendments, transitional provisions, and entry into force.",
-    articleRange: [99, 99],
+    description: "Penalties, remedies, evaluation, amendments, and entry into force.",
+    articleRange: [99, 105],
   },
 ];
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Book, FileText, Scale, ListChecks, Bookmark, ChevronRight } from "lucide-react";
+import { Search, Book, FileText, Scale, ListChecks, Bookmark, ChevronRight, Files } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,7 +59,7 @@ const Index = () => {
         {/* Quick Links */}
         <section className="py-8 px-4 border-b border-border bg-muted/30">
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <Link to="/overview">
                 <Card className="hover:border-primary transition-colors cursor-pointer h-full">
                   <CardContent className="p-4 flex items-center gap-3">
@@ -82,12 +82,23 @@ const Index = () => {
                   </CardContent>
                 </Card>
               </Link>
+              <Link to="/annexes">
+                <Card className="hover:border-primary transition-colors cursor-pointer h-full">
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <Files className="h-8 w-8 text-primary" />
+                    <div>
+                      <p className="font-semibold">Annexes</p>
+                      <p className="text-sm text-muted-foreground">4 annexes</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
               <Link to="/implementing-acts">
                 <Card className="hover:border-primary transition-colors cursor-pointer h-full">
                   <CardContent className="p-4 flex items-center gap-3">
                     <ListChecks className="h-8 w-8 text-secondary" />
                     <div>
-                      <p className="font-semibold">Implementing Acts</p>
+                      <p className="font-semibold">Impl. Acts</p>
                       <p className="text-sm text-muted-foreground">{actStats.consultation || 0} in consultation</p>
                     </div>
                   </CardContent>

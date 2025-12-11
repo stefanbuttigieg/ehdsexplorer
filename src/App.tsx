@@ -13,6 +13,8 @@ import ImplementingActsPage from "./pages/ImplementingActsPage";
 import ImplementingActDetail from "./pages/ImplementingActDetail";
 import OverviewPage from "./pages/OverviewPage";
 import BookmarksPage from "./pages/BookmarksPage";
+import AnnexesPage from "./pages/AnnexesPage";
+import AnnexDetailPage from "./pages/AnnexDetailPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +36,8 @@ const App = () => (
           <Route path="/search" element={<SearchPage />} />
           <Route path="/implementing-acts" element={<ImplementingActsPage />} />
           <Route path="/implementing-acts/:id" element={<ImplementingActDetail />} />
+          <Route path="/annexes" element={<AnnexesPage />} />
+          <Route path="/annex/:id" element={<AnnexDetailPage />} />
           <Route path="/bookmarks" element={<BookmarksPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { useEffect } from "react";
 import { ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +11,15 @@ const RecitalsPage = () => {
   const { id } = useParams();
   const selectedId = id ? parseInt(id) : null;
   const selectedRecital = selectedId ? getRecitalById(selectedId) : null;
+
+  useEffect(() => {
+    if (selectedId) {
+      const element = document.getElementById(`recital-${selectedId}`);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  }, [selectedId]);
 
   const breadcrumbItems = selectedId
     ? [{ label: "Recitals", href: "/recitals" }, { label: `Recital ${selectedId}` }]

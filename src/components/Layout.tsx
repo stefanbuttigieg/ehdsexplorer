@@ -1,12 +1,14 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files } from "lucide-react";
+import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { chapters } from "@/data/chapters";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AccessibilityControls } from "@/components/AccessibilityControls";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { KeyboardShortcutsDialog } from "@/components/KeyboardShortcutsDialog";
 
 interface LayoutProps {
   children: ReactNode;
@@ -15,7 +17,12 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chaptersOpen, setChaptersOpen] = useState(true);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const location = useLocation();
+
+  useKeyboardShortcuts({
+    onHelp: () => setShortcutsOpen(true),
+  });
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -116,9 +123,23 @@ const Layout = ({ children }: LayoutProps) => {
                 ))}
               </CollapsibleContent>
             </Collapsible>
+
+            {/* Keyboard Shortcuts Button */}
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-2 mt-4 text-muted-foreground"
+              onClick={() => setShortcutsOpen(true)}
+            >
+              <Keyboard className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">Keyboard shortcuts</span>
+              <kbd className="ml-auto text-xs px-1.5 py-0.5 bg-muted rounded">?</kbd>
+            </Button>
           </div>
         </ScrollArea>
       </aside>
+
+      {/* Keyboard Shortcuts Dialog */}
+      <KeyboardShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
 
       {/* Main Content */}
       <main className="flex-1 pt-14 md:pt-0">

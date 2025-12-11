@@ -6,10 +6,12 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [rolesLoading, setRolesLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
 
   const checkRoles = useCallback(async (userId: string) => {
+    setRolesLoading(true);
     try {
       const { data, error } = await supabase
         .from('user_roles')
@@ -30,6 +32,8 @@ export function useAuth() {
       console.error('Error checking roles:', err);
       setIsAdmin(false);
       setIsEditor(false);
+    } finally {
+      setRolesLoading(false);
     }
   }, []);
 
@@ -39,7 +43,6 @@ export function useAuth() {
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        setLoading(false);
 
         // Defer role check with setTimeout to avoid deadlock
         if (session?.user) {
@@ -49,6 +52,7 @@ export function useAuth() {
         } else {
           setIsAdmin(false);
           setIsEditor(false);
+          setLoading(false);
         }
       }
     );
@@ -57,10 +61,11 @@ export function useAuth() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
 
       if (session?.user) {
-        checkRoles(session.user.id);
+        checkRoles(session.user.id).then(() => setLoading(false));
+      } else {
+        setLoading(false);
       }
     });
 

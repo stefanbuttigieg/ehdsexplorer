@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { useEffect } from "react";
 import { ChevronLeft, ChevronRight, Bookmark, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +10,7 @@ import { getRecitalsByArticle } from "@/data/recitals";
 import { getActsByArticle } from "@/data/implementingActs";
 import Layout from "@/components/Layout";
 import { useBookmarks } from "@/hooks/useBookmarks";
+import { useReadingProgress } from "@/hooks/useReadingProgress";
 
 const ArticlePage = () => {
   const { id } = useParams();
@@ -18,6 +20,13 @@ const ArticlePage = () => {
   const relatedRecitals = getRecitalsByArticle(articleId);
   const relatedActs = getActsByArticle(articleId);
   const { isBookmarked, toggleBookmark } = useBookmarks();
+  const { markAsRead } = useReadingProgress();
+
+  useEffect(() => {
+    if (article) {
+      markAsRead(articleId);
+    }
+  }, [articleId, article, markAsRead]);
 
   const prevArticle = articles.find(a => a.id === articleId - 1);
   const nextArticle = articles.find(a => a.id === articleId + 1);

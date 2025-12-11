@@ -98,7 +98,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/ehds-explorer.git
+git clone https://github.com/stefanbuttigieg/ehdsexplorer.git
 
 # Navigate to the project directory
 cd ehds-explorer

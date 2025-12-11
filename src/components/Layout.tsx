@@ -140,7 +140,7 @@ const Layout = ({ children }: LayoutProps) => {
 
             {/* GitHub Link */}
             <a
-              href="https://github.com/yourusername/ehds-explorer"
+              href="https://github.com/stefanbuttigieg/ehdsexplorer"
               target="_blank"
               rel="noopener noreferrer"
               className="block"

@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import { AccessibilityControls } from "@/components/AccessibilityControls";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { KeyboardShortcutsDialog } from "@/components/KeyboardShortcutsDialog";
 import { ReportIssueButton } from "@/components/ReportIssueButton";
+import { SearchCommand } from "@/components/SearchCommand";
+
 interface LayoutProps {
   children: ReactNode;
 }
@@ -18,10 +20,12 @@ const Layout = ({ children }: LayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chaptersOpen, setChaptersOpen] = useState(true);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const location = useLocation();
 
   useKeyboardShortcuts({
     onHelp: () => setShortcutsOpen(true),
+    onSearch: () => setSearchOpen(true),
   });
 
   const isActive = (path: string) => location.pathname === path;
@@ -47,11 +51,9 @@ const Layout = ({ children }: LayoutProps) => {
         <div className="flex items-center gap-1">
           <ReportIssueButton />
           <AccessibilityControls />
-          <Link to="/search">
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Search className="h-4 w-4" />
-            </Button>
-          </Link>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSearchOpen(true)}>
+            <Search className="h-4 w-4" />
+          </Button>
         </div>
       </header>
 
@@ -81,12 +83,11 @@ const Layout = ({ children }: LayoutProps) => {
         <ScrollArea className="h-[calc(100vh-3.5rem)]">
           <div className="p-4 space-y-2 overflow-hidden">
             {/* Search */}
-            <Link to="/search" onClick={() => setSidebarOpen(false)}>
-              <Button variant="outline" className="w-full justify-start gap-2 mb-4 overflow-hidden">
-                <Search className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">Search...</span>
-              </Button>
-            </Link>
+            <Button variant="outline" className="w-full justify-start gap-2 mb-4 overflow-hidden" onClick={() => setSearchOpen(true)}>
+              <Search className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">Search...</span>
+              <kbd className="ml-auto text-xs px-1.5 py-0.5 bg-muted rounded">/</kbd>
+            </Button>
 
             {/* Nav Items */}
             {navItems.map((item) => (
@@ -142,6 +143,9 @@ const Layout = ({ children }: LayoutProps) => {
 
       {/* Keyboard Shortcuts Dialog */}
       <KeyboardShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
+
+      {/* Search Command Palette */}
+      <SearchCommand open={searchOpen} onOpenChange={setSearchOpen} />
 
       {/* Main Content */}
       <main className="flex-1 pt-14 md:pt-0">

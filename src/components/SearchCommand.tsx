@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Scale, Book, Search } from "lucide-react";
+import { FileText, Scale, Book, Search, Layers, ScrollText } from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -12,6 +12,8 @@ import {
 import { articles } from "@/data/articles";
 import { recitals } from "@/data/recitals";
 import { definitions } from "@/data/definitions";
+import { chapters } from "@/data/chapters";
+import { implementingActs } from "@/data/implementingActs";
 import Fuse from "fuse.js";
 
 interface SearchCommandProps {
@@ -33,6 +35,14 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
       ...r,
       searchId: `recital ${r.id} rec ${r.id}`,
     })),
+    chapters: chapters.map(c => ({
+      ...c,
+      searchId: `chapter ${c.id} ch ${c.id}`,
+    })),
+    acts: implementingActs.map(a => ({
+      ...a,
+      searchId: `${a.articleReference} implementing delegated act`,
+    })),
   }), []);
 
   const fuse = useMemo(() => ({
@@ -50,6 +60,16 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
       keys: ['term', 'definition'], 
       threshold: 0.3 
     }),
+    chapters: new Fuse(searchableData.chapters, {
+      keys: ['title', 'description', 'searchId'],
+      threshold: 0.3,
+      ignoreLocation: true,
+    }),
+    acts: new Fuse(searchableData.acts, {
+      keys: ['title', 'description', 'articleReference', 'searchId'],
+      threshold: 0.3,
+      ignoreLocation: true,
+    }),
   }), [searchableData]);
 
   const results = useMemo(() => {
@@ -58,12 +78,15 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
         articles: articles.slice(0, 5),
         recitals: recitals.slice(0, 3),
         definitions: definitions.slice(0, 3),
+        chapters: chapters.slice(0, 3),
+        acts: implementingActs.slice(0, 3),
       };
     }
 
-    // Check for direct ID match patterns like "article 42", "art 15", "recital 5"
+    // Check for direct ID match patterns
     const articleMatch = query.match(/^(?:article|art\.?)\s*(\d+)$/i);
     const recitalMatch = query.match(/^(?:recital|rec\.?)\s*(\d+)$/i);
+    const chapterMatch = query.match(/^(?:chapter|ch\.?)\s*(\d+)$/i);
     
     if (articleMatch) {
       const id = parseInt(articleMatch[1]);
@@ -72,6 +95,8 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
         articles: article ? [article] : [],
         recitals: [],
         definitions: [],
+        chapters: [],
+        acts: [],
       };
     }
     
@@ -82,6 +107,20 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
         articles: [],
         recitals: recital ? [recital] : [],
         definitions: [],
+        chapters: [],
+        acts: [],
+      };
+    }
+
+    if (chapterMatch) {
+      const id = parseInt(chapterMatch[1]);
+      const chapter = chapters.find(c => c.id === id);
+      return {
+        articles: [],
+        recitals: [],
+        definitions: [],
+        chapters: chapter ? [chapter] : [],
+        acts: [],
       };
     }
 
@@ -89,6 +128,8 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
       articles: fuse.articles.search(query).slice(0, 5).map(r => r.item),
       recitals: fuse.recitals.search(query).slice(0, 3).map(r => r.item),
       definitions: fuse.definitions.search(query).slice(0, 3).map(r => r.item),
+      chapters: fuse.chapters.search(query).slice(0, 3).map(r => r.item),
+      acts: fuse.acts.search(query).slice(0, 3).map(r => r.item),
     };
   }, [query, fuse]);
 
@@ -106,13 +147,29 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
       <CommandInput 
-        placeholder="Search articles, recitals, definitions..." 
+        placeholder="Search articles, chapters, implementing acts..." 
         value={query}
         onValueChange={setQuery}
       />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         
+        {results.chapters.length > 0 && (
+          <CommandGroup heading="Chapters">
+            {results.chapters.map(chapter => (
+              <CommandItem
+                key={`ch-${chapter.id}`}
+                value={`chapter-${chapter.id}-${chapter.title}`}
+                onSelect={() => handleSelect(`/chapter/${chapter.id}`)}
+              >
+                <Layers className="mr-2 h-4 w-4 text-primary" />
+                <span className="font-medium mr-2">Chapter {chapter.id}</span>
+                <span className="text-muted-foreground truncate">{chapter.title}</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
+
         {results.articles.length > 0 && (
           <CommandGroup heading="Articles">
             {results.articles.map(article => (
@@ -124,6 +181,22 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
                 <FileText className="mr-2 h-4 w-4 text-primary" />
                 <span className="font-medium mr-2">Art. {article.id}</span>
                 <span className="text-muted-foreground truncate">{article.title}</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
+
+        {results.acts.length > 0 && (
+          <CommandGroup heading="Implementing Acts">
+            {results.acts.map(act => (
+              <CommandItem
+                key={`act-${act.id}`}
+                value={`act-${act.id}-${act.title}`}
+                onSelect={() => handleSelect(`/implementing-acts/${act.id}`)}
+              >
+                <ScrollText className="mr-2 h-4 w-4 text-orange-500" />
+                <span className="font-medium mr-2">{act.articleReference}</span>
+                <span className="text-muted-foreground truncate">{act.title}</span>
               </CommandItem>
             ))}
           </CommandGroup>

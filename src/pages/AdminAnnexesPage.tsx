@@ -20,36 +20,35 @@ import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-interface DbRecital {
-  id: number;
-  recital_number: number;
+interface DbAnnex {
+  id: string;
+  title: string;
   content: string;
-  related_articles: number[] | null;
   created_at: string;
   updated_at: string;
 }
 
-const AdminRecitalsPage = () => {
+const AdminAnnexesPage = () => {
   const { user, loading, isEditor } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
-  const [editingRecital, setEditingRecital] = useState<DbRecital | null>(null);
+  const [editingAnnex, setEditingAnnex] = useState<DbAnnex | null>(null);
+  const [editedTitle, setEditedTitle] = useState('');
   const [editedContent, setEditedContent] = useState('');
-  const [editedRelatedArticles, setEditedRelatedArticles] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
-  const { data: recitals, isLoading } = useQuery({
-    queryKey: ['admin-recitals'],
+  const { data: annexes, isLoading } = useQuery({
+    queryKey: ['admin-annexes'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('recitals')
+        .from('annexes')
         .select('*')
-        .order('recital_number', { ascending: true });
+        .order('id', { ascending: true });
       
       if (error) throw error;
-      return data as DbRecital[];
+      return data as DbAnnex[];
     },
     enabled: !!user && isEditor
   });
@@ -62,48 +61,44 @@ const AdminRecitalsPage = () => {
     }
   }, [user, loading, isEditor, navigate]);
 
-  const filteredRecitals = recitals?.filter(recital =>
-    recital.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    recital.recital_number.toString().includes(searchQuery)
+  const filteredAnnexes = annexes?.filter(annex =>
+    annex.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    annex.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    annex.id.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
-  const handleEdit = (recital: DbRecital) => {
-    setEditingRecital(recital);
-    setEditedContent(recital.content);
-    setEditedRelatedArticles(recital.related_articles?.join(', ') || '');
+  const handleEdit = (annex: DbAnnex) => {
+    setEditingAnnex(annex);
+    setEditedTitle(annex.title);
+    setEditedContent(annex.content);
   };
 
   const handleSave = async () => {
-    if (!editingRecital) return;
+    if (!editingAnnex) return;
     
     setIsSaving(true);
     try {
-      const relatedArticlesArray = editedRelatedArticles
-        .split(',')
-        .map(s => parseInt(s.trim()))
-        .filter(n => !isNaN(n));
-
       const { error } = await supabase
-        .from('recitals')
+        .from('annexes')
         .update({ 
-          content: editedContent,
-          related_articles: relatedArticlesArray.length > 0 ? relatedArticlesArray : null
+          title: editedTitle,
+          content: editedContent
         })
-        .eq('id', editingRecital.id);
+        .eq('id', editingAnnex.id);
 
       if (error) throw error;
 
       toast({
-        title: 'Recital Updated',
-        description: `Recital ${editingRecital.recital_number} has been saved.`,
+        title: 'Annex Updated',
+        description: `Annex ${editingAnnex.id} has been saved.`,
       });
       
-      queryClient.invalidateQueries({ queryKey: ['admin-recitals'] });
-      setEditingRecital(null);
+      queryClient.invalidateQueries({ queryKey: ['admin-annexes'] });
+      setEditingAnnex(null);
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to save recital',
+        description: error.message || 'Failed to save annex',
         variant: 'destructive',
       });
     } finally {
@@ -131,8 +126,8 @@ const AdminRecitalsPage = () => {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold font-serif">Manage Recitals</h1>
-            <p className="text-muted-foreground">Edit recital content and related articles</p>
+            <h1 className="text-3xl font-bold font-serif">Manage Annexes</h1>
+            <p className="text-muted-foreground">Edit annex titles and content</p>
           </div>
         </div>
 
@@ -140,7 +135,7 @@ const AdminRecitalsPage = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search recitals by number or content..."
+              placeholder="Search annexes by ID, title, or content..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -150,7 +145,7 @@ const AdminRecitalsPage = () => {
 
         {isLoading ? (
           <div className="space-y-3">
-            {Array.from({ length: 5 }).map((_, i) => (
+            {Array.from({ length: 4 }).map((_, i) => (
               <Card key={i}>
                 <CardContent className="p-4">
                   <Skeleton className="h-6 w-32 mb-2" />
@@ -159,26 +154,28 @@ const AdminRecitalsPage = () => {
               </Card>
             ))}
           </div>
+        ) : filteredAnnexes.length === 0 ? (
+          <Card>
+            <CardContent className="p-8 text-center text-muted-foreground">
+              No annexes found. Use the bulk import feature to add annexes.
+            </CardContent>
+          </Card>
         ) : (
           <div className="space-y-3">
-            {filteredRecitals.map((recital) => (
-              <Card key={recital.id} className="hover:border-primary/50 transition-colors">
+            {filteredAnnexes.map((annex) => (
+              <Card key={annex.id} className="hover:border-primary/50 transition-colors">
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <Badge variant="outline">Recital {recital.recital_number}</Badge>
-                        {recital.related_articles && recital.related_articles.length > 0 && (
-                          <span className="text-xs text-muted-foreground">
-                            Related: Art. {recital.related_articles.join(', ')}
-                          </span>
-                        )}
+                        <Badge variant="outline">Annex {annex.id}</Badge>
+                        <span className="font-medium truncate">{annex.title}</span>
                       </div>
                       <p className="text-sm text-muted-foreground line-clamp-2">
-                        {recital.content.substring(0, 200)}...
+                        {annex.content.substring(0, 200)}...
                       </p>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(recital)}>
+                    <Button variant="outline" size="sm" onClick={() => handleEdit(annex)}>
                       <Edit className="h-4 w-4 mr-1" />
                       Edit
                     </Button>
@@ -189,31 +186,30 @@ const AdminRecitalsPage = () => {
           </div>
         )}
 
-        <Dialog open={!!editingRecital} onOpenChange={() => setEditingRecital(null)}>
+        <Dialog open={!!editingAnnex} onOpenChange={() => setEditingAnnex(null)}>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Edit Recital {editingRecital?.recital_number}</DialogTitle>
+              <DialogTitle>Edit Annex {editingAnnex?.id}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label>Title</Label>
+                <Input
+                  value={editedTitle}
+                  onChange={(e) => setEditedTitle(e.target.value)}
+                />
+              </div>
               <div className="space-y-2">
                 <Label>Content</Label>
                 <Textarea
                   value={editedContent}
                   onChange={(e) => setEditedContent(e.target.value)}
-                  rows={15}
+                  rows={20}
                   className="font-mono text-sm"
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Related Articles (comma-separated)</Label>
-                <Input
-                  value={editedRelatedArticles}
-                  onChange={(e) => setEditedRelatedArticles(e.target.value)}
-                  placeholder="e.g., 1, 2, 3"
-                />
-              </div>
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setEditingRecital(null)}>
+                <Button variant="outline" onClick={() => setEditingAnnex(null)}>
                   <X className="h-4 w-4 mr-1" />
                   Cancel
                 </Button>
@@ -230,4 +226,4 @@ const AdminRecitalsPage = () => {
   );
 };
 
-export default AdminRecitalsPage;
+export default AdminAnnexesPage;

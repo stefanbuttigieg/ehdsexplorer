@@ -20,36 +20,37 @@ import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-interface DbRecital {
+interface DbDefinition {
   id: number;
-  recital_number: number;
-  content: string;
-  related_articles: number[] | null;
+  term: string;
+  definition: string;
+  source_article: number | null;
   created_at: string;
   updated_at: string;
 }
 
-const AdminRecitalsPage = () => {
+const AdminDefinitionsPage = () => {
   const { user, loading, isEditor } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
-  const [editingRecital, setEditingRecital] = useState<DbRecital | null>(null);
-  const [editedContent, setEditedContent] = useState('');
-  const [editedRelatedArticles, setEditedRelatedArticles] = useState('');
+  const [editingDefinition, setEditingDefinition] = useState<DbDefinition | null>(null);
+  const [editedTerm, setEditedTerm] = useState('');
+  const [editedDefinition, setEditedDefinition] = useState('');
+  const [editedSourceArticle, setEditedSourceArticle] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
-  const { data: recitals, isLoading } = useQuery({
-    queryKey: ['admin-recitals'],
+  const { data: definitions, isLoading } = useQuery({
+    queryKey: ['admin-definitions'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('recitals')
+        .from('definitions')
         .select('*')
-        .order('recital_number', { ascending: true });
+        .order('term', { ascending: true });
       
       if (error) throw error;
-      return data as DbRecital[];
+      return data as DbDefinition[];
     },
     enabled: !!user && isEditor
   });
@@ -62,48 +63,47 @@ const AdminRecitalsPage = () => {
     }
   }, [user, loading, isEditor, navigate]);
 
-  const filteredRecitals = recitals?.filter(recital =>
-    recital.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    recital.recital_number.toString().includes(searchQuery)
+  const filteredDefinitions = definitions?.filter(def =>
+    def.term.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    def.definition.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
-  const handleEdit = (recital: DbRecital) => {
-    setEditingRecital(recital);
-    setEditedContent(recital.content);
-    setEditedRelatedArticles(recital.related_articles?.join(', ') || '');
+  const handleEdit = (definition: DbDefinition) => {
+    setEditingDefinition(definition);
+    setEditedTerm(definition.term);
+    setEditedDefinition(definition.definition);
+    setEditedSourceArticle(definition.source_article?.toString() || '');
   };
 
   const handleSave = async () => {
-    if (!editingRecital) return;
+    if (!editingDefinition) return;
     
     setIsSaving(true);
     try {
-      const relatedArticlesArray = editedRelatedArticles
-        .split(',')
-        .map(s => parseInt(s.trim()))
-        .filter(n => !isNaN(n));
+      const sourceArticle = editedSourceArticle ? parseInt(editedSourceArticle) : null;
 
       const { error } = await supabase
-        .from('recitals')
+        .from('definitions')
         .update({ 
-          content: editedContent,
-          related_articles: relatedArticlesArray.length > 0 ? relatedArticlesArray : null
+          term: editedTerm,
+          definition: editedDefinition,
+          source_article: isNaN(sourceArticle as number) ? null : sourceArticle
         })
-        .eq('id', editingRecital.id);
+        .eq('id', editingDefinition.id);
 
       if (error) throw error;
 
       toast({
-        title: 'Recital Updated',
-        description: `Recital ${editingRecital.recital_number} has been saved.`,
+        title: 'Definition Updated',
+        description: `"${editedTerm}" has been saved.`,
       });
       
-      queryClient.invalidateQueries({ queryKey: ['admin-recitals'] });
-      setEditingRecital(null);
+      queryClient.invalidateQueries({ queryKey: ['admin-definitions'] });
+      setEditingDefinition(null);
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to save recital',
+        description: error.message || 'Failed to save definition',
         variant: 'destructive',
       });
     } finally {
@@ -131,8 +131,8 @@ const AdminRecitalsPage = () => {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold font-serif">Manage Recitals</h1>
-            <p className="text-muted-foreground">Edit recital content and related articles</p>
+            <h1 className="text-3xl font-bold font-serif">Manage Definitions</h1>
+            <p className="text-muted-foreground">Edit terms and their definitions</p>
           </div>
         </div>
 
@@ -140,7 +140,7 @@ const AdminRecitalsPage = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search recitals by number or content..."
+              placeholder="Search definitions by term or content..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -159,26 +159,32 @@ const AdminRecitalsPage = () => {
               </Card>
             ))}
           </div>
+        ) : filteredDefinitions.length === 0 ? (
+          <Card>
+            <CardContent className="p-8 text-center text-muted-foreground">
+              No definitions found. Use the bulk import feature to add definitions.
+            </CardContent>
+          </Card>
         ) : (
           <div className="space-y-3">
-            {filteredRecitals.map((recital) => (
-              <Card key={recital.id} className="hover:border-primary/50 transition-colors">
+            {filteredDefinitions.map((definition) => (
+              <Card key={definition.id} className="hover:border-primary/50 transition-colors">
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <Badge variant="outline">Recital {recital.recital_number}</Badge>
-                        {recital.related_articles && recital.related_articles.length > 0 && (
+                        <Badge variant="outline">{definition.term}</Badge>
+                        {definition.source_article && (
                           <span className="text-xs text-muted-foreground">
-                            Related: Art. {recital.related_articles.join(', ')}
+                            Source: Art. {definition.source_article}
                           </span>
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground line-clamp-2">
-                        {recital.content.substring(0, 200)}...
+                        {definition.definition.substring(0, 200)}...
                       </p>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(recital)}>
+                    <Button variant="outline" size="sm" onClick={() => handleEdit(definition)}>
                       <Edit className="h-4 w-4 mr-1" />
                       Edit
                     </Button>
@@ -189,31 +195,39 @@ const AdminRecitalsPage = () => {
           </div>
         )}
 
-        <Dialog open={!!editingRecital} onOpenChange={() => setEditingRecital(null)}>
+        <Dialog open={!!editingDefinition} onOpenChange={() => setEditingDefinition(null)}>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Edit Recital {editingRecital?.recital_number}</DialogTitle>
+              <DialogTitle>Edit Definition</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label>Content</Label>
+                <Label>Term</Label>
+                <Input
+                  value={editedTerm}
+                  onChange={(e) => setEditedTerm(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Definition</Label>
                 <Textarea
-                  value={editedContent}
-                  onChange={(e) => setEditedContent(e.target.value)}
-                  rows={15}
+                  value={editedDefinition}
+                  onChange={(e) => setEditedDefinition(e.target.value)}
+                  rows={10}
                   className="font-mono text-sm"
                 />
               </div>
               <div className="space-y-2">
-                <Label>Related Articles (comma-separated)</Label>
+                <Label>Source Article (optional)</Label>
                 <Input
-                  value={editedRelatedArticles}
-                  onChange={(e) => setEditedRelatedArticles(e.target.value)}
-                  placeholder="e.g., 1, 2, 3"
+                  type="number"
+                  value={editedSourceArticle}
+                  onChange={(e) => setEditedSourceArticle(e.target.value)}
+                  placeholder="e.g., 2"
                 />
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setEditingRecital(null)}>
+                <Button variant="outline" onClick={() => setEditingDefinition(null)}>
                   <X className="h-4 w-4 mr-1" />
                   Cancel
                 </Button>
@@ -230,4 +244,4 @@ const AdminRecitalsPage = () => {
   );
 };
 
-export default AdminRecitalsPage;
+export default AdminDefinitionsPage;

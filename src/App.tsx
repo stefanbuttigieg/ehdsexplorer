@@ -21,6 +21,9 @@ import AdminAuthPage from "./pages/AdminAuthPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminArticlesPage from "./pages/AdminArticlesPage";
 import AdminRecitalsPage from "./pages/AdminRecitalsPage";
+import AdminDefinitionsPage from "./pages/AdminDefinitionsPage";
+import AdminAnnexesPage from "./pages/AdminAnnexesPage";
+import AdminImplementingActsPage from "./pages/AdminImplementingActsPage";
 import AdminBulkImportPage from "./pages/AdminBulkImportPage";
 import NotFound from "./pages/NotFound";
 
@@ -51,6 +54,9 @@ const App = () => (
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/articles" element={<AdminArticlesPage />} />
             <Route path="/admin/recitals" element={<AdminRecitalsPage />} />
+            <Route path="/admin/definitions" element={<AdminDefinitionsPage />} />
+            <Route path="/admin/annexes" element={<AdminAnnexesPage />} />
+            <Route path="/admin/implementing-acts" element={<AdminImplementingActsPage />} />
             <Route path="/admin/bulk-import" element={<AdminBulkImportPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -273,7 +273,7 @@ export const implementingActs: ImplementingAct[] = [
     type: "implementing",
     theme: "ehds-board",
     status: "feedback",
-    feedbackDeadline: "2025-03-15",
+    feedbackDeadline: "09 December 2025 - 06 January 2026",
     officialLink: "https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14992-European-Health-Data-Space-Board-operations_en",
     relatedArticles: [92],
   },

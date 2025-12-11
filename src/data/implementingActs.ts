@@ -1,4 +1,4 @@
-export type ActStatus = 'pending' | 'consultation' | 'progress' | 'adopted';
+export type ActStatus = 'pending' | 'feedback' | 'progress' | 'adopted';
 
 export type ActTheme = 
   | 'primary-use'
@@ -16,7 +16,7 @@ export interface ImplementingAct {
   type: 'implementing' | 'delegated';
   theme: ActTheme;
   status: ActStatus;
-  consultationDeadline?: string;
+  feedbackDeadline?: string;
   adoptionDate?: string;
   officialLink?: string;
   deliverableLink?: string;
@@ -272,9 +272,9 @@ export const implementingActs: ImplementingAct[] = [
     description: "Rules on the composition, organisation, and functioning of the European Health Data Space Board.",
     type: "implementing",
     theme: "ehds-board",
-    status: "consultation",
-    consultationDeadline: "2025-03-15",
-    officialLink: "https://ec.europa.eu/info/law/better-regulation/have-your-say",
+    status: "feedback",
+    feedbackDeadline: "2025-03-15",
+    officialLink: "https://ec.europa.eu/info/law/better-regulation/have-your-say/initiatives/14992-European-Health-Data-Space-Board-operations_en",
     relatedArticles: [92],
   },
   {
@@ -320,7 +320,7 @@ export const themeLabels: Record<ActTheme, string> = {
 
 export const statusLabels: Record<ActStatus, string> = {
   pending: 'Pending',
-  consultation: 'Open for Consultation',
+  feedback: 'Open for Feedback',
   progress: 'In Progress',
   adopted: 'Adopted',
 };

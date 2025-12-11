@@ -34,7 +34,7 @@ const ImplementingActsPage = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {(['pending', 'consultation', 'progress', 'adopted'] as ActStatus[]).map(status => (
+          {(['pending', 'feedback', 'progress', 'adopted'] as ActStatus[]).map(status => (
             <Card key={status} className={`cursor-pointer ${filterStatus === status ? 'border-primary' : ''}`} onClick={() => setFilterStatus(filterStatus === status ? 'all' : status)}>
               <CardContent className="p-4 text-center">
                 <div className={`text-3xl font-bold status-${status}`}>{stats[status] || 0}</div>

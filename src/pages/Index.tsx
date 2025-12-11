@@ -108,7 +108,7 @@ const Index = () => {
                     <ListChecks className="h-8 w-8 text-secondary" />
                     <div>
                       <p className="font-semibold">Impl. Acts</p>
-                      <p className="text-sm text-muted-foreground">{actStats.consultation || 0} in consultation</p>
+                      <p className="text-sm text-muted-foreground">{actStats.feedback || 0} open for feedback</p>
                     </div>
                   </CardContent>
                 </Card>

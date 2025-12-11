@@ -66,11 +66,11 @@ const ImplementingActDetail = () => {
               </div>
             )}
 
-            {act.status === 'consultation' && act.consultationDeadline && (
+            {act.status === 'feedback' && act.feedbackDeadline && (
               <div className="mt-6 p-4 rounded-lg bg-accent border border-accent-foreground/20">
                 <div className="flex items-center gap-2 text-accent-foreground">
                   <Calendar className="h-5 w-5" />
-                  <span className="font-medium">Consultation deadline: {act.consultationDeadline}</span>
+                  <span className="font-medium">Feedback deadline: {act.feedbackDeadline}</span>
                 </div>
                 {act.officialLink && (
                   <a href={act.officialLink} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 text-sm text-primary hover:underline">

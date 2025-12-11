@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { ChevronRight, ExternalLink, Calendar, Bookmark } from "lucide-react";
+import { ChevronRight, ExternalLink, Calendar, Bookmark, Globe } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -52,6 +52,19 @@ const ImplementingActDetail = () => {
           <CardContent className="p-6">
             <p className="text-muted-foreground mb-4">{themeLabels[act.theme]}</p>
             <p className="legal-text">{act.description}</p>
+
+            {act.deliverableLink && (
+              <div className="mt-6 p-4 rounded-lg bg-primary/10 border border-primary/20">
+                <div className="flex items-center gap-2 text-primary mb-1">
+                  <Globe className="h-5 w-5" />
+                  <span className="font-medium">Live Deliverable</span>
+                </div>
+                <p className="text-sm text-muted-foreground mb-2">{act.deliverableName || act.title}</p>
+                <a href={act.deliverableLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm text-primary hover:underline">
+                  View platform <ExternalLink className="h-4 w-4" />
+                </a>
+              </div>
+            )}
 
             {act.status === 'consultation' && act.consultationDeadline && (
               <div className="mt-6 p-4 rounded-lg bg-accent border border-accent-foreground/20">

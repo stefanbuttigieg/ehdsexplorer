@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { ChevronRight, ExternalLink, Filter } from "lucide-react";
+import { ChevronRight, ExternalLink, Filter, Globe } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -65,10 +65,16 @@ const ImplementingActsPage = () => {
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <Badge variant="outline">{act.articleReference}</Badge>
                             <Badge variant={act.type === 'delegated' ? 'secondary' : 'outline'}>{act.type}</Badge>
                             <span className={`status-badge status-${act.status}`}>{statusLabels[act.status]}</span>
+                            {act.deliverableLink && (
+                              <Badge variant="outline" className="text-primary border-primary/50">
+                                <Globe className="h-3 w-3 mr-1" />
+                                Live
+                              </Badge>
+                            )}
                           </div>
                           <h3 className="font-medium">{act.title}</h3>
                           <p className="text-sm text-muted-foreground line-clamp-1">{act.description}</p>

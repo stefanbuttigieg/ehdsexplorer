@@ -1,12 +1,34 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { ChevronRight, ExternalLink, Filter, Globe } from "lucide-react";
+import { ChevronRight, ExternalLink, Filter, Globe, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { implementingActs, themeLabels, statusLabels, ActStatus, ActTheme, getActStats } from "@/data/implementingActs";
 import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { differenceInDays, parse, isAfter, isBefore } from "date-fns";
+
+const getFeedbackDaysRemaining = (deadline: string) => {
+  const parts = deadline.split(" - ");
+  if (parts.length !== 2) return null;
+  
+  const startDate = parse(parts[0].trim(), "dd MMMM yyyy", new Date());
+  const endDate = parse(parts[1].trim(), "dd MMMM yyyy", new Date());
+  const now = new Date();
+  
+  if (isBefore(now, startDate)) {
+    const days = differenceInDays(startDate, now);
+    return { status: 'upcoming', days, label: `Opens in ${days}d` };
+  }
+  
+  if (isAfter(now, endDate)) {
+    return { status: 'closed', days: 0, label: 'Closed' };
+  }
+  
+  const days = differenceInDays(endDate, now);
+  return { status: 'active', days, label: `${days}d left` };
+};
 
 const ImplementingActsPage = () => {
   const [filterStatus, setFilterStatus] = useState<ActStatus | 'all'>('all');
@@ -75,6 +97,18 @@ const ImplementingActsPage = () => {
                                 Live
                               </Badge>
                             )}
+                            {act.status === 'feedback' && act.feedbackDeadline && (() => {
+                              const feedbackStatus = getFeedbackDaysRemaining(act.feedbackDeadline);
+                              return feedbackStatus ? (
+                                <Badge 
+                                  variant={feedbackStatus.status === 'active' ? 'default' : 'outline'}
+                                  className={feedbackStatus.status === 'active' ? 'bg-primary' : ''}
+                                >
+                                  <Clock className="h-3 w-3 mr-1" />
+                                  {feedbackStatus.label}
+                                </Badge>
+                              ) : null;
+                            })()}
                           </div>
                           <h3 className="font-medium">{act.title}</h3>
                           <p className="text-sm text-muted-foreground line-clamp-1">{act.description}</p>

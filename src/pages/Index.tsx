@@ -4,14 +4,17 @@ import { Search, Book, FileText, Scale, ListChecks, Bookmark, ChevronRight, File
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { chapters } from "@/data/chapters";
 import { getActStats } from "@/data/implementingActs";
 import Layout from "@/components/Layout";
+import { useReadingProgress } from "@/hooks/useReadingProgress";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const actStats = getActStats();
+  const { getChapterProgress } = useReadingProgress();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,27 +127,34 @@ const Index = () => {
           <div className="max-w-6xl mx-auto">
             <h2 className="text-2xl font-bold mb-6 font-serif">Chapters</h2>
             <div className="grid md:grid-cols-2 gap-4">
-              {chapters.map((chapter) => (
-                <Link key={chapter.id} to={`/chapter/${chapter.id}`}>
-                  <Card className="hover:border-primary hover:shadow-md transition-all cursor-pointer h-full">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Chapter {chapter.id}</span>
-                        <span className="text-xs text-muted-foreground">
-                          Art. {chapter.articleRange[0]}-{chapter.articleRange[1]}
-                        </span>
-                      </div>
-                      <CardTitle className="text-lg">{chapter.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <CardDescription className="line-clamp-2">{chapter.description}</CardDescription>
-                      <div className="flex items-center gap-1 mt-3 text-primary text-sm font-medium">
-                        Read chapter <ChevronRight className="h-4 w-4" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
+            {chapters.map((chapter) => {
+                const progress = getChapterProgress(chapter.articleRange);
+                return (
+                  <Link key={chapter.id} to={`/chapter/${chapter.id}`}>
+                    <Card className="hover:border-primary hover:shadow-md transition-all cursor-pointer h-full">
+                      <CardHeader className="pb-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-muted-foreground">Chapter {chapter.id}</span>
+                          <span className="text-xs text-muted-foreground">
+                            Art. {chapter.articleRange[0]}-{chapter.articleRange[1]}
+                          </span>
+                        </div>
+                        <CardTitle className="text-lg">{chapter.title}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <CardDescription className="line-clamp-2">{chapter.description}</CardDescription>
+                        <div className="mt-3 space-y-2">
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>{progress.read}/{progress.total} articles read</span>
+                            <span>{progress.percentage}%</span>
+                          </div>
+                          <Progress value={progress.percentage} className="h-1.5" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </section>

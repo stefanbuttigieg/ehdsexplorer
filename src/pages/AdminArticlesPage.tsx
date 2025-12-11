@@ -4,9 +4,10 @@ import { Search, Edit, Save, X, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
   DialogContent,
@@ -16,18 +17,44 @@ import {
 import Layout from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { articles as staticArticles, Article } from '@/data/articles';
 import { Link } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+
+interface DbArticle {
+  id: number;
+  article_number: number;
+  title: string;
+  content: string;
+  chapter_id: number | null;
+  created_at: string;
+  updated_at: string;
+}
 
 const AdminArticlesPage = () => {
   const { user, loading, isEditor } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
-  const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+  const [editingArticle, setEditingArticle] = useState<DbArticle | null>(null);
   const [editedTitle, setEditedTitle] = useState('');
   const [editedContent, setEditedContent] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+
+  const { data: articles, isLoading } = useQuery({
+    queryKey: ['admin-articles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('articles')
+        .select('*')
+        .order('article_number', { ascending: true });
+      
+      if (error) throw error;
+      return data as DbArticle[];
+    },
+    enabled: !!user && isEditor
+  });
 
   useEffect(() => {
     if (!loading && !user) {
@@ -37,13 +64,13 @@ const AdminArticlesPage = () => {
     }
   }, [user, loading, isEditor, navigate]);
 
-  const filteredArticles = staticArticles.filter(article =>
+  const filteredArticles = articles?.filter(article =>
     article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     article.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    article.id.toString().includes(searchQuery)
-  );
+    article.article_number.toString().includes(searchQuery)
+  ) || [];
 
-  const handleEdit = (article: Article) => {
+  const handleEdit = (article: DbArticle) => {
     setEditingArticle(article);
     setEditedTitle(article.title);
     setEditedContent(article.content);
@@ -53,14 +80,33 @@ const AdminArticlesPage = () => {
     if (!editingArticle) return;
     
     setIsSaving(true);
-    // For now, show a message that database sync will be implemented
-    // In production, this would update the database
-    toast({
-      title: 'Edit Recorded',
-      description: `Changes to Article ${editingArticle.id} noted. Database sync coming soon.`,
-    });
-    setIsSaving(false);
-    setEditingArticle(null);
+    try {
+      const { error } = await supabase
+        .from('articles')
+        .update({ 
+          title: editedTitle, 
+          content: editedContent 
+        })
+        .eq('id', editingArticle.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Article Updated',
+        description: `Article ${editingArticle.article_number} has been saved.`,
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['admin-articles'] });
+      setEditingArticle(null);
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to save article',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (loading || !user || !isEditor) {
@@ -100,34 +146,47 @@ const AdminArticlesPage = () => {
           </div>
         </div>
 
-        <div className="space-y-3">
-          {filteredArticles.map((article) => (
-            <Card key={article.id} className="hover:border-primary/50 transition-colors">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Badge variant="outline">Art. {article.id}</Badge>
-                      <span className="font-medium truncate">{article.title}</span>
+        {isLoading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Card key={i}>
+                <CardContent className="p-4">
+                  <Skeleton className="h-6 w-32 mb-2" />
+                  <Skeleton className="h-12 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filteredArticles.map((article) => (
+              <Card key={article.id} className="hover:border-primary/50 transition-colors">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge variant="outline">Art. {article.article_number}</Badge>
+                        <span className="font-medium truncate">{article.title}</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {article.content.substring(0, 200)}...
+                      </p>
                     </div>
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {article.content.substring(0, 200)}...
-                    </p>
+                    <Button variant="outline" size="sm" onClick={() => handleEdit(article)}>
+                      <Edit className="h-4 w-4 mr-1" />
+                      Edit
+                    </Button>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => handleEdit(article)}>
-                    <Edit className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
         <Dialog open={!!editingArticle} onOpenChange={() => setEditingArticle(null)}>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Edit Article {editingArticle?.id}</DialogTitle>
+              <DialogTitle>Edit Article {editingArticle?.article_number}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div className="space-y-2">

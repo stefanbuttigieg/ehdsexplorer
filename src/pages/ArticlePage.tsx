@@ -11,6 +11,7 @@ import { getActsByArticle } from "@/data/implementingActs";
 import Layout from "@/components/Layout";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 
 const ArticlePage = () => {
   const { id } = useParams();
@@ -21,6 +22,10 @@ const ArticlePage = () => {
   const relatedActs = getActsByArticle(articleId);
   const { isBookmarked, toggleBookmark } = useBookmarks();
   const { markAsRead } = useReadingProgress();
+
+  useKeyboardShortcuts({
+    onBookmark: () => article && toggleBookmark('article', articleId),
+  });
 
   useEffect(() => {
     if (article) {

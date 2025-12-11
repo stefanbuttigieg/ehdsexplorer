@@ -10,6 +10,7 @@ import { getActStats } from "@/data/implementingActs";
 import Layout from "@/components/Layout";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
 import { RecitalsQuickExplorer } from "@/components/RecitalsQuickExplorer";
+import { ContinueReading } from "@/components/ContinueReading";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -59,6 +60,9 @@ const Index = () => {
             </form>
           </div>
         </section>
+
+        {/* Continue Reading */}
+        <ContinueReading />
 
         {/* Quick Links */}
         <section className="py-8 px-4 border-b border-border bg-muted/30">

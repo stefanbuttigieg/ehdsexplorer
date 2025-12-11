@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 
-type BookmarkType = 'article' | 'recital' | 'act';
+type BookmarkType = 'article' | 'recital' | 'act' | 'annex';
 
 interface Bookmark {
   type: BookmarkType;

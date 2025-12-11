@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown } from "lucide-react";
+import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { chapters } from "@/data/chapters";
@@ -23,6 +23,7 @@ const Layout = ({ children }: LayoutProps) => {
     { path: "/overview", icon: Book, label: "Overview" },
     { path: "/definitions", icon: FileText, label: "Definitions" },
     { path: "/recitals", icon: Scale, label: "Recitals" },
+    { path: "/annexes", icon: Files, label: "Annexes" },
     { path: "/implementing-acts", icon: ListChecks, label: "Implementing Acts" },
     { path: "/bookmarks", icon: Bookmark, label: "Bookmarks" },
   ];

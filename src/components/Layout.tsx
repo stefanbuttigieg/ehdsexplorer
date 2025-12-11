@@ -61,12 +61,12 @@ const Layout = ({ children }: LayoutProps) => {
         </div>
         
         <ScrollArea className="h-[calc(100vh-3.5rem)]">
-          <div className="p-4 space-y-2">
+          <div className="p-4 space-y-2 overflow-hidden">
             {/* Search */}
             <Link to="/search" onClick={() => setSidebarOpen(false)}>
-              <Button variant="outline" className="w-full justify-start gap-2 mb-4">
-                <Search className="h-4 w-4" />
-                Search...
+              <Button variant="outline" className="w-full justify-start gap-2 mb-4 overflow-hidden">
+                <Search className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">Search...</span>
               </Button>
             </Link>
 
@@ -75,10 +75,10 @@ const Layout = ({ children }: LayoutProps) => {
               <Link key={item.path} to={item.path} onClick={() => setSidebarOpen(false)}>
                 <Button
                   variant={isActive(item.path) ? "secondary" : "ghost"}
-                  className={cn("w-full justify-start gap-2", isActive(item.path) && "bg-sidebar-accent text-sidebar-accent-foreground")}
+                  className={cn("w-full justify-start gap-2 overflow-hidden", isActive(item.path) && "bg-sidebar-accent text-sidebar-accent-foreground")}
                 >
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
+                  <item.icon className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">{item.label}</span>
                 </Button>
               </Link>
             ))}
@@ -88,7 +88,7 @@ const Layout = ({ children }: LayoutProps) => {
               <CollapsibleTrigger asChild>
                 <Button variant="ghost" className="w-full justify-between">
                   <span className="font-semibold">Chapters</span>
-                  <ChevronDown className={cn("h-4 w-4 transition-transform", chaptersOpen && "rotate-180")} />
+                  <ChevronDown className={cn("h-4 w-4 transition-transform flex-shrink-0", chaptersOpen && "rotate-180")} />
                 </Button>
               </CollapsibleTrigger>
               <CollapsibleContent className="space-y-1 mt-1">
@@ -96,11 +96,11 @@ const Layout = ({ children }: LayoutProps) => {
                   <Link key={chapter.id} to={`/chapter/${chapter.id}`} onClick={() => setSidebarOpen(false)}>
                     <Button
                       variant={location.pathname === `/chapter/${chapter.id}` ? "secondary" : "ghost"}
-                      className="w-full justify-start text-left h-auto py-2 px-3"
+                      className="w-full justify-start text-left h-auto py-2 px-3 overflow-hidden"
                       size="sm"
                     >
-                      <span className="text-xs text-muted-foreground mr-2">{chapter.id}.</span>
-                      <span className="truncate text-sm">{chapter.title}</span>
+                      <span className="text-xs text-muted-foreground mr-2 flex-shrink-0">{chapter.id}.</span>
+                      <span className="text-sm line-clamp-2">{chapter.title}</span>
                     </Button>
                   </Link>
                 ))}

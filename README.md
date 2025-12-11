@@ -1,73 +1,182 @@
-# Welcome to your Lovable project
+# EHDS Regulation Explorer
 
-## Project info
+A comprehensive digital platform for exploring **Regulation (EU) 2025/327** - the European Health Data Space Regulation. Navigate, search, and understand the complete EHDS framework with ease.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?logo=tailwindcss)
 
-## How can I edit this code?
+## 🎯 Overview
 
-There are several ways of editing your application.
+The EHDS Regulation Explorer provides an intuitive interface for healthcare professionals, legal experts, policymakers, health tech companies, and citizens to navigate and understand the European Health Data Space Regulation.
 
-**Use Lovable**
+**Source**: Complete EHDS Regulation (96 pages, 10 chapters, 99 articles, 96 recitals, 4 annexes)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## ✨ Current Features
 
-Changes made via Lovable will be committed automatically to this repo.
+### 📖 Content Navigation
+- **10 Chapters** with expandable table of contents and article navigation
+- **99 Articles** with full text, cross-references, and related recitals
+- **96 Recitals** providing context and interpretation guidance
+- **4 Annexes** with detailed technical requirements and specifications
+- **28 Definitions** from Article 2 with quick reference
 
-**Use your preferred IDE**
+### 🔍 Advanced Search
+- **Fuzzy search** powered by Fuse.js across all content types
+- **Direct ID matching** - search "article 42", "recital 15", "chapter 3", "annex I"
+- **Command palette** (press `/`) for quick navigation
+- **Filter by type** - articles, recitals, definitions, chapters, implementing acts, annexes
+- **Real-time results** as you type
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 📋 Implementing Acts Tracker
+- **33 implementing/delegated acts** identified in the regulation
+- **6 thematic categories**: Primary Use, EHR Systems, Secondary Use, Health Data Access Bodies, Cross-Border Infrastructure, EHDS Board & Governance
+- **Status tracking**: Pending, Open for Consultation, In Progress, Adopted
+- **Live deliverable links** to EHDS acceptance data platform
+- **Parent article references** and consultation deadlines
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 🎨 User Experience
+- **Dark/Light mode** toggle with system preference detection
+- **Adjustable font sizes** (small, medium, large, x-large)
+- **Reading progress tracking** per chapter with visual indicators
+- **Bookmarking system** for saving articles and recitals
+- **Keyboard shortcuts** for power users:
+  - `/` - Open search
+  - `b` - Toggle bookmark
+  - `h` - Go home
+  - `?` - Show shortcuts help
+  - Arrow keys - Navigate articles
+- **Print-friendly stylesheet** for articles and chapters
+- **Breadcrumb navigation** on all pages
+- **Mobile responsive** design
 
-Follow these steps:
+### 🔗 Cross-References
+- **Article-to-recital linking** with internal navigation
+- **Related articles** shown on recital pages
+- **Implementing act references** to parent articles
+- **Annex links** to relevant regulation articles
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### 📊 Quick Explorers
+- **Articles grid** (1-99) with hover tooltips showing titles
+- **Recitals grid** (1-96) with content preview on hover
+- **Continue reading** section to resume where you left off
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## 🚀 Planned Features
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Near-term
+- [ ] Search result highlighting showing matched text
+- [ ] Recent searches history
+- [ ] Export bookmarks to PDF/JSON
+- [ ] Shareable deep links with highlighted text
+- [ ] Offline support (PWA)
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### Medium-term
+- [ ] AI-powered Q&A about the regulation
+- [ ] Comparison view between articles
+- [ ] Annotation and note-taking
+- [ ] Collaboration features for teams
+- [ ] Email alerts for implementing act status changes
+
+### Long-term
+- [ ] Multi-language support (all EU languages)
+- [ ] Integration with national implementation trackers
+- [ ] API for third-party integrations
+- [ ] Mobile apps (iOS/Android)
+
+## 🛠️ Technology Stack
+
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS with shadcn/ui components
+- **Search**: Fuse.js for fuzzy matching
+- **Routing**: React Router v6
+- **State**: React Query + Local Storage
+- **Icons**: Lucide React
+
+## 📦 Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/ehds-explorer.git
+
+# Navigate to the project directory
+cd ehds-explorer
+
+# Install dependencies
+npm install
+
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## 🏗️ Project Structure
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```
+src/
+├── components/         # Reusable UI components
+│   ├── ui/            # shadcn/ui components
+│   └── ...            # Custom components
+├── data/              # Static regulation data
+│   ├── articles.ts    # 99 articles
+│   ├── recitals.ts    # 96 recitals
+│   ├── chapters.ts    # 10 chapters
+│   ├── annexes.ts     # 4 annexes
+│   ├── definitions.ts # 28 definitions
+│   └── implementingActs.ts # 33 acts
+├── hooks/             # Custom React hooks
+├── pages/             # Page components
+└── lib/               # Utility functions
+```
 
-**Use GitHub Codespaces**
+## 🤝 Contributing
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
 
-## What technologies are used for this project?
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-This project is built with:
+## 📄 License
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+This project is licensed under the MIT License - see below for details.
 
-## How can I deploy this project?
+```
+MIT License
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Copyright (c) 2025 EHDS Explorer Contributors
 
-## Can I connect a custom domain to my Lovable project?
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-Yes, you can!
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 📞 Contact
+
+For questions, suggestions, or feedback, please open an issue on GitHub.
+
+## 🙏 Acknowledgments
+
+- European Commission for the EHDS Regulation text
+- [shadcn/ui](https://ui.shadcn.com/) for the beautiful component library
+- [Lovable](https://lovable.dev) for the development platform
+
+---
+
+**Disclaimer**: This is an unofficial tool created for educational and informational purposes. For official legal text, always refer to the [Official Journal of the European Union](https://eur-lex.europa.eu/).

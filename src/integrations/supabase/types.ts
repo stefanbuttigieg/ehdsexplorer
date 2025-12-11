@@ -14,16 +14,226 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      annexes: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      articles: {
+        Row: {
+          article_number: number
+          chapter_id: number | null
+          content: string
+          created_at: string
+          id: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          article_number: number
+          chapter_id?: number | null
+          content: string
+          created_at?: string
+          id?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          article_number?: number
+          chapter_id?: number | null
+          content?: string
+          created_at?: string
+          id?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      definitions: {
+        Row: {
+          created_at: string
+          definition: string
+          id: number
+          source_article: number | null
+          term: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          definition: string
+          id?: number
+          source_article?: number | null
+          term: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          definition?: string
+          id?: number
+          source_article?: number | null
+          term?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      implementing_acts: {
+        Row: {
+          article_reference: string
+          created_at: string
+          deliverable_link: string | null
+          description: string
+          feedback_deadline: string | null
+          id: string
+          official_link: string | null
+          related_articles: number[] | null
+          status: string
+          theme: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          article_reference: string
+          created_at?: string
+          deliverable_link?: string | null
+          description: string
+          feedback_deadline?: string | null
+          id: string
+          official_link?: string | null
+          related_articles?: number[] | null
+          status: string
+          theme: string
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          article_reference?: string
+          created_at?: string
+          deliverable_link?: string | null
+          description?: string
+          feedback_deadline?: string | null
+          id?: string
+          official_link?: string | null
+          related_articles?: number[] | null
+          status?: string
+          theme?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      recitals: {
+        Row: {
+          content: string
+          created_at: string
+          id: number
+          recital_number: number
+          related_articles: number[] | null
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: number
+          recital_number: number
+          related_articles?: number[] | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: number
+          recital_number?: number
+          related_articles?: number[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin_or_editor: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "editor"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +360,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "editor"],
+    },
   },
 } as const

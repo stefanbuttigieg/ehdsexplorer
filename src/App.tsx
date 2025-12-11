@@ -17,6 +17,10 @@ import OverviewPage from "./pages/OverviewPage";
 import BookmarksPage from "./pages/BookmarksPage";
 import AnnexesPage from "./pages/AnnexesPage";
 import AnnexDetailPage from "./pages/AnnexDetailPage";
+import AdminAuthPage from "./pages/AdminAuthPage";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminArticlesPage from "./pages/AdminArticlesPage";
+import AdminRecitalsPage from "./pages/AdminRecitalsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +46,10 @@ const App = () => (
             <Route path="/annexes" element={<AnnexesPage />} />
             <Route path="/annex/:id" element={<AnnexDetailPage />} />
             <Route path="/bookmarks" element={<BookmarksPage />} />
+            <Route path="/admin/auth" element={<AdminAuthPage />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/articles" element={<AdminArticlesPage />} />
+            <Route path="/admin/recitals" element={<AdminRecitalsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

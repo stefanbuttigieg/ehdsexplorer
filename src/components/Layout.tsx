@@ -94,14 +94,15 @@ const Layout = ({ children }: LayoutProps) => {
               <CollapsibleContent className="space-y-1 mt-1">
                 {chapters.map((chapter) => (
                   <Link key={chapter.id} to={`/chapter/${chapter.id}`} onClick={() => setSidebarOpen(false)}>
-                    <Button
-                      variant={location.pathname === `/chapter/${chapter.id}` ? "secondary" : "ghost"}
-                      className="w-full justify-start text-left h-auto py-2 px-3 overflow-hidden"
-                      size="sm"
+                    <div
+                      className={cn(
+                        "flex items-start gap-2 w-full text-left py-2 px-3 rounded-md text-sm hover:bg-accent hover:text-accent-foreground transition-colors",
+                        location.pathname === `/chapter/${chapter.id}` && "bg-sidebar-accent text-sidebar-accent-foreground"
+                      )}
                     >
-                      <span className="text-xs text-muted-foreground mr-2 flex-shrink-0">{chapter.id}.</span>
-                      <span className="text-sm line-clamp-2">{chapter.title}</span>
-                    </Button>
+                      <span className="text-xs text-muted-foreground flex-shrink-0 mt-0.5">{chapter.id}.</span>
+                      <span className="break-words whitespace-normal">{chapter.title}</span>
+                    </div>
                   </Link>
                 ))}
               </CollapsibleContent>

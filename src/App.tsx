@@ -34,6 +34,7 @@ import AdminNotificationsPage from "./pages/AdminNotificationsPage";
 import AdminUsersPage from "./pages/AdminUsersPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import CookiesPolicyPage from "./pages/CookiesPolicyPage";
+import TermsOfServicePage from "./pages/TermsOfServicePage";
 import CookieConsentBanner from "./components/CookieConsentBanner";
 import NotFound from "./pages/NotFound";
 
@@ -73,6 +74,7 @@ const App = () => (
             <Route path="/bookmarks" element={<BookmarksPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="/cookies-policy" element={<CookiesPolicyPage />} />
+            <Route path="/terms-of-service" element={<TermsOfServicePage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/articles" element={<AdminArticlesPage />} />

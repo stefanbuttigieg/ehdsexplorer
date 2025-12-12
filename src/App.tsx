@@ -33,7 +33,16 @@ import AdminNotificationsPage from "./pages/AdminNotificationsPage";
 import AdminUsersPage from "./pages/AdminUsersPage";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes - data considered fresh
+      gcTime: 30 * 60 * 1000, // 30 minutes - keep in cache (formerly cacheTime)
+      refetchOnWindowFocus: false, // Don't refetch when tab regains focus
+      retry: 1, // Only retry failed requests once
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

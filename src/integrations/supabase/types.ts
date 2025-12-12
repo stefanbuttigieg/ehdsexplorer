@@ -45,6 +45,7 @@ export type Database = {
           content: string
           created_at: string
           id: number
+          section_id: number | null
           title: string
           updated_at: string
         }
@@ -54,6 +55,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: number
+          section_id?: number | null
           title: string
           updated_at?: string
         }
@@ -62,6 +64,42 @@ export type Database = {
           chapter_id?: number | null
           content?: string
           created_at?: string
+          id?: number
+          section_id?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "articles_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chapters: {
+        Row: {
+          chapter_number: number
+          created_at: string
+          description: string | null
+          id: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          chapter_number: number
+          created_at?: string
+          description?: string | null
+          id?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          chapter_number?: number
+          created_at?: string
+          description?: string | null
           id?: number
           title?: string
           updated_at?: string
@@ -196,6 +234,41 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      sections: {
+        Row: {
+          chapter_id: number
+          created_at: string
+          id: number
+          section_number: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          chapter_id: number
+          created_at?: string
+          id?: number
+          section_number: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          chapter_id?: number
+          created_at?: string
+          id?: number
+          section_number?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sections_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       site_settings: {
         Row: {

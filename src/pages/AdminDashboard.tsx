@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save } from 'lucide-react';
+import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -60,11 +60,17 @@ const AdminDashboard = () => {
 
   const contentSections = [
     {
+      title: 'Chapters & Sections',
+      description: 'Manage the structure of chapters and sections',
+      icon: Layers,
+      href: '/admin/chapters',
+    },
+    {
       title: 'Articles',
-      description: 'Manage the 99 articles of the EHDS Regulation',
+      description: 'Manage the 105 articles of the EHDS Regulation',
       icon: FileText,
       href: '/admin/articles',
-      count: 99,
+      count: 105,
     },
     {
       title: 'Recitals',
@@ -126,7 +132,7 @@ const AdminDashboard = () => {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <section.icon className="h-8 w-8 text-primary" />
-                    <Badge variant="outline">{section.count} items</Badge>
+                    {section.count && <Badge variant="outline">{section.count} items</Badge>}
                   </div>
                   <CardTitle className="mt-4">{section.title}</CardTitle>
                   <CardDescription>{section.description}</CardDescription>

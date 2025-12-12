@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard } from 'lucide-react';
+import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -105,6 +105,12 @@ const AdminDashboard = () => {
       icon: ListChecks,
       href: '/admin/implementing-acts',
       count: 33,
+    },
+    {
+      title: 'Joint Action Deliverables',
+      description: 'Link articles and acts to joint action deliverables',
+      icon: Link2,
+      href: '/admin/joint-action-deliverables',
     },
   ];
 

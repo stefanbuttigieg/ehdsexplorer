@@ -181,6 +181,39 @@ export type Database = {
         }
         Relationships: []
       }
+      joint_action_deliverables: {
+        Row: {
+          created_at: string
+          deliverable_link: string
+          deliverable_name: string
+          id: string
+          joint_action_name: string
+          related_articles: number[] | null
+          related_implementing_acts: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deliverable_link: string
+          deliverable_name: string
+          id?: string
+          joint_action_name: string
+          related_articles?: number[] | null
+          related_implementing_acts?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deliverable_link?: string
+          deliverable_name?: string
+          id?: string
+          joint_action_name?: string
+          related_articles?: number[] | null
+          related_implementing_acts?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       page_content: {
         Row: {
           content: Json

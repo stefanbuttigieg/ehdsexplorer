@@ -38,6 +38,21 @@ const CookieConsentBanner = () => {
     }
   }, []);
 
+  // Listen for custom event to reopen the banner
+  useEffect(() => {
+    const handleOpenCookieSettings = () => {
+      const savedPrefs = localStorage.getItem(COOKIE_PREFERENCES_KEY);
+      if (savedPrefs) {
+        setPreferences(JSON.parse(savedPrefs));
+      }
+      setShowPreferences(true);
+      setIsVisible(true);
+    };
+
+    window.addEventListener('open-cookie-settings', handleOpenCookieSettings);
+    return () => window.removeEventListener('open-cookie-settings', handleOpenCookieSettings);
+  }, []);
+
   const saveConsent = (prefs: CookiePreferences) => {
     localStorage.setItem(COOKIE_CONSENT_KEY, 'true');
     localStorage.setItem(COOKIE_PREFERENCES_KEY, JSON.stringify(prefs));

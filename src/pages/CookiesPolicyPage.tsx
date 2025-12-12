@@ -1,6 +1,12 @@
+import { Settings } from 'lucide-react';
 import Layout from '@/components/Layout';
+import { Button } from '@/components/ui/button';
 
 const CookiesPolicyPage = () => {
+  const handleOpenCookieSettings = () => {
+    window.dispatchEvent(new CustomEvent('open-cookie-settings'));
+  };
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -123,6 +129,12 @@ const CookiesPolicyPage = () => {
             <p className="text-foreground/80 leading-relaxed mt-3">
               Note: Disabling certain cookies may affect the functionality of the website.
             </p>
+            <div className="mt-4">
+              <Button onClick={handleOpenCookieSettings} className="gap-2">
+                <Settings className="h-4 w-4" />
+                Manage Cookie Preferences
+              </Button>
+            </div>
           </section>
 
           <section>

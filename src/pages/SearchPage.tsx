@@ -5,12 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useArticles } from "@/hooks/useArticles";
 import { useImplementingActs } from "@/hooks/useImplementingActs";
+import { useAnnexes } from "@/hooks/useAnnexes";
+import { useChapters } from "@/hooks/useChapters";
 import { recitals } from "@/data/recitals";
 import { definitions } from "@/data/definitions";
-import { chapters } from "@/data/chapters";
-import { annexes } from "@/data/annexes";
 import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import Fuse from "fuse.js";
@@ -46,8 +47,13 @@ const SearchPage = () => {
   const initialQuery = searchParams.get("q") || "";
   const [query, setQuery] = useState(initialQuery);
   const [filter, setFilter] = useState<FilterType>('all');
-  const { data: articles = [] } = useArticles();
-  const { data: implementingActs = [] } = useImplementingActs();
+  
+  const { data: articles = [], isLoading: articlesLoading } = useArticles();
+  const { data: implementingActs = [], isLoading: actsLoading } = useImplementingActs();
+  const { data: annexes = [], isLoading: annexesLoading } = useAnnexes();
+  const { data: chapters = [], isLoading: chaptersLoading } = useChapters();
+  
+  const isLoading = articlesLoading || actsLoading || annexesLoading || chaptersLoading;
 
   // Create searchable data with ID variations
   const searchableData = useMemo(() => ({
@@ -62,7 +68,7 @@ const SearchPage = () => {
     })),
     chapters: chapters.map(c => ({
       ...c,
-      searchId: `chapter ${c.id} ch ${c.id}`,
+      searchId: `chapter ${c.chapter_number} ch ${c.chapter_number}`,
     })),
     acts: implementingActs.map(a => ({
       ...a,
@@ -71,9 +77,8 @@ const SearchPage = () => {
     annexes: annexes.map(a => ({
       ...a,
       searchId: `annex ${a.id} annex ${romanToNumber(a.id)}`,
-      sectionContent: a.sections.map(s => s.title + ' ' + s.content).join(' '),
     })),
-  }), [articles, implementingActs]);
+  }), [articles, implementingActs, annexes, chapters]);
 
   const fuse = useMemo(() => ({
     articles: new Fuse(searchableData.articles, { 
@@ -101,7 +106,7 @@ const SearchPage = () => {
       ignoreLocation: true,
     }),
     annexes: new Fuse(searchableData.annexes, {
-      keys: ['title', 'description', 'searchId', 'sectionContent'],
+      keys: ['title', 'content', 'searchId'],
       threshold: 0.3,
       ignoreLocation: true,
     }),
@@ -146,7 +151,7 @@ const SearchPage = () => {
 
     if (chapterMatch) {
       const id = parseInt(chapterMatch[1]);
-      const chapter = chapters.find(c => c.id === id);
+      const chapter = chapters.find(c => c.chapter_number === id);
       return {
         articles: [],
         recitals: [],
@@ -179,7 +184,7 @@ const SearchPage = () => {
       acts: fuse.acts.search(query).map(r => r.item),
       annexes: fuse.annexes.search(query).map(r => r.item),
     };
-  }, [query, fuse, articles, implementingActs]);
+  }, [query, fuse, articles, chapters, annexes]);
 
   const handleSearch = (value: string) => {
     setQuery(value);
@@ -207,7 +212,13 @@ const SearchPage = () => {
           />
         </div>
 
-        {query && (
+        {isLoading && query && (
+          <div className="space-y-4">
+            {[1, 2, 3].map(i => <Skeleton key={i} className="h-24" />)}
+          </div>
+        )}
+
+        {query && !isLoading && (
           <>
             <div className="flex flex-wrap items-center gap-2 mb-6">
               <span className="text-muted-foreground">{totalResults} results</span>
@@ -224,12 +235,12 @@ const SearchPage = () => {
 
             <div className="space-y-4">
               {(filter === 'all' || filter === 'chapters') && results.chapters.map(chapter => (
-                <Link key={`ch-${chapter.id}`} to={`/chapter/${chapter.id}`}>
+                <Link key={`ch-${chapter.id}`} to={`/chapter/${chapter.chapter_number}`}>
                   <Card className="hover:border-primary transition-colors">
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-1">
                         <Layers className="h-4 w-4 text-primary" />
-                        <Badge variant="outline">Chapter {chapter.id}</Badge>
+                        <Badge variant="outline">Chapter {chapter.chapter_number}</Badge>
                       </div>
                       <h3 className="font-medium">{chapter.title}</h3>
                       <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{chapter.description}</p>
@@ -258,7 +269,7 @@ const SearchPage = () => {
                   <Card className="hover:border-primary transition-colors">
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-1">
-                        <ScrollText className="h-4 w-4 text-orange-500" />
+                        <ScrollText className="h-4 w-4 text-secondary" />
                         <Badge variant="outline">{act.articleReference}</Badge>
                         <Badge variant="secondary" className="text-xs">{act.type}</Badge>
                       </div>
@@ -274,11 +285,11 @@ const SearchPage = () => {
                   <Card className="hover:border-primary transition-colors">
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-1">
-                        <FileStack className="h-4 w-4 text-emerald-500" />
+                        <FileStack className="h-4 w-4 text-primary" />
                         <Badge variant="outline">Annex {annex.id}</Badge>
                       </div>
                       <h3 className="font-medium">{annex.title}</h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{annex.description}</p>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{annex.content.substring(0, 200)}...</p>
                     </CardContent>
                   </Card>
                 </Link>

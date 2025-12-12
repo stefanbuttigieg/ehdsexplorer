@@ -301,6 +301,39 @@ export type Database = {
         }
         Relationships: []
       }
+      published_works: {
+        Row: {
+          affiliated_organization: string
+          created_at: string
+          id: string
+          link: string
+          name: string
+          related_articles: number[] | null
+          related_implementing_acts: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          affiliated_organization: string
+          created_at?: string
+          id?: string
+          link: string
+          name: string
+          related_articles?: number[] | null
+          related_implementing_acts?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          affiliated_organization?: string
+          created_at?: string
+          id?: string
+          link?: string
+          name?: string
+          related_articles?: number[] | null
+          related_implementing_acts?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       recitals: {
         Row: {
           content: string

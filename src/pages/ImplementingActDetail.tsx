@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useImplementingAct, statusLabels, themeLabels } from "@/hooks/useImplementingActs";
 import { useArticles } from "@/hooks/useArticles";
 import { useJointActionDeliverables, getDeliverablesByImplementingAct } from "@/hooks/useJointActionDeliverables";
+import { usePublishedWorks, getPublishedWorksByImplementingAct } from "@/hooks/usePublishedWorks";
 import Layout from "@/components/Layout";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -47,8 +48,10 @@ const ImplementingActDetail = () => {
   const { data: act, isLoading } = useImplementingAct(id || "");
   const { data: articles = [] } = useArticles();
   const { data: jointActionDeliverables = [] } = useJointActionDeliverables();
+  const { data: publishedWorks = [] } = usePublishedWorks();
   const { isBookmarked, toggleBookmark } = useBookmarks();
   const relatedDeliverables = act ? getDeliverablesByImplementingAct(jointActionDeliverables, act.id) : [];
+  const relatedPublishedWorks = act ? getPublishedWorksByImplementingAct(publishedWorks, act.id) : [];
 
   if (isLoading) {
     return (
@@ -165,7 +168,7 @@ const ImplementingActDetail = () => {
 
         {/* Joint Action Deliverables */}
         {relatedDeliverables.length > 0 && (
-          <Card>
+          <Card className="mb-6">
             <CardHeader>
               <CardTitle className="text-lg">Joint Action Deliverables</CardTitle>
             </CardHeader>
@@ -183,6 +186,36 @@ const ImplementingActDetail = () => {
                       <div>
                         <span className="font-medium">{deliverable.deliverable_name}</span>
                         <p className="text-sm text-muted-foreground">{deliverable.joint_action_name}</p>
+                      </div>
+                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Published Works */}
+        {relatedPublishedWorks.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Published Works</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {relatedPublishedWorks.map((work) => (
+                <a 
+                  key={work.id} 
+                  href={work.link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block"
+                >
+                  <div className="p-3 rounded-lg bg-muted hover:bg-accent transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="font-medium">{work.name}</span>
+                        <p className="text-sm text-muted-foreground">{work.affiliated_organization}</p>
                       </div>
                       <ExternalLink className="h-4 w-4 text-muted-foreground" />
                     </div>

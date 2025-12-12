@@ -16,11 +16,11 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 ## ✨ Current Features
 
 ### 📖 Content Navigation
-- **10 Chapters** with expandable table of contents and article navigation
-- **99 Articles** with full text, cross-references, and related recitals
-- **96 Recitals** providing context and interpretation guidance
+- **9 Chapters** with expandable table of contents and article navigation
+- **105 Articles** with full text, cross-references, and related recitals
+- **115 Recitals** providing context and interpretation guidance
 - **4 Annexes** with detailed technical requirements and specifications
-- **28 Definitions** from Article 2 with quick reference
+- **62 Definitions** from Article 2 with quick reference
 
 ### 🔍 Advanced Search
 - **Fuzzy search** powered by Fuse.js across all content types

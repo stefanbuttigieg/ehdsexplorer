@@ -12,6 +12,7 @@ import { KeyboardShortcutsDialog } from "@/components/KeyboardShortcutsDialog";
 import { ReportIssueButton } from "@/components/ReportIssueButton";
 import { SearchCommand } from "@/components/SearchCommand";
 import { Skeleton } from "@/components/ui/skeleton";
+import { NotificationsBanner } from "@/components/NotificationsBanner";
 
 interface LayoutProps {
   children: ReactNode;
@@ -178,6 +179,9 @@ const Layout = ({ children }: LayoutProps) => {
       {/* Main Content */}
       <main className="flex-1 pt-14 md:pt-0">
         <div className="min-h-screen">
+          <div className="p-4">
+            <NotificationsBanner />
+          </div>
           {children}
         </div>
       </main>

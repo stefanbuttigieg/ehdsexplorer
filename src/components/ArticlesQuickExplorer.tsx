@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { useArticles } from "@/hooks/useArticles";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Tooltip,
   TooltipContent,
@@ -9,7 +10,19 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const ArticlesQuickExplorer = () => {
-  const { data: articles, isLoading } = useArticles();
+  // Only fetch article numbers and titles for the explorer (not full content)
+  const { data: articles, isLoading } = useQuery({
+    queryKey: ['articles-explorer'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('articles')
+        .select('article_number, title')
+        .order('article_number', { ascending: true });
+
+      if (error) throw error;
+      return data;
+    },
+  });
 
   if (isLoading) {
     return (

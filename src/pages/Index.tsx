@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Book, FileText, Scale, ListChecks, Bookmark, Files, Clock, MessageSquare, ExternalLink } from "lucide-react";
+import { Search, Book, FileText, Scale, ListChecks, Bookmark, Files, Clock, MessageSquare, ExternalLink, Gamepad2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -145,7 +145,7 @@ const Index = () => {
         {/* Quick Links */}
         <section className="py-8 px-4 border-b border-border bg-muted/30">
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
               <Link to="/overview">
                 <Card className="hover:border-primary transition-colors cursor-pointer h-full">
                   <CardContent className="p-4 flex items-center gap-3">
@@ -197,6 +197,17 @@ const Index = () => {
                     <div>
                       <p className="font-semibold">Bookmarks</p>
                       <p className="text-sm text-muted-foreground">Saved items</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link to="/match-game">
+                <Card className="hover:border-primary transition-colors cursor-pointer h-full">
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <Gamepad2 className="h-8 w-8 text-primary" />
+                    <div>
+                      <p className="font-semibold">Learn</p>
+                      <p className="text-sm text-muted-foreground">Match Game</p>
                     </div>
                   </CardContent>
                 </Card>

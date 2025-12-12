@@ -1,11 +1,12 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction } from 'lucide-react';
+import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import Layout from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -17,6 +18,13 @@ const AdminDashboard = () => {
   const { toast } = useToast();
   const { data: settings } = useSiteSettings();
   const updateSettings = useUpdateSiteSettings();
+  const [maintenanceMessage, setMaintenanceMessage] = useState('');
+
+  useEffect(() => {
+    if (settings?.maintenance_message) {
+      setMaintenanceMessage(settings.maintenance_message);
+    }
+  }, [settings?.maintenance_message]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -154,7 +162,7 @@ const AdminDashboard = () => {
                 When enabled, visitors will see a maintenance page. Admins and editors can still access the site.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-6">
               <div className="flex items-center gap-4">
                 <Switch
                   id="maintenance-mode"
@@ -190,6 +198,50 @@ const AdminDashboard = () => {
                     <span className="text-muted-foreground">Site is public</span>
                   )}
                 </Label>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="maintenance-message">Maintenance Message</Label>
+                <Textarea
+                  id="maintenance-message"
+                  value={maintenanceMessage}
+                  onChange={(e) => setMaintenanceMessage(e.target.value)}
+                  placeholder="Enter the message visitors will see during maintenance..."
+                  rows={3}
+                  className="resize-none"
+                />
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      updateSettings.mutate(
+                        { maintenance_message: maintenanceMessage },
+                        {
+                          onSuccess: () => {
+                            toast({
+                              title: 'Message Updated',
+                              description: 'Maintenance message has been saved.',
+                            });
+                          },
+                          onError: () => {
+                            toast({
+                              title: 'Error',
+                              description: 'Failed to update message.',
+                              variant: 'destructive',
+                            });
+                          },
+                        }
+                      );
+                    }}
+                    disabled={updateSettings.isPending || maintenanceMessage === settings?.maintenance_message}
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Message
+                  </Button>
+                  {maintenanceMessage !== settings?.maintenance_message && (
+                    <span className="text-sm text-muted-foreground">Unsaved changes</span>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>

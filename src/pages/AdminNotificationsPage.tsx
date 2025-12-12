@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Bell, Plus, Trash2, Edit, Power } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { Bell, Plus, Trash2, Edit, Power, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Layout from "@/components/Layout";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -125,14 +126,16 @@ const AdminNotificationsPage = () => {
 
   if (authLoading) {
     return (
-      <div className="p-6 max-w-4xl mx-auto">
-        <Skeleton className="h-8 w-48 mb-6" />
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-24 w-full" />
-          ))}
+      <Layout>
+        <div className="p-6 max-w-4xl mx-auto">
+          <Skeleton className="h-8 w-48 mb-6" />
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-24 w-full" />
+            ))}
+          </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
@@ -144,17 +147,26 @@ const AdminNotificationsPage = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto animate-fade-in">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <Bell className="h-6 w-6" />
-          <h1 className="text-2xl font-bold font-serif">Notifications</h1>
+    <Layout>
+      <div className="p-6 max-w-4xl mx-auto animate-fade-in">
+        <div className="mb-6">
+          <Link to="/admin">
+            <Button variant="ghost" size="sm" className="mb-4">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Button>
+          </Link>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Bell className="h-6 w-6" />
+              <h1 className="text-2xl font-bold font-serif">Notifications</h1>
+            </div>
+            <Button onClick={handleOpenCreate}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Notification
+            </Button>
+          </div>
         </div>
-        <Button onClick={handleOpenCreate}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Notification
-        </Button>
-      </div>
 
       {isLoading ? (
         <div className="space-y-4">
@@ -271,7 +283,8 @@ const AdminNotificationsPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </Layout>
   );
 };
 

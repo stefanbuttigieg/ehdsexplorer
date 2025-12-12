@@ -3,8 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Search, Edit, Save, X, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
+import MarkdownEditor from '@/components/MarkdownEditor';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -257,10 +257,10 @@ const AdminImplementingActsPage = () => {
               </div>
               <div className="space-y-2">
                 <Label>Description</Label>
-                <Textarea
+                <MarkdownEditor
                   value={editedDescription}
-                  onChange={(e) => setEditedDescription(e.target.value)}
-                  rows={5}
+                  onChange={setEditedDescription}
+                  rows={8}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">

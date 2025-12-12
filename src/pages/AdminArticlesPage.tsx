@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Search, Edit, Save, X, ArrowLeft, CheckSquare, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
+import MarkdownEditor from '@/components/MarkdownEditor';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -396,11 +396,10 @@ const AdminArticlesPage = () => {
               </div>
               <div className="space-y-2">
                 <Label>Content</Label>
-                <Textarea
+                <MarkdownEditor
                   value={editedContent}
-                  onChange={(e) => setEditedContent(e.target.value)}
+                  onChange={setEditedContent}
                   rows={16}
-                  className="font-mono text-sm"
                 />
               </div>
               <div className="flex justify-end gap-2">

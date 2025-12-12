@@ -11,10 +11,10 @@ import {
 } from "@/components/ui/command";
 import { useArticles } from "@/hooks/useArticles";
 import { useImplementingActs } from "@/hooks/useImplementingActs";
+import { useAnnexes } from "@/hooks/useAnnexes";
+import { useChapters } from "@/hooks/useChapters";
 import { recitals } from "@/data/recitals";
 import { definitions } from "@/data/definitions";
-import { chapters } from "@/data/chapters";
-import { annexes } from "@/data/annexes";
 import Fuse from "fuse.js";
 
 interface SearchCommandProps {
@@ -51,6 +51,8 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
   const navigate = useNavigate();
   const { data: articles = [] } = useArticles();
   const { data: implementingActs = [] } = useImplementingActs();
+  const { data: annexes = [] } = useAnnexes();
+  const { data: chapters = [] } = useChapters();
 
   // Create searchable data with ID variations
   const searchableData = useMemo(() => ({
@@ -65,7 +67,7 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
     })),
     chapters: chapters.map(c => ({
       ...c,
-      searchId: `chapter ${c.id} ch ${c.id}`,
+      searchId: `chapter ${c.chapter_number} ch ${c.chapter_number}`,
     })),
     acts: implementingActs.map(a => ({
       ...a,
@@ -74,9 +76,8 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
     annexes: annexes.map(a => ({
       ...a,
       searchId: `annex ${a.id} annex ${romanToNumber(a.id)}`,
-      sectionContent: a.sections.map(s => s.title + ' ' + s.content).join(' '),
     })),
-  }), [articles, implementingActs]);
+  }), [articles, implementingActs, annexes, chapters]);
 
   const fuse = useMemo(() => ({
     articles: new Fuse(searchableData.articles, { 
@@ -104,7 +105,7 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
       ignoreLocation: true,
     }),
     annexes: new Fuse(searchableData.annexes, {
-      keys: ['title', 'description', 'searchId', 'sectionContent'],
+      keys: ['title', 'content', 'searchId'],
       threshold: 0.3,
       ignoreLocation: true,
     }),
@@ -116,7 +117,7 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
         articles: searchableData.articles.slice(0, 5),
         recitals: recitals.slice(0, 3),
         definitions: definitions.slice(0, 3),
-        chapters: chapters.slice(0, 3),
+        chapters: searchableData.chapters.slice(0, 3),
         acts: implementingActs.slice(0, 3),
         annexes: annexes.slice(0, 2),
       };
@@ -156,7 +157,7 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
 
     if (chapterMatch) {
       const id = parseInt(chapterMatch[1]);
-      const chapter = chapters.find(c => c.id === id);
+      const chapter = chapters.find(c => c.chapter_number === id);
       return {
         articles: [],
         recitals: [],
@@ -169,7 +170,6 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
 
     if (annexMatch) {
       const input = annexMatch[1].toUpperCase();
-      // Handle both Roman numerals and Arabic numbers
       const annexId = /^\d+$/.test(input) ? numberToRoman(parseInt(input)) : input;
       const annex = annexes.find(a => a.id === annexId);
       return {
@@ -190,7 +190,7 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
       acts: fuse.acts.search(query).slice(0, 3).map(r => r.item),
       annexes: fuse.annexes.search(query).slice(0, 2).map(r => r.item),
     };
-  }, [query, fuse, searchableData, implementingActs]);
+  }, [query, fuse, searchableData, implementingActs, annexes, chapters]);
 
   const handleSelect = (path: string) => {
     onOpenChange(false);
@@ -218,11 +218,11 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
             {results.chapters.map(chapter => (
               <CommandItem
                 key={`ch-${chapter.id}`}
-                value={`chapter-${chapter.id}-${chapter.title}`}
-                onSelect={() => handleSelect(`/chapter/${chapter.id}`)}
+                value={`chapter-${chapter.chapter_number}-${chapter.title}`}
+                onSelect={() => handleSelect(`/chapter/${chapter.chapter_number}`)}
               >
                 <Layers className="mr-2 h-4 w-4 text-primary" />
-                <span className="font-medium mr-2">Chapter {chapter.id}</span>
+                <span className="font-medium mr-2">Chapter {chapter.chapter_number}</span>
                 <span className="text-muted-foreground truncate">{chapter.title}</span>
               </CommandItem>
             ))}
@@ -253,7 +253,7 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
                 value={`act-${act.id}-${act.title}`}
                 onSelect={() => handleSelect(`/implementing-acts/${act.id}`)}
               >
-                <ScrollText className="mr-2 h-4 w-4 text-orange-500" />
+                <ScrollText className="mr-2 h-4 w-4 text-secondary" />
                 <span className="font-medium mr-2">{act.articleReference}</span>
                 <span className="text-muted-foreground truncate">{act.title}</span>
               </CommandItem>
@@ -269,7 +269,7 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
                 value={`annex-${annex.id}-${annex.title}`}
                 onSelect={() => handleSelect(`/annex/${annex.id}`)}
               >
-                <FileStack className="mr-2 h-4 w-4 text-emerald-500" />
+                <FileStack className="mr-2 h-4 w-4 text-primary" />
                 <span className="font-medium mr-2">Annex {annex.id}</span>
                 <span className="text-muted-foreground truncate">{annex.title}</span>
               </CommandItem>

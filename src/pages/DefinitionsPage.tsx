@@ -4,15 +4,16 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { definitions, searchDefinitions } from "@/data/definitions";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useDefinitions, searchDefinitions } from "@/hooks/useDefinitions";
 import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 const DefinitionsPage = () => {
   const [query, setQuery] = useState("");
-  const filteredDefs = (query ? searchDefinitions(query) : definitions)
-    .slice()
-    .sort((a, b) => a.term.localeCompare(b.term));
+  const { data: definitions = [], isLoading } = useDefinitions();
+  
+  const filteredDefs = query ? searchDefinitions(definitions, query) : definitions;
 
   return (
     <Layout>
@@ -32,17 +33,39 @@ const DefinitionsPage = () => {
         </div>
 
         <div className="space-y-4">
-          {filteredDefs.map((def, idx) => (
-            <Card key={idx} id={def.term.toLowerCase().replace(/\s+/g, '-')}>
-              <CardContent className="p-5">
-                <div className="flex items-center gap-2 mb-2">
-                  <h3 className="font-semibold text-lg">{def.term}</h3>
-                  <Badge variant="outline" className="text-xs">{def.articleReference}</Badge>
-                </div>
-                <p className="text-muted-foreground legal-text">{def.definition}</p>
-              </CardContent>
-            </Card>
-          ))}
+          {isLoading ? (
+            Array.from({ length: 5 }).map((_, idx) => (
+              <Card key={idx}>
+                <CardContent className="p-5">
+                  <Skeleton className="h-6 w-48 mb-2" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4 mt-1" />
+                </CardContent>
+              </Card>
+            ))
+          ) : filteredDefs.length === 0 ? (
+            <p className="text-muted-foreground text-center py-8">
+              {query ? "No definitions match your search." : "No definitions found."}
+            </p>
+          ) : (
+            filteredDefs.map((def) => (
+              <Card key={def.id} id={def.term.toLowerCase().replace(/\s+/g, '-')}>
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="font-semibold text-lg">{def.term}</h3>
+                    {def.source_article && (
+                      <Link to={`/article/${def.source_article}`}>
+                        <Badge variant="outline" className="text-xs hover:bg-accent cursor-pointer">
+                          Article {def.source_article}
+                        </Badge>
+                      </Link>
+                    )}
+                  </div>
+                  <p className="text-muted-foreground legal-text">{def.definition}</p>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
       </div>
     </Layout>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Users, ArrowLeft, Shield, ShieldCheck, Trash2, Plus, Search } from "lucide-react";
+import { Users, ArrowLeft, Shield, ShieldCheck, Trash2, Plus, Search, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,8 +31,11 @@ const AdminUsersPage = () => {
   const { user, isAdmin, loading: authLoading } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [addRoleDialogOpen, setAddRoleDialogOpen] = useState(false);
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<"admin" | "editor">("editor");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<"admin" | "editor">("editor");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -143,6 +146,43 @@ const AdminUsersPage = () => {
     setAddRoleDialogOpen(true);
   };
 
+  const handleSendInvite = async () => {
+    if (!inviteEmail.trim()) {
+      toast({ title: "Error", description: "Email is required", variant: "destructive" });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-invite", {
+        body: {
+          email: inviteEmail.trim(),
+          role: inviteRole,
+          inviterEmail: user?.email || "Admin",
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Invitation sent!",
+        description: `An invitation email has been sent to ${inviteEmail}`,
+      });
+      setInviteDialogOpen(false);
+      setInviteEmail("");
+      setInviteRole("editor");
+    } catch (error: any) {
+      console.error("Invite error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send invitation",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (authLoading) {
     return (
       <Layout>
@@ -173,6 +213,10 @@ const AdminUsersPage = () => {
               <Users className="h-6 w-6" />
               <h1 className="text-2xl font-bold font-serif">User Management</h1>
             </div>
+            <Button onClick={() => setInviteDialogOpen(true)}>
+              <Mail className="h-4 w-4 mr-2" />
+              Invite User
+            </Button>
           </div>
           <p className="text-muted-foreground mt-1">
             Manage user roles and permissions
@@ -308,6 +352,60 @@ const AdminUsersPage = () => {
               </Button>
               <Button onClick={handleAddRole} disabled={isSubmitting}>
                 Add Role
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Invite User</DialogTitle>
+              <DialogDescription>
+                Send an email invitation to a new user to join the admin team.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="invite-email">Email Address</Label>
+                <Input
+                  id="invite-email"
+                  type="email"
+                  placeholder="user@example.com"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="invite-role">Role</Label>
+                <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as "admin" | "editor")}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="editor">
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4" />
+                        Editor - Can manage content
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="admin">
+                      <div className="flex items-center gap-2">
+                        <ShieldCheck className="h-4 w-4" />
+                        Admin - Full access
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setInviteDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSendInvite} disabled={isSubmitting}>
+                <Mail className="h-4 w-4 mr-2" />
+                {isSubmitting ? "Sending..." : "Send Invitation"}
               </Button>
             </DialogFooter>
           </DialogContent>

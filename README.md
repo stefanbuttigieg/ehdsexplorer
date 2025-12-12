@@ -6,21 +6,22 @@ A comprehensive digital platform for exploring **Regulation (EU) 2025/327** - th
 ![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?logo=tailwindcss)
+![Supabase](https://img.shields.io/badge/Supabase-Backend-3FCF8E?logo=supabase)
 
 ## 🎯 Overview
 
 The EHDS Regulation Explorer provides an intuitive interface for healthcare professionals, legal experts, policymakers, health tech companies, and citizens to navigate and understand the European Health Data Space Regulation.
 
-**Source**: Complete EHDS Regulation (96 pages, 10 chapters, 99 articles, 96 recitals, 4 annexes)
+**Source**: Complete EHDS Regulation (10 chapters, 105 articles, 115 recitals, 4 annexes)
 
 ## ✨ Current Features
 
 ### 📖 Content Navigation
-- **9 Chapters** with expandable table of contents and article navigation
-- **105 Articles** with full text, cross-references, and related recitals
-- **115 Recitals** providing context and interpretation guidance
+- **10 Chapters** with expandable table of contents, sections, and article navigation
+- **105 Articles** with full text, cross-references, related recitals, and implementing acts
+- **115 Recitals** with individual detail pages and related article links
 - **4 Annexes** with detailed technical requirements and specifications
-- **62 Definitions** from Article 2 with quick reference
+- **62+ Definitions** from Article 2 with quick reference and source links
 
 ### 🔍 Advanced Search
 - **Fuzzy search** powered by Fuse.js across all content types
@@ -32,15 +33,23 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 ### 📋 Implementing Acts Tracker
 - **33 implementing/delegated acts** identified in the regulation
 - **6 thematic categories**: Primary Use, EHR Systems, Secondary Use, Health Data Access Bodies, Cross-Border Infrastructure, EHDS Board & Governance
-- **Status tracking**: Pending, Open for Consultation, In Progress, Adopted
+- **Status tracking**: Pending, Open for Feedback, In Progress, Adopted
+- **Feedback period countdowns** with "days remaining" indicators
+- **"Open for Feedback" section** highlighting acts with active feedback windows
 - **Live deliverable links** to EHDS acceptance data platform
-- **Parent article references** and consultation deadlines
+- **Related articles** and official document links
+
+### 🔗 External Resources Linking
+- **Joint Action Deliverables** - Links to deliverables from EHDS-related joint actions
+- **Published Works** - Academic research and publications linked to articles and implementing acts
+- **Live Deliverables** - Direct links to EHDS acceptance data platform resources
 
 ### 🎨 User Experience
 - **Dark/Light mode** toggle with system preference detection
 - **Adjustable font sizes** (small, medium, large, x-large)
 - **Reading progress tracking** per chapter with visual indicators
 - **Bookmarking system** for saving articles and recitals
+- **Loading indicator** with dark mode support
 - **Keyboard shortcuts** for power users:
   - `/` - Open search
   - `b` - Toggle bookmark
@@ -51,16 +60,45 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Breadcrumb navigation** on all pages
 - **Mobile responsive** design
 
-### 🔗 Cross-References
-- **Article-to-recital linking** with internal navigation
-- **Related articles** shown on recital pages
-- **Implementing act references** to parent articles
-- **Annex links** to relevant regulation articles
+### ♿ Accessibility
+- **WCAG 2.1 Level AA** compliance efforts
+- **Semantic HTML** structure throughout
+- **Keyboard navigation** support
+- **Screen reader** compatibility
+- **High contrast** mode support
+- **Adjustable text sizes**
+- **Focus indicators** for all interactive elements
+
+### 🔔 Notifications System
+- **Admin-managed announcements** displayed as banners
+- **Expiration dates** for time-limited notifications
+- **Dismissible notifications** for better UX
 
 ### 📊 Quick Explorers
-- **Articles grid** (1-99) with hover tooltips showing titles
-- **Recitals grid** (1-96) with content preview on hover
+- **Articles grid** (1-105) with hover tooltips showing titles
+- **Recitals grid** (1-115) with content preview on hover
 - **Continue reading** section to resume where you left off
+
+### 🔐 Admin Backend
+- **Role-based access control** (Admin/Editor roles)
+- **Content management** for all content types:
+  - Articles, Recitals, Chapters, Sections
+  - Definitions, Annexes
+  - Implementing Acts
+  - Joint Action Deliverables
+  - Published Works
+  - Notifications
+- **Markdown WYSIWYG editor** with live preview
+- **Bulk import** functionality for JSON data
+- **User management** with email invitation system
+- **Maintenance mode** with custom messaging
+- **Overview page** content management
+
+### 📜 Legal & Compliance
+- **Privacy Policy** page
+- **Cookies Policy** page
+- **Terms of Service** page
+- **Accessibility Statement** page
 
 ## 🚀 Planned Features
 
@@ -89,10 +127,12 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Framework**: React 18 with TypeScript
 - **Build Tool**: Vite
 - **Styling**: Tailwind CSS with shadcn/ui components
+- **Backend**: Supabase (PostgreSQL, Auth, Edge Functions)
 - **Search**: Fuse.js for fuzzy matching
 - **Routing**: React Router v6
 - **State**: React Query + Local Storage
 - **Icons**: Lucide React
+- **Email**: Resend for user invitations
 
 ## 📦 Installation
 
@@ -101,7 +141,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 git clone https://github.com/stefanbuttigieg/ehdsexplorer.git
 
 # Navigate to the project directory
-cd ehds-explorer
+cd ehdsexplorer
 
 # Install dependencies
 npm install
@@ -117,17 +157,33 @@ src/
 ├── components/         # Reusable UI components
 │   ├── ui/            # shadcn/ui components
 │   └── ...            # Custom components
-├── data/              # Static regulation data
-│   ├── articles.ts    # 99 articles
-│   ├── recitals.ts    # 96 recitals
-│   ├── chapters.ts    # 10 chapters
-│   ├── annexes.ts     # 4 annexes
-│   ├── definitions.ts # 28 definitions
-│   └── implementingActs.ts # 33 acts
 ├── hooks/             # Custom React hooks
+│   ├── useArticles.ts
+│   ├── useAuth.ts
+│   ├── useBookmarks.ts
+│   └── ...
+├── integrations/      # Third-party integrations
+│   └── supabase/      # Supabase client and types
 ├── pages/             # Page components
+│   ├── Admin*/        # Admin dashboard pages
+│   └── ...            # Public pages
+├── data/              # Static fallback data
 └── lib/               # Utility functions
+
+supabase/
+├── config.toml        # Supabase configuration
+├── functions/         # Edge functions
+│   └── send-invite/   # User invitation function
+└── migrations/        # Database migrations
 ```
+
+## 🔒 Security
+
+- **Row Level Security (RLS)** on all database tables
+- **Role-based access control** for admin functions
+- **Email-only user registration** (no public signups)
+- **Server-side role verification**
+- **Secure secret management**
 
 ## 🤝 Contributing
 
@@ -176,7 +232,8 @@ For questions, suggestions, or feedback, please open an issue on GitHub.
 - European Commission for the EHDS Regulation text
 - [shadcn/ui](https://ui.shadcn.com/) for the beautiful component library
 - [Lovable](https://lovable.dev) for the development platform
+- [Supabase](https://supabase.com/) for the backend infrastructure
 
 ---
 
-**Disclaimer**: This is an unofficial tool created for educational and informational purposes. For official legal text, always refer to the [Official Journal of the European Union](https://eur-lex.europa.eu/).
+**Disclaimer**: This is an unofficial tool created for educational and informational purposes. It is not affiliated with the European Union or any official EU body. For official legal text, always refer to the [Official Journal of the European Union](https://eur-lex.europa.eu/).

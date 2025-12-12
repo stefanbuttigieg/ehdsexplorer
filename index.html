@@ -22,7 +22,49 @@
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="initial-loader" style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background: linear-gradient(135deg, hsl(210, 40%, 98%) 0%, hsl(210, 40%, 96%) 100%);
+        font-family: system-ui, -apple-system, sans-serif;
+      ">
+        <div style="
+          width: 48px;
+          height: 48px;
+          border: 3px solid hsl(210, 40%, 90%);
+          border-top-color: hsl(192, 91%, 36%);
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+        "></div>
+        <p style="
+          margin-top: 16px;
+          color: hsl(210, 40%, 40%);
+          font-size: 14px;
+          font-weight: 500;
+        ">Loading EHDS Explorer...</p>
+      </div>
+      <style>
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        @media (prefers-color-scheme: dark) {
+          #initial-loader {
+            background: linear-gradient(135deg, hsl(222, 47%, 11%) 0%, hsl(222, 47%, 8%) 100%) !important;
+          }
+          #initial-loader p {
+            color: hsl(210, 40%, 80%) !important;
+          }
+          #initial-loader > div:first-child {
+            border-color: hsl(222, 47%, 20%) !important;
+            border-top-color: hsl(192, 91%, 50%) !important;
+          }
+        }
+      </style>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

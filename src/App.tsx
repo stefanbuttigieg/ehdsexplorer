@@ -30,6 +30,7 @@ import AdminChaptersPage from "./pages/AdminChaptersPage";
 import AdminOverviewPage from "./pages/AdminOverviewPage";
 import AdminJointActionDeliverablesPage from "./pages/AdminJointActionDeliverablesPage";
 import AdminNotificationsPage from "./pages/AdminNotificationsPage";
+import AdminUsersPage from "./pages/AdminUsersPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -68,6 +69,7 @@ const App = () => (
             <Route path="/admin/overview" element={<AdminOverviewPage />} />
             <Route path="/admin/joint-action-deliverables" element={<AdminJointActionDeliverablesPage />} />
             <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
+            <Route path="/admin/users" element={<AdminUsersPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </MaintenanceGuard>

@@ -10,6 +10,7 @@ import { getChapterByArticle } from "@/data/chapters";
 import { getRecitalsByArticle } from "@/data/recitals";
 import { useImplementingActs, getActsByArticle, statusLabels } from "@/hooks/useImplementingActs";
 import { useJointActionDeliverables, getDeliverablesByArticle } from "@/hooks/useJointActionDeliverables";
+import { usePublishedWorks, getPublishedWorksByArticle } from "@/hooks/usePublishedWorks";
 import Layout from "@/components/Layout";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
@@ -24,10 +25,12 @@ const ArticlePage = () => {
   const { data: articles } = useArticles();
   const { data: implementingActs = [] } = useImplementingActs();
   const { data: jointActionDeliverables = [] } = useJointActionDeliverables();
+  const { data: publishedWorks = [] } = usePublishedWorks();
   const chapter = getChapterByArticle(articleId);
   const relatedRecitals = getRecitalsByArticle(articleId);
   const relatedActs = getActsByArticle(implementingActs, articleId);
   const relatedDeliverables = getDeliverablesByArticle(jointActionDeliverables, articleId);
+  const relatedPublishedWorks = getPublishedWorksByArticle(publishedWorks, articleId);
   const { isBookmarked, toggleBookmark } = useBookmarks();
   const { markAsRead } = useReadingProgress();
 
@@ -164,6 +167,36 @@ const ArticlePage = () => {
                       <div>
                         <span className="font-medium">{deliverable.deliverable_name}</span>
                         <p className="text-sm text-muted-foreground">{deliverable.joint_action_name}</p>
+                      </div>
+                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Published Works */}
+        {relatedPublishedWorks.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-lg">Published Works</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {relatedPublishedWorks.map((work) => (
+                <a 
+                  key={work.id} 
+                  href={work.link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block"
+                >
+                  <div className="p-3 rounded-lg bg-muted hover:bg-accent transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="font-medium">{work.name}</span>
+                        <p className="text-sm text-muted-foreground">{work.affiliated_organization}</p>
                       </div>
                       <ExternalLink className="h-4 w-4 text-muted-foreground" />
                     </div>

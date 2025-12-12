@@ -161,7 +161,7 @@ const Index = () => {
                     <FileText className="h-8 w-8 text-primary" />
                     <div>
                       <p className="font-semibold">Definitions</p>
-                      <p className="text-sm text-muted-foreground">28 terms</p>
+                      <p className="text-sm text-muted-foreground">62 terms</p>
                     </div>
                   </CardContent>
                 </Card>

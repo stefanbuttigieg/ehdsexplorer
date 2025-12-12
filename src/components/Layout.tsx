@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText } from "lucide-react";
+import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText, Accessibility } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useChapters } from "@/hooks/useChapters";
@@ -195,6 +195,15 @@ const Layout = ({ children }: LayoutProps) => {
                 >
                   <ScrollText className="h-3.5 w-3.5 flex-shrink-0" />
                   <span className="truncate">Terms of Service</span>
+                </Button>
+              </Link>
+              <Link to="/accessibility" onClick={() => setSidebarOpen(false)}>
+                <Button
+                  variant="ghost"
+                  className={cn("w-full justify-start gap-2 text-muted-foreground h-8 text-sm", isActive("/accessibility") && "bg-sidebar-accent text-sidebar-accent-foreground")}
+                >
+                  <Accessibility className="h-3.5 w-3.5 flex-shrink-0" />
+                  <span className="truncate">Accessibility</span>
                 </Button>
               </Link>
             </div>

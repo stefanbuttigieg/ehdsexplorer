@@ -38,6 +38,7 @@ import TermsOfServicePage from "./pages/TermsOfServicePage";
 import AccessibilityStatementPage from "./pages/AccessibilityStatementPage";
 import CookieConsentBanner from "./components/CookieConsentBanner";
 import NotFound from "./pages/NotFound";
+import MatchGamePage from "./pages/MatchGamePage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -77,6 +78,7 @@ const App = () => (
             <Route path="/cookies-policy" element={<CookiesPolicyPage />} />
             <Route path="/terms-of-service" element={<TermsOfServicePage />} />
             <Route path="/accessibility" element={<AccessibilityStatementPage />} />
+            <Route path="/match-game" element={<MatchGamePage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/articles" element={<AdminArticlesPage />} />

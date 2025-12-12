@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect } from "react";
-import { ChevronLeft, ChevronRight, Bookmark } from "lucide-react";
+import { ChevronLeft, ChevronRight, Bookmark, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,7 @@ import { useArticle, useArticles } from "@/hooks/useArticles";
 import { getChapterByArticle } from "@/data/chapters";
 import { getRecitalsByArticle } from "@/data/recitals";
 import { useImplementingActs, getActsByArticle, statusLabels } from "@/hooks/useImplementingActs";
+import { useJointActionDeliverables, getDeliverablesByArticle } from "@/hooks/useJointActionDeliverables";
 import Layout from "@/components/Layout";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
@@ -22,9 +23,11 @@ const ArticlePage = () => {
   const { data: article, isLoading } = useArticle(articleId);
   const { data: articles } = useArticles();
   const { data: implementingActs = [] } = useImplementingActs();
+  const { data: jointActionDeliverables = [] } = useJointActionDeliverables();
   const chapter = getChapterByArticle(articleId);
   const relatedRecitals = getRecitalsByArticle(articleId);
   const relatedActs = getActsByArticle(implementingActs, articleId);
+  const relatedDeliverables = getDeliverablesByArticle(jointActionDeliverables, articleId);
   const { isBookmarked, toggleBookmark } = useBookmarks();
   const { markAsRead } = useReadingProgress();
 
@@ -136,6 +139,36 @@ const ArticlePage = () => {
                     <Badge className={`status-${act.status}`}>{statusLabels[act.status]}</Badge>
                   </div>
                 </Link>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Joint Action Deliverables */}
+        {relatedDeliverables.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-lg">Joint Action Deliverables</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {relatedDeliverables.map((deliverable) => (
+                <a 
+                  key={deliverable.id} 
+                  href={deliverable.deliverable_link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block"
+                >
+                  <div className="p-3 rounded-lg bg-muted hover:bg-accent transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="font-medium">{deliverable.deliverable_name}</span>
+                        <p className="text-sm text-muted-foreground">{deliverable.joint_action_name}</p>
+                      </div>
+                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </div>
+                </a>
               ))}
             </CardContent>
           </Card>

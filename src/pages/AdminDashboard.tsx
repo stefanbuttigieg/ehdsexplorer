@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell } from 'lucide-react';
+import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -111,6 +111,12 @@ const AdminDashboard = () => {
       description: 'Link articles and acts to joint action deliverables',
       icon: Link2,
       href: '/admin/joint-action-deliverables',
+    },
+    {
+      title: 'Published Works',
+      description: 'Link articles and acts to published works',
+      icon: BookMarked,
+      href: '/admin/published-works',
     },
     {
       title: 'Notifications',

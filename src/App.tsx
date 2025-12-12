@@ -26,6 +26,7 @@ import AdminDefinitionsPage from "./pages/AdminDefinitionsPage";
 import AdminAnnexesPage from "./pages/AdminAnnexesPage";
 import AdminImplementingActsPage from "./pages/AdminImplementingActsPage";
 import AdminBulkImportPage from "./pages/AdminBulkImportPage";
+import AdminChaptersPage from "./pages/AdminChaptersPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -60,6 +61,7 @@ const App = () => (
             <Route path="/admin/annexes" element={<AdminAnnexesPage />} />
             <Route path="/admin/implementing-acts" element={<AdminImplementingActsPage />} />
             <Route path="/admin/bulk-import" element={<AdminBulkImportPage />} />
+            <Route path="/admin/chapters" element={<AdminChaptersPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </MaintenanceGuard>

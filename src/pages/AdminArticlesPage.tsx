@@ -14,12 +14,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import Layout from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useChapters } from '@/hooks/useChapters';
+import { useSections } from '@/hooks/useSections';
 
 interface DbArticle {
   id: number;
@@ -27,6 +36,7 @@ interface DbArticle {
   title: string;
   content: string;
   chapter_id: number | null;
+  section_id: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -40,7 +50,12 @@ const AdminArticlesPage = () => {
   const [editingArticle, setEditingArticle] = useState<DbArticle | null>(null);
   const [editedTitle, setEditedTitle] = useState('');
   const [editedContent, setEditedContent] = useState('');
+  const [editedChapterId, setEditedChapterId] = useState<number | null>(null);
+  const [editedSectionId, setEditedSectionId] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  const { data: chapters } = useChapters();
+  const { data: allSections } = useSections();
 
   const { data: articles, isLoading } = useQuery({
     queryKey: ['admin-articles'],
@@ -74,7 +89,12 @@ const AdminArticlesPage = () => {
     setEditingArticle(article);
     setEditedTitle(article.title);
     setEditedContent(article.content);
+    setEditedChapterId(article.chapter_id);
+    setEditedSectionId(article.section_id);
   };
+
+  // Get sections filtered by selected chapter
+  const availableSections = allSections?.filter(s => s.chapter_id === editedChapterId) || [];
 
   const handleSave = async () => {
     if (!editingArticle) return;
@@ -85,7 +105,9 @@ const AdminArticlesPage = () => {
         .from('articles')
         .update({ 
           title: editedTitle, 
-          content: editedContent 
+          content: editedContent,
+          chapter_id: editedChapterId,
+          section_id: editedSectionId,
         })
         .eq('id', editingArticle.id);
 
@@ -196,12 +218,60 @@ const AdminArticlesPage = () => {
                   onChange={(e) => setEditedTitle(e.target.value)}
                 />
               </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Chapter</Label>
+                  <Select
+                    value={editedChapterId?.toString() || "none"}
+                    onValueChange={(value) => {
+                      const newChapterId = value === "none" ? null : parseInt(value);
+                      setEditedChapterId(newChapterId);
+                      // Reset section if chapter changes
+                      if (newChapterId !== editedChapterId) {
+                        setEditedSectionId(null);
+                      }
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select chapter" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No chapter</SelectItem>
+                      {chapters?.map((ch) => (
+                        <SelectItem key={ch.id} value={ch.id.toString()}>
+                          Chapter {ch.chapter_number}: {ch.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Section</Label>
+                  <Select
+                    value={editedSectionId?.toString() || "none"}
+                    onValueChange={(value) => setEditedSectionId(value === "none" ? null : parseInt(value))}
+                    disabled={!editedChapterId || availableSections.length === 0}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={!editedChapterId ? "Select chapter first" : "Select section"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No section</SelectItem>
+                      {availableSections.map((sec) => (
+                        <SelectItem key={sec.id} value={sec.id.toString()}>
+                          Section {sec.section_number}: {sec.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
               <div className="space-y-2">
                 <Label>Content</Label>
                 <Textarea
                   value={editedContent}
                   onChange={(e) => setEditedContent(e.target.value)}
-                  rows={20}
+                  rows={16}
                   className="font-mono text-sm"
                 />
               </div>

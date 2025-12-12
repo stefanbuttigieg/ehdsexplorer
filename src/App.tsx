@@ -28,6 +28,7 @@ import AdminImplementingActsPage from "./pages/AdminImplementingActsPage";
 import AdminBulkImportPage from "./pages/AdminBulkImportPage";
 import AdminChaptersPage from "./pages/AdminChaptersPage";
 import AdminOverviewPage from "./pages/AdminOverviewPage";
+import AdminJointActionDeliverablesPage from "./pages/AdminJointActionDeliverablesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -64,6 +65,7 @@ const App = () => (
             <Route path="/admin/bulk-import" element={<AdminBulkImportPage />} />
             <Route path="/admin/chapters" element={<AdminChaptersPage />} />
             <Route path="/admin/overview" element={<AdminOverviewPage />} />
+            <Route path="/admin/joint-action-deliverables" element={<AdminJointActionDeliverablesPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </MaintenanceGuard>

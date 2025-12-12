@@ -1,9 +1,9 @@
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { chapters } from "@/data/chapters";
+import { useChapters } from "@/hooks/useChapters";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AccessibilityControls } from "@/components/AccessibilityControls";
@@ -11,6 +11,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { KeyboardShortcutsDialog } from "@/components/KeyboardShortcutsDialog";
 import { ReportIssueButton } from "@/components/ReportIssueButton";
 import { SearchCommand } from "@/components/SearchCommand";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface LayoutProps {
   children: ReactNode;
@@ -22,6 +23,7 @@ const Layout = ({ children }: LayoutProps) => {
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const location = useLocation();
+  const { data: chapters, isLoading: chaptersLoading } = useChapters();
 
   useKeyboardShortcuts({
     onHelp: () => setShortcutsOpen(true),
@@ -111,19 +113,29 @@ const Layout = ({ children }: LayoutProps) => {
                 </Button>
               </CollapsibleTrigger>
               <CollapsibleContent className="space-y-1 mt-1">
-                {chapters.map((chapter) => (
-                  <Link key={chapter.id} to={`/chapter/${chapter.id}`} onClick={() => setSidebarOpen(false)}>
-                    <div
-                      className={cn(
-                        "flex items-start gap-2 w-full text-left py-2 px-3 rounded-md text-sm hover:bg-accent hover:text-accent-foreground transition-colors",
-                        location.pathname === `/chapter/${chapter.id}` && "bg-sidebar-accent text-sidebar-accent-foreground"
-                      )}
-                    >
-                      <span className="text-xs text-muted-foreground flex-shrink-0 mt-0.5">{chapter.id}.</span>
-                      <span className="break-words whitespace-normal">{chapter.title}</span>
-                    </div>
-                  </Link>
-                ))}
+                {chaptersLoading ? (
+                  <div className="space-y-2 px-3">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <Skeleton key={i} className="h-8 w-full" />
+                    ))}
+                  </div>
+                ) : chapters && chapters.length > 0 ? (
+                  chapters.map((chapter) => (
+                    <Link key={chapter.id} to={`/chapter/${chapter.chapter_number}`} onClick={() => setSidebarOpen(false)}>
+                      <div
+                        className={cn(
+                          "flex items-start gap-2 w-full text-left py-2 px-3 rounded-md text-sm hover:bg-accent hover:text-accent-foreground transition-colors",
+                          location.pathname === `/chapter/${chapter.chapter_number}` && "bg-sidebar-accent text-sidebar-accent-foreground"
+                        )}
+                      >
+                        <span className="text-xs text-muted-foreground flex-shrink-0 mt-0.5">{chapter.chapter_number}.</span>
+                        <span className="break-words whitespace-normal">{chapter.title}</span>
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <p className="text-xs text-muted-foreground px-3 py-2">No chapters configured</p>
+                )}
               </CollapsibleContent>
             </Collapsible>
 

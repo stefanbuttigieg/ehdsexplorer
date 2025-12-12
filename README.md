@@ -14,26 +14,6 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 
 **Source**: Complete EHDS Regulation (10 chapters, 105 articles, 115 recitals, 4 annexes)
 
-## 📸 Screenshots
-
-### Homepage
-![Homepage](docs/screenshots/homepage.png)
-*Quick explorers for articles and recitals, search functionality, and navigation*
-
-### Article View
-![Article View](docs/screenshots/article-view.png)
-*Full article text with related recitals, implementing acts, and cross-references*
-
-### Implementing Acts Tracker
-![Implementing Acts](docs/screenshots/implementing-acts.png)
-*Track 33 implementing acts with status, feedback periods, and official links*
-
-### Dark Mode
-![Dark Mode](docs/screenshots/dark-mode.png)
-*Full dark mode support with system preference detection*
-
-> **Note**: To add screenshots, create a `docs/screenshots/` folder and add images named as shown above.
-
 ## ✨ Current Features
 
 ### 📖 Content Navigation

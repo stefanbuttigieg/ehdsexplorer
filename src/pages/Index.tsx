@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { chapters } from "@/data/chapters";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useChapters } from "@/hooks/useChapters";
 import { getActStats, implementingActs, themeLabels } from "@/data/implementingActs";
 import Layout from "@/components/Layout";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
@@ -41,6 +42,7 @@ const Index = () => {
   const navigate = useNavigate();
   const actStats = getActStats();
   const { getChapterProgress } = useReadingProgress();
+  const { data: chapters, isLoading: chaptersLoading } = useChapters();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -206,34 +208,40 @@ const Index = () => {
           <div className="max-w-6xl mx-auto">
             <h2 className="text-2xl font-bold mb-6 font-serif">Chapters</h2>
             <div className="grid md:grid-cols-2 gap-4">
-            {chapters.map((chapter) => {
-                const progress = getChapterProgress(chapter.articleRange);
-                return (
-                  <Link key={chapter.id} to={`/chapter/${chapter.id}`}>
+              {chaptersLoading ? (
+                <>
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <Card key={i} className="h-full">
+                      <CardHeader className="pb-2">
+                        <Skeleton className="h-4 w-24 mb-2" />
+                        <Skeleton className="h-6 w-48" />
+                      </CardHeader>
+                      <CardContent>
+                        <Skeleton className="h-4 w-full mb-2" />
+                        <Skeleton className="h-4 w-3/4" />
+                      </CardContent>
+                    </Card>
+                  ))}
+                </>
+              ) : chapters && chapters.length > 0 ? (
+                chapters.map((chapter) => (
+                  <Link key={chapter.id} to={`/chapter/${chapter.chapter_number}`}>
                     <Card className="hover:border-primary hover:shadow-md transition-all cursor-pointer h-full">
                       <CardHeader className="pb-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">Chapter {chapter.id}</span>
-                          <span className="text-xs text-muted-foreground">
-                            Art. {chapter.articleRange[0]}-{chapter.articleRange[1]}
-                          </span>
+                          <span className="text-sm text-muted-foreground">Chapter {chapter.chapter_number}</span>
                         </div>
                         <CardTitle className="text-lg">{chapter.title}</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <CardDescription className="line-clamp-2">{chapter.description}</CardDescription>
-                        <div className="mt-3 space-y-2">
-                          <div className="flex items-center justify-between text-xs text-muted-foreground">
-                            <span>{progress.read}/{progress.total} articles read</span>
-                            <span>{progress.percentage}%</span>
-                          </div>
-                          <Progress value={progress.percentage} className="h-1.5" />
-                        </div>
                       </CardContent>
                     </Card>
                   </Link>
-                );
-              })}
+                ))
+              ) : (
+                <p className="text-muted-foreground col-span-2">No chapters configured yet.</p>
+              )}
             </div>
           </div>
         </section>

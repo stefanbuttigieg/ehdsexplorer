@@ -10,12 +10,13 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const RecitalsQuickExplorer = () => {
+  // Only fetch recital numbers and first part of content for tooltips (not full content)
   const { data: recitals, isLoading } = useQuery({
     queryKey: ['recitals-explorer'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('recitals')
-        .select('id, recital_number, content')
+        .select('recital_number')
         .order('recital_number', { ascending: true });
 
       if (error) throw error;
@@ -46,7 +47,7 @@ export const RecitalsQuickExplorer = () => {
       <TooltipProvider delayDuration={200}>
         <div className="flex flex-wrap gap-1.5">
           {recitals?.map((recital) => (
-            <Tooltip key={recital.id}>
+            <Tooltip key={recital.recital_number}>
               <TooltipTrigger asChild>
                 <Link
                   to={`/recital/${recital.recital_number}`}
@@ -56,7 +57,7 @@ export const RecitalsQuickExplorer = () => {
                 </Link>
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-xs">
-                <p className="text-xs line-clamp-3">{recital.content}</p>
+                <p className="text-xs">Recital {recital.recital_number}</p>
               </TooltipContent>
             </Tooltip>
           ))}

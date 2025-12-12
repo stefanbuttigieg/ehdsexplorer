@@ -32,6 +32,9 @@ import AdminJointActionDeliverablesPage from "./pages/AdminJointActionDeliverabl
 import AdminPublishedWorksPage from "./pages/AdminPublishedWorksPage";
 import AdminNotificationsPage from "./pages/AdminNotificationsPage";
 import AdminUsersPage from "./pages/AdminUsersPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import CookiesPolicyPage from "./pages/CookiesPolicyPage";
+import CookieConsentBanner from "./components/CookieConsentBanner";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -51,6 +54,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <CookieConsentBanner />
         <BrowserRouter>
           <MaintenanceGuard>
           <Routes>
@@ -67,6 +71,8 @@ const App = () => (
             <Route path="/annexes" element={<AnnexesPage />} />
             <Route path="/annex/:id" element={<AnnexDetailPage />} />
             <Route path="/bookmarks" element={<BookmarksPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route path="/cookies-policy" element={<CookiesPolicyPage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/articles" element={<AdminArticlesPage />} />

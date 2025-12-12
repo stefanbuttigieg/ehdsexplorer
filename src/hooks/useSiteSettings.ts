@@ -13,8 +13,9 @@ export const useSiteSettings = () => {
   return useQuery({
     queryKey: ["site-settings"],
     queryFn: async () => {
+      // Use the public view to avoid exposing admin UUIDs
       const { data, error } = await supabase
-        .from("site_settings")
+        .from("site_settings_public")
         .select("*")
         .eq("id", "default")
         .single();

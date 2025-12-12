@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Book, FileText, Scale, ListChecks, Bookmark, ChevronRight, Files, Clock, MessageSquare, ExternalLink } from "lucide-react";
+import { Search, Book, FileText, Scale, ListChecks, Bookmark, Files, Clock, MessageSquare, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useChapters } from "@/hooks/useChapters";
-import { getActStats, implementingActs, themeLabels } from "@/data/implementingActs";
+import { useImplementingActs, getActStats } from "@/hooks/useImplementingActs";
 import Layout from "@/components/Layout";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
 import { RecitalsQuickExplorer } from "@/components/RecitalsQuickExplorer";
@@ -40,9 +39,10 @@ const getFeedbackStatus = (deadline: string) => {
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
-  const actStats = getActStats();
   const { getChapterProgress } = useReadingProgress();
   const { data: chapters, isLoading: chaptersLoading } = useChapters();
+  const { data: implementingActs = [] } = useImplementingActs();
+  const actStats = getActStats(implementingActs);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

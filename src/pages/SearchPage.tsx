@@ -6,10 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useArticles } from "@/hooks/useArticles";
+import { useImplementingActs } from "@/hooks/useImplementingActs";
 import { recitals } from "@/data/recitals";
 import { definitions } from "@/data/definitions";
 import { chapters } from "@/data/chapters";
-import { implementingActs } from "@/data/implementingActs";
 import { annexes } from "@/data/annexes";
 import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -47,6 +47,7 @@ const SearchPage = () => {
   const [query, setQuery] = useState(initialQuery);
   const [filter, setFilter] = useState<FilterType>('all');
   const { data: articles = [] } = useArticles();
+  const { data: implementingActs = [] } = useImplementingActs();
 
   // Create searchable data with ID variations
   const searchableData = useMemo(() => ({
@@ -72,7 +73,7 @@ const SearchPage = () => {
       searchId: `annex ${a.id} annex ${romanToNumber(a.id)}`,
       sectionContent: a.sections.map(s => s.title + ' ' + s.content).join(' '),
     })),
-  }), [articles]);
+  }), [articles, implementingActs]);
 
   const fuse = useMemo(() => ({
     articles: new Fuse(searchableData.articles, { 
@@ -178,7 +179,7 @@ const SearchPage = () => {
       acts: fuse.acts.search(query).map(r => r.item),
       annexes: fuse.annexes.search(query).map(r => r.item),
     };
-  }, [query, fuse, articles]);
+  }, [query, fuse, articles, implementingActs]);
 
   const handleSearch = (value: string) => {
     setQuery(value);

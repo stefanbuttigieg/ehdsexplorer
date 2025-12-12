@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useArticle, useArticles } from "@/hooks/useArticles";
 import { getChapterByArticle } from "@/data/chapters";
 import { getRecitalsByArticle } from "@/data/recitals";
-import { getActsByArticle } from "@/data/implementingActs";
+import { useImplementingActs, getActsByArticle, statusLabels } from "@/hooks/useImplementingActs";
 import Layout from "@/components/Layout";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
@@ -21,9 +21,10 @@ const ArticlePage = () => {
   const articleId = parseInt(id || "1");
   const { data: article, isLoading } = useArticle(articleId);
   const { data: articles } = useArticles();
+  const { data: implementingActs = [] } = useImplementingActs();
   const chapter = getChapterByArticle(articleId);
   const relatedRecitals = getRecitalsByArticle(articleId);
-  const relatedActs = getActsByArticle(articleId);
+  const relatedActs = getActsByArticle(implementingActs, articleId);
   const { isBookmarked, toggleBookmark } = useBookmarks();
   const { markAsRead } = useReadingProgress();
 
@@ -132,7 +133,7 @@ const ArticlePage = () => {
                       <span className="font-medium">{act.articleReference}</span>
                       <p className="text-sm text-muted-foreground">{act.title}</p>
                     </div>
-                    <Badge className={`status-${act.status}`}>{act.status}</Badge>
+                    <Badge className={`status-${act.status}`}>{statusLabels[act.status]}</Badge>
                   </div>
                 </Link>
               ))}

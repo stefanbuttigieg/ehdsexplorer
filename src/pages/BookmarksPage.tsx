@@ -1,21 +1,26 @@
 import { Link } from "react-router-dom";
-import { Bookmark, FileText, Scale, ListChecks } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Bookmark, FileText, ListChecks } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useBookmarks } from "@/hooks/useBookmarks";
-import { getArticleById } from "@/data/articles";
+import { useArticles } from "@/hooks/useArticles";
+import { useImplementingActs } from "@/hooks/useImplementingActs";
 import { getRecitalById } from "@/data/recitals";
-import { getActById } from "@/data/implementingActs";
 import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 const BookmarksPage = () => {
   const { bookmarks, getBookmarksByType, toggleBookmark } = useBookmarks();
+  const { data: articles = [] } = useArticles();
+  const { data: implementingActs = [] } = useImplementingActs();
 
   const articleBookmarks = getBookmarksByType('article');
   const recitalBookmarks = getBookmarksByType('recital');
   const actBookmarks = getBookmarksByType('act');
+
+  const getArticleById = (id: number) => articles.find(a => a.article_number === id);
+  const getActById = (id: string) => implementingActs.find(a => a.id === id);
 
   if (bookmarks.length === 0) {
     return (
@@ -50,7 +55,7 @@ const BookmarksPage = () => {
                     <Card className="hover:border-primary transition-colors">
                       <CardContent className="p-4 flex items-center justify-between">
                         <div>
-                          <Badge variant="outline" className="mb-1">Article {article.id}</Badge>
+                          <Badge variant="outline" className="mb-1">Article {article.article_number}</Badge>
                           <h3 className="font-medium">{article.title}</h3>
                         </div>
                         <Button variant="ghost" size="icon" onClick={(e) => { e.preventDefault(); toggleBookmark('article', b.id); }}>

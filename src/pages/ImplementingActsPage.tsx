@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { ChevronRight, ExternalLink, Filter, Globe, Clock } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChevronRight, Globe, Clock } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { implementingActs, themeLabels, statusLabels, ActStatus, ActTheme, getActStats } from "@/data/implementingActs";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useImplementingActs, themeLabels, statusLabels, ActStatus, ActTheme, getActStats } from "@/hooks/useImplementingActs";
 import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { differenceInDays, parse, isAfter, isBefore } from "date-fns";
@@ -33,7 +34,8 @@ const getFeedbackDaysRemaining = (deadline: string) => {
 const ImplementingActsPage = () => {
   const [filterStatus, setFilterStatus] = useState<ActStatus | 'all'>('all');
   const [filterTheme, setFilterTheme] = useState<ActTheme | 'all'>('all');
-  const stats = getActStats();
+  const { data: implementingActs = [], isLoading } = useImplementingActs();
+  const stats = getActStats(implementingActs);
 
   const filteredActs = implementingActs.filter(act => {
     if (filterStatus !== 'all' && act.status !== filterStatus) return false;
@@ -46,6 +48,26 @@ const ImplementingActsPage = () => {
     acc[act.theme].push(act);
     return acc;
   }, {} as Record<ActTheme, typeof implementingActs>);
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="max-w-5xl mx-auto p-6">
+          <Skeleton className="h-8 w-48 mb-4" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            {[1, 2, 3, 4].map(i => (
+              <Skeleton key={i} className="h-24" />
+            ))}
+          </div>
+          <div className="space-y-4">
+            {[1, 2, 3].map(i => (
+              <Skeleton key={i} className="h-20" />
+            ))}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

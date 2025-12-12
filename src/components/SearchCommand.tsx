@@ -9,11 +9,11 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { articles } from "@/data/articles";
+import { useArticles } from "@/hooks/useArticles";
+import { useImplementingActs } from "@/hooks/useImplementingActs";
 import { recitals } from "@/data/recitals";
 import { definitions } from "@/data/definitions";
 import { chapters } from "@/data/chapters";
-import { implementingActs } from "@/data/implementingActs";
 import { annexes } from "@/data/annexes";
 import Fuse from "fuse.js";
 
@@ -49,12 +49,15 @@ const numberToRoman = (num: number): string => {
 export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
+  const { data: articles = [] } = useArticles();
+  const { data: implementingActs = [] } = useImplementingActs();
 
   // Create searchable data with ID variations
   const searchableData = useMemo(() => ({
     articles: articles.map(a => ({
       ...a,
-      searchId: `article ${a.id} art ${a.id} art. ${a.id}`,
+      id: a.article_number,
+      searchId: `article ${a.article_number} art ${a.article_number} art. ${a.article_number}`,
     })),
     recitals: recitals.map(r => ({
       ...r,
@@ -73,7 +76,7 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
       searchId: `annex ${a.id} annex ${romanToNumber(a.id)}`,
       sectionContent: a.sections.map(s => s.title + ' ' + s.content).join(' '),
     })),
-  }), []);
+  }), [articles, implementingActs]);
 
   const fuse = useMemo(() => ({
     articles: new Fuse(searchableData.articles, { 
@@ -110,7 +113,7 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
   const results = useMemo(() => {
     if (!query.trim()) {
       return {
-        articles: articles.slice(0, 5),
+        articles: searchableData.articles.slice(0, 5),
         recitals: recitals.slice(0, 3),
         definitions: definitions.slice(0, 3),
         chapters: chapters.slice(0, 3),
@@ -127,7 +130,7 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
     
     if (articleMatch) {
       const id = parseInt(articleMatch[1]);
-      const article = articles.find(a => a.id === id);
+      const article = searchableData.articles.find(a => a.id === id);
       return {
         articles: article ? [article] : [],
         recitals: [],
@@ -187,7 +190,7 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
       acts: fuse.acts.search(query).slice(0, 3).map(r => r.item),
       annexes: fuse.annexes.search(query).slice(0, 2).map(r => r.item),
     };
-  }, [query, fuse]);
+  }, [query, fuse, searchableData, implementingActs]);
 
   const handleSelect = (path: string) => {
     onOpenChange(false);

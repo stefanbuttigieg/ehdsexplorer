@@ -1,10 +1,11 @@
 import { useParams, Link } from "react-router-dom";
-import { ChevronRight, ExternalLink, Calendar, Bookmark, Globe, Clock } from "lucide-react";
+import { ExternalLink, Calendar, Bookmark, Globe, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getActById, statusLabels, themeLabels } from "@/data/implementingActs";
-import { getArticleById } from "@/data/articles";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useImplementingAct, statusLabels, themeLabels } from "@/hooks/useImplementingActs";
+import { useArticles } from "@/hooks/useArticles";
 import Layout from "@/components/Layout";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -42,8 +43,21 @@ const getFeedbackStatus = (deadline: string) => {
 
 const ImplementingActDetail = () => {
   const { id } = useParams();
-  const act = getActById(id || "");
+  const { data: act, isLoading } = useImplementingAct(id || "");
+  const { data: articles = [] } = useArticles();
   const { isBookmarked, toggleBookmark } = useBookmarks();
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="max-w-4xl mx-auto p-6">
+          <Skeleton className="h-8 w-48 mb-4" />
+          <Skeleton className="h-12 w-full mb-8" />
+          <Skeleton className="h-64 w-full" />
+        </div>
+      </Layout>
+    );
+  }
 
   if (!act) {
     return (
@@ -133,7 +147,7 @@ const ImplementingActDetail = () => {
           </CardHeader>
           <CardContent className="space-y-3">
             {act.relatedArticles.map(artId => {
-              const article = getArticleById(artId);
+              const article = articles.find(a => a.article_number === artId);
               return article ? (
                 <Link key={artId} to={`/article/${artId}`}>
                   <div className="p-3 rounded-lg bg-muted hover:bg-accent transition-colors">

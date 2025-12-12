@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers } from 'lucide-react';
+import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -59,6 +59,12 @@ const AdminDashboard = () => {
   }
 
   const contentSections = [
+    {
+      title: 'Overview Page',
+      description: 'Manage the overview page content',
+      icon: LayoutDashboard,
+      href: '/admin/overview',
+    },
     {
       title: 'Chapters & Sections',
       description: 'Manage the structure of chapters and sections',

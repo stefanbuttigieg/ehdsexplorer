@@ -10,7 +10,9 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 
 const DefinitionsPage = () => {
   const [query, setQuery] = useState("");
-  const filteredDefs = query ? searchDefinitions(query) : definitions;
+  const filteredDefs = (query ? searchDefinitions(query) : definitions)
+    .slice()
+    .sort((a, b) => a.term.localeCompare(b.term));
 
   return (
     <Layout>

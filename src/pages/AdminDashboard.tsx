@@ -1,17 +1,22 @@
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload } from 'lucide-react';
+import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import Layout from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useSiteSettings, useUpdateSiteSettings } from '@/hooks/useSiteSettings';
 
 const AdminDashboard = () => {
   const { user, loading, isEditor, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { data: settings } = useSiteSettings();
+  const updateSettings = useUpdateSiteSettings();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -137,6 +142,58 @@ const AdminDashboard = () => {
             </Link>
           )}
         </div>
+
+        {isAdmin && (
+          <Card className="mb-8">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <Construction className="h-5 w-5 text-primary" />
+                <CardTitle>Maintenance Mode</CardTitle>
+              </div>
+              <CardDescription>
+                When enabled, visitors will see a maintenance page. Admins and editors can still access the site.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-4">
+                <Switch
+                  id="maintenance-mode"
+                  checked={settings?.maintenance_mode ?? false}
+                  onCheckedChange={(checked) => {
+                    updateSettings.mutate(
+                      { maintenance_mode: checked },
+                      {
+                        onSuccess: () => {
+                          toast({
+                            title: checked ? 'Maintenance Mode Enabled' : 'Maintenance Mode Disabled',
+                            description: checked
+                              ? 'Visitors will now see the maintenance page.'
+                              : 'The site is now publicly accessible.',
+                          });
+                        },
+                        onError: () => {
+                          toast({
+                            title: 'Error',
+                            description: 'Failed to update maintenance mode.',
+                            variant: 'destructive',
+                          });
+                        },
+                      }
+                    );
+                  }}
+                  disabled={updateSettings.isPending}
+                />
+                <Label htmlFor="maintenance-mode" className="cursor-pointer">
+                  {settings?.maintenance_mode ? (
+                    <Badge variant="destructive">Maintenance Mode Active</Badge>
+                  ) : (
+                    <span className="text-muted-foreground">Site is public</span>
+                  )}
+                </Label>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>

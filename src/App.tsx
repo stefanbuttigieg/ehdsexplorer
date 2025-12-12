@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import MaintenanceGuard from "@/components/MaintenanceGuard";
 import Index from "./pages/Index";
 import ArticlePage from "./pages/ArticlePage";
 import ChapterPage from "./pages/ChapterPage";
@@ -36,6 +37,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <MaintenanceGuard>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/overview" element={<OverviewPage />} />
@@ -60,6 +62,7 @@ const App = () => (
             <Route path="/admin/bulk-import" element={<AdminBulkImportPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </MaintenanceGuard>
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>

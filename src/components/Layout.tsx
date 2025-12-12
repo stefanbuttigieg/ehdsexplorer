@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github } from "lucide-react";
+import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useChapters } from "@/hooks/useChapters";
@@ -166,6 +166,29 @@ const Layout = ({ children }: LayoutProps) => {
                 <span className="truncate">GitHub</span>
               </Button>
             </a>
+
+            {/* Legal Links */}
+            <div className="pt-4 mt-4 border-t border-sidebar-border">
+              <p className="text-xs text-muted-foreground px-3 mb-2">Legal</p>
+              <Link to="/privacy-policy" onClick={() => setSidebarOpen(false)}>
+                <Button
+                  variant="ghost"
+                  className={cn("w-full justify-start gap-2 text-muted-foreground h-8 text-sm", isActive("/privacy-policy") && "bg-sidebar-accent text-sidebar-accent-foreground")}
+                >
+                  <Shield className="h-3.5 w-3.5 flex-shrink-0" />
+                  <span className="truncate">Privacy Policy</span>
+                </Button>
+              </Link>
+              <Link to="/cookies-policy" onClick={() => setSidebarOpen(false)}>
+                <Button
+                  variant="ghost"
+                  className={cn("w-full justify-start gap-2 text-muted-foreground h-8 text-sm", isActive("/cookies-policy") && "bg-sidebar-accent text-sidebar-accent-foreground")}
+                >
+                  <Cookie className="h-3.5 w-3.5 flex-shrink-0" />
+                  <span className="truncate">Cookies Policy</span>
+                </Button>
+              </Link>
+            </div>
           </div>
         </ScrollArea>
       </aside>

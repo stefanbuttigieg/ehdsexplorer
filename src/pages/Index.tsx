@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useChapters } from "@/hooks/useChapters";
 import { useImplementingActs, getActStats } from "@/hooks/useImplementingActs";
+import { useDefinitions } from "@/hooks/useDefinitions";
 import Layout from "@/components/Layout";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
 import { RecitalsQuickExplorer } from "@/components/RecitalsQuickExplorer";
@@ -42,6 +43,7 @@ const Index = () => {
   const { getChapterProgress } = useReadingProgress();
   const { data: chapters, isLoading: chaptersLoading } = useChapters();
   const { data: implementingActs = [] } = useImplementingActs();
+  const { data: definitions = [] } = useDefinitions();
   const actStats = getActStats(implementingActs);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -161,7 +163,7 @@ const Index = () => {
                     <FileText className="h-8 w-8 text-primary" />
                     <div>
                       <p className="font-semibold">Definitions</p>
-                      <p className="text-sm text-muted-foreground">62 terms</p>
+                      <p className="text-sm text-muted-foreground">{definitions.length} terms</p>
                     </div>
                   </CardContent>
                 </Card>

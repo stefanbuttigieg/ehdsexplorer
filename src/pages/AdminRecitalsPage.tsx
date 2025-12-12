@@ -3,8 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Search, Edit, Save, X, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
+import MarkdownEditor from '@/components/MarkdownEditor';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -197,11 +197,10 @@ const AdminRecitalsPage = () => {
             <div className="space-y-4 mt-4">
               <div className="space-y-2">
                 <Label>Content</Label>
-                <Textarea
+                <MarkdownEditor
                   value={editedContent}
-                  onChange={(e) => setEditedContent(e.target.value)}
+                  onChange={setEditedContent}
                   rows={15}
-                  className="font-mono text-sm"
                 />
               </div>
               <div className="space-y-2">

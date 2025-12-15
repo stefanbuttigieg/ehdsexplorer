@@ -15,6 +15,7 @@ import { useAnnexes } from "@/hooks/useAnnexes";
 import { useChapters } from "@/hooks/useChapters";
 import { recitals } from "@/data/recitals";
 import { definitions } from "@/data/definitions";
+import { HighlightedText } from "@/components/HighlightedText";
 import Fuse from "fuse.js";
 
 interface SearchCommandProps {
@@ -221,9 +222,13 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
                 value={`chapter-${chapter.chapter_number}-${chapter.title}`}
                 onSelect={() => handleSelect(`/chapter/${chapter.chapter_number}`)}
               >
-                <Layers className="mr-2 h-4 w-4 text-primary" />
-                <span className="font-medium mr-2">Chapter {chapter.chapter_number}</span>
-                <span className="text-muted-foreground truncate">{chapter.title}</span>
+                <Layers className="mr-2 h-4 w-4 text-primary flex-shrink-0" />
+                <span className="font-medium mr-2 flex-shrink-0">Chapter {chapter.chapter_number}</span>
+                <HighlightedText 
+                  text={chapter.title} 
+                  query={query} 
+                  className="text-muted-foreground truncate"
+                />
               </CommandItem>
             ))}
           </CommandGroup>
@@ -236,10 +241,25 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
                 key={`art-${article.id}`}
                 value={`article-${article.id}-${article.title}`}
                 onSelect={() => handleSelect(`/article/${article.id}`)}
+                className="flex-col items-start gap-1"
               >
-                <FileText className="mr-2 h-4 w-4 text-primary" />
-                <span className="font-medium mr-2">Art. {article.id}</span>
-                <span className="text-muted-foreground truncate">{article.title}</span>
+                <div className="flex items-center w-full">
+                  <FileText className="mr-2 h-4 w-4 text-primary flex-shrink-0" />
+                  <span className="font-medium mr-2 flex-shrink-0">Art. {article.id}</span>
+                  <HighlightedText 
+                    text={article.title} 
+                    query={query} 
+                    className="text-muted-foreground truncate"
+                  />
+                </div>
+                {query.trim() && article.content && (
+                  <HighlightedText 
+                    text={article.content.replace(/[#*`]/g, '')} 
+                    query={query} 
+                    className="text-xs text-muted-foreground/70 pl-6 line-clamp-1"
+                    maxLength={80}
+                  />
+                )}
               </CommandItem>
             ))}
           </CommandGroup>
@@ -252,10 +272,25 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
                 key={`act-${act.id}`}
                 value={`act-${act.id}-${act.title}`}
                 onSelect={() => handleSelect(`/implementing-acts/${act.id}`)}
+                className="flex-col items-start gap-1"
               >
-                <ScrollText className="mr-2 h-4 w-4 text-secondary" />
-                <span className="font-medium mr-2">{act.articleReference}</span>
-                <span className="text-muted-foreground truncate">{act.title}</span>
+                <div className="flex items-center w-full">
+                  <ScrollText className="mr-2 h-4 w-4 text-secondary flex-shrink-0" />
+                  <span className="font-medium mr-2 flex-shrink-0">{act.articleReference}</span>
+                  <HighlightedText 
+                    text={act.title} 
+                    query={query} 
+                    className="text-muted-foreground truncate"
+                  />
+                </div>
+                {query.trim() && act.description && (
+                  <HighlightedText 
+                    text={act.description} 
+                    query={query} 
+                    className="text-xs text-muted-foreground/70 pl-6 line-clamp-1"
+                    maxLength={80}
+                  />
+                )}
               </CommandItem>
             ))}
           </CommandGroup>
@@ -268,10 +303,25 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
                 key={`annex-${annex.id}`}
                 value={`annex-${annex.id}-${annex.title}`}
                 onSelect={() => handleSelect(`/annex/${annex.id}`)}
+                className="flex-col items-start gap-1"
               >
-                <FileStack className="mr-2 h-4 w-4 text-primary" />
-                <span className="font-medium mr-2">Annex {annex.id}</span>
-                <span className="text-muted-foreground truncate">{annex.title}</span>
+                <div className="flex items-center w-full">
+                  <FileStack className="mr-2 h-4 w-4 text-primary flex-shrink-0" />
+                  <span className="font-medium mr-2 flex-shrink-0">Annex {annex.id}</span>
+                  <HighlightedText 
+                    text={annex.title} 
+                    query={query} 
+                    className="text-muted-foreground truncate"
+                  />
+                </div>
+                {query.trim() && annex.content && (
+                  <HighlightedText 
+                    text={annex.content.replace(/[#*`]/g, '')} 
+                    query={query} 
+                    className="text-xs text-muted-foreground/70 pl-6 line-clamp-1"
+                    maxLength={80}
+                  />
+                )}
               </CommandItem>
             ))}
           </CommandGroup>
@@ -285,9 +335,14 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
                 value={`recital-${recital.id}-${recital.content.substring(0, 50)}`}
                 onSelect={() => handleSelect(`/recital/${recital.id}`)}
               >
-                <Scale className="mr-2 h-4 w-4 text-secondary" />
-                <span className="font-medium mr-2">Recital {recital.id}</span>
-                <span className="text-muted-foreground truncate">{recital.content.substring(0, 60)}...</span>
+                <Scale className="mr-2 h-4 w-4 text-secondary flex-shrink-0" />
+                <span className="font-medium mr-2 flex-shrink-0">Recital {recital.id}</span>
+                <HighlightedText 
+                  text={recital.content} 
+                  query={query} 
+                  className="text-muted-foreground truncate"
+                  maxLength={60}
+                />
               </CommandItem>
             ))}
           </CommandGroup>
@@ -300,9 +355,24 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
                 key={`def-${idx}`}
                 value={`definition-${def.term}`}
                 onSelect={() => handleSelect("/definitions")}
+                className="flex-col items-start gap-1"
               >
-                <Book className="mr-2 h-4 w-4" />
-                <span className="font-medium">{def.term}</span>
+                <div className="flex items-center">
+                  <Book className="mr-2 h-4 w-4 flex-shrink-0" />
+                  <HighlightedText 
+                    text={def.term} 
+                    query={query} 
+                    className="font-medium"
+                  />
+                </div>
+                {query.trim() && def.definition && (
+                  <HighlightedText 
+                    text={def.definition} 
+                    query={query} 
+                    className="text-xs text-muted-foreground/70 pl-6 line-clamp-1"
+                    maxLength={80}
+                  />
+                )}
               </CommandItem>
             ))}
           </CommandGroup>

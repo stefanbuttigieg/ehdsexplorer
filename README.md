@@ -81,6 +81,13 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Recitals grid** (1-115) with content preview on hover
 - **Continue reading** section to resume where you left off
 
+### 📝 Footnotes System
+- **Inline footnote markers** in article and recital content (e.g., [^1], *, †)
+- **Clickable markers** that smooth-scroll to footnote with highlight effect
+- **Hover tooltips** showing footnote content preview
+- **Central management** via admin dashboard
+- **Per-article/recital footnotes** displayed at content bottom
+
 ### 🔐 Admin Backend
 - **Role-based access control** (Admin/Editor roles)
 - **Content management** for all content types:
@@ -90,7 +97,9 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
   - Joint Action Deliverables
   - Published Works
   - Notifications
+  - Footnotes (inline and attached)
 - **Markdown WYSIWYG editor** with live preview
+- **Bulk editing** with multi-select for recitals and articles
 - **Bulk import** functionality for JSON data
 - **User management** with email invitation system
 - **Maintenance mode** with custom messaging

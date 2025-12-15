@@ -22,7 +22,7 @@ interface KeyDatesGanttProps {
   dates: KeyDate[];
 }
 
-const categoryConfig: Record<KeyDateCategory, { label: string; color: string }> = {
+export const categoryConfig: Record<KeyDateCategory, { label: string; color: string }> = {
   "general": { label: "General", color: "bg-primary" },
   "primary-use": { label: "Primary Use", color: "bg-chart-1" },
   "ehr-systems": { label: "EHR Systems", color: "bg-chart-2" },

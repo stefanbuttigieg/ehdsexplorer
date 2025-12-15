@@ -7,10 +7,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Layout from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { usePageContent, useUpdatePageContent, OverviewContent } from '@/hooks/usePageContent';
+import { KeyDateCategory, categoryConfig } from '@/components/KeyDatesGantt';
 
 const AdminOverviewPage = () => {
   const { user, loading, isEditor } = useAuth();
@@ -62,10 +64,10 @@ const AdminOverviewPage = () => {
     setContent({ ...content, key_components: { ...content.key_components, items: newItems } });
   };
 
-  const updateDate = (idx: number, field: 'label' | 'date', value: string) => {
+  const updateDate = (idx: number, field: 'label' | 'date' | 'category', value: string) => {
     if (!content) return;
     const newDates = [...content.key_dates.dates];
-    newDates[idx] = { ...newDates[idx], [field]: value };
+    newDates[idx] = { ...newDates[idx], [field]: field === 'category' ? (value as KeyDateCategory) : value };
     setContent({ ...content, key_dates: { ...content.key_dates, dates: newDates } });
   };
 
@@ -75,7 +77,7 @@ const AdminOverviewPage = () => {
       ...content,
       key_dates: {
         ...content.key_dates,
-        dates: [...content.key_dates.dates, { label: '', date: '' }]
+        dates: [...content.key_dates.dates, { label: '', date: '', category: 'general' as KeyDateCategory }]
       }
     });
   };
@@ -203,7 +205,22 @@ const AdminOverviewPage = () => {
               {content.key_dates.dates.map((item, idx) => (
                 <div key={idx} className="flex items-center gap-2 p-3 bg-muted rounded-lg">
                   <Input placeholder="Label" value={item.label} onChange={(e) => updateDate(idx, 'label', e.target.value)} className="flex-1" />
-                  <Input placeholder="Date" value={item.date} onChange={(e) => updateDate(idx, 'date', e.target.value)} className="w-40" />
+                  <Input placeholder="Date (e.g. 26 March 2029)" value={item.date} onChange={(e) => updateDate(idx, 'date', e.target.value)} className="w-44" />
+                  <Select value={item.category || 'general'} onValueChange={(value) => updateDate(idx, 'category', value)}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue placeholder="Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(categoryConfig).map(([key, { label, color }]) => (
+                        <SelectItem key={key} value={key}>
+                          <div className="flex items-center gap-2">
+                            <div className={`w-3 h-3 rounded-full ${color}`} />
+                            {label}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <Button variant="ghost" size="icon" onClick={() => removeDate(idx)}>
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>

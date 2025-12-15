@@ -19,6 +19,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import PrintButton from "@/components/PrintButton";
 import FootnotesSection from "@/components/FootnotesSection";
+import ContentWithFootnotes from "@/components/ContentWithFootnotes";
 
 const ArticlePage = () => {
   const { id } = useParams();
@@ -103,9 +104,11 @@ const ArticlePage = () => {
         {/* Article Content */}
         <Card className="mb-8">
           <CardContent className="p-6">
-            <div className="article-content whitespace-pre-wrap">
-              {article.content}
-            </div>
+            <ContentWithFootnotes 
+              content={article.content} 
+              footnotes={footnotes} 
+              className="article-content"
+            />
             <FootnotesSection footnotes={footnotes} />
           </CardContent>
         </Card>

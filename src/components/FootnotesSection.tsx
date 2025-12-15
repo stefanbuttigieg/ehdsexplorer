@@ -14,7 +14,11 @@ const FootnotesSection = ({ footnotes }: FootnotesSectionProps) => {
       </h3>
       <div className="space-y-3">
         {footnotes.map((footnote) => (
-          <div key={footnote.id} className="flex gap-3 text-sm">
+          <div 
+            key={footnote.id} 
+            id={`footnote-${footnote.id}`}
+            className="flex gap-3 text-sm p-2 -mx-2 rounded transition-colors duration-500"
+          >
             <span className="font-mono text-primary shrink-0">{footnote.marker}</span>
             <p className="text-muted-foreground">{footnote.content}</p>
           </div>

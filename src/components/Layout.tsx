@@ -37,6 +37,7 @@ const Layout = ({ children }: LayoutProps) => {
     { path: "/", icon: Home, label: "Home" },
     { path: "/overview", icon: Book, label: "Overview" },
     { path: "/definitions", icon: FileText, label: "Definitions" },
+    { path: "/articles", icon: FileText, label: "Articles" },
     { path: "/recitals", icon: Scale, label: "Recitals" },
     { path: "/annexes", icon: Files, label: "Annexes" },
     { path: "/implementing-acts", icon: ListChecks, label: "Implementing Acts" },

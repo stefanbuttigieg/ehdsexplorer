@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Scale, Book, Layers, ScrollText, FileStack } from "lucide-react";
+import { FileText, Scale, Book, Layers, ScrollText, FileStack, ArrowRight } from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -375,6 +375,19 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
                 )}
               </CommandItem>
             ))}
+          </CommandGroup>
+        )}
+
+        {query.trim() && (
+          <CommandGroup>
+            <CommandItem
+              value="view-all-results"
+              onSelect={() => handleSelect(`/search?q=${encodeURIComponent(query)}`)}
+              className="justify-between"
+            >
+              <span className="font-medium">View all results</span>
+              <ArrowRight className="h-4 w-4 text-muted-foreground" />
+            </CommandItem>
           </CommandGroup>
         )}
       </CommandList>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Search, Edit, Save, X, ArrowLeft, CheckSquare, Square } from 'lucide-react';
+import { Search, Edit, Save, X, ArrowLeft, Plus, Trash2, StickyNote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -20,6 +21,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useFootnotes, useCreateFootnote, useDeleteFootnote } from '@/hooks/useFootnotes';
 
 interface DbRecital {
   id: number;
@@ -43,6 +45,12 @@ const AdminRecitalsPage = () => {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [showBulkEdit, setShowBulkEdit] = useState(false);
   const [bulkRelatedArticles, setBulkRelatedArticles] = useState('');
+  const [newFootnoteMarker, setNewFootnoteMarker] = useState('');
+  const [newFootnoteContent, setNewFootnoteContent] = useState('');
+
+  const { data: allFootnotes = [] } = useFootnotes();
+  const createFootnote = useCreateFootnote();
+  const deleteFootnote = useDeleteFootnote();
 
   const { data: recitals, isLoading } = useQuery({
     queryKey: ['admin-recitals'],
@@ -75,7 +83,14 @@ const AdminRecitalsPage = () => {
     setEditingRecital(recital);
     setEditedContent(recital.content);
     setEditedRelatedArticles(recital.related_articles?.join(', ') || '');
+    setNewFootnoteMarker('');
+    setNewFootnoteContent('');
   };
+
+  // Get footnotes for the currently editing recital
+  const recitalFootnotes = editingRecital 
+    ? allFootnotes.filter(fn => fn.recital_id === editingRecital.id)
+    : [];
 
   const handleSave = async () => {
     if (!editingRecital) return;
@@ -112,6 +127,33 @@ const AdminRecitalsPage = () => {
       });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleAddFootnote = async () => {
+    if (!editingRecital || !newFootnoteMarker || !newFootnoteContent) return;
+    try {
+      await createFootnote.mutateAsync({
+        marker: newFootnoteMarker,
+        content: newFootnoteContent,
+        article_id: null,
+        recital_id: editingRecital.id,
+      });
+      setNewFootnoteMarker('');
+      setNewFootnoteContent('');
+      toast({ title: 'Footnote added' });
+    } catch {
+      toast({ title: 'Error', description: 'Failed to add footnote', variant: 'destructive' });
+    }
+  };
+
+  const handleDeleteFootnote = async (id: string) => {
+    if (!confirm('Delete this footnote?')) return;
+    try {
+      await deleteFootnote.mutateAsync(id);
+      toast({ title: 'Footnote deleted' });
+    } catch {
+      toast({ title: 'Error', description: 'Failed to delete footnote', variant: 'destructive' });
     }
   };
 
@@ -296,7 +338,7 @@ const AdminRecitalsPage = () => {
                 <MarkdownEditor
                   value={editedContent}
                   onChange={setEditedContent}
-                  rows={15}
+                  rows={10}
                 />
               </div>
               <div className="space-y-2">
@@ -306,6 +348,61 @@ const AdminRecitalsPage = () => {
                   onChange={(e) => setEditedRelatedArticles(e.target.value)}
                   placeholder="e.g., 1, 2, 3"
                 />
+              </div>
+              
+              {/* Footnotes Section */}
+              <div className="space-y-3 pt-4 border-t">
+                <div className="flex items-center gap-2">
+                  <StickyNote className="h-4 w-4 text-muted-foreground" />
+                  <Label className="text-base font-medium">Footnotes ({recitalFootnotes.length})</Label>
+                </div>
+                
+                {recitalFootnotes.length > 0 && (
+                  <div className="space-y-2">
+                    {recitalFootnotes.map((fn) => (
+                      <div key={fn.id} className="flex items-start gap-2 p-2 bg-muted/50 rounded text-sm">
+                        <span className="font-mono text-primary shrink-0">{fn.marker}</span>
+                        <p className="flex-1 text-muted-foreground">{fn.content}</p>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleDeleteFootnote(fn.id)}
+                          className="shrink-0"
+                        >
+                          <Trash2 className="h-3 w-3 text-destructive" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <div className="grid gap-2">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Marker (e.g. [^1])"
+                      value={newFootnoteMarker}
+                      onChange={(e) => setNewFootnoteMarker(e.target.value)}
+                      className="w-32"
+                    />
+                    <Textarea
+                      placeholder="Footnote content..."
+                      value={newFootnoteContent}
+                      onChange={(e) => setNewFootnoteContent(e.target.value)}
+                      rows={2}
+                      className="flex-1"
+                    />
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleAddFootnote}
+                    disabled={!newFootnoteMarker || !newFootnoteContent || createFootnote.isPending}
+                    className="w-fit"
+                  >
+                    <Plus className="h-3 w-3 mr-1" />
+                    Add Footnote
+                  </Button>
+                </div>
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setEditingRecital(null)}>

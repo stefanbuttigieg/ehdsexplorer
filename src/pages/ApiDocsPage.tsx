@@ -114,7 +114,7 @@ const endpoints = [
   },
 ];
 
-const CopyButton = ({ text }: { text: string }) => {
+const CopyButton = ({ text, label }: { text: string; label?: string }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -122,6 +122,20 @@ const CopyButton = ({ text }: { text: string }) => {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  if (label) {
+    return (
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={handleCopy}
+        className="gap-2"
+      >
+        {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+        {copied ? "Copied!" : label}
+      </Button>
+    );
+  }
 
   return (
     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCopy}>
@@ -158,29 +172,68 @@ const ApiDocsPage = () => {
           </p>
         </div>
 
-        {/* Quick Start */}
-        <Card className="mb-8">
+        {/* Quick Start - Hero Section */}
+        <Card className="mb-8 border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Database className="h-5 w-5" />
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="text-xs">Public API</Badge>
+              <Badge variant="outline" className="text-xs">No Auth Required</Badge>
+            </div>
+            <CardTitle className="flex items-center gap-2 text-2xl mt-2">
+              <Database className="h-6 w-6" />
               Quick Start
             </CardTitle>
-            <CardDescription>
-              The API is publicly accessible without authentication. All responses include Schema.org metadata.
+            <CardDescription className="text-base">
+              Get started in seconds. Copy the base URL and start making requests.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <p className="text-sm font-medium mb-2">Base URL</p>
-              <CodeBlock code={API_BASE} />
+          <CardContent className="space-y-6">
+            {/* Prominent Base URL Section */}
+            <div className="p-4 rounded-lg bg-background border-2 border-dashed border-primary/30">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-semibold text-primary">Base URL</p>
+                <CopyButton text={API_BASE} label="Copy URL" />
+              </div>
+              <code className="block text-sm font-mono bg-muted p-3 rounded-md break-all">
+                {API_BASE}
+              </code>
             </div>
-            <div>
-              <p className="text-sm font-medium mb-2">Example Request</p>
-              <CodeBlock code={`curl "${API_BASE}?resource=articles&format=json"`} language="bash" />
+
+            {/* Quick Examples */}
+            <div className="grid gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge variant="outline" className="text-xs font-mono">GET</Badge>
+                  <p className="text-sm font-medium">Fetch all articles</p>
+                </div>
+                <CodeBlock code={`curl "${API_BASE}?resource=articles"`} language="bash" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge variant="outline" className="text-xs font-mono">GET</Badge>
+                  <p className="text-sm font-medium">Fetch a specific article</p>
+                </div>
+                <CodeBlock code={`curl "${API_BASE}?resource=articles&id=42"`} language="bash" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge variant="outline" className="text-xs font-mono">GET</Badge>
+                  <p className="text-sm font-medium">Export as CSV</p>
+                </div>
+                <CodeBlock code={`curl "${API_BASE}?resource=definitions&format=csv"`} language="bash" />
+              </div>
             </div>
+
+            {/* Available Resources */}
             <div>
-              <p className="text-sm font-medium mb-2">Get a specific article</p>
-              <CodeBlock code={`curl "${API_BASE}?resource=articles&id=42"`} language="bash" />
+              <p className="text-sm font-medium mb-2">Available Resources</p>
+              <div className="flex flex-wrap gap-2">
+                {["articles", "recitals", "definitions", "chapters", "implementing-acts", "metadata"].map((resource) => (
+                  <Badge key={resource} variant="secondary" className="font-mono text-xs">
+                    {resource}
+                  </Badge>
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>

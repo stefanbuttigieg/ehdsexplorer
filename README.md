@@ -81,6 +81,12 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Recitals grid** (1-115) with content preview on hover
 - **Continue reading** section to resume where you left off
 
+### 🎮 Learning Tools
+- **Match Game** - Educational card-matching game to learn EHDS terminology
+- **Selectable difficulty** - 4, 6, or 8 term-definition pairs
+- **Timer tracking** and accuracy metrics
+- **Engaging way** to memorize key definitions
+
 ### 📝 Footnotes System
 - **Inline footnote markers** in article and recital content (e.g., [^1], *, †)
 - **Clickable markers** that smooth-scroll to footnote with highlight effect

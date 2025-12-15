@@ -70,7 +70,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Sending test email to ${recipientEmail}`);
 
     const emailResponse = await resend.emails.send({
-      from: "EHDS Explorer <onboarding@resend.dev>",
+      from: "EHDS Explorer <noreply@ehdsexplorer.eu>",
       to: [recipientEmail],
       subject: "EHDS Explorer - Email Test Successful",
       html: `

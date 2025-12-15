@@ -14,6 +14,8 @@ import { ReportIssueButton } from "@/components/ReportIssueButton";
 import { SearchCommand } from "@/components/SearchCommand";
 import { Skeleton } from "@/components/ui/skeleton";
 import { NotificationsBanner } from "@/components/NotificationsBanner";
+import { PublicTour, usePublicTour } from "@/components/PublicTour";
+import { TourButton } from "@/components/TourButton";
 
 interface LayoutProps {
   children: ReactNode;
@@ -26,6 +28,7 @@ const Layout = ({ children }: LayoutProps) => {
   const [searchOpen, setSearchOpen] = useState(false);
   const location = useLocation();
   const { data: chapters, isLoading: chaptersLoading } = useChapters();
+  const { isTourOpen, startTour, completeTour, closeTour } = usePublicTour();
 
   useKeyboardShortcuts({
     onHelp: () => setShortcutsOpen(true),
@@ -53,7 +56,8 @@ const Layout = ({ children }: LayoutProps) => {
           <Menu className="h-5 w-5" />
         </Button>
         <Link to="/" className="font-serif font-bold text-lg">EHDS Explorer</Link>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1" data-tour="accessibility">
+          <TourButton onClick={startTour} />
           <ReportIssueButton />
           <AccessibilityControls />
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSearchOpen(true)}>
@@ -75,7 +79,8 @@ const Layout = ({ children }: LayoutProps) => {
         <div className="h-14 border-b border-sidebar-border flex items-center justify-between px-4">
           <Link to="/" className="font-serif font-bold text-lg text-sidebar-foreground">EHDS Explorer</Link>
           <div className="flex items-center gap-1">
-            <div className="hidden md:flex items-center gap-1">
+            <div className="hidden md:flex items-center gap-1" data-tour="accessibility">
+              <TourButton onClick={startTour} />
               <ReportIssueButton />
               <AccessibilityControls />
             </div>
@@ -88,27 +93,29 @@ const Layout = ({ children }: LayoutProps) => {
         <ScrollArea className="h-[calc(100vh-3.5rem)]">
           <div className="p-4 space-y-2 overflow-hidden">
             {/* Search */}
-            <Button variant="outline" className="w-full justify-start gap-2 mb-4 overflow-hidden" onClick={() => setSearchOpen(true)}>
+            <Button data-tour="sidebar-search" variant="outline" className="w-full justify-start gap-2 mb-4 overflow-hidden" onClick={() => setSearchOpen(true)}>
               <Search className="h-4 w-4 flex-shrink-0" />
               <span className="truncate">Search...</span>
               <kbd className="ml-auto text-xs px-1.5 py-0.5 bg-muted rounded">/</kbd>
             </Button>
 
             {/* Nav Items */}
-            {navItems.map((item) => (
-              <Link key={item.path} to={item.path} onClick={() => setSidebarOpen(false)}>
-                <Button
-                  variant={isActive(item.path) ? "secondary" : "ghost"}
-                  className={cn("w-full justify-start gap-2 overflow-hidden", isActive(item.path) && "bg-sidebar-accent text-sidebar-accent-foreground")}
-                >
-                  <item.icon className="h-4 w-4 flex-shrink-0" />
-                  <span className="truncate">{item.label}</span>
-                </Button>
-              </Link>
-            ))}
+            <div data-tour="sidebar-nav">
+              {navItems.map((item) => (
+                <Link key={item.path} to={item.path} onClick={() => setSidebarOpen(false)}>
+                  <Button
+                    variant={isActive(item.path) ? "secondary" : "ghost"}
+                    className={cn("w-full justify-start gap-2 overflow-hidden", isActive(item.path) && "bg-sidebar-accent text-sidebar-accent-foreground")}
+                  >
+                    <item.icon className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">{item.label}</span>
+                  </Button>
+                </Link>
+              ))}
+            </div>
 
             {/* Chapters Accordion */}
-            <Collapsible open={chaptersOpen} onOpenChange={setChaptersOpen} className="mt-4">
+            <Collapsible open={chaptersOpen} onOpenChange={setChaptersOpen} className="mt-4" data-tour="sidebar-chapters">
               <CollapsibleTrigger asChild>
                 <Button variant="ghost" className="w-full justify-between">
                   <span className="font-semibold">Chapters</span>
@@ -147,11 +154,15 @@ const Layout = ({ children }: LayoutProps) => {
               variant="ghost"
               className="w-full justify-start gap-2 mt-4 text-muted-foreground"
               onClick={() => setShortcutsOpen(true)}
+              data-tour="keyboard-shortcuts"
             >
               <Keyboard className="h-4 w-4 flex-shrink-0" />
               <span className="truncate">Keyboard shortcuts</span>
               <kbd className="ml-auto text-xs px-1.5 py-0.5 bg-muted rounded">?</kbd>
             </Button>
+            
+            {/* Take a Tour Button */}
+            <TourButton onClick={startTour} variant="full" />
 
             {/* GitHub Link */}
             <a
@@ -218,6 +229,9 @@ const Layout = ({ children }: LayoutProps) => {
 
       {/* Search Command Palette */}
       <SearchCommand open={searchOpen} onOpenChange={setSearchOpen} />
+
+      {/* Public Tour */}
+      <PublicTour run={isTourOpen} onComplete={completeTour} onClose={closeTour} />
 
       {/* Main Content */}
       <main className="flex-1 pt-14 md:pt-0">

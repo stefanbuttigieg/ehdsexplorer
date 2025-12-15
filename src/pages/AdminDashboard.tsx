@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote } from 'lucide-react';
+import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,7 @@ import Layout from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useSiteSettings, useUpdateSiteSettings } from '@/hooks/useSiteSettings';
+import { AdminTour, useAdminTour } from '@/components/AdminTour';
 
 const AdminDashboard = () => {
   const { user, loading, isEditor, isAdmin, signOut } = useAuth();
@@ -19,6 +20,7 @@ const AdminDashboard = () => {
   const { data: settings } = useSiteSettings();
   const updateSettings = useUpdateSiteSettings();
   const [maintenanceMessage, setMaintenanceMessage] = useState('');
+  const { isTourOpen, startTour, completeTour, closeTour } = useAdminTour();
 
   useEffect(() => {
     if (settings?.maintenance_message) {
@@ -143,6 +145,10 @@ const AdminDashboard = () => {
             </p>
           </div>
           <div className="flex items-center gap-4">
+            <Button variant="outline" size="sm" onClick={startTour}>
+              <HelpCircle className="h-4 w-4 mr-2" />
+              Take Tour
+            </Button>
             <div className="text-right">
               <p className="text-sm font-medium">{user.email}</p>
               <Badge variant={isAdmin ? 'default' : 'secondary'}>
@@ -155,24 +161,31 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {contentSections.map((section) => (
-            <Link key={section.title} to={section.href}>
-              <Card className="hover:border-primary transition-colors h-full">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <section.icon className="h-8 w-8 text-primary" />
-                    {section.count && <Badge variant="outline">{section.count} items</Badge>}
-                  </div>
-                  <CardTitle className="mt-4">{section.title}</CardTitle>
-                  <CardDescription>{section.description}</CardDescription>
-                </CardHeader>
-              </Card>
-            </Link>
-          ))}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8" data-tour="admin-content-sections">
+          {contentSections.map((section) => {
+            // Add specific data-tour attributes for key sections
+            const tourAttr = section.title === 'Articles' ? { 'data-tour': 'admin-articles' } :
+                           section.title === 'Recitals' ? { 'data-tour': 'admin-recitals' } :
+                           section.title === 'Implementing Acts' ? { 'data-tour': 'admin-implementing-acts' } : {};
+            
+            return (
+              <Link key={section.title} to={section.href} {...tourAttr}>
+                <Card className="hover:border-primary transition-colors h-full">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <section.icon className="h-8 w-8 text-primary" />
+                      {section.count && <Badge variant="outline">{section.count} items</Badge>}
+                    </div>
+                    <CardTitle className="mt-4">{section.title}</CardTitle>
+                    <CardDescription>{section.description}</CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
+            );
+          })}
 
           {isAdmin && (
-            <Link to="/admin/users">
+            <Link to="/admin/users" data-tour="admin-user-management">
               <Card className="hover:border-primary transition-colors h-full border-dashed">
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -188,7 +201,7 @@ const AdminDashboard = () => {
         </div>
 
         {isAdmin && (
-          <Card className="mb-8">
+          <Card className="mb-8" data-tour="admin-maintenance">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <Construction className="h-5 w-5 text-primary" />
@@ -283,7 +296,7 @@ const AdminDashboard = () => {
           </Card>
         )}
 
-        <Card>
+        <Card data-tour="admin-quick-actions">
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
@@ -305,6 +318,9 @@ const AdminDashboard = () => {
             </Link>
           </CardContent>
         </Card>
+
+        {/* Admin Tour */}
+        <AdminTour run={isTourOpen} onComplete={completeTour} onClose={closeTour} />
       </div>
     </Layout>
   );

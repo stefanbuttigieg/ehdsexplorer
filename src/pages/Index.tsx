@@ -172,7 +172,7 @@ const Index = () => {
                   </CardContent>
                 </Card>
               </Link>
-              <Link to="/implementing-acts">
+              <Link to="/implementing-acts" data-tour="implementing-acts">
                 <Card className="hover:border-primary transition-colors cursor-pointer h-full">
                   <CardContent className="p-4 flex items-center gap-3">
                     <ListChecks className="h-8 w-8 text-secondary" />
@@ -252,7 +252,7 @@ const Index = () => {
           </div>
         </section>
         {/* Articles Quick Explorer */}
-        <section className="py-12 px-4 border-t border-border bg-muted/30">
+        <section className="py-12 px-4 border-t border-border bg-muted/30" data-tour="quick-explorers">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold font-serif">Articles</h2>

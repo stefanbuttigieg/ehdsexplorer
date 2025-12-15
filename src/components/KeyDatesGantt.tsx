@@ -5,14 +5,34 @@ import { Download, Calendar, FileSpreadsheet, ZoomIn, ZoomOut, RotateCcw } from 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 
+export type KeyDateCategory = 
+  | "general"
+  | "primary-use"
+  | "ehr-systems"
+  | "secondary-use"
+  | "cross-border";
+
 interface KeyDate {
   label: string;
   date: string;
+  category?: KeyDateCategory;
 }
 
 interface KeyDatesGanttProps {
   dates: KeyDate[];
 }
+
+const categoryConfig: Record<KeyDateCategory, { label: string; color: string }> = {
+  "general": { label: "General", color: "bg-primary" },
+  "primary-use": { label: "Primary Use", color: "bg-chart-1" },
+  "ehr-systems": { label: "EHR Systems", color: "bg-chart-2" },
+  "secondary-use": { label: "Secondary Use", color: "bg-chart-3" },
+  "cross-border": { label: "Cross-Border", color: "bg-chart-4" },
+};
+
+const getCategoryColor = (category?: KeyDateCategory): string => {
+  return category ? categoryConfig[category]?.color || "bg-primary" : "bg-primary";
+};
 
 const parseDate = (dateStr: string): Date => {
   const parts = dateStr.split(" ");
@@ -43,8 +63,8 @@ export const KeyDatesGantt = ({ dates }: KeyDatesGanttProps) => {
   })).sort((a, b) => a.parsed.getTime() - b.parsed.getTime());
 
   const minDate = sortedDates[0]?.parsed || new Date();
-  // Extend to 2033
-  const fixedMaxDate = new Date(2033, 11, 31);
+  // Extend to 2040
+  const fixedMaxDate = new Date(2040, 11, 31);
   
   // Add some padding to the start
   const paddedMin = new Date(minDate.getTime() - (30 * 24 * 60 * 60 * 1000)); // 30 days padding
@@ -166,13 +186,7 @@ END:VCALENDAR`;
     toast.success("JSON file downloaded!");
   };
 
-  const colors = [
-    "bg-primary",
-    "bg-chart-1",
-    "bg-chart-2",
-    "bg-chart-3",
-    "bg-chart-4"
-  ];
+  // Category colors are now used instead of cycling colors
 
   return (
     <div className="space-y-6">
@@ -260,7 +274,7 @@ END:VCALENDAR`;
             {sortedDates.map((item, index) => (
               <div
                 key={index}
-                className={`absolute w-4 h-4 rounded-full -top-0.5 transform -translate-x-1/2 transition-all duration-200 cursor-pointer border-2 border-background ${colors[index % colors.length]} ${hoveredIndex === index ? 'scale-150 ring-2 ring-primary/50' : ''}`}
+                className={`absolute w-4 h-4 rounded-full -top-0.5 transform -translate-x-1/2 transition-all duration-200 cursor-pointer border-2 border-background ${getCategoryColor(item.category)} ${hoveredIndex === index ? 'scale-150 ring-2 ring-primary/50' : ''}`}
                 style={{ left: `${getPosition(item.parsed)}%` }}
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
@@ -283,7 +297,7 @@ END:VCALENDAR`;
                       onMouseLeave={() => setHoveredIndex(null)}
                     >
                       <div 
-                        className={`absolute h-full rounded-r-lg transition-all duration-300 ${colors[index % colors.length]} ${isHovered ? 'opacity-100' : 'opacity-70'}`}
+                        className={`absolute h-full rounded-r-lg transition-all duration-300 ${getCategoryColor(item.category)} ${isHovered ? 'opacity-100' : 'opacity-70'}`}
                         style={{ 
                           left: 0, 
                           width: `${position}%`,
@@ -315,12 +329,23 @@ END:VCALENDAR`;
         </div>
       </div>
 
+      {/* Category Legend */}
+      <div className="flex flex-wrap gap-4 mb-4">
+        {Object.entries(categoryConfig).map(([key, { label, color }]) => (
+          <div key={key} className="flex items-center gap-2">
+            <div className={`w-3 h-3 rounded-full ${color}`} />
+            <span className="text-sm text-muted-foreground">{label}</span>
+          </div>
+        ))}
+      </div>
+
       {/* Legend / Table */}
       <div className="border border-border rounded-lg overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-muted/50">
             <tr>
               <th className="text-left px-4 py-3 font-medium">Milestone</th>
+              <th className="text-left px-4 py-3 font-medium">Category</th>
               <th className="text-left px-4 py-3 font-medium">Date</th>
             </tr>
           </thead>
@@ -334,9 +359,12 @@ END:VCALENDAR`;
               >
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <div className={`w-3 h-3 rounded-full flex-shrink-0 ${colors[index % colors.length]}`} />
+                    <div className={`w-3 h-3 rounded-full flex-shrink-0 ${getCategoryColor(item.category)}`} />
                     <span>{item.label}</span>
                   </div>
+                </td>
+                <td className="px-4 py-3 text-muted-foreground">
+                  {item.category ? categoryConfig[item.category]?.label : 'General'}
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">{item.date}</td>
               </tr>

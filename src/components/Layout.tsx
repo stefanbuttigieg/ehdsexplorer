@@ -16,6 +16,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { NotificationsBanner } from "@/components/NotificationsBanner";
 import { PublicTour, usePublicTour } from "@/components/PublicTour";
 import { TourButton } from "@/components/TourButton";
+import { ShareTextButton } from "@/components/ShareTextButton";
+import { useTextHighlight } from "@/hooks/useTextHighlight";
 
 interface LayoutProps {
   children: ReactNode;
@@ -29,6 +31,9 @@ const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
   const { data: chapters, isLoading: chaptersLoading } = useChapters();
   const { isTourOpen, startTour, completeTour, closeTour } = usePublicTour();
+  
+  // Initialize text highlight hook for URL-based highlighting
+  useTextHighlight();
 
   useKeyboardShortcuts({
     onHelp: () => setShortcutsOpen(true),
@@ -242,6 +247,9 @@ const Layout = ({ children }: LayoutProps) => {
           {children}
         </div>
       </main>
+
+      {/* Share Text Button - appears when user selects text */}
+      <ShareTextButton />
     </div>
   );
 };

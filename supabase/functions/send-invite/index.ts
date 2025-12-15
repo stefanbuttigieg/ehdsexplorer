@@ -108,7 +108,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     try {
       const emailResponse = await resend.emails.send({
-        from: "EHDS Explorer <onboarding@resend.dev>",
+        from: "EHDS Explorer <noreply@ehdsexplorer.eu>",
         to: [email],
         subject: "You've been invited to EHDS Explorer Admin",
         html: `

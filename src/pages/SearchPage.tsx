@@ -14,6 +14,7 @@ import { recitals } from "@/data/recitals";
 import { definitions } from "@/data/definitions";
 import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { HighlightedText } from "@/components/HighlightedText";
 import Fuse from "fuse.js";
 
 // Helper functions for Roman numerals
@@ -242,8 +243,12 @@ const SearchPage = () => {
                         <Layers className="h-4 w-4 text-primary" />
                         <Badge variant="outline">Chapter {chapter.chapter_number}</Badge>
                       </div>
-                      <h3 className="font-medium">{chapter.title}</h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{chapter.description}</p>
+                      <h3 className="font-medium">
+                        <HighlightedText text={chapter.title} query={query} />
+                      </h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                        <HighlightedText text={chapter.description || ''} query={query} maxLength={200} />
+                      </p>
                     </CardContent>
                   </Card>
                 </Link>
@@ -257,8 +262,12 @@ const SearchPage = () => {
                         <FileText className="h-4 w-4 text-primary" />
                         <Badge variant="outline">Article {article.id}</Badge>
                       </div>
-                      <h3 className="font-medium">{article.title}</h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{article.content.substring(0, 200)}...</p>
+                      <h3 className="font-medium">
+                        <HighlightedText text={article.title} query={query} />
+                      </h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                        <HighlightedText text={article.content.replace(/[#*`]/g, '')} query={query} maxLength={200} />
+                      </p>
                     </CardContent>
                   </Card>
                 </Link>
@@ -273,8 +282,12 @@ const SearchPage = () => {
                         <Badge variant="outline">{act.articleReference}</Badge>
                         <Badge variant="secondary" className="text-xs">{act.type}</Badge>
                       </div>
-                      <h3 className="font-medium">{act.title}</h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{act.description}</p>
+                      <h3 className="font-medium">
+                        <HighlightedText text={act.title} query={query} />
+                      </h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                        <HighlightedText text={act.description} query={query} maxLength={200} />
+                      </p>
                     </CardContent>
                   </Card>
                 </Link>
@@ -288,8 +301,12 @@ const SearchPage = () => {
                         <FileStack className="h-4 w-4 text-primary" />
                         <Badge variant="outline">Annex {annex.id}</Badge>
                       </div>
-                      <h3 className="font-medium">{annex.title}</h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{annex.content.substring(0, 200)}...</p>
+                      <h3 className="font-medium">
+                        <HighlightedText text={annex.title} query={query} />
+                      </h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                        <HighlightedText text={annex.content.replace(/[#*`]/g, '')} query={query} maxLength={200} />
+                      </p>
                     </CardContent>
                   </Card>
                 </Link>
@@ -303,7 +320,9 @@ const SearchPage = () => {
                         <Scale className="h-4 w-4 text-secondary" />
                         <Badge variant="outline">Recital {recital.id}</Badge>
                       </div>
-                      <p className="text-sm text-muted-foreground line-clamp-3">{recital.content}</p>
+                      <p className="text-sm text-muted-foreground line-clamp-3">
+                        <HighlightedText text={recital.content} query={query} maxLength={250} />
+                      </p>
                     </CardContent>
                   </Card>
                 </Link>
@@ -317,8 +336,12 @@ const SearchPage = () => {
                         <Book className="h-4 w-4 text-accent-foreground" />
                         <Badge variant="outline">{def.articleReference}</Badge>
                       </div>
-                      <h3 className="font-medium">{def.term}</h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{def.definition}</p>
+                      <h3 className="font-medium">
+                        <HighlightedText text={def.term} query={query} />
+                      </h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                        <HighlightedText text={def.definition} query={query} maxLength={200} />
+                      </p>
                     </CardContent>
                   </Card>
                 </Link>

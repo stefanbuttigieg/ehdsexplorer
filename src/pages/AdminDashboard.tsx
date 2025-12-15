@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote, HelpCircle } from 'lucide-react';
+import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote, HelpCircle, BookOpenCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -314,6 +314,12 @@ const AdminDashboard = () => {
               <Button variant="secondary">
                 <Upload className="h-4 w-4 mr-2" />
                 Bulk Import
+              </Button>
+            </Link>
+            <Link to="/admin/help">
+              <Button variant="outline">
+                <BookOpenCheck className="h-4 w-4 mr-2" />
+                Help Center
               </Button>
             </Link>
           </CardContent>

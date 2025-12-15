@@ -2,39 +2,83 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Content-Type": "application/json",
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Cache-Control": "public, max-age=300", // 5 min cache for public data
 };
 
+// Allowed resources - whitelist approach
+const ALLOWED_RESOURCES = ["articles", "recitals", "definitions", "chapters", "implementing-acts", "metadata"];
+const ALLOWED_FORMATS = ["json", "csv"];
+
+// Validate and sanitize ID parameter
+function validateId(id: string | null): number | null {
+  if (!id) return null;
+  const parsed = parseInt(id, 10);
+  if (isNaN(parsed) || parsed < 1 || parsed > 10000) return null;
+  return parsed;
+}
+
 Deno.serve(async (req) => {
-  // Handle CORS preflight
+  // Only allow GET requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+  
+  if (req.method !== "GET") {
+    return new Response(
+      JSON.stringify({ error: "Method not allowed" }),
+      { status: 405, headers: corsHeaders }
+    );
+  }
 
   try {
+    // Use service role for controlled data access - bypasses RLS but we explicitly select only public columns
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     const url = new URL(req.url);
     const resource = url.searchParams.get("resource");
     const format = url.searchParams.get("format") || "json";
     const id = url.searchParams.get("id");
 
-    console.log(`API request: resource=${resource}, format=${format}, id=${id}`);
+    // Validate resource parameter
+    if (resource && !ALLOWED_RESOURCES.includes(resource)) {
+      return new Response(
+        JSON.stringify({ 
+          error: "Invalid resource",
+          allowedResources: ALLOWED_RESOURCES 
+        }),
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    // Validate format parameter
+    if (!ALLOWED_FORMATS.includes(format)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid format. Use 'json' or 'csv'" }),
+        { status: 400, headers: corsHeaders }
+      );
+    }
+
+    // Validate ID if provided
+    const validatedId = validateId(id);
+
+    console.log(`API request: resource=${resource}, format=${format}, id=${validatedId}`);
 
     let data: any = null;
     let error: any = null;
 
     switch (resource) {
       case "articles":
-        if (id) {
+        if (validatedId) {
           const result = await supabase
             .from("articles")
             .select("article_number, title, content, chapter_id, section_id")
-            .eq("article_number", parseInt(id))
+            .eq("article_number", validatedId)
             .single();
           data = result.data;
           error = result.error;
@@ -49,11 +93,11 @@ Deno.serve(async (req) => {
         break;
 
       case "recitals":
-        if (id) {
+        if (validatedId) {
           const result = await supabase
             .from("recitals")
             .select("recital_number, content, related_articles")
-            .eq("recital_number", parseInt(id))
+            .eq("recital_number", validatedId)
             .single();
           data = result.data;
           error = result.error;
@@ -133,9 +177,10 @@ Deno.serve(async (req) => {
     }
 
     if (error) {
+      // Log internally but don't expose details to client
       console.error("Database error:", error);
       return new Response(
-        JSON.stringify({ error: error.message }),
+        JSON.stringify({ error: "Unable to retrieve data" }),
         { status: 500, headers: corsHeaders }
       );
     }

@@ -15,6 +15,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2025-12-15
+
+### Added
+
+#### Key Dates Gantt Chart
+- Interactive Gantt chart visualization for key EHDS dates
+- Zoom controls (1x-4x) for better timeline navigation
+- Timeline extended to 2033 for long-term planning
+- Export functionality to ICS (calendar), CSV (spreadsheet), and JSON formats
+- Hover interactions with milestone highlighting
+- Color-coded milestones with chart color palette
+
+#### Content Landing Pages
+- New Articles landing page (/articles) with search functionality
+- Search articles by number, title, or content
+- Recitals page now includes search functionality
+- Filter recitals by number or content
+
+#### UI Improvements
+- Chapter numbers displayed as Roman numerals in sidebar navigation
+- Added chart color tokens to design system (chart-1 through chart-5)
+
+### Fixed
+- Fixed uncolored date markers in Gantt chart after first milestone
+- Added missing chart color definitions to Tailwind config and CSS
+
+---
+
 ## [1.0.0] - 2024-12-12
 
 ### Added

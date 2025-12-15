@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText, Accessibility } from "lucide-react";
+import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText, Accessibility, Code } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toRoman } from "@/lib/romanNumerals";
@@ -169,21 +169,32 @@ const Layout = ({ children }: LayoutProps) => {
             {/* Take a Tour Button */}
             <TourButton onClick={startTour} variant="full" />
 
-            {/* GitHub Link */}
-            <a
-              href="https://github.com/stefanbuttigieg/ehdsexplorer"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block"
-            >
-              <Button
-                variant="ghost"
-                className="w-full justify-start gap-2 text-muted-foreground"
+            {/* Developer Links */}
+            <div className="pt-2 space-y-1">
+              <Link to="/api" onClick={() => setSidebarOpen(false)}>
+                <Button
+                  variant="ghost"
+                  className={cn("w-full justify-start gap-2 text-muted-foreground", isActive("/api") && "bg-sidebar-accent text-sidebar-accent-foreground")}
+                >
+                  <Code className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">API Documentation</span>
+                </Button>
+              </Link>
+              <a
+                href="https://github.com/stefanbuttigieg/ehdsexplorer"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block"
               >
-                <Github className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">GitHub</span>
-              </Button>
-            </a>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-2 text-muted-foreground"
+                >
+                  <Github className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">GitHub</span>
+                </Button>
+              </a>
+            </div>
 
             {/* Legal Links */}
             <div className="pt-4 mt-4 border-t border-sidebar-border">

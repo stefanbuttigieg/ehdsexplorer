@@ -133,6 +133,39 @@ export type Database = {
         }
         Relationships: []
       }
+      email_templates: {
+        Row: {
+          available_variables: string[]
+          body_html: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          available_variables?: string[]
+          body_html: string
+          created_at?: string
+          description?: string | null
+          id: string
+          name: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          available_variables?: string[]
+          body_html?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       footnotes: {
         Row: {
           article_id: number | null

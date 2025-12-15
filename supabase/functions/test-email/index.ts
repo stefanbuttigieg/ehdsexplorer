@@ -10,6 +10,23 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// Default template if database fetch fails
+const defaultTemplate = {
+  subject: "EHDS Explorer - Email Test Successful",
+  body_html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <h1 style="color: #22c55e;">✓ Email Test Successful</h1>
+  <p>Hello {{user_email}},</p>
+  <p>This is a test email from EHDS Explorer to verify that email delivery is working correctly.</p>
+  <div style="background-color: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px; padding: 16px; margin: 20px 0;">
+    <p style="margin: 0; color: #166534;"><strong>Email Configuration Status:</strong> Working</p>
+    <p style="margin: 8px 0 0 0; color: #166534;"><strong>Sent at:</strong> {{sent_at}}</p>
+  </div>
+  <p>Your Resend integration is configured correctly and emails are being delivered.</p>
+  <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+  <p style="color: #999; font-size: 12px;">This is an automated test email from EHDS Explorer.</p>
+</div>`,
+};
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -69,36 +86,36 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Sending test email to ${recipientEmail}`);
 
+    // Fetch email template from database
+    let template = defaultTemplate;
+    try {
+      const { data: templateData, error: templateError } = await supabaseAdmin
+        .from("email_templates")
+        .select("subject, body_html")
+        .eq("id", "test-email")
+        .single();
+
+      if (!templateError && templateData) {
+        template = templateData;
+        console.log("Using custom email template from database");
+      } else {
+        console.log("Using default email template");
+      }
+    } catch (err) {
+      console.log("Error fetching template, using default:", err);
+    }
+
+    // Replace template variables
+    const sentAt = new Date().toLocaleString();
+    let emailHtml = template.body_html
+      .replace(/\{\{user_email\}\}/g, recipientEmail)
+      .replace(/\{\{sent_at\}\}/g, sentAt);
+
     const emailResponse = await resend.emails.send({
       from: "EHDS Explorer <noreply@ehdsexplorer.eu>",
       to: [recipientEmail],
-      subject: "EHDS Explorer - Email Test Successful",
-      html: `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          </head>
-          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 24px;">✓ Email Test Successful</h1>
-            </div>
-            <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb; border-top: none;">
-              <p style="color: #4b5563;">
-                This is a test email from <strong>EHDS Explorer</strong>. If you're reading this, email delivery is working correctly!
-              </p>
-              <p style="color: #6b7280; font-size: 14px;">
-                Sent at: ${new Date().toISOString()}
-              </p>
-              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
-              <p style="color: #9ca3af; font-size: 12px; margin-bottom: 0;">
-                This test email was triggered from the EHDS Explorer admin dashboard.
-              </p>
-            </div>
-          </body>
-        </html>
-      `,
+      subject: template.subject,
+      html: emailHtml,
     });
 
     console.log("Email API response:", emailResponse);

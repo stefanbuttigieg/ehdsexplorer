@@ -8,6 +8,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from "@/components/ui/command";
 import { useArticles } from "@/hooks/useArticles";
 import { useImplementingActs } from "@/hooks/useImplementingActs";
@@ -379,16 +380,22 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
         )}
 
         {query.trim() && (
-          <CommandGroup>
-            <CommandItem
-              value="view-all-results"
-              onSelect={() => handleSelect(`/search?q=${encodeURIComponent(query)}`)}
-              className="justify-between"
-            >
-              <span className="font-medium">View all results</span>
-              <ArrowRight className="h-4 w-4 text-muted-foreground" />
-            </CommandItem>
-          </CommandGroup>
+          <>
+            <CommandSeparator />
+            <CommandGroup>
+              <CommandItem
+                value="view-all-results"
+                onSelect={() => handleSelect(`/search?q=${encodeURIComponent(query)}`)}
+                className="justify-between bg-muted/50"
+              >
+                <span className="font-medium">View all results</span>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <span className="text-xs">Full page</span>
+                  <ArrowRight className="h-4 w-4" />
+                </div>
+              </CommandItem>
+            </CommandGroup>
+          </>
         )}
       </CommandList>
     </CommandDialog>

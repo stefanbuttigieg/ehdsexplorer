@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Scale, Book, Layers, ScrollText, FileStack, ArrowRight } from "lucide-react";
+import { FileText, Scale, Book, Layers, ScrollText, FileStack, ArrowRight, Clock, X, Trash2 } from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -10,6 +10,7 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
+import { Button } from "@/components/ui/button";
 import { useArticles } from "@/hooks/useArticles";
 import { useImplementingActs } from "@/hooks/useImplementingActs";
 import { useAnnexes } from "@/hooks/useAnnexes";
@@ -48,13 +49,74 @@ const numberToRoman = (num: number): string => {
   return result;
 };
 
+const RECENT_SEARCHES_KEY = "ehds-recent-searches";
+const MAX_RECENT_SEARCHES = 5;
+
+const getRecentSearches = (): string[] => {
+  try {
+    const stored = localStorage.getItem(RECENT_SEARCHES_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveRecentSearch = (query: string) => {
+  try {
+    const recent = getRecentSearches();
+    const filtered = recent.filter(s => s.toLowerCase() !== query.toLowerCase());
+    const updated = [query, ...filtered].slice(0, MAX_RECENT_SEARCHES);
+    localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
+  } catch {
+    // Ignore localStorage errors
+  }
+};
+
+const removeRecentSearch = (query: string) => {
+  try {
+    const recent = getRecentSearches();
+    const updated = recent.filter(s => s.toLowerCase() !== query.toLowerCase());
+    localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
+  } catch {
+    // Ignore localStorage errors
+  }
+};
+
+const clearAllRecentSearches = () => {
+  try {
+    localStorage.removeItem(RECENT_SEARCHES_KEY);
+  } catch {
+    // Ignore localStorage errors
+  }
+};
+
 export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
   const [query, setQuery] = useState("");
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const navigate = useNavigate();
   const { data: articles = [] } = useArticles();
   const { data: implementingActs = [] } = useImplementingActs();
   const { data: annexes = [] } = useAnnexes();
   const { data: chapters = [] } = useChapters();
+
+  // Load recent searches on mount and when dialog opens
+  useEffect(() => {
+    if (open) {
+      setRecentSearches(getRecentSearches());
+    }
+  }, [open]);
+
+  const handleRemoveRecent = useCallback((e: React.MouseEvent, searchTerm: string) => {
+    e.stopPropagation();
+    removeRecentSearch(searchTerm);
+    setRecentSearches(getRecentSearches());
+  }, []);
+
+  const handleClearAll = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    clearAllRecentSearches();
+    setRecentSearches([]);
+  }, []);
 
   // Create searchable data with ID variations
   const searchableData = useMemo(() => ({
@@ -194,10 +256,18 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
     };
   }, [query, fuse, searchableData, implementingActs, annexes, chapters]);
 
-  const handleSelect = (path: string) => {
+  const handleSelect = (path: string, searchQuery?: string) => {
+    // Save to recent searches if there's a query
+    if (searchQuery?.trim()) {
+      saveRecentSearch(searchQuery.trim());
+    }
     onOpenChange(false);
     setQuery("");
     navigate(path);
+  };
+
+  const handleRecentSelect = (searchTerm: string) => {
+    setQuery(searchTerm);
   };
 
   // Reset query when dialog closes
@@ -214,6 +284,46 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
       />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
+
+        {/* Recent Searches - only show when no query */}
+        {!query.trim() && recentSearches.length > 0 && (
+          <CommandGroup 
+            heading={
+              <div className="flex items-center justify-between">
+                <span>Recent Searches</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-5 px-2 text-xs text-muted-foreground hover:text-destructive"
+                  onClick={handleClearAll}
+                >
+                  <Trash2 className="h-3 w-3 mr-1" />
+                  Clear all
+                </Button>
+              </div>
+            }
+          >
+            {recentSearches.map((searchTerm, idx) => (
+              <CommandItem
+                key={`recent-${idx}`}
+                value={`recent-search-${searchTerm}`}
+                onSelect={() => handleRecentSelect(searchTerm)}
+                className="group"
+              >
+                <Clock className="mr-2 h-4 w-4 text-muted-foreground flex-shrink-0" />
+                <span className="flex-1 truncate">{searchTerm}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => handleRemoveRecent(e, searchTerm)}
+                >
+                  <X className="h-3 w-3 text-muted-foreground hover:text-destructive" />
+                </Button>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
         
         {results.chapters.length > 0 && (
           <CommandGroup heading="Chapters">
@@ -386,7 +496,7 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
               <CommandItem
                 forceMount
                 value={`view-all-results-${query}`}
-                onSelect={() => handleSelect(`/search?q=${encodeURIComponent(query)}`)}
+                onSelect={() => handleSelect(`/search?q=${encodeURIComponent(query)}`, query)}
                 className="justify-between bg-muted/50"
               >
                 <span className="font-medium">View all results</span>

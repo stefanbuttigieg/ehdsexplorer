@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Json } from "@/integrations/supabase/types";
+import type { KeyDateCategory } from "@/components/KeyDatesGantt";
 
 export interface OverviewContent {
   subtitle: string;
@@ -16,7 +17,7 @@ export interface OverviewContent {
   };
   key_dates: {
     title: string;
-    dates: Array<{ label: string; date: string }>;
+    dates: Array<{ label: string; date: string; category?: KeyDateCategory }>;
   };
 }
 

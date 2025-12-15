@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Download, Calendar, FileSpreadsheet } from "lucide-react";
+import { Download, Calendar, FileSpreadsheet, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 
@@ -15,7 +15,6 @@ interface KeyDatesGanttProps {
 }
 
 const parseDate = (dateStr: string): Date => {
-  // Parse dates like "25 March 2025"
   const parts = dateStr.split(" ");
   const day = parseInt(parts[0]);
   const monthNames = ["January", "February", "March", "April", "May", "June", 
@@ -34,6 +33,8 @@ const formatDateForICS = (date: Date): string => {
 
 export const KeyDatesGantt = ({ dates }: KeyDatesGanttProps) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Sort dates and calculate timeline range
   const sortedDates = [...dates].map(d => ({
@@ -42,12 +43,12 @@ export const KeyDatesGantt = ({ dates }: KeyDatesGanttProps) => {
   })).sort((a, b) => a.parsed.getTime() - b.parsed.getTime());
 
   const minDate = sortedDates[0]?.parsed || new Date();
-  const maxDate = sortedDates[sortedDates.length - 1]?.parsed || new Date();
-  const totalRange = maxDate.getTime() - minDate.getTime();
-
-  // Add some padding to the range
-  const paddedMin = new Date(minDate.getTime() - totalRange * 0.05);
-  const paddedMax = new Date(maxDate.getTime() + totalRange * 0.05);
+  // Extend to 2033
+  const fixedMaxDate = new Date(2033, 11, 31);
+  
+  // Add some padding to the start
+  const paddedMin = new Date(minDate.getTime() - (30 * 24 * 60 * 60 * 1000)); // 30 days padding
+  const paddedMax = fixedMaxDate;
   const paddedRange = paddedMax.getTime() - paddedMin.getTime();
 
   const getPosition = (date: Date) => {
@@ -64,6 +65,21 @@ export const KeyDatesGantt = ({ dates }: KeyDatesGanttProps) => {
       yearMarkers.push({ year, position: getPosition(yearDate) });
     }
   }
+
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(prev + 0.5, 4));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel(prev => Math.max(prev - 0.5, 1));
+  };
+
+  const handleResetZoom = () => {
+    setZoomLevel(1);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollLeft = 0;
+    }
+  };
 
   const exportToICS = () => {
     const events = sortedDates.map((item, index) => {
@@ -150,7 +166,6 @@ END:VCALENDAR`;
     toast.success("JSON file downloaded!");
   };
 
-  // Color palette for milestones
   const colors = [
     "bg-primary",
     "bg-chart-1",
@@ -161,8 +176,42 @@ END:VCALENDAR`;
 
   return (
     <div className="space-y-6">
-      {/* Export buttons */}
-      <div className="flex justify-end">
+      {/* Controls */}
+      <div className="flex justify-between items-center flex-wrap gap-2">
+        {/* Zoom controls */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground mr-2">Zoom:</span>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleZoomOut}
+            disabled={zoomLevel <= 1}
+            className="h-8 w-8 p-0"
+          >
+            <ZoomOut className="h-4 w-4" />
+          </Button>
+          <span className="text-sm font-medium min-w-[3rem] text-center">{zoomLevel}x</span>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleZoomIn}
+            disabled={zoomLevel >= 4}
+            className="h-8 w-8 p-0"
+          >
+            <ZoomIn className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleResetZoom}
+            className="h-8 px-2 gap-1"
+          >
+            <RotateCcw className="h-3 w-3" />
+            Reset
+          </Button>
+        </div>
+
+        {/* Export dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="gap-2">
@@ -187,97 +236,113 @@ END:VCALENDAR`;
         </DropdownMenu>
       </div>
 
-      {/* Gantt Chart */}
-      <div className="relative">
-        {/* Year markers */}
-        <div className="relative h-6 border-b border-border mb-2">
-          {yearMarkers.map(({ year, position }) => (
-            <div 
-              key={year}
-              className="absolute text-xs text-muted-foreground"
-              style={{ left: `${position}%`, transform: 'translateX(-50%)' }}
-            >
-              {year}
-            </div>
-          ))}
-        </div>
+      {/* Gantt Chart with horizontal scroll */}
+      <div 
+        ref={scrollContainerRef}
+        className="overflow-x-auto border border-border rounded-lg p-4 bg-card"
+      >
+        <div style={{ width: `${100 * zoomLevel}%`, minWidth: '100%' }}>
+          {/* Year markers */}
+          <div className="relative h-8 border-b border-border mb-4">
+            {yearMarkers.map(({ year, position }) => (
+              <div 
+                key={year}
+                className="absolute text-xs font-medium text-muted-foreground"
+                style={{ left: `${position}%`, transform: 'translateX(-50%)' }}
+              >
+                {year}
+              </div>
+            ))}
+          </div>
 
-        {/* Timeline track */}
-        <div className="relative h-2 bg-muted rounded-full mb-6">
-          {/* Date markers on track */}
-          {sortedDates.map((item, index) => (
-            <div
-              key={index}
-              className={`absolute w-3 h-3 rounded-full -top-0.5 transform -translate-x-1/2 transition-all duration-200 cursor-pointer ${colors[index % colors.length]} ${hoveredIndex === index ? 'scale-150 ring-2 ring-primary/50' : ''}`}
-              style={{ left: `${getPosition(item.parsed)}%` }}
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
-            />
-          ))}
-        </div>
+          {/* Timeline track */}
+          <div className="relative h-3 bg-muted rounded-full mb-8">
+            {sortedDates.map((item, index) => (
+              <div
+                key={index}
+                className={`absolute w-4 h-4 rounded-full -top-0.5 transform -translate-x-1/2 transition-all duration-200 cursor-pointer border-2 border-background ${colors[index % colors.length]} ${hoveredIndex === index ? 'scale-150 ring-2 ring-primary/50' : ''}`}
+                style={{ left: `${getPosition(item.parsed)}%` }}
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+              />
+            ))}
+          </div>
 
-        {/* Milestone bars */}
-        <div className="space-y-3">
-          {sortedDates.map((item, index) => {
-            const position = getPosition(item.parsed);
-            const isHovered = hoveredIndex === index;
-            
-            return (
-              <Tooltip key={index}>
-                <TooltipTrigger asChild>
-                  <div 
-                    className="relative h-10 group cursor-pointer"
-                    onMouseEnter={() => setHoveredIndex(index)}
-                    onMouseLeave={() => setHoveredIndex(null)}
-                  >
-                    {/* Bar from start to milestone */}
+          {/* Milestone bars */}
+          <div className="space-y-3">
+            {sortedDates.map((item, index) => {
+              const position = getPosition(item.parsed);
+              const isHovered = hoveredIndex === index;
+              
+              return (
+                <Tooltip key={index}>
+                  <TooltipTrigger asChild>
                     <div 
-                      className={`absolute h-full rounded-r-lg transition-all duration-300 ${colors[index % colors.length]} ${isHovered ? 'opacity-100' : 'opacity-70'}`}
-                      style={{ 
-                        left: 0, 
-                        width: `${position}%`,
-                        minWidth: '60px'
-                      }}
-                    />
-                    {/* Label */}
-                    <div 
-                      className={`absolute inset-y-0 flex items-center px-3 text-sm font-medium transition-all duration-200 ${isHovered ? 'text-primary-foreground' : 'text-primary-foreground/90'}`}
-                      style={{ left: '8px', maxWidth: `calc(${position}% - 16px)` }}
+                      className="relative h-10 group cursor-pointer"
+                      onMouseEnter={() => setHoveredIndex(index)}
+                      onMouseLeave={() => setHoveredIndex(null)}
                     >
-                      <span className="truncate">{item.label}</span>
+                      <div 
+                        className={`absolute h-full rounded-r-lg transition-all duration-300 ${colors[index % colors.length]} ${isHovered ? 'opacity-100' : 'opacity-70'}`}
+                        style={{ 
+                          left: 0, 
+                          width: `${position}%`,
+                          minWidth: '60px'
+                        }}
+                      />
+                      <div 
+                        className={`absolute inset-y-0 flex items-center px-3 text-sm font-medium transition-all duration-200 ${isHovered ? 'text-primary-foreground' : 'text-primary-foreground/90'}`}
+                        style={{ left: '8px', maxWidth: `calc(${position}% - 16px)` }}
+                      >
+                        <span className="truncate">{item.label}</span>
+                      </div>
+                      <div 
+                        className={`absolute top-1/2 -translate-y-1/2 bg-background border border-border px-2 py-1 rounded text-xs font-medium shadow-sm transition-all duration-200 whitespace-nowrap ${isHovered ? 'scale-105' : ''}`}
+                        style={{ left: `calc(${position}% + 8px)` }}
+                      >
+                        {item.date}
+                      </div>
                     </div>
-                    {/* Date badge */}
-                    <div 
-                      className={`absolute top-1/2 -translate-y-1/2 bg-background border border-border px-2 py-1 rounded text-xs font-medium shadow-sm transition-all duration-200 ${isHovered ? 'scale-105' : ''}`}
-                      style={{ left: `calc(${position}% + 8px)` }}
-                    >
-                      {item.date}
-                    </div>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-xs">
-                  <p className="font-semibold">{item.label}</p>
-                  <p className="text-muted-foreground">{item.date}</p>
-                </TooltipContent>
-              </Tooltip>
-            );
-          })}
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-xs">
+                    <p className="font-semibold">{item.label}</p>
+                    <p className="text-muted-foreground">{item.date}</p>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* Legend */}
-      <div className="flex flex-wrap gap-4 pt-4 border-t border-border">
-        {sortedDates.map((item, index) => (
-          <div 
-            key={index} 
-            className="flex items-center gap-2 text-sm cursor-pointer hover:opacity-80 transition-opacity"
-            onMouseEnter={() => setHoveredIndex(index)}
-            onMouseLeave={() => setHoveredIndex(null)}
-          >
-            <div className={`w-3 h-3 rounded-full ${colors[index % colors.length]}`} />
-            <span className={hoveredIndex === index ? 'font-medium' : ''}>{item.label}</span>
-          </div>
-        ))}
+      {/* Legend / Table */}
+      <div className="border border-border rounded-lg overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-muted/50">
+            <tr>
+              <th className="text-left px-4 py-3 font-medium">Milestone</th>
+              <th className="text-left px-4 py-3 font-medium">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedDates.map((item, index) => (
+              <tr 
+                key={index} 
+                className={`border-t border-border transition-colors cursor-pointer ${hoveredIndex === index ? 'bg-muted/50' : 'hover:bg-muted/30'}`}
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+              >
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-3 h-3 rounded-full flex-shrink-0 ${colors[index % colors.length]}`} />
+                    <span>{item.label}</span>
+                  </div>
+                </td>
+                <td className="px-4 py-3 text-muted-foreground">{item.date}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

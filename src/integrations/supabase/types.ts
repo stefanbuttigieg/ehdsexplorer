@@ -133,6 +133,51 @@ export type Database = {
         }
         Relationships: []
       }
+      footnotes: {
+        Row: {
+          article_id: number | null
+          content: string
+          created_at: string
+          id: string
+          marker: string
+          recital_id: number | null
+          updated_at: string
+        }
+        Insert: {
+          article_id?: number | null
+          content: string
+          created_at?: string
+          id?: string
+          marker: string
+          recital_id?: number | null
+          updated_at?: string
+        }
+        Update: {
+          article_id?: number | null
+          content?: string
+          created_at?: string
+          id?: string
+          marker?: string
+          recital_id?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "footnotes_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "footnotes_recital_id_fkey"
+            columns: ["recital_id"]
+            isOneToOne: false
+            referencedRelation: "recitals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       implementing_acts: {
         Row: {
           article_reference: string

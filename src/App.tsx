@@ -32,6 +32,7 @@ import AdminJointActionDeliverablesPage from "./pages/AdminJointActionDeliverabl
 import AdminPublishedWorksPage from "./pages/AdminPublishedWorksPage";
 import AdminNotificationsPage from "./pages/AdminNotificationsPage";
 import AdminUsersPage from "./pages/AdminUsersPage";
+import AdminFootnotesPage from "./pages/AdminFootnotesPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import CookiesPolicyPage from "./pages/CookiesPolicyPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
@@ -93,6 +94,7 @@ const App = () => (
             <Route path="/admin/published-works" element={<AdminPublishedWorksPage />} />
             <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
             <Route path="/admin/users" element={<AdminUsersPage />} />
+            <Route path="/admin/footnotes" element={<AdminFootnotesPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </MaintenanceGuard>

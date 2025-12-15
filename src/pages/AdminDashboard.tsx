@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked } from 'lucide-react';
+import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -123,6 +123,12 @@ const AdminDashboard = () => {
       description: 'Push notifications to site visitors',
       icon: Bell,
       href: '/admin/notifications',
+    },
+    {
+      title: 'Footnotes',
+      description: 'Manage footnotes for articles and recitals',
+      icon: StickyNote,
+      href: '/admin/footnotes',
     },
   ];
 

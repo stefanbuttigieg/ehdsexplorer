@@ -17,7 +17,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 ## ✨ Current Features
 
 ### 📖 Content Navigation
-- **10 Chapters** with expandable table of contents, sections, and article navigation
+- **10 Chapters** with expandable table of contents using Roman numerals, sections, and article navigation
 - **105 Articles** with full text, cross-references, related recitals, and implementing acts
 - **115 Recitals** with individual detail pages and related article links
 - **4 Annexes** with detailed technical requirements and specifications
@@ -76,16 +76,19 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Expiration dates** for time-limited notifications
 - **Dismissible notifications** for better UX
 
-### 📊 Quick Explorers
+### 📊 Quick Explorers & Visualizations
 - **Articles grid** (1-105) with hover tooltips showing titles
 - **Recitals grid** (1-115) with content preview on hover
+- **Articles landing page** with search by number, title, or content
+- **Recitals landing page** with search functionality
 - **Continue reading** section to resume where you left off
+- **Interactive Gantt chart** for key dates timeline visualization
+  - Zoom controls (1x-4x) for timeline navigation
+  - Timeline extended to 2033
+  - Export to ICS (calendar), CSV (spreadsheet), and JSON formats
+  - Hover interactions with milestone highlighting
 
 ### 🎮 Learning Tools
-- **Match Game** - Educational card-matching game to learn EHDS terminology
-- **Selectable difficulty** - 4, 6, or 8 term-definition pairs
-- **Timer tracking** and accuracy metrics
-- **Engaging way** to memorize key definitions
 
 ### 📝 Footnotes System
 - **Inline footnote markers** in article and recital content (e.g., [^1], *, †)

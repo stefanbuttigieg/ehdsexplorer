@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { SearchCommand } from "@/components/SearchCommand";
 import { Search, Book, FileText, Scale, ListChecks, Bookmark, Files, Clock, MessageSquare, ExternalLink, Gamepad2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,20 +39,12 @@ const getFeedbackStatus = (deadline: string) => {
 };
 
 const Index = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const navigate = useNavigate();
+  const [searchOpen, setSearchOpen] = useState(false);
   const { getChapterProgress } = useReadingProgress();
   const { data: chapters, isLoading: chaptersLoading } = useChapters();
   const { data: implementingActs = [] } = useImplementingActs();
   const { data: definitions = [] } = useDefinitions();
   const actStats = getActStats(implementingActs);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-    }
-  };
 
   return (
     <Layout>
@@ -71,21 +64,21 @@ const Index = () => {
             </p>
 
             {/* Search Bar */}
-            <form onSubmit={handleSearch} className="max-w-xl mx-auto">
-              <div className="relative">
+            <div className="max-w-xl mx-auto">
+              <div 
+                className="relative cursor-pointer"
+                onClick={() => setSearchOpen(true)}
+              >
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search articles, recitals, definitions..."
-                  className="pl-12 pr-4 py-6 text-lg"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <Button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2">
-                  Search
-                </Button>
+                <div className="pl-12 pr-4 py-4 text-lg border border-input rounded-md bg-background text-muted-foreground hover:border-primary transition-colors">
+                  Search articles, recitals, definitions...
+                </div>
+                <kbd className="absolute right-4 top-1/2 -translate-y-1/2 text-xs px-2 py-1 bg-muted rounded">/</kbd>
               </div>
-            </form>
+            </div>
+
+            {/* Search Command */}
+            <SearchCommand open={searchOpen} onOpenChange={setSearchOpen} />
           </div>
         </section>
 

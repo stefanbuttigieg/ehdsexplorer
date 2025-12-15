@@ -144,6 +144,24 @@ const CopyButton = ({ text, label }: { text: string; label?: string }) => {
   );
 };
 
+const TryItButton = ({ resource, id }: { resource: string; id?: number }) => {
+  const url = id 
+    ? `${API_BASE}?resource=${resource}&id=${id}` 
+    : `${API_BASE}?resource=${resource}`;
+  
+  return (
+    <Button 
+      variant="default" 
+      size="sm" 
+      onClick={() => window.open(url, '_blank')}
+      className="gap-2"
+    >
+      <ExternalLink className="h-4 w-4" />
+      Try it
+    </Button>
+  );
+};
+
 const CodeBlock = ({ code, language = "json" }: { code: string; language?: string }) => (
   <div className="relative">
     <div className="absolute right-2 top-2">
@@ -289,8 +307,11 @@ const ApiDocsPage = () => {
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{ep.resource}</CardTitle>
-                    <Badge variant="outline">GET</Badge>
+                    <div className="flex items-center gap-2">
+                      <CardTitle className="text-lg">{ep.resource}</CardTitle>
+                      <Badge variant="outline">GET</Badge>
+                    </div>
+                    <TryItButton resource={ep.resource} />
                   </div>
                   <CardDescription>{ep.description}</CardDescription>
                 </CardHeader>

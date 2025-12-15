@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import MaintenanceGuard from "@/components/MaintenanceGuard";
 import Index from "./pages/Index";
 import ArticlePage from "./pages/ArticlePage";
+import ArticlesPage from "./pages/ArticlesPage";
 import ChapterPage from "./pages/ChapterPage";
 import RecitalsPage from "./pages/RecitalsPage";
 import RecitalPage from "./pages/RecitalPage";
@@ -65,6 +66,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/overview" element={<OverviewPage />} />
             <Route path="/chapter/:id" element={<ChapterPage />} />
+            <Route path="/articles" element={<ArticlesPage />} />
             <Route path="/article/:id" element={<ArticlePage />} />
             <Route path="/recitals" element={<RecitalsPage />} />
             <Route path="/recital/:id" element={<RecitalPage />} />

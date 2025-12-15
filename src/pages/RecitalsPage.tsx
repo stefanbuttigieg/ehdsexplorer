@@ -1,8 +1,10 @@
 import { useParams, Link } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { useQuery } from "@tanstack/react-query";
@@ -11,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 const RecitalsPage = () => {
   const { id } = useParams();
   const selectedId = id ? parseInt(id) : null;
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: recitals, isLoading } = useQuery({
     queryKey: ['recitals'],
@@ -23,6 +26,14 @@ const RecitalsPage = () => {
       if (error) throw error;
       return data;
     }
+  });
+
+  const filteredRecitals = recitals?.filter((recital) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      recital.content.toLowerCase().includes(query) ||
+      recital.recital_number.toString().includes(query)
+    );
   });
 
   useEffect(() => {
@@ -51,6 +62,20 @@ const RecitalsPage = () => {
             : `The ${recitals?.length || ''} recitals providing context and interpretation guidance`}
         </p>
 
+        {/* Search */}
+        {!selectedId && (
+          <div className="relative mb-6">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search recitals by number or content..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        )}
+
         {isLoading ? (
           <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -62,9 +87,9 @@ const RecitalsPage = () => {
               </Card>
             ))}
           </div>
-        ) : (
+        ) : filteredRecitals && filteredRecitals.length > 0 ? (
           <div className="space-y-4">
-            {recitals?.map((recital) => (
+            {filteredRecitals.map((recital) => (
               <Card 
                 key={recital.id} 
                 id={`recital-${recital.recital_number}`} 
@@ -90,6 +115,10 @@ const RecitalsPage = () => {
               </Card>
             ))}
           </div>
+        ) : (
+          <p className="text-muted-foreground text-center py-8">
+            {searchQuery ? "No recitals found matching your search." : "No recitals available."}
+          </p>
         )}
       </div>
     </Layout>

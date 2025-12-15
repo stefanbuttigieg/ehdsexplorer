@@ -89,29 +89,37 @@ export const ShareTextButton = () => {
     };
   }, [handleSelection]);
 
-  // Hide on scroll
+  // Hide on scroll with delay
   useEffect(() => {
+    let scrollTimeout: NodeJS.Timeout;
     const handleScroll = () => {
       if (position) {
-        setPosition(null);
-        setSelectedText("");
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+          setPosition(null);
+          setSelectedText("");
+        }, 150);
       }
     };
 
     window.addEventListener("scroll", handleScroll, true);
-    return () => window.removeEventListener("scroll", handleScroll, true);
+    return () => {
+      window.removeEventListener("scroll", handleScroll, true);
+      clearTimeout(scrollTimeout);
+    };
   }, [position]);
 
   if (!position || !selectedText) return null;
 
   return (
     <div
-      className="fixed z-50 flex items-center gap-1 bg-popover border rounded-lg shadow-lg p-1 animate-in fade-in-0 zoom-in-95"
+      className="fixed z-[100] flex items-center gap-1 bg-popover border rounded-lg shadow-lg p-1 animate-in fade-in-0 zoom-in-95"
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
         transform: "translate(-50%, -100%)",
       }}
+      onMouseDown={(e) => e.stopPropagation()}
     >
       <Button
         variant="ghost"

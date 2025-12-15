@@ -35,6 +35,7 @@ import AdminNotificationsPage from "./pages/AdminNotificationsPage";
 import AdminUsersPage from "./pages/AdminUsersPage";
 import AdminFootnotesPage from "./pages/AdminFootnotesPage";
 import AdminHelpCenterPage from "./pages/AdminHelpCenterPage";
+import AdminEmailTemplatesPage from "./pages/AdminEmailTemplatesPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import CookiesPolicyPage from "./pages/CookiesPolicyPage";
 import TermsOfServicePage from "./pages/TermsOfServicePage";
@@ -99,6 +100,7 @@ const App = () => (
             <Route path="/admin/users" element={<AdminUsersPage />} />
             <Route path="/admin/footnotes" element={<AdminFootnotesPage />} />
             <Route path="/admin/help" element={<AdminHelpCenterPage />} />
+            <Route path="/admin/email-templates" element={<AdminEmailTemplatesPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </MaintenanceGuard>

@@ -21,7 +21,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **105 Articles** with full text, cross-references, related recitals, and implementing acts
 - **115 Recitals** with individual detail pages and related article links
 - **4 Annexes** with detailed technical requirements and specifications
-- **62+ Definitions** from Article 2 with quick reference and source links
+- **67+ Definitions** from Article 2 with quick reference and source links
 
 ### 🔍 Advanced Search
 - **Fuzzy search** powered by Fuse.js across all content types

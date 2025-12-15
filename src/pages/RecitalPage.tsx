@@ -3,26 +3,43 @@ import { ChevronLeft, ChevronRight, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getRecitalById, recitals } from "@/data/recitals";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getArticleById } from "@/data/articles";
 import Layout from "@/components/Layout";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import PrintButton from "@/components/PrintButton";
+import { useRecital, useRecitals } from "@/hooks/useRecitals";
+import { useFootnotesByRecital } from "@/hooks/useFootnotes";
+import FootnotesSection from "@/components/FootnotesSection";
 
 const RecitalPage = () => {
   const { id } = useParams();
-  const recitalId = parseInt(id || "1");
-  const recital = getRecitalById(recitalId);
+  const recitalNumber = parseInt(id || "1");
+  const { data: recital, isLoading } = useRecital(recitalNumber);
+  const { data: recitals = [] } = useRecitals();
+  const { data: footnotes = [] } = useFootnotesByRecital(recital?.id ?? null);
   const { isBookmarked, toggleBookmark } = useBookmarks();
 
   useKeyboardShortcuts({
-    onBookmark: () => recital && toggleBookmark('recital', recitalId),
+    onBookmark: () => recital && toggleBookmark('recital', recitalNumber),
   });
 
-  const prevRecital = recitals.find(r => r.id === recitalId - 1);
-  const nextRecital = recitals.find(r => r.id === recitalId + 1);
+  const prevRecital = recitals.find(r => r.recital_number === recitalNumber - 1);
+  const nextRecital = recitals.find(r => r.recital_number === recitalNumber + 1);
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="max-w-4xl mx-auto p-6">
+          <Skeleton className="h-8 w-48 mb-4" />
+          <Skeleton className="h-12 w-full mb-8" />
+          <Skeleton className="h-64 w-full" />
+        </div>
+      </Layout>
+    );
+  }
 
   if (!recital) {
     return (
@@ -37,7 +54,7 @@ const RecitalPage = () => {
 
   const breadcrumbItems = [
     { label: "Recitals", href: "/recitals" },
-    { label: `Recital ${recital.id}` }
+    { label: `Recital ${recital.recital_number}` }
   ];
 
   return (
@@ -48,18 +65,18 @@ const RecitalPage = () => {
         {/* Recital Header */}
         <div className="flex items-start justify-between gap-4 mb-8">
           <div>
-            <Badge variant="outline" className="mb-2">Recital {recital.id}</Badge>
-            <h1 className="text-3xl font-bold font-serif">Recital {recital.id}</h1>
+            <Badge variant="outline" className="mb-2">Recital {recital.recital_number}</Badge>
+            <h1 className="text-3xl font-bold font-serif">Recital {recital.recital_number}</h1>
             <p className="text-muted-foreground mt-1">Context and interpretation guidance</p>
           </div>
           <div className="flex gap-2">
             <PrintButton />
             <Button
-              variant={isBookmarked('recital', recitalId) ? "default" : "outline"}
+              variant={isBookmarked('recital', recitalNumber) ? "default" : "outline"}
               size="icon"
-              onClick={() => toggleBookmark('recital', recitalId)}
+              onClick={() => toggleBookmark('recital', recitalNumber)}
             >
-              <Bookmark className={isBookmarked('recital', recitalId) ? "fill-current" : ""} />
+              <Bookmark className={isBookmarked('recital', recitalNumber) ? "fill-current" : ""} />
             </Button>
           </div>
         </div>
@@ -70,17 +87,18 @@ const RecitalPage = () => {
             <div className="legal-text whitespace-pre-wrap text-lg leading-relaxed">
               {recital.content}
             </div>
+            <FootnotesSection footnotes={footnotes} />
           </CardContent>
         </Card>
 
         {/* Related Articles */}
-        {recital.relatedArticles.length > 0 && (
+        {recital.related_articles && recital.related_articles.length > 0 && (
           <Card className="mb-8">
             <CardHeader>
               <CardTitle className="text-lg">Related Articles</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {recital.relatedArticles.map((articleId) => {
+              {recital.related_articles.map((articleId) => {
                 const article = getArticleById(articleId);
                 return article ? (
                   <Link key={articleId} to={`/article/${articleId}`} className="block">
@@ -98,17 +116,17 @@ const RecitalPage = () => {
         {/* Navigation */}
         <div className="flex items-center justify-between pt-6 border-t border-border">
           {prevRecital ? (
-            <Link to={`/recital/${prevRecital.id}`}>
+            <Link to={`/recital/${prevRecital.recital_number}`}>
               <Button variant="outline" className="gap-2">
                 <ChevronLeft className="h-4 w-4" />
-                Recital {prevRecital.id}
+                Recital {prevRecital.recital_number}
               </Button>
             </Link>
           ) : <div />}
           {nextRecital && (
-            <Link to={`/recital/${nextRecital.id}`}>
+            <Link to={`/recital/${nextRecital.recital_number}`}>
               <Button variant="outline" className="gap-2">
-                Recital {nextRecital.id}
+                Recital {nextRecital.recital_number}
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </Link>

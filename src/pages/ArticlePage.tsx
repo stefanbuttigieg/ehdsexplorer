@@ -11,12 +11,14 @@ import { getRecitalsByArticle } from "@/data/recitals";
 import { useImplementingActs, getActsByArticle, statusLabels } from "@/hooks/useImplementingActs";
 import { useJointActionDeliverables, getDeliverablesByArticle } from "@/hooks/useJointActionDeliverables";
 import { usePublishedWorks, getPublishedWorksByArticle } from "@/hooks/usePublishedWorks";
+import { useFootnotesByArticle } from "@/hooks/useFootnotes";
 import Layout from "@/components/Layout";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import PrintButton from "@/components/PrintButton";
+import FootnotesSection from "@/components/FootnotesSection";
 
 const ArticlePage = () => {
   const { id } = useParams();
@@ -26,6 +28,7 @@ const ArticlePage = () => {
   const { data: implementingActs = [] } = useImplementingActs();
   const { data: jointActionDeliverables = [] } = useJointActionDeliverables();
   const { data: publishedWorks = [] } = usePublishedWorks();
+  const { data: footnotes = [] } = useFootnotesByArticle(article?.id ?? null);
   const chapter = getChapterByArticle(articleId);
   const relatedRecitals = getRecitalsByArticle(articleId);
   const relatedActs = getActsByArticle(implementingActs, articleId);
@@ -103,6 +106,7 @@ const ArticlePage = () => {
             <div className="article-content whitespace-pre-wrap">
               {article.content}
             </div>
+            <FootnotesSection footnotes={footnotes} />
           </CardContent>
         </Card>
 

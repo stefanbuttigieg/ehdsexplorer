@@ -210,10 +210,16 @@ const AdminRecitalsPage = () => {
             />
           </div>
           {selectedIds.size > 0 && (
-            <Button onClick={() => setShowBulkEdit(true)}>
-              <Edit className="h-4 w-4 mr-1" />
-              Bulk Edit ({selectedIds.size})
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={() => setShowBulkEdit(true)}>
+                <Edit className="h-4 w-4 mr-1" />
+                Bulk Edit ({selectedIds.size})
+              </Button>
+              <Button variant="outline" onClick={() => setSelectedIds(new Set())}>
+                <X className="h-4 w-4 mr-1" />
+                Clear
+              </Button>
+            </div>
           )}
         </div>
 

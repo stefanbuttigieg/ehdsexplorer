@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useEmailTemplates, useUpdateEmailTemplate, EmailTemplate } from "@/hooks/useEmailTemplates";
+import { useAuth } from "@/hooks/useAuth";
+import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,16 +11,33 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Mail, Edit, Eye, Code, Save, Info } from "lucide-react";
+import { Mail, Edit, Eye, Code, Save, Info, ArrowLeft } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const AdminEmailTemplatesPage = () => {
+  const { user, loading, isAdmin } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const { data: templates, isLoading } = useEmailTemplates();
   const updateTemplate = useUpdateEmailTemplate();
   const [editingTemplate, setEditingTemplate] = useState<EmailTemplate | null>(null);
   const [editSubject, setEditSubject] = useState("");
   const [editBodyHtml, setEditBodyHtml] = useState("");
   const [previewTab, setPreviewTab] = useState<"edit" | "preview">("edit");
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/admin/auth');
+    } else if (!loading && user && !isAdmin) {
+      toast({
+        title: 'Access Denied',
+        description: 'Only admins can manage email templates.',
+        variant: 'destructive',
+      });
+      navigate('/admin');
+    }
+  }, [user, loading, isAdmin, navigate, toast]);
 
   const handleEdit = (template: EmailTemplate) => {
     setEditingTemplate(template);
@@ -60,36 +80,48 @@ const AdminEmailTemplatesPage = () => {
     return html;
   };
 
-  if (isLoading) {
+  if (loading || isLoading) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Email Templates</h1>
-          <p className="text-muted-foreground">Manage email templates for invitations and notifications</p>
+      <Layout>
+        <div className="max-w-4xl mx-auto p-6 space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Email Templates</h1>
+            <p className="text-muted-foreground">Manage email templates for invitations and notifications</p>
+          </div>
+          <div className="grid gap-4">
+            {[1, 2].map((i) => (
+              <Card key={i}>
+                <CardHeader>
+                  <Skeleton className="h-6 w-48" />
+                  <Skeleton className="h-4 w-72" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-4 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
-        <div className="grid gap-4">
-          {[1, 2].map((i) => (
-            <Card key={i}>
-              <CardHeader>
-                <Skeleton className="h-6 w-48" />
-                <Skeleton className="h-4 w-72" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-4 w-full" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
+      </Layout>
     );
   }
 
+  if (!user || !isAdmin) {
+    return null;
+  }
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Email Templates</h1>
-        <p className="text-muted-foreground">Manage email templates for invitations and notifications</p>
-      </div>
+    <Layout>
+      <div className="max-w-4xl mx-auto p-6 space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/admin')}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Email Templates</h1>
+            <p className="text-muted-foreground">Manage email templates for invitations and notifications</p>
+          </div>
+        </div>
 
       <div className="grid gap-4">
         {templates?.map((template) => (
@@ -202,7 +234,8 @@ const AdminEmailTemplatesPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </Layout>
   );
 };
 

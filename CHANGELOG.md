@@ -19,6 +19,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Public Data API
+- RESTful API at `/functions/v1/api-data` for programmatic access
+- Support for JSON and CSV export formats
+- Six endpoints: articles, recitals, definitions, chapters, implementing-acts, metadata
+- Rate limiting (100 requests/hour/IP) with headers showing remaining quota
+- FAIR-compliant metadata including ELI identifiers and provenance
+- No authentication required for read-only access
+
+#### API Documentation
+- Dedicated developer documentation page at `/api`
+- Prominent copy-to-clipboard button for base URL
+- Quick start section with curl examples
+- Comprehensive endpoint documentation with parameter tables
+- Example responses and FAIR compliance explanation
+
 #### Key Dates Gantt Chart
 - Interactive Gantt chart visualization for key EHDS dates
 - Zoom controls (1x-4x) for better timeline navigation

@@ -29,6 +29,8 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Command palette** (press `/`) for quick navigation
 - **Filter by type** - articles, recitals, definitions, chapters, implementing acts, annexes
 - **Real-time results** as you type
+- **Search-result highlighting**
+- **Recent searches history**
 
 ### 📋 Implementing Acts Tracker
 - **33 implementing/delegated acts** identified in the regulation
@@ -103,9 +105,9 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 ## 🚀 Planned Features
 
 ### Near-term
-- [ ] Search result highlighting showing matched text
-- [ ] Recent searches history
-- [ ] Export bookmarks to PDF/JSON
+- [X] Search result highlighting showing matched text
+- [X] Recent searches history
+- [X] Export bookmarks to PDF/JSON
 - [ ] Shareable deep links with highlighted text
 - [ ] Offline support (PWA)
 

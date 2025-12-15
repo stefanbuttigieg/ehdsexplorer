@@ -13,12 +13,65 @@ const corsHeaders = {
 const ALLOWED_RESOURCES = ["articles", "recitals", "definitions", "chapters", "implementing-acts", "metadata"];
 const ALLOWED_FORMATS = ["json", "csv"];
 
+// Rate limiting config: 100 requests per hour per IP
+const RATE_LIMIT_MAX = 100;
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+
 // Validate and sanitize ID parameter
 function validateId(id: string | null): number | null {
   if (!id) return null;
   const parsed = parseInt(id, 10);
   if (isNaN(parsed) || parsed < 1 || parsed > 10000) return null;
   return parsed;
+}
+
+// Get client IP from request headers
+function getClientIp(req: Request): string {
+  return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+         req.headers.get("x-real-ip") ||
+         "unknown";
+}
+
+// Check and update rate limit
+async function checkRateLimit(supabase: any, ip: string): Promise<{ allowed: boolean; remaining: number; resetAt: Date }> {
+  const now = new Date();
+  const windowStart = new Date(now.getTime() - RATE_LIMIT_WINDOW_MS);
+  
+  // Clean up old entries and get current count
+  await supabase
+    .from("api_rate_limits")
+    .delete()
+    .lt("window_start", windowStart.toISOString());
+  
+  // Get current request count for this IP
+  const { data: existing } = await supabase
+    .from("api_rate_limits")
+    .select("id, request_count, window_start")
+    .eq("ip_address", ip)
+    .gte("window_start", windowStart.toISOString())
+    .maybeSingle();
+  
+  if (existing) {
+    const newCount = existing.request_count + 1;
+    if (newCount > RATE_LIMIT_MAX) {
+      const resetAt = new Date(new Date(existing.window_start).getTime() + RATE_LIMIT_WINDOW_MS);
+      return { allowed: false, remaining: 0, resetAt };
+    }
+    
+    await supabase
+      .from("api_rate_limits")
+      .update({ request_count: newCount })
+      .eq("id", existing.id);
+    
+    return { allowed: true, remaining: RATE_LIMIT_MAX - newCount, resetAt: new Date(new Date(existing.window_start).getTime() + RATE_LIMIT_WINDOW_MS) };
+  } else {
+    // First request from this IP in the window
+    await supabase
+      .from("api_rate_limits")
+      .insert({ ip_address: ip, request_count: 1, window_start: now.toISOString() });
+    
+    return { allowed: true, remaining: RATE_LIMIT_MAX - 1, resetAt: new Date(now.getTime() + RATE_LIMIT_WINDOW_MS) };
+  }
 }
 
 Deno.serve(async (req) => {
@@ -39,6 +92,30 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+    // Check rate limit
+    const clientIp = getClientIp(req);
+    const rateLimit = await checkRateLimit(supabase, clientIp);
+    
+    if (!rateLimit.allowed) {
+      return new Response(
+        JSON.stringify({ 
+          error: "Rate limit exceeded",
+          message: "Too many requests. Please try again later.",
+          retryAfter: Math.ceil((rateLimit.resetAt.getTime() - Date.now()) / 1000)
+        }),
+        { 
+          status: 429, 
+          headers: {
+            ...corsHeaders,
+            "X-RateLimit-Limit": String(RATE_LIMIT_MAX),
+            "X-RateLimit-Remaining": "0",
+            "X-RateLimit-Reset": rateLimit.resetAt.toISOString(),
+            "Retry-After": String(Math.ceil((rateLimit.resetAt.getTime() - Date.now()) / 1000))
+          }
+        }
+      );
+    }
 
     const url = new URL(req.url);
     const resource = url.searchParams.get("resource");
@@ -233,12 +310,20 @@ Deno.serve(async (req) => {
           ...corsHeaders,
           "Content-Type": "text/csv",
           "Content-Disposition": `attachment; filename="ehds-${resource}.csv"`,
+          "X-RateLimit-Limit": String(RATE_LIMIT_MAX),
+          "X-RateLimit-Remaining": String(rateLimit.remaining),
+          "X-RateLimit-Reset": rateLimit.resetAt.toISOString(),
         },
       });
     }
 
     return new Response(JSON.stringify(response, null, 2), {
-      headers: corsHeaders,
+      headers: {
+        ...corsHeaders,
+        "X-RateLimit-Limit": String(RATE_LIMIT_MAX),
+        "X-RateLimit-Remaining": String(rateLimit.remaining),
+        "X-RateLimit-Reset": rateLimit.resetAt.toISOString(),
+      },
     });
   } catch (err) {
     console.error("API error:", err);

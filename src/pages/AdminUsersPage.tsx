@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Users, ArrowLeft, Shield, ShieldCheck, Trash2, Plus, Search, Mail, Clock, AlertCircle, CheckCircle2, XCircle, RefreshCw } from "lucide-react";
+import { Users, ArrowLeft, Shield, ShieldCheck, Trash2, Plus, Search, Mail, Clock, AlertCircle, CheckCircle2, XCircle, RefreshCw, TestTube2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -49,6 +49,7 @@ const AdminUsersPage = () => {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<"admin" | "editor">("editor");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTestingEmail, setIsTestingEmail] = useState(false);
 
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) {
@@ -287,6 +288,37 @@ const AdminUsersPage = () => {
     }
   };
 
+  const handleTestEmail = async () => {
+    setIsTestingEmail(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("test-email");
+
+      if (error) throw error;
+
+      if (data?.success) {
+        toast({
+          title: "Test email sent!",
+          description: data.message || `Check your inbox at ${user?.email}`,
+        });
+      } else {
+        toast({
+          title: "Email test failed",
+          description: data?.error || "Email delivery failed. Please verify your Resend domain at resend.com/domains",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error("Test email error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send test email",
+        variant: "destructive",
+      });
+    } finally {
+      setIsTestingEmail(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "sent":
@@ -355,10 +387,20 @@ const AdminUsersPage = () => {
               <Users className="h-6 w-6" />
               <h1 className="text-2xl font-bold font-serif">User Management</h1>
             </div>
-            <Button onClick={() => setInviteDialogOpen(true)}>
-              <Mail className="h-4 w-4 mr-2" />
-              Invite User
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                onClick={handleTestEmail}
+                disabled={isTestingEmail}
+              >
+                <TestTube2 className="h-4 w-4 mr-2" />
+                {isTestingEmail ? "Sending..." : "Test Email"}
+              </Button>
+              <Button onClick={() => setInviteDialogOpen(true)}>
+                <Mail className="h-4 w-4 mr-2" />
+                Invite User
+              </Button>
+            </div>
           </div>
           <p className="text-muted-foreground mt-1">
             Manage user roles and pending invitations

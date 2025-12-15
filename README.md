@@ -139,8 +139,40 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 ### Long-term
 - [ ] Multi-language support (all EU languages)
 - [ ] Integration with national implementation trackers
-- [ ] API for third-party integrations
+- [x] API for third-party integrations
 - [ ] Mobile apps (iOS/Android)
+
+## 🔌 Public API
+
+The EHDS Explorer provides a public RESTful API for programmatic access to all content.
+
+### Base URL
+```
+https://lmjjghvrjgffmbidajih.supabase.co/functions/v1/api-data
+```
+
+### Features
+- **No authentication required** for read-only access
+- **JSON and CSV** export formats
+- **Rate limited** to 100 requests/hour/IP
+- **FAIR-compliant** metadata with ELI identifiers
+
+### Endpoints
+| Resource | Description |
+|----------|-------------|
+| `?resource=articles` | All 105 articles |
+| `?resource=recitals` | All 115 recitals |
+| `?resource=definitions` | All definitions |
+| `?resource=chapters` | All 10 chapters |
+| `?resource=implementing-acts` | All 33 implementing acts |
+| `?resource=metadata` | Dataset metadata |
+
+### Example
+```bash
+curl "https://lmjjghvrjgffmbidajih.supabase.co/functions/v1/api-data?resource=articles&format=json"
+```
+
+See the [API Documentation](/api) for full details.
 
 ## 🛠️ Technology Stack
 

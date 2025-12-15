@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Users, ArrowLeft, Shield, ShieldCheck, Trash2, Plus, Search, Mail } from "lucide-react";
+import { Users, ArrowLeft, Shield, ShieldCheck, Trash2, Plus, Search, Mail, Clock, AlertCircle, CheckCircle2, XCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -22,6 +24,16 @@ interface UserWithRoles {
   display_name: string | null;
   created_at: string;
   roles: Array<{ id: string; role: "admin" | "editor" }>;
+}
+
+interface Invitation {
+  id: string;
+  email: string;
+  role: string;
+  status: string;
+  error_message: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 const AdminUsersPage = () => {
@@ -48,7 +60,6 @@ const AdminUsersPage = () => {
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["admin-users"],
     queryFn: async () => {
-      // First get all profiles
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("*")
@@ -56,14 +67,12 @@ const AdminUsersPage = () => {
 
       if (profilesError) throw profilesError;
 
-      // Then get all roles
       const { data: roles, error: rolesError } = await supabase
         .from("user_roles")
         .select("*");
 
       if (rolesError) throw rolesError;
 
-      // Combine profiles with their roles
       const usersWithRoles: UserWithRoles[] = (profiles || []).map((profile) => ({
         id: profile.user_id,
         email: profile.email,
@@ -79,10 +88,29 @@ const AdminUsersPage = () => {
     enabled: !!user && isAdmin,
   });
 
+  // Fetch invitations
+  const { data: invitations = [], isLoading: invitationsLoading, refetch: refetchInvitations } = useQuery({
+    queryKey: ["admin-invitations"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_invitations")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data as Invitation[];
+    },
+    enabled: !!user && isAdmin,
+  });
+
   const filteredUsers = users.filter(
     (u) =>
       u.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       u.display_name?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredInvitations = invitations.filter(
+    (inv) => inv.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleAddRole = async () => {
@@ -164,10 +192,22 @@ const AdminUsersPage = () => {
 
       if (error) throw error;
 
-      toast({
-        title: "Invitation sent!",
-        description: `An invitation email has been sent to ${inviteEmail}`,
-      });
+      // Check if email failed but invitation was created
+      if (data && !data.success && data.invitationId) {
+        toast({
+          title: "Invitation created",
+          description: data.message || "Email delivery failed - please verify your Resend domain.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Invitation sent!",
+          description: `An invitation email has been sent to ${inviteEmail}`,
+        });
+      }
+
+      // Refresh invitations list
+      queryClient.invalidateQueries({ queryKey: ["admin-invitations"] });
       setInviteDialogOpen(false);
       setInviteEmail("");
       setInviteRole("editor");
@@ -180,6 +220,105 @@ const AdminUsersPage = () => {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteInvitation = async (invitationId: string) => {
+    if (!confirm("Are you sure you want to delete this invitation?")) return;
+
+    try {
+      const { error } = await supabase
+        .from("user_invitations")
+        .delete()
+        .eq("id", invitationId);
+
+      if (error) throw error;
+
+      toast({ title: "Success", description: "Invitation deleted" });
+      queryClient.invalidateQueries({ queryKey: ["admin-invitations"] });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete invitation",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleResendInvitation = async (invitation: Invitation) => {
+    setIsSubmitting(true);
+    try {
+      // First delete the old invitation
+      await supabase.from("user_invitations").delete().eq("id", invitation.id);
+
+      // Then send a new one
+      const { data, error } = await supabase.functions.invoke("send-invite", {
+        body: {
+          email: invitation.email,
+          role: invitation.role,
+          inviterEmail: user?.email || "Admin",
+        },
+      });
+
+      if (error) throw error;
+
+      if (data && !data.success) {
+        toast({
+          title: "Invitation created",
+          description: data.message || "Email delivery failed - please verify your Resend domain.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Invitation resent!",
+          description: `A new invitation has been sent to ${invitation.email}`,
+        });
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["admin-invitations"] });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to resend invitation",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "sent":
+        return (
+          <Badge variant="default" className="bg-green-600">
+            <CheckCircle2 className="h-3 w-3 mr-1" />
+            Sent
+          </Badge>
+        );
+      case "pending":
+        return (
+          <Badge variant="secondary">
+            <Clock className="h-3 w-3 mr-1" />
+            Pending
+          </Badge>
+        );
+      case "failed":
+        return (
+          <Badge variant="destructive">
+            <XCircle className="h-3 w-3 mr-1" />
+            Failed
+          </Badge>
+        );
+      case "accepted":
+        return (
+          <Badge variant="outline" className="border-green-600 text-green-600">
+            <CheckCircle2 className="h-3 w-3 mr-1" />
+            Accepted
+          </Badge>
+        );
+      default:
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
 
@@ -197,6 +336,9 @@ const AdminUsersPage = () => {
       </Layout>
     );
   }
+
+  const pendingInvitations = invitations.filter(inv => inv.status !== "accepted");
+  const failedInvitations = invitations.filter(inv => inv.status === "failed");
 
   return (
     <Layout>
@@ -219,100 +361,212 @@ const AdminUsersPage = () => {
             </Button>
           </div>
           <p className="text-muted-foreground mt-1">
-            Manage user roles and permissions
+            Manage user roles and pending invitations
           </p>
         </div>
+
+        {/* Warning about failed invitations */}
+        {failedInvitations.length > 0 && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Email Delivery Issue</AlertTitle>
+            <AlertDescription>
+              {failedInvitations.length} invitation(s) failed to send. This is likely because your Resend domain is not verified. 
+              Please visit <a href="https://resend.com/domains" target="_blank" rel="noopener noreferrer" className="underline font-medium">resend.com/domains</a> to verify your domain.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search users by email or name..."
+            placeholder="Search users or invitations by email..."
             className="pl-10"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
 
-        {isLoading ? (
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-24 w-full" />
-            ))}
-          </div>
-        ) : filteredUsers.length === 0 ? (
-          <Card>
-            <CardContent className="p-8 text-center text-muted-foreground">
-              {searchQuery ? "No users match your search." : "No users found."}
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-4">
-            {filteredUsers.map((userItem) => (
-              <Card key={userItem.id}>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold">
-                          {userItem.display_name || userItem.email || "Unknown User"}
-                        </h3>
-                        {userItem.id === user?.id && (
-                          <Badge variant="outline" className="text-xs">You</Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {userItem.email}
-                      </p>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {userItem.roles.length === 0 ? (
-                          <span className="text-sm text-muted-foreground">No special roles</span>
-                        ) : (
-                          userItem.roles.map((role) => (
-                            <Badge
-                              key={role.id}
-                              variant={role.role === "admin" ? "default" : "secondary"}
-                              className="flex items-center gap-1"
-                            >
-                              {role.role === "admin" ? (
-                                <ShieldCheck className="h-3 w-3" />
-                              ) : (
-                                <Shield className="h-3 w-3" />
-                              )}
-                              {role.role}
-                              {userItem.id !== user?.id && (
-                                <button
-                                  onClick={() => handleRemoveRole(role.id)}
-                                  className="ml-1 hover:bg-background/20 rounded-full p-0.5"
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </button>
-                              )}
-                            </Badge>
-                          ))
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Joined: {format(new Date(userItem.created_at), "PPp")}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {userItem.id !== user?.id && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openAddRoleDialog(userItem.id)}
-                        >
-                          <Plus className="h-4 w-4 mr-1" />
-                          Add Role
-                        </Button>
-                      )}
-                    </div>
-                  </div>
+        <Tabs defaultValue="users" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="users">
+              Active Users
+              <Badge variant="secondary" className="ml-2">{users.length}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="invitations">
+              Invitations
+              {pendingInvitations.length > 0 && (
+                <Badge variant="default" className="ml-2">{pendingInvitations.length}</Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="users">
+            {isLoading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-24 w-full" />
+                ))}
+              </div>
+            ) : filteredUsers.length === 0 ? (
+              <Card>
+                <CardContent className="p-8 text-center text-muted-foreground">
+                  {searchQuery ? "No users match your search." : "No users found."}
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        )}
+            ) : (
+              <div className="space-y-4">
+                {filteredUsers.map((userItem) => (
+                  <Card key={userItem.id}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold">
+                              {userItem.display_name || userItem.email || "Unknown User"}
+                            </h3>
+                            {userItem.id === user?.id && (
+                              <Badge variant="outline" className="text-xs">You</Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {userItem.email}
+                          </p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {userItem.roles.length === 0 ? (
+                              <span className="text-sm text-muted-foreground">No special roles</span>
+                            ) : (
+                              userItem.roles.map((role) => (
+                                <Badge
+                                  key={role.id}
+                                  variant={role.role === "admin" ? "default" : "secondary"}
+                                  className="flex items-center gap-1"
+                                >
+                                  {role.role === "admin" ? (
+                                    <ShieldCheck className="h-3 w-3" />
+                                  ) : (
+                                    <Shield className="h-3 w-3" />
+                                  )}
+                                  {role.role}
+                                  {userItem.id !== user?.id && (
+                                    <button
+                                      onClick={() => handleRemoveRole(role.id)}
+                                      className="ml-1 hover:bg-background/20 rounded-full p-0.5"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </button>
+                                  )}
+                                </Badge>
+                              ))
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Joined: {format(new Date(userItem.created_at), "PPp")}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {userItem.id !== user?.id && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => openAddRoleDialog(userItem.id)}
+                            >
+                              <Plus className="h-4 w-4 mr-1" />
+                              Add Role
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="invitations">
+            <div className="flex justify-end mb-4">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => refetchInvitations()}
+                disabled={invitationsLoading}
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${invitationsLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            </div>
+
+            {invitationsLoading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-24 w-full" />
+                ))}
+              </div>
+            ) : filteredInvitations.length === 0 ? (
+              <Card>
+                <CardContent className="p-8 text-center text-muted-foreground">
+                  {searchQuery ? "No invitations match your search." : "No invitations sent yet."}
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {filteredInvitations.map((invitation) => (
+                  <Card key={invitation.id} className={invitation.status === "failed" ? "border-destructive/50" : ""}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold">{invitation.email}</h3>
+                            {getStatusBadge(invitation.status)}
+                          </div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge variant="outline" className="text-xs">
+                              {invitation.role === "admin" ? (
+                                <ShieldCheck className="h-3 w-3 mr-1" />
+                              ) : (
+                                <Shield className="h-3 w-3 mr-1" />
+                              )}
+                              {invitation.role}
+                            </Badge>
+                          </div>
+                          {invitation.error_message && (
+                            <p className="text-sm text-destructive mb-2">
+                              Error: {invitation.error_message}
+                            </p>
+                          )}
+                          <p className="text-xs text-muted-foreground">
+                            Invited: {format(new Date(invitation.created_at), "PPp")}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {invitation.status === "failed" && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleResendInvitation(invitation)}
+                              disabled={isSubmitting}
+                            >
+                              <RefreshCw className="h-4 w-4 mr-1" />
+                              Resend
+                            </Button>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteInvitation(invitation.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
 
         <Dialog open={addRoleDialogOpen} onOpenChange={setAddRoleDialogOpen}>
           <DialogContent>

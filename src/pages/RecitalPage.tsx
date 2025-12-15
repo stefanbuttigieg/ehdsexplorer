@@ -13,6 +13,7 @@ import PrintButton from "@/components/PrintButton";
 import { useRecital, useRecitals } from "@/hooks/useRecitals";
 import { useFootnotesByRecital } from "@/hooks/useFootnotes";
 import FootnotesSection from "@/components/FootnotesSection";
+import ContentWithFootnotes from "@/components/ContentWithFootnotes";
 
 const RecitalPage = () => {
   const { id } = useParams();
@@ -84,9 +85,11 @@ const RecitalPage = () => {
         {/* Recital Content */}
         <Card className="mb-8">
           <CardContent className="p-6">
-            <div className="legal-text whitespace-pre-wrap text-lg leading-relaxed">
-              {recital.content}
-            </div>
+            <ContentWithFootnotes 
+              content={recital.content} 
+              footnotes={footnotes} 
+              className="legal-text text-lg leading-relaxed"
+            />
             <FootnotesSection footnotes={footnotes} />
           </CardContent>
         </Card>

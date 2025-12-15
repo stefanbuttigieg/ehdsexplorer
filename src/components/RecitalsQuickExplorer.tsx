@@ -49,12 +49,14 @@ export const RecitalsQuickExplorer = () => {
           {recitals?.map((recital) => (
             <Tooltip key={recital.recital_number}>
               <TooltipTrigger asChild>
-                <Link
-                  to={`/recital/${recital.recital_number}`}
-                  className="inline-flex items-center justify-center w-9 h-9 text-sm font-medium rounded-md border border-border bg-background hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
-                >
-                  {recital.recital_number}
-                </Link>
+                <span>
+                  <Link
+                    to={`/recital/${recital.recital_number}`}
+                    className="inline-flex items-center justify-center w-9 h-9 text-sm font-medium rounded-md border border-border bg-background hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
+                  >
+                    {recital.recital_number}
+                  </Link>
+                </span>
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-xs">
                 <p className="text-xs">Recital {recital.recital_number}</p>

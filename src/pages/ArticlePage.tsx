@@ -20,6 +20,8 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import PrintButton from "@/components/PrintButton";
 import FootnotesSection from "@/components/FootnotesSection";
 import ContentWithFootnotes from "@/components/ContentWithFootnotes";
+import { JsonLdMetadata } from "@/components/JsonLdMetadata";
+import { EliReference } from "@/components/EliReference";
 
 const ArticlePage = () => {
   const { id } = useParams();
@@ -81,13 +83,23 @@ const ArticlePage = () => {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
+        <JsonLdMetadata
+          type="article"
+          articleNumber={article.article_number}
+          title={article.title}
+          content={article.content}
+          chapterNumber={chapter?.id}
+        />
         <Breadcrumbs items={breadcrumbItems} />
 
         {/* Article Header */}
-        <div className="flex items-start justify-between gap-4 mb-8">
+        <div className="flex items-start justify-between gap-4 mb-4">
           <div>
             <Badge variant="outline" className="mb-2">Article {article.article_number}</Badge>
             <h1 className="text-3xl font-bold font-serif">{article.title}</h1>
+            <div className="mt-2">
+              <EliReference type="article" number={article.article_number} />
+            </div>
           </div>
           <div className="flex gap-2">
             <PrintButton />

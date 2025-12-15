@@ -9,6 +9,8 @@ import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { DataExportButtons } from "@/components/DataExportButtons";
+import { EliReference } from "@/components/EliReference";
 
 const RecitalsPage = () => {
   const { id } = useParams();
@@ -49,22 +51,36 @@ const RecitalsPage = () => {
     ? [{ label: "Recitals", href: "/recitals" }, { label: `Recital ${selectedId}` }]
     : [{ label: "Recitals" }];
 
+  const exportData = recitals?.map((r) => ({
+    recital_number: r.recital_number,
+    content: r.content,
+    related_articles: r.related_articles,
+  })) || [];
+
   return (
     <Layout>
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
         <Breadcrumbs items={breadcrumbItems} />
-        <h1 className="text-3xl font-bold font-serif mb-2">
-          {selectedId ? `Recital ${selectedId}` : "Recitals"}
-        </h1>
-        <p className="text-muted-foreground mb-6">
-          {selectedId 
-            ? "Context and interpretation guidance" 
-            : `The ${recitals?.length || ''} recitals providing context and interpretation guidance`}
-        </p>
+        <div className="flex items-start justify-between mb-2">
+          <div>
+            <h1 className="text-3xl font-bold font-serif mb-2">
+              {selectedId ? `Recital ${selectedId}` : "Recitals"}
+            </h1>
+            <p className="text-muted-foreground mb-2">
+              {selectedId 
+                ? "Context and interpretation guidance" 
+                : `The ${recitals?.length || ''} recitals providing context and interpretation guidance`}
+            </p>
+            <EliReference type="regulation" />
+          </div>
+          {!selectedId && recitals && recitals.length > 0 && (
+            <DataExportButtons data={exportData} filename="ehds-recitals" />
+          )}
+        </div>
 
         {/* Search */}
         {!selectedId && (
-          <div className="relative mb-6">
+          <div className="relative mb-6 mt-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"

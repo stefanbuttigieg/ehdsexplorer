@@ -8,6 +8,8 @@ import { Search } from "lucide-react";
 import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { useArticles } from "@/hooks/useArticles";
+import { DataExportButtons } from "@/components/DataExportButtons";
+import { EliReference } from "@/components/EliReference";
 
 const ArticlesPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -22,17 +24,32 @@ const ArticlesPage = () => {
     );
   });
 
+  const exportData = articles?.map((a) => ({
+    article_number: a.article_number,
+    title: a.title,
+    content: a.content,
+    chapter_id: a.chapter_id,
+  })) || [];
+
   return (
     <Layout>
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
         <Breadcrumbs items={[{ label: "Articles" }]} />
-        <h1 className="text-3xl font-bold font-serif mb-2">Articles</h1>
-        <p className="text-muted-foreground mb-6">
-          Browse all {articles?.length || ''} articles of the EHDS Regulation
-        </p>
+        <div className="flex items-start justify-between mb-2">
+          <div>
+            <h1 className="text-3xl font-bold font-serif mb-2">Articles</h1>
+            <p className="text-muted-foreground mb-2">
+              Browse all {articles?.length || ''} articles of the EHDS Regulation
+            </p>
+            <EliReference type="regulation" />
+          </div>
+          {articles && articles.length > 0 && (
+            <DataExportButtons data={exportData} filename="ehds-articles" />
+          )}
+        </div>
 
         {/* Search */}
-        <div className="relative mb-6">
+        <div className="relative mb-6 mt-4">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"

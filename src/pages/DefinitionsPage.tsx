@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useDefinitions, searchDefinitions } from "@/hooks/useDefinitions";
 import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { DataExportButtons } from "@/components/DataExportButtons";
 
 const DefinitionsPage = () => {
   const [query, setQuery] = useState("");
@@ -15,12 +16,25 @@ const DefinitionsPage = () => {
   
   const filteredDefs = query ? searchDefinitions(definitions, query) : definitions;
 
+  const exportData = definitions.map((d) => ({
+    term: d.term,
+    definition: d.definition,
+    source_article: d.source_article,
+  }));
+
   return (
     <Layout>
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
         <Breadcrumbs items={[{ label: "Definitions" }]} />
-        <h1 className="text-3xl font-bold font-serif mb-2">Definitions</h1>
-        <p className="text-muted-foreground mb-6">Article 2 definitions from the EHDS Regulation</p>
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold font-serif mb-2">Definitions</h1>
+            <p className="text-muted-foreground">Article 2 definitions from the EHDS Regulation</p>
+          </div>
+          {definitions.length > 0 && (
+            <DataExportButtons data={exportData} filename="ehds-definitions" />
+          )}
+        </div>
 
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

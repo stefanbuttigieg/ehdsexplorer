@@ -382,9 +382,10 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
         {query.trim() && (
           <>
             <CommandSeparator />
-            <CommandGroup>
+            <CommandGroup forceMount>
               <CommandItem
-                value="view-all-results"
+                forceMount
+                value={`view-all-results-${query}`}
                 onSelect={() => handleSelect(`/search?q=${encodeURIComponent(query)}`)}
                 className="justify-between bg-muted/50"
               >

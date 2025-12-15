@@ -30,6 +30,9 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useChapters } from '@/hooks/useChapters';
 import { useSections } from '@/hooks/useSections';
+import { useFootnotes, useCreateFootnote, useUpdateFootnote, useDeleteFootnote, Footnote } from '@/hooks/useFootnotes';
+import { Plus, Trash2, StickyNote } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 
 interface DbArticle {
   id: number;
@@ -64,6 +67,14 @@ const AdminArticlesPage = () => {
 
   const { data: chapters } = useChapters();
   const { data: allSections } = useSections();
+  const { data: allFootnotes = [] } = useFootnotes();
+  const createFootnote = useCreateFootnote();
+  const updateFootnote = useUpdateFootnote();
+  const deleteFootnote = useDeleteFootnote();
+
+  // Footnote management state
+  const [newFootnoteMarker, setNewFootnoteMarker] = useState('');
+  const [newFootnoteContent, setNewFootnoteContent] = useState('');
 
   const { data: articles, isLoading } = useQuery({
     queryKey: ['admin-articles'],
@@ -99,7 +110,14 @@ const AdminArticlesPage = () => {
     setEditedContent(article.content);
     setEditedChapterId(article.chapter_id);
     setEditedSectionId(article.section_id);
+    setNewFootnoteMarker('');
+    setNewFootnoteContent('');
   };
+
+  // Get footnotes for the currently editing article
+  const articleFootnotes = editingArticle 
+    ? allFootnotes.filter(fn => fn.article_id === editingArticle.id)
+    : [];
 
   // Get sections filtered by selected chapter
   const availableSections = allSections?.filter(s => s.chapter_id === editedChapterId) || [];
@@ -137,6 +155,33 @@ const AdminArticlesPage = () => {
       });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleAddFootnote = async () => {
+    if (!editingArticle || !newFootnoteMarker || !newFootnoteContent) return;
+    try {
+      await createFootnote.mutateAsync({
+        marker: newFootnoteMarker,
+        content: newFootnoteContent,
+        article_id: editingArticle.id,
+        recital_id: null,
+      });
+      setNewFootnoteMarker('');
+      setNewFootnoteContent('');
+      toast({ title: 'Footnote added' });
+    } catch {
+      toast({ title: 'Error', description: 'Failed to add footnote', variant: 'destructive' });
+    }
+  };
+
+  const handleDeleteFootnote = async (id: string) => {
+    if (!confirm('Delete this footnote?')) return;
+    try {
+      await deleteFootnote.mutateAsync(id);
+      toast({ title: 'Footnote deleted' });
+    } catch {
+      toast({ title: 'Error', description: 'Failed to delete footnote', variant: 'destructive' });
     }
   };
 
@@ -399,8 +444,63 @@ const AdminArticlesPage = () => {
                 <MarkdownEditor
                   value={editedContent}
                   onChange={setEditedContent}
-                  rows={16}
+                  rows={12}
                 />
+              </div>
+              
+              {/* Footnotes Section */}
+              <div className="space-y-3 pt-4 border-t">
+                <div className="flex items-center gap-2">
+                  <StickyNote className="h-4 w-4 text-muted-foreground" />
+                  <Label className="text-base font-medium">Footnotes ({articleFootnotes.length})</Label>
+                </div>
+                
+                {articleFootnotes.length > 0 && (
+                  <div className="space-y-2">
+                    {articleFootnotes.map((fn) => (
+                      <div key={fn.id} className="flex items-start gap-2 p-2 bg-muted/50 rounded text-sm">
+                        <span className="font-mono text-primary shrink-0">{fn.marker}</span>
+                        <p className="flex-1 text-muted-foreground">{fn.content}</p>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleDeleteFootnote(fn.id)}
+                          className="shrink-0"
+                        >
+                          <Trash2 className="h-3 w-3 text-destructive" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <div className="grid gap-2">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Marker (e.g. [^1])"
+                      value={newFootnoteMarker}
+                      onChange={(e) => setNewFootnoteMarker(e.target.value)}
+                      className="w-32"
+                    />
+                    <Textarea
+                      placeholder="Footnote content..."
+                      value={newFootnoteContent}
+                      onChange={(e) => setNewFootnoteContent(e.target.value)}
+                      rows={2}
+                      className="flex-1"
+                    />
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleAddFootnote}
+                    disabled={!newFootnoteMarker || !newFootnoteContent || createFootnote.isPending}
+                    className="w-fit"
+                  >
+                    <Plus className="h-3 w-3 mr-1" />
+                    Add Footnote
+                  </Button>
+                </div>
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setEditingArticle(null)}>

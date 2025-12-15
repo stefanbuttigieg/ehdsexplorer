@@ -4,6 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { usePageContent } from "@/hooks/usePageContent";
+import { KeyDatesGantt } from "@/components/KeyDatesGantt";
 
 const OverviewPage = () => {
   const { data: page, isLoading } = usePageContent('overview');
@@ -35,7 +36,7 @@ const OverviewPage = () => {
           <CardContent className="legal-text space-y-4">
             <p>{content?.what_is_ehds?.intro}</p>
             <ul className="list-disc ml-6 space-y-2">
-              {content?.what_is_ehds?.points?.map((point, idx) => (
+              {content?.what_is_ehds?.points?.map((point: { title: string; description: string }, idx: number) => (
                 <li key={idx}><strong>{point.title}</strong> {point.description}</li>
               ))}
             </ul>
@@ -45,7 +46,7 @@ const OverviewPage = () => {
         <Card className="mb-6">
           <CardHeader><CardTitle>{content?.key_components?.title || 'Key Components'}</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            {content?.key_components?.items?.map((item, idx) => (
+            {content?.key_components?.items?.map((item: { title: string; description: string }, idx: number) => (
               <div key={idx} className="p-4 bg-muted rounded-lg">
                 <h4 className="font-semibold mb-2">{item.title}</h4>
                 <p className="text-sm text-muted-foreground">{item.description}</p>
@@ -57,14 +58,11 @@ const OverviewPage = () => {
         <Card>
           <CardHeader><CardTitle>{content?.key_dates?.title || 'Key Dates'}</CardTitle></CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {content?.key_dates?.dates?.map((item, idx) => (
-                <div key={idx} className="flex justify-between items-center p-3 bg-muted rounded-lg">
-                  <span>{item.label}</span>
-                  <Badge>{item.date}</Badge>
-                </div>
-              ))}
-            </div>
+            {content?.key_dates?.dates && content.key_dates.dates.length > 0 ? (
+              <KeyDatesGantt dates={content.key_dates.dates} />
+            ) : (
+              <p className="text-muted-foreground">No key dates available.</p>
+            )}
           </CardContent>
         </Card>
       </div>

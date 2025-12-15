@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText, Accessibility } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { toRoman } from "@/lib/romanNumerals";
 import { useChapters } from "@/hooks/useChapters";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -130,7 +131,7 @@ const Layout = ({ children }: LayoutProps) => {
                           location.pathname === `/chapter/${chapter.chapter_number}` && "bg-sidebar-accent text-sidebar-accent-foreground"
                         )}
                       >
-                        <span className="text-xs text-muted-foreground flex-shrink-0 mt-0.5">{chapter.chapter_number}.</span>
+                        <span className="text-xs text-muted-foreground flex-shrink-0 mt-0.5">{toRoman(chapter.chapter_number)}.</span>
                         <span className="break-words whitespace-normal">{chapter.title}</span>
                       </div>
                     </Link>

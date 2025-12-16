@@ -95,7 +95,7 @@ export function useAuth() {
   return {
     user,
     session,
-    loading,
+    loading: loading || rolesLoading,
     isAdmin,
     isEditor,
     signIn,

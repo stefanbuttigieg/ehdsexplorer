@@ -49,9 +49,9 @@ export function useAuth() {
       setIsEditor(false);
     } finally {
       setRolesLoading(false);
+      setLoading(false);
     }
   }, []);
-
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -79,7 +79,7 @@ export function useAuth() {
       setUser(session?.user ?? null);
 
       if (session?.user) {
-        checkRoles(session.user.id).then(() => setLoading(false));
+        checkRoles(session.user.id);
       } else {
         setLoading(false);
       }

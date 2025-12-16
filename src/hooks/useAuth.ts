@@ -13,14 +13,17 @@ export function useAuth() {
 
   const checkRoles = useCallback(async (userId: string) => {
     setRolesLoading(true);
+    console.log('[useAuth] Checking roles for user:', userId);
     try {
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId);
       
+      console.log('[useAuth] Roles query result:', { data, error });
+      
       if (error) {
-        console.error('Error checking roles:', error);
+        console.error('[useAuth] Error checking roles:', error);
         setIsSuperAdmin(false);
         setIsAdmin(false);
         setIsEditor(false);
@@ -28,11 +31,19 @@ export function useAuth() {
       }
 
       const roles = data?.map(r => r.role) || [];
-      setIsSuperAdmin(roles.includes('super_admin'));
-      setIsAdmin(roles.includes('admin') || roles.includes('super_admin'));
-      setIsEditor(roles.includes('editor') || roles.includes('admin') || roles.includes('super_admin'));
+      console.log('[useAuth] Roles found:', roles);
+      
+      const hasSuperAdmin = roles.includes('super_admin');
+      const hasAdmin = roles.includes('admin');
+      const hasEditor = roles.includes('editor');
+      
+      setIsSuperAdmin(hasSuperAdmin);
+      setIsAdmin(hasAdmin || hasSuperAdmin);
+      setIsEditor(hasEditor || hasAdmin || hasSuperAdmin);
+      
+      console.log('[useAuth] Role states set:', { hasSuperAdmin, hasAdmin, hasEditor });
     } catch (err) {
-      console.error('Error checking roles:', err);
+      console.error('[useAuth] Error checking roles:', err);
       setIsSuperAdmin(false);
       setIsAdmin(false);
       setIsEditor(false);

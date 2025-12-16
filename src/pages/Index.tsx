@@ -138,18 +138,18 @@ const Index = () => {
         })()}
 
         {/* Latest News Section */}
-        {newsSummaries.length > 0 && (
-          <section className="py-8 px-4 border-b border-border bg-secondary/5">
-            <div className="max-w-6xl mx-auto">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Newspaper className="h-5 w-5 text-secondary" />
-                  <h2 className="text-xl font-bold font-serif">Latest News</h2>
-                </div>
-                <Link to="/news" className="text-sm text-primary hover:underline">
-                  View all →
-                </Link>
+        <section className="py-8 px-4 border-b border-border bg-secondary/5">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Newspaper className="h-5 w-5 text-secondary" />
+                <h2 className="text-xl font-bold font-serif">Latest News</h2>
               </div>
+              <Link to="/news" className="text-sm text-primary hover:underline">
+                View all →
+              </Link>
+            </div>
+            {newsSummaries.length > 0 ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {newsSummaries.slice(0, 3).map(summary => (
                   <Card key={summary.id} className="border-secondary/20 bg-background">
@@ -168,9 +168,15 @@ const Index = () => {
                   </Card>
                 ))}
               </div>
-            </div>
-          </section>
-        )}
+            ) : (
+              <Card className="border-secondary/20 bg-background">
+                <CardContent className="p-6 text-center text-muted-foreground">
+                  <p>No news summaries published yet. Check back soon for weekly EHDS updates.</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </section>
 
         {/* Quick Links */}
         <section className="py-8 px-4 border-b border-border bg-muted/30">

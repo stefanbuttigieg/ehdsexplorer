@@ -18,12 +18,14 @@ import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/Layout";
 import { format } from "date-fns";
 
+type AppRole = "super_admin" | "admin" | "editor";
+
 interface UserWithRoles {
   id: string;
   email: string | null;
   display_name: string | null;
   created_at: string;
-  roles: Array<{ id: string; role: "admin" | "editor" }>;
+  roles: Array<{ id: string; role: AppRole }>;
 }
 
 interface Invitation {
@@ -40,14 +42,14 @@ const AdminUsersPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user, isAdmin, loading: authLoading } = useAuth();
+  const { user, isAdmin, isSuperAdmin, loading: authLoading } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [addRoleDialogOpen, setAddRoleDialogOpen] = useState(false);
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [selectedRole, setSelectedRole] = useState<"admin" | "editor">("editor");
+  const [selectedRole, setSelectedRole] = useState<AppRole>("editor");
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<"admin" | "editor">("editor");
+  const [inviteRole, setInviteRole] = useState<AppRole>("editor");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTestingEmail, setIsTestingEmail] = useState(false);
 
@@ -81,7 +83,7 @@ const AdminUsersPage = () => {
         created_at: profile.created_at,
         roles: (roles || [])
           .filter((r) => r.user_id === profile.user_id)
-          .map((r) => ({ id: r.id, role: r.role as "admin" | "editor" })),
+          .map((r) => ({ id: r.id, role: r.role as AppRole })),
       }));
 
       return usersWithRoles;
@@ -481,15 +483,17 @@ const AdminUsersPage = () => {
                               userItem.roles.map((role) => (
                                 <Badge
                                   key={role.id}
-                                  variant={role.role === "admin" ? "default" : "secondary"}
+                                  variant={role.role === "super_admin" ? "destructive" : role.role === "admin" ? "default" : "secondary"}
                                   className="flex items-center gap-1"
                                 >
-                                  {role.role === "admin" ? (
+                                  {role.role === "super_admin" ? (
+                                    <ShieldCheck className="h-3 w-3" />
+                                  ) : role.role === "admin" ? (
                                     <ShieldCheck className="h-3 w-3" />
                                   ) : (
                                     <Shield className="h-3 w-3" />
                                   )}
-                                  {role.role}
+                                  {role.role === "super_admin" ? "Super Admin" : role.role}
                                   {userItem.id !== user?.id && (
                                     <button
                                       onClick={() => handleRemoveRole(role.id)}
@@ -564,12 +568,14 @@ const AdminUsersPage = () => {
                           </div>
                           <div className="flex items-center gap-2 mb-2">
                             <Badge variant="outline" className="text-xs">
-                              {invitation.role === "admin" ? (
+                              {invitation.role === "super_admin" ? (
+                                <ShieldCheck className="h-3 w-3 mr-1" />
+                              ) : invitation.role === "admin" ? (
                                 <ShieldCheck className="h-3 w-3 mr-1" />
                               ) : (
                                 <Shield className="h-3 w-3 mr-1" />
                               )}
-                              {invitation.role}
+                              {invitation.role === "super_admin" ? "Super Admin" : invitation.role}
                             </Badge>
                           </div>
                           {invitation.error_message && (
@@ -621,7 +627,7 @@ const AdminUsersPage = () => {
             <div className="space-y-4">
               <div>
                 <Label htmlFor="role">Role</Label>
-                <Select value={selectedRole} onValueChange={(v) => setSelectedRole(v as "admin" | "editor")}>
+                <Select value={selectedRole} onValueChange={(v) => setSelectedRole(v as AppRole)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -638,6 +644,14 @@ const AdminUsersPage = () => {
                         Admin - Full access
                       </div>
                     </SelectItem>
+                    {isSuperAdmin && (
+                      <SelectItem value="super_admin">
+                        <div className="flex items-center gap-2">
+                          <ShieldCheck className="h-4 w-4 text-destructive" />
+                          Super Admin - System control
+                        </div>
+                      </SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -674,7 +688,7 @@ const AdminUsersPage = () => {
               </div>
               <div>
                 <Label htmlFor="invite-role">Role</Label>
-                <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as "admin" | "editor")}>
+                <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as AppRole)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -691,6 +705,14 @@ const AdminUsersPage = () => {
                         Admin - Full access
                       </div>
                     </SelectItem>
+                    {isSuperAdmin && (
+                      <SelectItem value="super_admin">
+                        <div className="flex items-center gap-2">
+                          <ShieldCheck className="h-4 w-4 text-destructive" />
+                          Super Admin - System control
+                        </div>
+                      </SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>

@@ -7,6 +7,7 @@ export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [rolesLoading, setRolesLoading] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
 
@@ -20,16 +21,19 @@ export function useAuth() {
       
       if (error) {
         console.error('Error checking roles:', error);
+        setIsSuperAdmin(false);
         setIsAdmin(false);
         setIsEditor(false);
         return;
       }
 
       const roles = data?.map(r => r.role) || [];
-      setIsAdmin(roles.includes('admin'));
-      setIsEditor(roles.includes('editor') || roles.includes('admin'));
+      setIsSuperAdmin(roles.includes('super_admin'));
+      setIsAdmin(roles.includes('admin') || roles.includes('super_admin'));
+      setIsEditor(roles.includes('editor') || roles.includes('admin') || roles.includes('super_admin'));
     } catch (err) {
       console.error('Error checking roles:', err);
+      setIsSuperAdmin(false);
       setIsAdmin(false);
       setIsEditor(false);
     } finally {
@@ -50,6 +54,7 @@ export function useAuth() {
             checkRoles(session.user.id);
           }, 0);
         } else {
+          setIsSuperAdmin(false);
           setIsAdmin(false);
           setIsEditor(false);
           setLoading(false);
@@ -96,6 +101,7 @@ export function useAuth() {
     user,
     session,
     loading,
+    isSuperAdmin,
     isAdmin,
     isEditor,
     signIn,

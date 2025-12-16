@@ -47,6 +47,7 @@ import ApiDocsPage from "./pages/ApiDocsPage";
 import NewsPage from "./pages/NewsPage";
 import NewsDetailPage from "./pages/NewsDetailPage";
 import AdminNewsPage from "./pages/AdminNewsPage";
+import AdminPermissionsPage from "./pages/AdminPermissionsPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -109,6 +110,7 @@ const App = () => (
             <Route path="/admin/help" element={<AdminHelpCenterPage />} />
             <Route path="/admin/email-templates" element={<AdminEmailTemplatesPage />} />
             <Route path="/admin/news" element={<AdminNewsPage />} />
+            <Route path="/admin/permissions" element={<AdminPermissionsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </MaintenanceGuard>

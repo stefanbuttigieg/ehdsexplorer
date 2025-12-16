@@ -26,6 +26,7 @@ export function useAuth() {
       }
 
       const roles = data?.map(r => r.role) || [];
+      console.log('User roles from DB:', roles);
       setIsAdmin(roles.includes('admin') || roles.includes('super_admin'));
       setIsEditor(roles.includes('editor') || roles.includes('admin') || roles.includes('super_admin'));
     } catch (err) {

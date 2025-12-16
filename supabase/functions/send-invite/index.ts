@@ -13,6 +13,13 @@ interface InviteRequest {
   inviterEmail: string;
 }
 
+// Email validation function
+const isValidEmail = (email: string): boolean => {
+  if (!email || typeof email !== 'string') return false;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email) && email.length <= 254;
+};
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -67,6 +74,22 @@ const handler = async (req: Request): Promise<Response> => {
     if (!email || !role) {
       return new Response(
         JSON.stringify({ error: "Email and role are required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate email format
+    if (!isValidEmail(email)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid email format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate inviterEmail format if provided
+    if (inviterEmail && !isValidEmail(inviterEmail)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid inviter email format" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }

@@ -20,6 +20,7 @@ import BookmarksPage from "./pages/BookmarksPage";
 import AnnexesPage from "./pages/AnnexesPage";
 import AnnexDetailPage from "./pages/AnnexDetailPage";
 import AdminAuthPage from "./pages/AdminAuthPage";
+import AdminSetPasswordPage from "./pages/AdminSetPasswordPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminArticlesPage from "./pages/AdminArticlesPage";
 import AdminRecitalsPage from "./pages/AdminRecitalsPage";
@@ -92,6 +93,7 @@ const App = () => (
             <Route path="/news" element={<NewsPage />} />
             <Route path="/news/:id" element={<NewsDetailPage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
+            <Route path="/admin/set-password" element={<AdminSetPasswordPage />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/articles" element={<AdminArticlesPage />} />
             <Route path="/admin/recitals" element={<AdminRecitalsPage />} />

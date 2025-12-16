@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Users, ArrowLeft, Shield, ShieldCheck, Trash2, Plus, Search, Mail, Clock, AlertCircle, CheckCircle2, XCircle, RefreshCw, TestTube2 } from "lucide-react";
+import { Users, ArrowLeft, Shield, ShieldCheck, Trash2, Plus, Search, Mail, Clock, AlertCircle, CheckCircle2, XCircle, RefreshCw, TestTube2, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -44,10 +44,13 @@ const AdminUsersPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [addRoleDialogOpen, setAddRoleDialogOpen] = useState(false);
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [selectedUserEmail, setSelectedUserEmail] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<"admin" | "editor">("editor");
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<"admin" | "editor">("editor");
+  const [newPassword, setNewPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTestingEmail, setIsTestingEmail] = useState(false);
 
@@ -173,6 +176,61 @@ const AdminUsersPage = () => {
     setSelectedUserId(userId);
     setSelectedRole("editor");
     setAddRoleDialogOpen(true);
+  };
+
+  const openPasswordDialog = (userId: string, email: string | null) => {
+    setSelectedUserId(userId);
+    setSelectedUserEmail(email);
+    setNewPassword("");
+    setPasswordDialogOpen(true);
+  };
+
+  const handleSetPassword = async () => {
+    if (!selectedUserId || !newPassword) {
+      toast({ title: "Error", description: "Password is required", variant: "destructive" });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({ title: "Error", description: "Password must be at least 6 characters", variant: "destructive" });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("manage-user-password", {
+        body: {
+          userId: selectedUserId,
+          password: newPassword,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        toast({
+          title: "Password updated",
+          description: `Password has been set for ${selectedUserEmail || 'the user'}. Please share it with them securely.`,
+        });
+        setPasswordDialogOpen(false);
+        setNewPassword("");
+      } else {
+        toast({
+          title: "Error",
+          description: data?.error || "Failed to set password",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error("Set password error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to set password",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSendInvite = async () => {
@@ -508,14 +566,24 @@ const AdminUsersPage = () => {
                         </div>
                         <div className="flex items-center gap-2">
                           {userItem.id !== user?.id && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => openAddRoleDialog(userItem.id)}
-                            >
-                              <Plus className="h-4 w-4 mr-1" />
-                              Add Role
-                            </Button>
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openPasswordDialog(userItem.id, userItem.email)}
+                              >
+                                <Key className="h-4 w-4 mr-1" />
+                                Set Password
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openAddRoleDialog(userItem.id)}
+                              >
+                                <Plus className="h-4 w-4 mr-1" />
+                                Add Role
+                              </Button>
+                            </>
                           )}
                         </div>
                       </div>
@@ -702,6 +770,43 @@ const AdminUsersPage = () => {
               <Button onClick={handleSendInvite} disabled={isSubmitting}>
                 <Mail className="h-4 w-4 mr-2" />
                 {isSubmitting ? "Sending..." : "Send Invitation"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Set User Password</DialogTitle>
+              <DialogDescription>
+                Set a password for {selectedUserEmail || 'this user'}. 
+                Share the password with them securely (not via email).
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="new-password">New Password</Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  placeholder="Enter new password (min 6 characters)"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  minLength={6}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Password must be at least 6 characters long.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setPasswordDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSetPassword} disabled={isSubmitting || newPassword.length < 6}>
+                <Key className="h-4 w-4 mr-2" />
+                {isSubmitting ? "Setting..." : "Set Password"}
               </Button>
             </DialogFooter>
           </DialogContent>

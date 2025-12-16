@@ -316,6 +316,45 @@ export type Database = {
         }
         Relationships: []
       }
+      news_summaries: {
+        Row: {
+          created_at: string
+          generated_by: string | null
+          id: string
+          is_published: boolean
+          sources: string[] | null
+          summary: string
+          title: string
+          updated_at: string
+          week_end: string
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          generated_by?: string | null
+          id?: string
+          is_published?: boolean
+          sources?: string[] | null
+          summary: string
+          title: string
+          updated_at?: string
+          week_end: string
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          generated_by?: string | null
+          id?: string
+          is_published?: boolean
+          sources?: string[] | null
+          summary?: string
+          title?: string
+          updated_at?: string
+          week_end?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string

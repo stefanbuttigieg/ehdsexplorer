@@ -2,3 +2,6 @@ project_id = "lmjjghvrjgffmbidajih"
 
 [functions.api-data]
 verify_jwt = false
+
+[functions.generate-news-summary]
+verify_jwt = true

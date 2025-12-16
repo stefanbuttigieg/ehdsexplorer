@@ -565,25 +565,23 @@ const AdminUsersPage = () => {
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openPasswordDialog(userItem.id, userItem.email)}
+                          >
+                            <Key className="h-4 w-4 mr-1" />
+                            {userItem.id === user?.id ? "Change Password" : "Set Password"}
+                          </Button>
                           {userItem.id !== user?.id && (
-                            <>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => openPasswordDialog(userItem.id, userItem.email)}
-                              >
-                                <Key className="h-4 w-4 mr-1" />
-                                Set Password
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => openAddRoleDialog(userItem.id)}
-                              >
-                                <Plus className="h-4 w-4 mr-1" />
-                                Add Role
-                              </Button>
-                            </>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => openAddRoleDialog(userItem.id)}
+                            >
+                              <Plus className="h-4 w-4 mr-1" />
+                              Add Role
+                            </Button>
                           )}
                         </div>
                       </div>

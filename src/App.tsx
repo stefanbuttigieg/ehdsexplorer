@@ -44,6 +44,9 @@ import CookieConsentBanner from "./components/CookieConsentBanner";
 import NotFound from "./pages/NotFound";
 import MatchGamePage from "./pages/MatchGamePage";
 import ApiDocsPage from "./pages/ApiDocsPage";
+import NewsPage from "./pages/NewsPage";
+import NewsDetailPage from "./pages/NewsDetailPage";
+import AdminNewsPage from "./pages/AdminNewsPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -86,6 +89,8 @@ const App = () => (
             <Route path="/accessibility" element={<AccessibilityStatementPage />} />
             <Route path="/match-game" element={<MatchGamePage />} />
             <Route path="/api" element={<ApiDocsPage />} />
+            <Route path="/news" element={<NewsPage />} />
+            <Route path="/news/:id" element={<NewsDetailPage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/articles" element={<AdminArticlesPage />} />
@@ -103,6 +108,7 @@ const App = () => (
             <Route path="/admin/footnotes" element={<AdminFootnotesPage />} />
             <Route path="/admin/help" element={<AdminHelpCenterPage />} />
             <Route path="/admin/email-templates" element={<AdminEmailTemplatesPage />} />
+            <Route path="/admin/news" element={<AdminNewsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </MaintenanceGuard>

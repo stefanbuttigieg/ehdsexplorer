@@ -52,10 +52,9 @@ const handler = async (req: Request): Promise<Response> => {
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id)
-      .eq("role", "admin")
-      .maybeSingle();
+      .in("role", ["admin", "super_admin"]);
 
-    if (roleError || !roleData) {
+    if (roleError || !roleData || roleData.length === 0) {
       console.error("Role check error:", roleError);
       return new Response(
         JSON.stringify({ error: "Only admins can send invitations" }),

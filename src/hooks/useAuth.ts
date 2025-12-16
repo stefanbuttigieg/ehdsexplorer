@@ -26,8 +26,8 @@ export function useAuth() {
       }
 
       const roles = data?.map(r => r.role) || [];
-      setIsAdmin(roles.includes('admin'));
-      setIsEditor(roles.includes('editor') || roles.includes('admin'));
+      setIsAdmin(roles.includes('admin') || roles.includes('super_admin'));
+      setIsEditor(roles.includes('editor') || roles.includes('admin') || roles.includes('super_admin'));
     } catch (err) {
       console.error('Error checking roles:', err);
       setIsAdmin(false);

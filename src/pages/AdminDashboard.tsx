@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote, HelpCircle, BookOpenCheck, Mail, Newspaper, Shield } from 'lucide-react';
+import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote, HelpCircle, BookOpenCheck, Mail, Newspaper } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +14,7 @@ import { useSiteSettings, useUpdateSiteSettings } from '@/hooks/useSiteSettings'
 import { AdminTour, useAdminTour } from '@/components/AdminTour';
 
 const AdminDashboard = () => {
-  const { user, loading, isEditor, isAdmin, isSuperAdmin, signOut } = useAuth();
+  const { user, loading, isEditor, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { data: settings } = useSiteSettings();
@@ -157,8 +157,8 @@ const AdminDashboard = () => {
             </Button>
             <div className="text-right">
               <p className="text-sm font-medium">{user.email}</p>
-              <Badge variant={isSuperAdmin ? 'destructive' : isAdmin ? 'default' : 'secondary'}>
-                {isSuperAdmin ? 'Super Admin' : isAdmin ? 'Admin' : 'Editor'}
+              <Badge variant={isAdmin ? 'default' : 'secondary'}>
+                {isAdmin ? 'Admin' : 'Editor'}
               </Badge>
             </div>
             <Button variant="outline" size="icon" onClick={handleSignOut}>
@@ -189,21 +189,6 @@ const AdminDashboard = () => {
               </Link>
             );
           })}
-
-          {isSuperAdmin && (
-            <Link to="/admin/permissions">
-              <Card className="hover:border-primary transition-colors h-full border-dashed border-destructive/50">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <Shield className="h-8 w-8 text-destructive" />
-                    <Badge variant="destructive">Super Admin Only</Badge>
-                  </div>
-                  <CardTitle className="mt-4">Role Permissions</CardTitle>
-                  <CardDescription>Configure permissions for each role</CardDescription>
-                </CardHeader>
-              </Card>
-            </Link>
-          )}
 
           {isAdmin && (
             <>

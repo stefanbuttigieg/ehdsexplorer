@@ -7,51 +7,36 @@ export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [rolesLoading, setRolesLoading] = useState(false);
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
 
   const checkRoles = useCallback(async (userId: string) => {
     setRolesLoading(true);
-    console.log('[useAuth] Checking roles for user:', userId);
     try {
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId);
       
-      console.log('[useAuth] Roles query result:', { data, error });
-      
       if (error) {
-        console.error('[useAuth] Error checking roles:', error);
-        setIsSuperAdmin(false);
+        console.error('Error checking roles:', error);
         setIsAdmin(false);
         setIsEditor(false);
         return;
       }
 
       const roles = data?.map(r => r.role) || [];
-      console.log('[useAuth] Roles found:', roles);
-      
-      const hasSuperAdmin = roles.includes('super_admin');
-      const hasAdmin = roles.includes('admin');
-      const hasEditor = roles.includes('editor');
-      
-      setIsSuperAdmin(hasSuperAdmin);
-      setIsAdmin(hasAdmin || hasSuperAdmin);
-      setIsEditor(hasEditor || hasAdmin || hasSuperAdmin);
-      
-      console.log('[useAuth] Role states set:', { hasSuperAdmin, hasAdmin, hasEditor });
+      setIsAdmin(roles.includes('admin'));
+      setIsEditor(roles.includes('editor') || roles.includes('admin'));
     } catch (err) {
-      console.error('[useAuth] Error checking roles:', err);
-      setIsSuperAdmin(false);
+      console.error('Error checking roles:', err);
       setIsAdmin(false);
       setIsEditor(false);
     } finally {
       setRolesLoading(false);
-      setLoading(false);
     }
   }, []);
+
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -65,7 +50,6 @@ export function useAuth() {
             checkRoles(session.user.id);
           }, 0);
         } else {
-          setIsSuperAdmin(false);
           setIsAdmin(false);
           setIsEditor(false);
           setLoading(false);
@@ -79,7 +63,7 @@ export function useAuth() {
       setUser(session?.user ?? null);
 
       if (session?.user) {
-        checkRoles(session.user.id);
+        checkRoles(session.user.id).then(() => setLoading(false));
       } else {
         setLoading(false);
       }
@@ -112,7 +96,6 @@ export function useAuth() {
     user,
     session,
     loading,
-    isSuperAdmin,
     isAdmin,
     isEditor,
     signIn,

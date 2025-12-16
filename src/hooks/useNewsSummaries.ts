@@ -104,3 +104,31 @@ export const useDeleteNewsSummary = () => {
     },
   });
 };
+
+export const useCreateNewsSummary = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (summary: Omit<NewsSummary, 'id' | 'created_at' | 'updated_at'>) => {
+      const { data, error } = await supabase
+        .from("news_summaries")
+        .insert({
+          title: summary.title,
+          summary: summary.summary,
+          week_start: summary.week_start,
+          week_end: summary.week_end,
+          sources: summary.sources || [],
+          generated_by: summary.generated_by || 'manual',
+          is_published: summary.is_published || false,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["news-summaries"] });
+    },
+  });
+};

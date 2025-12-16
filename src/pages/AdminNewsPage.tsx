@@ -16,7 +16,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { useNewsSummaries, useGenerateNewsSummary, useUpdateNewsSummary, useDeleteNewsSummary, NewsSummary } from '@/hooks/useNewsSummaries';
+import { useNewsSummaries, useGenerateNewsSummary, useUpdateNewsSummary, useDeleteNewsSummary, useCreateNewsSummary, NewsSummary } from '@/hooks/useNewsSummaries';
 import { usePageContent, useUpdatePageContent } from '@/hooks/usePageContent';
 
 const AdminNewsPage = () => {
@@ -27,6 +27,7 @@ const AdminNewsPage = () => {
   const generateMutation = useGenerateNewsSummary();
   const updateMutation = useUpdateNewsSummary();
   const deleteMutation = useDeleteNewsSummary();
+  const createMutation = useCreateNewsSummary();
 
   const { data: promptData, isLoading: promptLoading } = usePageContent('news-prompt');
   const updatePromptMutation = useUpdatePageContent();
@@ -39,6 +40,14 @@ const AdminNewsPage = () => {
 
   const [showPromptEditor, setShowPromptEditor] = useState(false);
   const [editPrompt, setEditPrompt] = useState('');
+  
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [createTitle, setCreateTitle] = useState('');
+  const [createSummary, setCreateSummary] = useState('');
+  const [createSources, setCreateSources] = useState<string[]>([]);
+  const [createNewSource, setCreateNewSource] = useState('');
+  const [createWeekStart, setCreateWeekStart] = useState('');
+  const [createWeekEnd, setCreateWeekEnd] = useState('');
 
   if (authLoading) {
     return (
@@ -161,6 +170,55 @@ const AdminNewsPage = () => {
     }
   };
 
+  const openCreateDialog = () => {
+    const today = new Date();
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - today.getDay() + 1);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    
+    setCreateTitle(`EHDS Weekly Update: ${format(monday, 'MMM d')} - ${format(sunday, 'MMM d, yyyy')}`);
+    setCreateSummary('');
+    setCreateSources([]);
+    setCreateNewSource('');
+    setCreateWeekStart(format(monday, 'yyyy-MM-dd'));
+    setCreateWeekEnd(format(sunday, 'yyyy-MM-dd'));
+    setShowCreateDialog(true);
+  };
+
+  const handleAddCreateSource = () => {
+    if (createNewSource.trim() && !createSources.includes(createNewSource.trim())) {
+      setCreateSources([...createSources, createNewSource.trim()]);
+      setCreateNewSource('');
+    }
+  };
+
+  const handleRemoveCreateSource = (index: number) => {
+    setCreateSources(createSources.filter((_, i) => i !== index));
+  };
+
+  const handleCreate = async () => {
+    if (!createTitle.trim() || !createSummary.trim() || !createWeekStart || !createWeekEnd) {
+      toast({ title: "Error", description: "Please fill in all required fields.", variant: "destructive" });
+      return;
+    }
+    try {
+      await createMutation.mutateAsync({
+        title: createTitle,
+        summary: createSummary,
+        week_start: createWeekStart,
+        week_end: createWeekEnd,
+        sources: createSources,
+        generated_by: 'manual',
+        is_published: false,
+      });
+      toast({ title: "Created", description: "Manual summary created successfully." });
+      setShowCreateDialog(false);
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  };
+
   return (
     <Layout>
       <div className="max-w-6xl mx-auto">
@@ -176,13 +234,17 @@ const AdminNewsPage = () => {
               <Settings className="h-4 w-4 mr-2" />
               Edit AI Prompt
             </Button>
+            <Button variant="outline" onClick={openCreateDialog}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Manual
+            </Button>
             <Button onClick={handleGenerate} disabled={generateMutation.isPending}>
               {generateMutation.isPending ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
                 <Sparkles className="h-4 w-4 mr-2" />
               )}
-              Generate Weekly Summary
+              Generate with AI
             </Button>
           </div>
         </div>
@@ -416,6 +478,119 @@ const AdminNewsPage = () => {
             <Button onClick={handleSavePrompt} disabled={updatePromptMutation.isPending}>
               {updatePromptMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Save Prompt
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Manual Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create Manual Summary</DialogTitle>
+            <DialogDescription>
+              Create a news summary manually without AI generation.
+            </DialogDescription>
+          </DialogHeader>
+          <Tabs defaultValue="content" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="content">Content</TabsTrigger>
+              <TabsTrigger value="sources">Sources ({createSources.length})</TabsTrigger>
+            </TabsList>
+            <TabsContent value="content" className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="create-week-start">Week Start</Label>
+                  <Input
+                    id="create-week-start"
+                    type="date"
+                    value={createWeekStart}
+                    onChange={(e) => setCreateWeekStart(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="create-week-end">Week End</Label>
+                  <Input
+                    id="create-week-end"
+                    type="date"
+                    value={createWeekEnd}
+                    onChange={(e) => setCreateWeekEnd(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="create-title">Title</Label>
+                <Input
+                  id="create-title"
+                  value={createTitle}
+                  onChange={(e) => setCreateTitle(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Content (Markdown)</Label>
+                <MarkdownEditor
+                  value={createSummary}
+                  onChange={setCreateSummary}
+                  rows={15}
+                />
+              </div>
+            </TabsContent>
+            <TabsContent value="sources" className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Source URLs</Label>
+                <p className="text-sm text-muted-foreground">
+                  Add URLs that were used as sources for this news summary.
+                </p>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="https://example.com/article"
+                    value={createNewSource}
+                    onChange={(e) => setCreateNewSource(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCreateSource())}
+                  />
+                  <Button type="button" onClick={handleAddCreateSource} size="icon">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              {createSources.length > 0 ? (
+                <div className="space-y-2">
+                  {createSources.map((source, index) => (
+                    <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-md">
+                      <Link className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <a
+                        href={source}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-primary hover:underline flex-1 truncate"
+                      >
+                        {source}
+                      </a>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => handleRemoveCreateSource(index)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No sources added yet.
+                </p>
+              )}
+            </TabsContent>
+          </Tabs>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreate} disabled={createMutation.isPending}>
+              {createMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Create Summary
             </Button>
           </div>
         </DialogContent>

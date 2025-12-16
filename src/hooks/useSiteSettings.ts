@@ -13,14 +13,24 @@ export const useSiteSettings = () => {
   return useQuery({
     queryKey: ["site-settings"],
     queryFn: async () => {
-      // Use the public view to avoid exposing admin UUIDs
+      // Try the public view first
       const { data, error } = await supabase
         .from("site_settings_public")
         .select("*")
         .eq("id", "default")
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      // If error or no data, return safe defaults
+      if (error || !data) {
+        console.warn('Could not fetch site settings, using defaults:', error?.message);
+        return {
+          id: 'default',
+          maintenance_mode: false,
+          maintenance_message: '',
+          updated_at: new Date().toISOString(),
+          updated_by: null
+        } as SiteSettings;
+      }
       return data as SiteSettings;
     },
     staleTime: 1000 * 30, // 30 seconds

@@ -6,6 +6,21 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const DEFAULT_PROMPT = `You are an expert analyst on the European Health Data Space (EHDS) Regulation (EU) 2025/327.
+
+Generate a comprehensive weekly news summary about developments related to the EHDS Regulation. The summary should cover:
+
+1. **Recent Developments**: Any new implementing acts, delegated acts, or regulatory updates
+2. **Member State Implementation**: Progress in EU member states adopting EHDS requirements
+3. **Health Data Access Bodies**: Updates on national HDAB establishment
+4. **EHR Systems**: News about electronic health record system certifications and compliance
+5. **Secondary Use of Data**: Developments in health data research access and governance
+6. **Stakeholder Activities**: Relevant activities from the European Commission, EHDS Board, or health data stakeholders
+
+IMPORTANT: For each news item or development mentioned, include a source URL in markdown format [Source Name](URL). Use real, verifiable sources from official EU institutions, news outlets, or regulatory bodies.
+
+Format the summary in clear markdown with sections. Be informative and factual. If there are no major developments, provide context on ongoing implementation timelines and upcoming milestones from the regulation.`;
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -51,24 +66,27 @@ serve(async (req) => {
       );
     }
 
-    // Generate AI summary
-    const prompt = `You are an expert analyst on the European Health Data Space (EHDS) Regulation (EU) 2025/327. 
+    // Fetch custom prompt from database
+    let customPrompt = DEFAULT_PROMPT;
+    const { data: promptData } = await supabase
+      .from('page_content')
+      .select('content')
+      .eq('id', 'news-prompt')
+      .single();
 
-Generate a comprehensive weekly news summary about developments related to the EHDS Regulation. The summary should cover:
+    if (promptData?.content?.prompt) {
+      customPrompt = promptData.content.prompt;
+      console.log("Using custom prompt from database");
+    }
 
-1. **Recent Developments**: Any new implementing acts, delegated acts, or regulatory updates
-2. **Member State Implementation**: Progress in EU member states adopting EHDS requirements
-3. **Health Data Access Bodies**: Updates on national HDAB establishment
-4. **EHR Systems**: News about electronic health record system certifications and compliance
-5. **Secondary Use of Data**: Developments in health data research access and governance
-6. **Stakeholder Activities**: Relevant activities from the European Commission, EHDS Board, or health data stakeholders
-
-Format the summary in clear markdown with sections. Be informative and factual. If there are no major developments, provide context on ongoing implementation timelines and upcoming milestones from the regulation.
+    // Build final prompt with week dates
+    const fullPrompt = `${customPrompt}
 
 Week period: ${weekStartStr} to ${weekEndStr}
 
-Generate a title for this week's summary and the content.`;
+Generate a title for this week's summary and the content. Make sure to include source URLs for any news items mentioned.`;
 
+    // Generate AI summary
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -79,7 +97,7 @@ Generate a title for this week's summary and the content.`;
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: "You are an expert on EU health data regulations, specifically the European Health Data Space (EHDS) Regulation." },
-          { role: "user", content: prompt }
+          { role: "user", content: fullPrompt }
         ],
       }),
     });
@@ -126,6 +144,16 @@ Generate a title for this week's summary and the content.`;
       summary = lines.slice(1).join('\n').trim();
     }
 
+    // Extract source URLs from the content
+    const urlRegex = /\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g;
+    const sources: string[] = [];
+    let match;
+    while ((match = urlRegex.exec(summary)) !== null) {
+      sources.push(match[2]);
+    }
+
+    console.log(`Extracted ${sources.length} source URLs`);
+
     // Save to database
     const { data: newSummary, error: insertError } = await supabase
       .from('news_summaries')
@@ -136,6 +164,7 @@ Generate a title for this week's summary and the content.`;
         week_end: weekEndStr,
         generated_by: 'ai',
         is_published: false,
+        sources,
       })
       .select()
       .single();

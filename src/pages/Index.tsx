@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { SearchCommand } from "@/components/SearchCommand";
-import { Search, Book, FileText, Scale, ListChecks, Bookmark, Files, Clock, MessageSquare, ExternalLink, Gamepad2 } from "lucide-react";
+import { Search, Book, FileText, Scale, ListChecks, Bookmark, Files, Clock, MessageSquare, ExternalLink, Gamepad2, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,12 +10,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useChapters } from "@/hooks/useChapters";
 import { useImplementingActs, getActStats } from "@/hooks/useImplementingActs";
 import { useDefinitions } from "@/hooks/useDefinitions";
+import { useNewsSummaries } from "@/hooks/useNewsSummaries";
 import Layout from "@/components/Layout";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
 import { RecitalsQuickExplorer } from "@/components/RecitalsQuickExplorer";
 import { ArticlesQuickExplorer } from "@/components/ArticlesQuickExplorer";
 import { ContinueReading } from "@/components/ContinueReading";
-import { differenceInDays, parse, isAfter, isBefore } from "date-fns";
+import { differenceInDays, parse, isAfter, isBefore, format } from "date-fns";
 
 const getFeedbackStatus = (deadline: string) => {
   const parts = deadline.split(" - ");
@@ -44,6 +45,7 @@ const Index = () => {
   const { data: chapters, isLoading: chaptersLoading } = useChapters();
   const { data: implementingActs = [] } = useImplementingActs();
   const { data: definitions = [] } = useDefinitions();
+  const { data: newsSummaries = [] } = useNewsSummaries(true);
   const actStats = getActStats(implementingActs);
 
   return (
@@ -134,6 +136,41 @@ const Index = () => {
             </section>
           );
         })()}
+
+        {/* Latest News Section */}
+        {newsSummaries.length > 0 && (
+          <section className="py-8 px-4 border-b border-border bg-secondary/5">
+            <div className="max-w-6xl mx-auto">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Newspaper className="h-5 w-5 text-secondary" />
+                  <h2 className="text-xl font-bold font-serif">Latest News</h2>
+                </div>
+                <Link to="/news" className="text-sm text-primary hover:underline">
+                  View all →
+                </Link>
+              </div>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {newsSummaries.slice(0, 3).map(summary => (
+                  <Card key={summary.id} className="border-secondary/20 bg-background">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {format(new Date(summary.week_start), "MMM d")} - {format(new Date(summary.week_end), "MMM d, yyyy")}
+                        </Badge>
+                      </div>
+                      <h3 className="font-semibold mb-2 line-clamp-2">{summary.title}</h3>
+                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{summary.summary}</p>
+                      <Link to={`/news/${summary.id}`}>
+                        <Button variant="outline" size="sm">Read more</Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Quick Links */}
         <section className="py-8 px-4 border-b border-border bg-muted/30">

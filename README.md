@@ -126,8 +126,10 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [X] Search result highlighting showing matched text
 - [X] Recent searches history
 - [X] Export bookmarks to PDF/JSON
-- [ ] Shareable deep links with highlighted text
-- [ ] Offline support (PWA)
+- [X] Shareable deep links with highlighted text
+- [X] Offline support (PWA)
+- [X] AI-generated news summaries
+- [X] Footnotes
 
 ### Medium-term
 - [ ] AI-powered Q&A about the regulation
@@ -135,6 +137,8 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [ ] Annotation and note-taking
 - [ ] Collaboration features for teams
 - [ ] Email alerts for implementing act status changes
+- [ ] Plain Language Version of Legal Text - side-by-side to legal text
+- [ ] Sign-up of new users and creation of profiles
 
 ### Long-term
 - [ ] Multi-language support (all EU languages)

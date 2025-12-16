@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.generate-news-summary]
 verify_jwt = true
+
+[functions.manage-user-password]
+verify_jwt = true

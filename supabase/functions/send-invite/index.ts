@@ -98,10 +98,11 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Use Supabase Admin API to invite user - this works even when signups are disabled
+    // Redirect to set-password page so users can set their password after clicking the magic link
     const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
       normalizedEmail,
       {
-        redirectTo: `${siteUrl}/admin`,
+        redirectTo: `${siteUrl}/admin/set-password`,
         data: {
           role: role,
           invited_by: inviterEmail,

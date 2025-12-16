@@ -8,7 +8,7 @@ A comprehensive digital platform for exploring **Regulation (EU) 2025/327** - th
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?logo=tailwindcss)
 ![Supabase](https://img.shields.io/badge/Supabase-Backend-3FCF8E?logo=supabase)
 [![BuyMeACoffee](https://raw.githubusercontent.com/pachadotdev/buymeacoffee-badges/main/bmc-yellow.svg)](https://buymeacoffee.com/stefanbuttigieg)
-![Lovable Credits used](https://img.shields.io/badge/Lovable%20Credits-1%2C250%20used-blue)
+![Lovable Credits used](https://img.shields.io/badge/Lovable%20Credits-%2C250%20used-blue)
 
 
 

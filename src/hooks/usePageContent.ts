@@ -55,7 +55,7 @@ export const useUpdatePageContent = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, title, content }: { id: string; title: string; content: OverviewContent }) => {
+    mutationFn: async ({ id, title, content }: { id: string; title: string; content: OverviewContent | Record<string, unknown> }) => {
       const { error } = await supabase
         .from('page_content')
         .update({ title, content: content as unknown as Json })

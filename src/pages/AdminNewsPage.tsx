@@ -1,20 +1,23 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { ArrowLeft, Plus, Sparkles, Trash2, Eye, EyeOff, Loader2, Pencil } from 'lucide-react';
+import { ArrowLeft, Sparkles, Trash2, Eye, EyeOff, Loader2, Pencil, Settings, Link, Plus, X } from 'lucide-react';
 import Layout from '@/components/Layout';
+import MarkdownEditor from '@/components/MarkdownEditor';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useNewsSummaries, useGenerateNewsSummary, useUpdateNewsSummary, useDeleteNewsSummary, NewsSummary } from '@/hooks/useNewsSummaries';
+import { usePageContent, useUpdatePageContent } from '@/hooks/usePageContent';
 
 const AdminNewsPage = () => {
   const navigate = useNavigate();
@@ -25,9 +28,17 @@ const AdminNewsPage = () => {
   const updateMutation = useUpdateNewsSummary();
   const deleteMutation = useDeleteNewsSummary();
 
+  const { data: promptData, isLoading: promptLoading } = usePageContent('news-prompt');
+  const updatePromptMutation = useUpdatePageContent();
+
   const [editingItem, setEditingItem] = useState<NewsSummary | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editSummary, setEditSummary] = useState('');
+  const [editSources, setEditSources] = useState<string[]>([]);
+  const [newSource, setNewSource] = useState('');
+
+  const [showPromptEditor, setShowPromptEditor] = useState(false);
+  const [editPrompt, setEditPrompt] = useState('');
 
   if (authLoading) {
     return (
@@ -100,6 +111,8 @@ const AdminNewsPage = () => {
     setEditingItem(summary);
     setEditTitle(summary.title);
     setEditSummary(summary.summary);
+    setEditSources(summary.sources || []);
+    setNewSource('');
   };
 
   const handleSaveEdit = async () => {
@@ -109,9 +122,40 @@ const AdminNewsPage = () => {
         id: editingItem.id,
         title: editTitle,
         summary: editSummary,
+        sources: editSources,
       });
       toast({ title: "Saved", description: "Summary updated successfully." });
       setEditingItem(null);
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  };
+
+  const handleAddSource = () => {
+    if (newSource.trim() && !editSources.includes(newSource.trim())) {
+      setEditSources([...editSources, newSource.trim()]);
+      setNewSource('');
+    }
+  };
+
+  const handleRemoveSource = (index: number) => {
+    setEditSources(editSources.filter((_, i) => i !== index));
+  };
+
+  const openPromptEditor = () => {
+    setEditPrompt((promptData?.content as any)?.prompt || '');
+    setShowPromptEditor(true);
+  };
+
+  const handleSavePrompt = async () => {
+    try {
+      await updatePromptMutation.mutateAsync({
+        id: 'news-prompt',
+        title: 'News Summary AI Prompt',
+        content: { prompt: editPrompt },
+      });
+      toast({ title: "Saved", description: "AI prompt updated successfully." });
+      setShowPromptEditor(false);
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     }
@@ -127,14 +171,20 @@ const AdminNewsPage = () => {
             </Button>
             <h1 className="text-2xl font-bold">Manage News Summaries</h1>
           </div>
-          <Button onClick={handleGenerate} disabled={generateMutation.isPending}>
-            {generateMutation.isPending ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Sparkles className="h-4 w-4 mr-2" />
-            )}
-            Generate Weekly Summary
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={openPromptEditor}>
+              <Settings className="h-4 w-4 mr-2" />
+              Edit AI Prompt
+            </Button>
+            <Button onClick={handleGenerate} disabled={generateMutation.isPending}>
+              {generateMutation.isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4 mr-2" />
+              )}
+              Generate Weekly Summary
+            </Button>
+          </div>
         </div>
 
         <p className="text-muted-foreground mb-6">
@@ -160,6 +210,12 @@ const AdminNewsPage = () => {
                       </CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
+                      {summary.sources && summary.sources.length > 0 && (
+                        <Badge variant="outline" className="gap-1">
+                          <Link className="h-3 w-3" />
+                          {summary.sources.length} sources
+                        </Badge>
+                      )}
                       <Badge variant={summary.is_published ? "default" : "secondary"}>
                         {summary.is_published ? "Published" : "Draft"}
                       </Badge>
@@ -242,29 +298,81 @@ const AdminNewsPage = () => {
           <DialogHeader>
             <DialogTitle>Edit Summary</DialogTitle>
             <DialogDescription>
-              Edit the title and content of this news summary.
+              Edit the title, content, and sources of this news summary.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="summary">Content (Markdown)</Label>
-              <Textarea
-                id="summary"
-                value={editSummary}
-                onChange={(e) => setEditSummary(e.target.value)}
-                rows={15}
-                className="font-mono text-sm"
-              />
-            </div>
-          </div>
+          <Tabs defaultValue="content" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="content">Content</TabsTrigger>
+              <TabsTrigger value="sources">Sources ({editSources.length})</TabsTrigger>
+            </TabsList>
+            <TabsContent value="content" className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Title</Label>
+                <Input
+                  id="title"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Content (Markdown)</Label>
+                <MarkdownEditor
+                  value={editSummary}
+                  onChange={setEditSummary}
+                  rows={15}
+                />
+              </div>
+            </TabsContent>
+            <TabsContent value="sources" className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Source URLs</Label>
+                <p className="text-sm text-muted-foreground">
+                  Add URLs that were used as sources for this news summary.
+                </p>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="https://example.com/article"
+                    value={newSource}
+                    onChange={(e) => setNewSource(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddSource())}
+                  />
+                  <Button type="button" onClick={handleAddSource} size="icon">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              {editSources.length > 0 ? (
+                <div className="space-y-2">
+                  {editSources.map((source, index) => (
+                    <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-md">
+                      <Link className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <a
+                        href={source}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-primary hover:underline flex-1 truncate"
+                      >
+                        {source}
+                      </a>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => handleRemoveSource(index)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No sources added yet.
+                </p>
+              )}
+            </TabsContent>
+          </Tabs>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setEditingItem(null)}>
               Cancel
@@ -272,6 +380,42 @@ const AdminNewsPage = () => {
             <Button onClick={handleSaveEdit} disabled={updateMutation.isPending}>
               {updateMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Save Changes
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Prompt Editor Dialog */}
+      <Dialog open={showPromptEditor} onOpenChange={setShowPromptEditor}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit AI Prompt</DialogTitle>
+            <DialogDescription>
+              Customize the prompt used to generate weekly news summaries. The week dates will be automatically appended.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>AI Prompt</Label>
+              <Textarea
+                value={editPrompt}
+                onChange={(e) => setEditPrompt(e.target.value)}
+                rows={20}
+                className="font-mono text-sm"
+                placeholder="Enter the prompt for AI news generation..."
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Tip: Include instructions for the AI to add source URLs in markdown format like [Source Name](URL).
+            </p>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowPromptEditor(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSavePrompt} disabled={updatePromptMutation.isPending}>
+              {updatePromptMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Save Prompt
             </Button>
           </div>
         </DialogContent>

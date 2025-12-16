@@ -6,7 +6,7 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [rolesLoading, setRolesLoading] = useState(false);
+  const [rolesLoading, setRolesLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
 
@@ -52,6 +52,7 @@ export function useAuth() {
         } else {
           setIsAdmin(false);
           setIsEditor(false);
+          setRolesLoading(false);
           setLoading(false);
         }
       }
@@ -65,6 +66,7 @@ export function useAuth() {
       if (session?.user) {
         checkRoles(session.user.id).then(() => setLoading(false));
       } else {
+        setRolesLoading(false);
         setLoading(false);
       }
     });

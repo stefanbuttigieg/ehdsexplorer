@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Search, Edit, Save, X, ArrowLeft, Plus } from 'lucide-react';
+import { Search, Edit, Save, X, ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,6 +14,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
   Select,
   SelectContent,
@@ -63,6 +73,8 @@ const AdminImplementingActsPage = () => {
   const [editedFeedbackDeadline, setEditedFeedbackDeadline] = useState('');
   const [editedRelatedArticles, setEditedRelatedArticles] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [deletingAct, setDeletingAct] = useState<DbImplementingAct | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { data: implementingActs, isLoading } = useQuery({
     queryKey: ['admin-implementing-acts'],
@@ -250,6 +262,37 @@ const AdminImplementingActsPage = () => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!deletingAct) return;
+
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('implementing_acts')
+        .delete()
+        .eq('id', deletingAct.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Implementing Act Deleted',
+        description: `"${deletingAct.title}" has been deleted.`,
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['admin-implementing-acts'] });
+      queryClient.invalidateQueries({ queryKey: ['implementing-acts'] });
+      setDeletingAct(null);
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to delete implementing act',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (loading || !user || !isEditor) {
     return (
       <Layout>
@@ -333,10 +376,15 @@ const AdminImplementingActsPage = () => {
                         {act.description.substring(0, 200)}...
                       </p>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(act)}>
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={() => handleEdit(act)}>
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => setDeletingAct(act)} className="text-destructive hover:text-destructive">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -474,6 +522,27 @@ const AdminImplementingActsPage = () => {
             </div>
           </DialogContent>
         </Dialog>
+
+        <AlertDialog open={!!deletingAct} onOpenChange={() => setDeletingAct(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Implementing Act</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete "{deletingAct?.title}"? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Layout>
   );

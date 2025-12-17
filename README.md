@@ -133,6 +133,8 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [X] Offline support (PWA)
 - [X] AI-generated news summaries
 - [X] Footnotes
+- [ ] Implementing Acts - Seperate Pages with relevant IA Articles
+- [ ] Self-Service Portal for Users (Password Management, Reset Password and Profile Management) 
 
 ### Medium-term
 - [ ] AI-powered Q&A about the regulation

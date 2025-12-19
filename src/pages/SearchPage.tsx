@@ -6,40 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useArticles } from "@/hooks/useArticles";
-import { useImplementingActs } from "@/hooks/useImplementingActs";
-import { useAnnexes } from "@/hooks/useAnnexes";
-import { useChapters } from "@/hooks/useChapters";
-import { recitals } from "@/data/recitals";
-import { definitions } from "@/data/definitions";
 import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { HighlightedText } from "@/components/HighlightedText";
-import Fuse from "fuse.js";
-
-// Helper functions for Roman numerals
-const romanToNumber = (roman: string): number => {
-  const map: Record<string, number> = { I: 1, V: 5, X: 10 };
-  let result = 0;
-  for (let i = 0; i < roman.length; i++) {
-    const curr = map[roman[i]] || 0;
-    const next = map[roman[i + 1]] || 0;
-    result += curr < next ? -curr : curr;
-  }
-  return result;
-};
-
-const numberToRoman = (num: number): string => {
-  const romanNumerals: [number, string][] = [[10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']];
-  let result = '';
-  for (const [value, symbol] of romanNumerals) {
-    while (num >= value) {
-      result += symbol;
-      num -= value;
-    }
-  }
-  return result;
-};
+import { useSearch, getMatchContext } from "@/hooks/useSearch";
 
 type FilterType = 'all' | 'articles' | 'recitals' | 'definitions' | 'chapters' | 'acts' | 'annexes';
 
@@ -49,143 +19,14 @@ const SearchPage = () => {
   const [query, setQuery] = useState(initialQuery);
   const [filter, setFilter] = useState<FilterType>('all');
   
-  const { data: articles = [], isLoading: articlesLoading } = useArticles();
-  const { data: implementingActs = [], isLoading: actsLoading } = useImplementingActs();
-  const { data: annexes = [], isLoading: annexesLoading } = useAnnexes();
-  const { data: chapters = [], isLoading: chaptersLoading } = useChapters();
-  
-  const isLoading = articlesLoading || actsLoading || annexesLoading || chaptersLoading;
-
-  // Create searchable data with ID variations
-  const searchableData = useMemo(() => ({
-    articles: articles.map(a => ({
-      ...a,
-      id: a.article_number,
-      searchId: `article ${a.article_number} art ${a.article_number} art. ${a.article_number}`,
-    })),
-    recitals: recitals.map(r => ({
-      ...r,
-      searchId: `recital ${r.id} rec ${r.id}`,
-    })),
-    chapters: chapters.map(c => ({
-      ...c,
-      searchId: `chapter ${c.chapter_number} ch ${c.chapter_number}`,
-    })),
-    acts: implementingActs.map(a => ({
-      ...a,
-      searchId: `${a.articleReference} implementing delegated act`,
-    })),
-    annexes: annexes.map(a => ({
-      ...a,
-      searchId: `annex ${a.id} annex ${romanToNumber(a.id)}`,
-    })),
-  }), [articles, implementingActs, annexes, chapters]);
-
-  const fuse = useMemo(() => ({
-    articles: new Fuse(searchableData.articles, { 
-      keys: ['title', 'content', 'searchId'], 
-      threshold: 0.3,
-      ignoreLocation: true,
-    }),
-    recitals: new Fuse(searchableData.recitals, { 
-      keys: ['content', 'searchId'], 
-      threshold: 0.3,
-      ignoreLocation: true,
-    }),
-    definitions: new Fuse(definitions, { 
-      keys: ['term', 'definition'], 
-      threshold: 0.3 
-    }),
-    chapters: new Fuse(searchableData.chapters, {
-      keys: ['title', 'description', 'searchId'],
-      threshold: 0.3,
-      ignoreLocation: true,
-    }),
-    acts: new Fuse(searchableData.acts, {
-      keys: ['title', 'description', 'articleReference', 'searchId'],
-      threshold: 0.3,
-      ignoreLocation: true,
-    }),
-    annexes: new Fuse(searchableData.annexes, {
-      keys: ['title', 'content', 'searchId'],
-      threshold: 0.3,
-      ignoreLocation: true,
-    }),
-  }), [searchableData]);
+  const { search, isLoading } = useSearch();
 
   const results = useMemo(() => {
     if (!query.trim()) {
-      return { articles: [], recitals: [], definitions: [], chapters: [], acts: [], annexes: [] };
+      return { articles: [], recitals: [], definitions: [], chapters: [], implementingActs: [], annexes: [] };
     }
-
-    // Check for direct ID match patterns
-    const articleMatch = query.match(/^(?:article|art\.?)\s*(\d+)$/i);
-    const recitalMatch = query.match(/^(?:recital|rec\.?)\s*(\d+)$/i);
-    const chapterMatch = query.match(/^(?:chapter|ch\.?)\s*(\d+)$/i);
-    const annexMatch = query.match(/^(?:annex)\s*([IVX]+|\d+)$/i);
-
-    if (articleMatch) {
-      const id = parseInt(articleMatch[1]);
-      const article = articles.find(a => a.article_number === id);
-      return {
-        articles: article ? [{ ...article, id: article.article_number }] : [],
-        recitals: [],
-        definitions: [],
-        chapters: [],
-        acts: [],
-        annexes: [],
-      };
-    }
-
-    if (recitalMatch) {
-      const id = parseInt(recitalMatch[1]);
-      const recital = recitals.find(r => r.id === id);
-      return {
-        articles: [],
-        recitals: recital ? [recital] : [],
-        definitions: [],
-        chapters: [],
-        acts: [],
-        annexes: [],
-      };
-    }
-
-    if (chapterMatch) {
-      const id = parseInt(chapterMatch[1]);
-      const chapter = chapters.find(c => c.chapter_number === id);
-      return {
-        articles: [],
-        recitals: [],
-        definitions: [],
-        chapters: chapter ? [chapter] : [],
-        acts: [],
-        annexes: [],
-      };
-    }
-
-    if (annexMatch) {
-      const input = annexMatch[1].toUpperCase();
-      const annexId = /^\d+$/.test(input) ? numberToRoman(parseInt(input)) : input;
-      const annex = annexes.find(a => a.id === annexId);
-      return {
-        articles: [],
-        recitals: [],
-        definitions: [],
-        chapters: [],
-        acts: [],
-        annexes: annex ? [annex] : [],
-      };
-    }
-
-    return {
-      articles: fuse.articles.search(query).map(r => r.item),
-      recitals: fuse.recitals.search(query).map(r => r.item),
-      definitions: fuse.definitions.search(query).map(r => r.item),
-      chapters: fuse.chapters.search(query).map(r => r.item),
-      acts: fuse.acts.search(query).map(r => r.item),
-      annexes: fuse.annexes.search(query).map(r => r.item),
-    };
-  }, [query, fuse, articles, chapters, annexes]);
+    return search(query);
+  }, [query, search]);
 
   const handleSearch = (value: string) => {
     setQuery(value);
@@ -193,7 +34,7 @@ const SearchPage = () => {
   };
 
   const totalResults = results.articles.length + results.recitals.length + results.definitions.length + 
-                       results.chapters.length + results.acts.length + results.annexes.length;
+                       results.chapters.length + results.implementingActs.length + results.annexes.length;
 
   return (
     <Layout>
@@ -205,7 +46,7 @@ const SearchPage = () => {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search articles, chapters, annexes, implementing acts..."
+            placeholder="Search articles, chapters, annexes, implementing acts, recitals, definitions..."
             className="pl-12 py-6 text-lg"
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
@@ -225,129 +66,221 @@ const SearchPage = () => {
               <span className="text-muted-foreground">{totalResults} results</span>
               <div className="flex flex-wrap gap-2 ml-4">
                 <Button variant={filter === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setFilter('all')}>All</Button>
-                <Button variant={filter === 'chapters' ? 'default' : 'outline'} size="sm" onClick={() => setFilter('chapters')}>Chapters ({results.chapters.length})</Button>
-                <Button variant={filter === 'articles' ? 'default' : 'outline'} size="sm" onClick={() => setFilter('articles')}>Articles ({results.articles.length})</Button>
-                <Button variant={filter === 'acts' ? 'default' : 'outline'} size="sm" onClick={() => setFilter('acts')}>Impl. Acts ({results.acts.length})</Button>
-                <Button variant={filter === 'annexes' ? 'default' : 'outline'} size="sm" onClick={() => setFilter('annexes')}>Annexes ({results.annexes.length})</Button>
-                <Button variant={filter === 'recitals' ? 'default' : 'outline'} size="sm" onClick={() => setFilter('recitals')}>Recitals ({results.recitals.length})</Button>
-                <Button variant={filter === 'definitions' ? 'default' : 'outline'} size="sm" onClick={() => setFilter('definitions')}>Definitions ({results.definitions.length})</Button>
+                <Button variant={filter === 'chapters' ? 'default' : 'outline'} size="sm" onClick={() => setFilter('chapters')}>
+                  Chapters ({results.chapters.length})
+                </Button>
+                <Button variant={filter === 'articles' ? 'default' : 'outline'} size="sm" onClick={() => setFilter('articles')}>
+                  Articles ({results.articles.length})
+                </Button>
+                <Button variant={filter === 'acts' ? 'default' : 'outline'} size="sm" onClick={() => setFilter('acts')}>
+                  Impl. Acts ({results.implementingActs.length})
+                </Button>
+                <Button variant={filter === 'annexes' ? 'default' : 'outline'} size="sm" onClick={() => setFilter('annexes')}>
+                  Annexes ({results.annexes.length})
+                </Button>
+                <Button variant={filter === 'recitals' ? 'default' : 'outline'} size="sm" onClick={() => setFilter('recitals')}>
+                  Recitals ({results.recitals.length})
+                </Button>
+                <Button variant={filter === 'definitions' ? 'default' : 'outline'} size="sm" onClick={() => setFilter('definitions')}>
+                  Definitions ({results.definitions.length})
+                </Button>
               </div>
             </div>
 
             <div className="space-y-4">
-              {(filter === 'all' || filter === 'chapters') && results.chapters.map(chapter => (
-                <Link key={`ch-${chapter.id}`} to={`/chapter/${chapter.chapter_number}`}>
+              {(filter === 'all' || filter === 'chapters') && results.chapters.map(result => (
+                <Link key={`ch-${result.item.id}`} to={`/chapter/${result.item.chapter_number}`}>
                   <Card className="hover:border-primary transition-colors">
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-1">
                         <Layers className="h-4 w-4 text-primary" />
-                        <Badge variant="outline">Chapter {chapter.chapter_number}</Badge>
+                        <Badge variant="outline">Chapter {result.item.chapter_number}</Badge>
+                        {result.score !== undefined && (
+                          <span className="text-xs text-muted-foreground ml-auto">
+                            {Math.round((1 - result.score) * 100)}% match
+                          </span>
+                        )}
                       </div>
                       <h3 className="font-medium">
-                        <HighlightedText text={chapter.title} query={query} />
+                        <HighlightedText text={result.item.title} query={query} />
                       </h3>
                       <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                        <HighlightedText text={chapter.description || ''} query={query} maxLength={200} />
+                        <HighlightedText 
+                          text={getMatchContext(result.item.description || '', query, 100)} 
+                          query={query} 
+                        />
                       </p>
                     </CardContent>
                   </Card>
                 </Link>
               ))}
 
-              {(filter === 'all' || filter === 'articles') && results.articles.map(article => (
-                <Link key={`art-${article.id}`} to={`/article/${article.id}`}>
+              {(filter === 'all' || filter === 'articles') && results.articles.map(result => (
+                <Link key={`art-${result.item.id}`} to={`/article/${result.item.article_number}`}>
                   <Card className="hover:border-primary transition-colors">
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-1">
                         <FileText className="h-4 w-4 text-primary" />
-                        <Badge variant="outline">Article {article.id}</Badge>
+                        <Badge variant="outline">Article {result.item.article_number}</Badge>
+                        {result.item.chapter_id && (
+                          <span className="text-xs text-muted-foreground">Chapter {result.item.chapter_id}</span>
+                        )}
+                        {result.score !== undefined && (
+                          <span className="text-xs text-muted-foreground ml-auto">
+                            {Math.round((1 - result.score) * 100)}% match
+                          </span>
+                        )}
                       </div>
                       <h3 className="font-medium">
-                        <HighlightedText text={article.title} query={query} />
+                        <HighlightedText text={result.item.title} query={query} />
                       </h3>
                       <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                        <HighlightedText text={article.content.replace(/[#*`]/g, '')} query={query} maxLength={200} />
+                        <HighlightedText 
+                          text={getMatchContext(result.item.normalizedContent, query, 100)} 
+                          query={query} 
+                        />
                       </p>
                     </CardContent>
                   </Card>
                 </Link>
               ))}
 
-              {(filter === 'all' || filter === 'acts') && results.acts.map(act => (
-                <Link key={`act-${act.id}`} to={`/implementing-acts/${act.id}`}>
+              {(filter === 'all' || filter === 'acts') && results.implementingActs.map(result => (
+                <Link key={`act-${result.item.id}`} to={`/implementing-acts/${result.item.id}`}>
                   <Card className="hover:border-primary transition-colors">
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-1">
                         <ScrollText className="h-4 w-4 text-secondary" />
-                        <Badge variant="outline">{act.articleReference}</Badge>
-                        <Badge variant="secondary" className="text-xs">{act.type}</Badge>
+                        <Badge variant="outline">{result.item.articleReference}</Badge>
+                        <Badge variant="secondary" className="text-xs">{result.item.type}</Badge>
+                        {result.score !== undefined && (
+                          <span className="text-xs text-muted-foreground ml-auto">
+                            {Math.round((1 - result.score) * 100)}% match
+                          </span>
+                        )}
                       </div>
                       <h3 className="font-medium">
-                        <HighlightedText text={act.title} query={query} />
+                        <HighlightedText text={result.item.title} query={query} />
                       </h3>
                       <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                        <HighlightedText text={act.description} query={query} maxLength={200} />
+                        <HighlightedText 
+                          text={getMatchContext(result.item.normalizedDescription, query, 100)} 
+                          query={query} 
+                        />
                       </p>
                     </CardContent>
                   </Card>
                 </Link>
               ))}
 
-              {(filter === 'all' || filter === 'annexes') && results.annexes.map(annex => (
-                <Link key={`annex-${annex.id}`} to={`/annex/${annex.id}`}>
+              {(filter === 'all' || filter === 'annexes') && results.annexes.map(result => (
+                <Link key={`annex-${result.item.id}`} to={`/annex/${result.item.id}`}>
                   <Card className="hover:border-primary transition-colors">
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-1">
                         <FileStack className="h-4 w-4 text-primary" />
-                        <Badge variant="outline">Annex {annex.id}</Badge>
+                        <Badge variant="outline">Annex {result.item.id}</Badge>
+                        {result.score !== undefined && (
+                          <span className="text-xs text-muted-foreground ml-auto">
+                            {Math.round((1 - result.score) * 100)}% match
+                          </span>
+                        )}
                       </div>
                       <h3 className="font-medium">
-                        <HighlightedText text={annex.title} query={query} />
+                        <HighlightedText text={result.item.title} query={query} />
                       </h3>
                       <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                        <HighlightedText text={annex.content.replace(/[#*`]/g, '')} query={query} maxLength={200} />
+                        <HighlightedText 
+                          text={getMatchContext(result.item.normalizedContent, query, 100)} 
+                          query={query} 
+                        />
                       </p>
                     </CardContent>
                   </Card>
                 </Link>
               ))}
 
-              {(filter === 'all' || filter === 'recitals') && results.recitals.map(recital => (
-                <Link key={`rec-${recital.id}`} to={`/recital/${recital.id}`}>
+              {(filter === 'all' || filter === 'recitals') && results.recitals.map(result => (
+                <Link key={`rec-${result.item.id}`} to={`/recital/${result.item.recital_number}`}>
                   <Card className="hover:border-primary transition-colors">
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-1">
                         <Scale className="h-4 w-4 text-secondary" />
-                        <Badge variant="outline">Recital {recital.id}</Badge>
+                        <Badge variant="outline">Recital {result.item.recital_number}</Badge>
+                        {result.item.related_articles && result.item.related_articles.length > 0 && (
+                          <span className="text-xs text-muted-foreground">
+                            Related: {result.item.related_articles.slice(0, 3).map(a => `Art. ${a}`).join(', ')}
+                            {result.item.related_articles.length > 3 && '...'}
+                          </span>
+                        )}
+                        {result.score !== undefined && (
+                          <span className="text-xs text-muted-foreground ml-auto">
+                            {Math.round((1 - result.score) * 100)}% match
+                          </span>
+                        )}
                       </div>
                       <p className="text-sm text-muted-foreground line-clamp-3">
-                        <HighlightedText text={recital.content} query={query} maxLength={250} />
+                        <HighlightedText 
+                          text={getMatchContext(result.item.normalizedContent, query, 120)} 
+                          query={query} 
+                        />
                       </p>
                     </CardContent>
                   </Card>
                 </Link>
               ))}
 
-              {(filter === 'all' || filter === 'definitions') && results.definitions.map((def, idx) => (
-                <Link key={`def-${idx}`} to="/definitions">
+              {(filter === 'all' || filter === 'definitions') && results.definitions.map(result => (
+                <Link key={`def-${result.item.id}`} to={`/definitions`}>
                   <Card className="hover:border-primary transition-colors">
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-1">
                         <Book className="h-4 w-4 text-accent-foreground" />
-                        <Badge variant="outline">{def.articleReference}</Badge>
+                        {result.item.source_article && (
+                          <Badge variant="outline">Art. {result.item.source_article}</Badge>
+                        )}
+                        {result.score !== undefined && (
+                          <span className="text-xs text-muted-foreground ml-auto">
+                            {Math.round((1 - result.score) * 100)}% match
+                          </span>
+                        )}
                       </div>
                       <h3 className="font-medium">
-                        <HighlightedText text={def.term} query={query} />
+                        <HighlightedText text={result.item.term} query={query} />
                       </h3>
                       <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                        <HighlightedText text={def.definition} query={query} maxLength={200} />
+                        <HighlightedText 
+                          text={getMatchContext(result.item.normalizedDefinition, query, 100)} 
+                          query={query} 
+                        />
                       </p>
                     </CardContent>
                   </Card>
                 </Link>
               ))}
+
+              {totalResults === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">No results found for "{query}"</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Try searching for article numbers (e.g., "Article 5"), recitals (e.g., "Recital 10"), 
+                    or keywords from the EHDS regulation.
+                  </p>
+                </div>
+              )}
             </div>
           </>
+        )}
+
+        {!query && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">
+              Enter a search term to find articles, chapters, recitals, definitions, implementing acts, and annexes.
+            </p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Tip: You can search by ID (e.g., "Article 5", "Recital 10", "Chapter 3", "Annex I") or by keywords.
+            </p>
+          </div>
         )}
       </div>
     </Layout>

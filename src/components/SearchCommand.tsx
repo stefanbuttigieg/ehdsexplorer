@@ -11,43 +11,13 @@ import {
   CommandSeparator,
 } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
-import { useArticles } from "@/hooks/useArticles";
-import { useImplementingActs } from "@/hooks/useImplementingActs";
-import { useAnnexes } from "@/hooks/useAnnexes";
-import { useChapters } from "@/hooks/useChapters";
-import { recitals } from "@/data/recitals";
-import { definitions } from "@/data/definitions";
 import { HighlightedText } from "@/components/HighlightedText";
-import Fuse from "fuse.js";
+import { useSearch, getMatchContext } from "@/hooks/useSearch";
 
 interface SearchCommandProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-// Helper functions for Roman numerals
-const romanToNumber = (roman: string): number => {
-  const map: Record<string, number> = { I: 1, V: 5, X: 10 };
-  let result = 0;
-  for (let i = 0; i < roman.length; i++) {
-    const curr = map[roman[i]] || 0;
-    const next = map[roman[i + 1]] || 0;
-    result += curr < next ? -curr : curr;
-  }
-  return result;
-};
-
-const numberToRoman = (num: number): string => {
-  const romanNumerals: [number, string][] = [[10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']];
-  let result = '';
-  for (const [value, symbol] of romanNumerals) {
-    while (num >= value) {
-      result += symbol;
-      num -= value;
-    }
-  }
-  return result;
-};
 
 const RECENT_SEARCHES_KEY = "ehds-recent-searches";
 const MAX_RECENT_SEARCHES = 5;
@@ -94,10 +64,8 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
   const [query, setQuery] = useState("");
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const navigate = useNavigate();
-  const { data: articles = [] } = useArticles();
-  const { data: implementingActs = [] } = useImplementingActs();
-  const { data: annexes = [] } = useAnnexes();
-  const { data: chapters = [] } = useChapters();
+  
+  const { search, data, isLoading } = useSearch();
 
   // Load recent searches on mount and when dialog opens
   useEffect(() => {
@@ -118,146 +86,31 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
     setRecentSearches([]);
   }, []);
 
-  // Create searchable data with ID variations
-  const searchableData = useMemo(() => ({
-    articles: articles.map(a => ({
-      ...a,
-      id: a.article_number,
-      searchId: `article ${a.article_number} art ${a.article_number} art. ${a.article_number}`,
-    })),
-    recitals: recitals.map(r => ({
-      ...r,
-      searchId: `recital ${r.id} rec ${r.id}`,
-    })),
-    chapters: chapters.map(c => ({
-      ...c,
-      searchId: `chapter ${c.chapter_number} ch ${c.chapter_number}`,
-    })),
-    acts: implementingActs.map(a => ({
-      ...a,
-      searchId: `${a.articleReference} implementing delegated act`,
-    })),
-    annexes: annexes.map(a => ({
-      ...a,
-      searchId: `annex ${a.id} annex ${romanToNumber(a.id)}`,
-    })),
-  }), [articles, implementingActs, annexes, chapters]);
-
-  const fuse = useMemo(() => ({
-    articles: new Fuse(searchableData.articles, { 
-      keys: ['title', 'content', 'searchId'], 
-      threshold: 0.3,
-      ignoreLocation: true,
-    }),
-    recitals: new Fuse(searchableData.recitals, { 
-      keys: ['content', 'searchId'], 
-      threshold: 0.3,
-      ignoreLocation: true,
-    }),
-    definitions: new Fuse(definitions, { 
-      keys: ['term', 'definition'], 
-      threshold: 0.3 
-    }),
-    chapters: new Fuse(searchableData.chapters, {
-      keys: ['title', 'description', 'searchId'],
-      threshold: 0.3,
-      ignoreLocation: true,
-    }),
-    acts: new Fuse(searchableData.acts, {
-      keys: ['title', 'description', 'articleReference', 'searchId'],
-      threshold: 0.3,
-      ignoreLocation: true,
-    }),
-    annexes: new Fuse(searchableData.annexes, {
-      keys: ['title', 'content', 'searchId'],
-      threshold: 0.3,
-      ignoreLocation: true,
-    }),
-  }), [searchableData]);
-
   const results = useMemo(() => {
     if (!query.trim()) {
+      // Show a sample of each category when no query
       return {
-        articles: searchableData.articles.slice(0, 5),
-        recitals: recitals.slice(0, 3),
-        definitions: definitions.slice(0, 3),
-        chapters: searchableData.chapters.slice(0, 3),
-        acts: implementingActs.slice(0, 3),
-        annexes: annexes.slice(0, 2),
-      };
-    }
-
-    // Check for direct ID match patterns
-    const articleMatch = query.match(/^(?:article|art\.?)\s*(\d+)$/i);
-    const recitalMatch = query.match(/^(?:recital|rec\.?)\s*(\d+)$/i);
-    const chapterMatch = query.match(/^(?:chapter|ch\.?)\s*(\d+)$/i);
-    const annexMatch = query.match(/^(?:annex)\s*([IVX]+|\d+)$/i);
-    
-    if (articleMatch) {
-      const id = parseInt(articleMatch[1]);
-      const article = searchableData.articles.find(a => a.id === id);
-      return {
-        articles: article ? [article] : [],
-        recitals: [],
-        definitions: [],
-        chapters: [],
-        acts: [],
-        annexes: [],
+        articles: data.articles.slice(0, 5).map(item => ({ item, refIndex: 0 })),
+        recitals: data.recitals.slice(0, 3).map(item => ({ item, refIndex: 0 })),
+        definitions: data.definitions.slice(0, 3).map(item => ({ item, refIndex: 0 })),
+        chapters: data.chapters.slice(0, 3).map(item => ({ item, refIndex: 0 })),
+        implementingActs: data.implementingActs.slice(0, 3).map(item => ({ item, refIndex: 0 })),
+        annexes: data.annexes.slice(0, 2).map(item => ({ item, refIndex: 0 })),
       };
     }
     
-    if (recitalMatch) {
-      const id = parseInt(recitalMatch[1]);
-      const recital = recitals.find(r => r.id === id);
-      return {
-        articles: [],
-        recitals: recital ? [recital] : [],
-        definitions: [],
-        chapters: [],
-        acts: [],
-        annexes: [],
-      };
-    }
-
-    if (chapterMatch) {
-      const id = parseInt(chapterMatch[1]);
-      const chapter = chapters.find(c => c.chapter_number === id);
-      return {
-        articles: [],
-        recitals: [],
-        definitions: [],
-        chapters: chapter ? [chapter] : [],
-        acts: [],
-        annexes: [],
-      };
-    }
-
-    if (annexMatch) {
-      const input = annexMatch[1].toUpperCase();
-      const annexId = /^\d+$/.test(input) ? numberToRoman(parseInt(input)) : input;
-      const annex = annexes.find(a => a.id === annexId);
-      return {
-        articles: [],
-        recitals: [],
-        definitions: [],
-        chapters: [],
-        acts: [],
-        annexes: annex ? [annex] : [],
-      };
-    }
-
+    const searchResults = search(query);
     return {
-      articles: fuse.articles.search(query).slice(0, 5).map(r => r.item),
-      recitals: fuse.recitals.search(query).slice(0, 3).map(r => r.item),
-      definitions: fuse.definitions.search(query).slice(0, 3).map(r => r.item),
-      chapters: fuse.chapters.search(query).slice(0, 3).map(r => r.item),
-      acts: fuse.acts.search(query).slice(0, 3).map(r => r.item),
-      annexes: fuse.annexes.search(query).slice(0, 2).map(r => r.item),
+      articles: searchResults.articles.slice(0, 5),
+      recitals: searchResults.recitals.slice(0, 3),
+      definitions: searchResults.definitions.slice(0, 3),
+      chapters: searchResults.chapters.slice(0, 3),
+      implementingActs: searchResults.implementingActs.slice(0, 3),
+      annexes: searchResults.annexes.slice(0, 2),
     };
-  }, [query, fuse, searchableData, implementingActs, annexes, chapters]);
+  }, [query, search, data]);
 
   const handleSelect = (path: string, searchQuery?: string) => {
-    // Save to recent searches if there's a query
     if (searchQuery?.trim()) {
       saveRecentSearch(searchQuery.trim());
     }
@@ -275,15 +128,21 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
     if (!open) setQuery("");
   }, [open]);
 
+  const hasResults = results.chapters.length > 0 || results.articles.length > 0 || 
+                     results.implementingActs.length > 0 || results.annexes.length > 0 || 
+                     results.recitals.length > 0 || results.definitions.length > 0;
+
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
       <CommandInput 
-        placeholder="Search articles, chapters, implementing acts..." 
+        placeholder="Search articles, chapters, implementing acts, recitals, definitions..." 
         value={query}
         onValueChange={setQuery}
       />
       <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
+        {query.trim() && !hasResults && !isLoading && (
+          <CommandEmpty>No results found for "{query}"</CommandEmpty>
+        )}
 
         {/* Recent Searches - only show when no query */}
         {!query.trim() && recentSearches.length > 0 && (
@@ -327,16 +186,16 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
         
         {results.chapters.length > 0 && (
           <CommandGroup heading="Chapters">
-            {results.chapters.map(chapter => (
+            {results.chapters.map(result => (
               <CommandItem
-                key={`ch-${chapter.id}`}
-                value={`chapter-${chapter.chapter_number}-${chapter.title}`}
-                onSelect={() => handleSelect(`/chapter/${chapter.chapter_number}`)}
+                key={`ch-${result.item.id}`}
+                value={`chapter-${result.item.chapter_number}-${result.item.title}`}
+                onSelect={() => handleSelect(`/chapter/${result.item.chapter_number}`)}
               >
                 <Layers className="mr-2 h-4 w-4 text-primary flex-shrink-0" />
-                <span className="font-medium mr-2 flex-shrink-0">Chapter {chapter.chapter_number}</span>
+                <span className="font-medium mr-2 flex-shrink-0">Chapter {result.item.chapter_number}</span>
                 <HighlightedText 
-                  text={chapter.title} 
+                  text={result.item.title} 
                   query={query} 
                   className="text-muted-foreground truncate"
                 />
@@ -347,25 +206,25 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
 
         {results.articles.length > 0 && (
           <CommandGroup heading="Articles">
-            {results.articles.map(article => (
+            {results.articles.map(result => (
               <CommandItem
-                key={`art-${article.id}`}
-                value={`article-${article.id}-${article.title}`}
-                onSelect={() => handleSelect(`/article/${article.id}`)}
+                key={`art-${result.item.id}`}
+                value={`article-${result.item.article_number}-${result.item.title}`}
+                onSelect={() => handleSelect(`/article/${result.item.article_number}`)}
                 className="flex-col items-start gap-1"
               >
                 <div className="flex items-center w-full">
                   <FileText className="mr-2 h-4 w-4 text-primary flex-shrink-0" />
-                  <span className="font-medium mr-2 flex-shrink-0">Art. {article.id}</span>
+                  <span className="font-medium mr-2 flex-shrink-0">Art. {result.item.article_number}</span>
                   <HighlightedText 
-                    text={article.title} 
+                    text={result.item.title} 
                     query={query} 
                     className="text-muted-foreground truncate"
                   />
                 </div>
-                {query.trim() && article.content && (
+                {query.trim() && result.item.content && (
                   <HighlightedText 
-                    text={article.content.replace(/[#*`]/g, '')} 
+                    text={getMatchContext(result.item.normalizedContent, query, 60)} 
                     query={query} 
                     className="text-xs text-muted-foreground/70 pl-6 line-clamp-1"
                     maxLength={80}
@@ -376,27 +235,27 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
           </CommandGroup>
         )}
 
-        {results.acts.length > 0 && (
+        {results.implementingActs.length > 0 && (
           <CommandGroup heading="Implementing Acts">
-            {results.acts.map(act => (
+            {results.implementingActs.map(result => (
               <CommandItem
-                key={`act-${act.id}`}
-                value={`act-${act.id}-${act.title}`}
-                onSelect={() => handleSelect(`/implementing-acts/${act.id}`)}
+                key={`act-${result.item.id}`}
+                value={`act-${result.item.id}-${result.item.title}`}
+                onSelect={() => handleSelect(`/implementing-acts/${result.item.id}`)}
                 className="flex-col items-start gap-1"
               >
                 <div className="flex items-center w-full">
                   <ScrollText className="mr-2 h-4 w-4 text-secondary flex-shrink-0" />
-                  <span className="font-medium mr-2 flex-shrink-0">{act.articleReference}</span>
+                  <span className="font-medium mr-2 flex-shrink-0">{result.item.articleReference}</span>
                   <HighlightedText 
-                    text={act.title} 
+                    text={result.item.title} 
                     query={query} 
                     className="text-muted-foreground truncate"
                   />
                 </div>
-                {query.trim() && act.description && (
+                {query.trim() && result.item.description && (
                   <HighlightedText 
-                    text={act.description} 
+                    text={getMatchContext(result.item.normalizedDescription, query, 60)} 
                     query={query} 
                     className="text-xs text-muted-foreground/70 pl-6 line-clamp-1"
                     maxLength={80}
@@ -409,25 +268,25 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
 
         {results.annexes.length > 0 && (
           <CommandGroup heading="Annexes">
-            {results.annexes.map(annex => (
+            {results.annexes.map(result => (
               <CommandItem
-                key={`annex-${annex.id}`}
-                value={`annex-${annex.id}-${annex.title}`}
-                onSelect={() => handleSelect(`/annex/${annex.id}`)}
+                key={`annex-${result.item.id}`}
+                value={`annex-${result.item.id}-${result.item.title}`}
+                onSelect={() => handleSelect(`/annex/${result.item.id}`)}
                 className="flex-col items-start gap-1"
               >
                 <div className="flex items-center w-full">
                   <FileStack className="mr-2 h-4 w-4 text-primary flex-shrink-0" />
-                  <span className="font-medium mr-2 flex-shrink-0">Annex {annex.id}</span>
+                  <span className="font-medium mr-2 flex-shrink-0">Annex {result.item.id}</span>
                   <HighlightedText 
-                    text={annex.title} 
+                    text={result.item.title} 
                     query={query} 
                     className="text-muted-foreground truncate"
                   />
                 </div>
-                {query.trim() && annex.content && (
+                {query.trim() && result.item.content && (
                   <HighlightedText 
-                    text={annex.content.replace(/[#*`]/g, '')} 
+                    text={getMatchContext(result.item.normalizedContent, query, 60)} 
                     query={query} 
                     className="text-xs text-muted-foreground/70 pl-6 line-clamp-1"
                     maxLength={80}
@@ -440,16 +299,16 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
 
         {results.recitals.length > 0 && (
           <CommandGroup heading="Recitals">
-            {results.recitals.map(recital => (
+            {results.recitals.map(result => (
               <CommandItem
-                key={`rec-${recital.id}`}
-                value={`recital-${recital.id}-${recital.content.substring(0, 50)}`}
-                onSelect={() => handleSelect(`/recital/${recital.id}`)}
+                key={`rec-${result.item.id}`}
+                value={`recital-${result.item.recital_number}-${result.item.content.substring(0, 50)}`}
+                onSelect={() => handleSelect(`/recital/${result.item.recital_number}`)}
               >
                 <Scale className="mr-2 h-4 w-4 text-secondary flex-shrink-0" />
-                <span className="font-medium mr-2 flex-shrink-0">Recital {recital.id}</span>
+                <span className="font-medium mr-2 flex-shrink-0">Recital {result.item.recital_number}</span>
                 <HighlightedText 
-                  text={recital.content} 
+                  text={query.trim() ? getMatchContext(result.item.normalizedContent, query, 40) : result.item.content} 
                   query={query} 
                   className="text-muted-foreground truncate"
                   maxLength={60}
@@ -461,24 +320,24 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
 
         {results.definitions.length > 0 && (
           <CommandGroup heading="Definitions">
-            {results.definitions.map((def, idx) => (
+            {results.definitions.map(result => (
               <CommandItem
-                key={`def-${idx}`}
-                value={`definition-${def.term}`}
+                key={`def-${result.item.id}`}
+                value={`definition-${result.item.term}`}
                 onSelect={() => handleSelect("/definitions")}
                 className="flex-col items-start gap-1"
               >
                 <div className="flex items-center">
                   <Book className="mr-2 h-4 w-4 flex-shrink-0" />
                   <HighlightedText 
-                    text={def.term} 
+                    text={result.item.term} 
                     query={query} 
                     className="font-medium"
                   />
                 </div>
-                {query.trim() && def.definition && (
+                {query.trim() && result.item.definition && (
                   <HighlightedText 
-                    text={def.definition} 
+                    text={getMatchContext(result.item.normalizedDefinition, query, 60)} 
                     query={query} 
                     className="text-xs text-muted-foreground/70 pl-6 line-clamp-1"
                     maxLength={80}
@@ -499,11 +358,10 @@ export const SearchCommand = ({ open, onOpenChange }: SearchCommandProps) => {
                 onSelect={() => handleSelect(`/search?q=${encodeURIComponent(query)}`, query)}
                 className="justify-between bg-muted/50"
               >
-                <span className="font-medium">View all results</span>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <span className="text-xs">Full page</span>
-                  <ArrowRight className="h-4 w-4" />
-                </div>
+                <span className="flex items-center">
+                  <span>View all results for "<strong>{query}</strong>"</span>
+                </span>
+                <ArrowRight className="h-4 w-4" />
               </CommandItem>
             </CommandGroup>
           </>

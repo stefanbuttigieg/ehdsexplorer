@@ -1,12 +1,12 @@
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useQuery } from '@tanstack/react-query';
-import { format, subDays, startOfDay, endOfDay } from 'date-fns';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { TrendingUp, Users, Eye, Calendar } from 'lucide-react';
+import { format, subDays } from 'date-fns';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { TrendingUp, Users, Eye, Calendar, ExternalLink } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface AnalyticsData {
   date: string;
@@ -14,20 +14,21 @@ interface AnalyticsData {
   uniqueVisitors: number;
 }
 
-// This component displays placeholder analytics until Lovable analytics API is integrated
+const UMAMI_WEBSITE_ID = import.meta.env.VITE_UMAMI_WEBSITE_ID;
+
 const AnalyticsWidget = () => {
   const [dateRange, setDateRange] = useState('7');
   
-  // For now, we'll show a message about analytics integration
-  // Lovable analytics would be integrated via their API when available
+  const isConfigured = !!UMAMI_WEBSITE_ID;
+
+  // Generate sample data for demonstration when not configured
   const { data, isLoading, error } = useQuery({
     queryKey: ['analytics', dateRange],
     queryFn: async () => {
-      // Placeholder - in production this would call Lovable's analytics API
-      // For now, return sample data structure to show the UI
       const days = parseInt(dateRange);
       const sampleData: AnalyticsData[] = [];
       
+      // Generate sample data to show the UI structure
       for (let i = days - 1; i >= 0; i--) {
         const date = subDays(new Date(), i);
         sampleData.push({
@@ -39,7 +40,7 @@ const AnalyticsWidget = () => {
       
       return sampleData;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 
   const totals = useMemo(() => {
@@ -78,9 +79,14 @@ const AnalyticsWidget = () => {
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
               Site Analytics
+              {!isConfigured && (
+                <span className="text-xs font-normal text-muted-foreground">(Demo Data)</span>
+              )}
             </CardTitle>
             <CardDescription>
-              Overview of site traffic and engagement
+              {isConfigured 
+                ? 'Powered by Umami Analytics' 
+                : 'Configure Umami to see real analytics data'}
             </CardDescription>
           </div>
           <Select value={dateRange} onValueChange={setDateRange}>
@@ -180,9 +186,23 @@ const AnalyticsWidget = () => {
           )}
         </div>
 
-        <p className="text-xs text-muted-foreground text-center">
-          Analytics data is for demonstration purposes. Connect your analytics provider for real data.
-        </p>
+        {!isConfigured && (
+          <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg space-y-3">
+            <p className="text-sm font-medium">Set up Umami Analytics</p>
+            <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside">
+              <li>Sign up at <a href="https://cloud.umami.is" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">cloud.umami.is</a> or self-host Umami</li>
+              <li>Create a website and copy your Website ID</li>
+              <li>Add <code className="px-1 py-0.5 bg-muted rounded text-xs">VITE_UMAMI_WEBSITE_ID</code> to your environment</li>
+              <li>Optionally add <code className="px-1 py-0.5 bg-muted rounded text-xs">VITE_UMAMI_SCRIPT_URL</code> if self-hosting</li>
+            </ol>
+            <Button variant="outline" size="sm" asChild>
+              <a href="https://umami.is/docs" target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="h-3 w-3 mr-1" />
+                Umami Docs
+              </a>
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

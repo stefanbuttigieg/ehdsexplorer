@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText, Accessibility, Code, Newspaper } from "lucide-react";
+import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText, Accessibility, Code, Newspaper, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toRoman } from "@/lib/romanNumerals";
@@ -18,6 +18,8 @@ import { PublicTour, usePublicTour } from "@/components/PublicTour";
 import { TourButton } from "@/components/TourButton";
 import { ShareTextButton } from "@/components/ShareTextButton";
 import { useTextHighlight } from "@/hooks/useTextHighlight";
+import { useAuth } from "@/hooks/useAuth";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface LayoutProps {
   children: ReactNode;
@@ -31,6 +33,7 @@ const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
   const { data: chapters, isLoading: chaptersLoading } = useChapters();
   const { isTourOpen, startTour, completeTour, closeTour } = usePublicTour();
+  const { user, isEditor, loading: authLoading } = useAuth();
   
   // Initialize text highlight hook for URL-based highlighting
   useTextHighlight();
@@ -63,6 +66,18 @@ const Layout = ({ children }: LayoutProps) => {
         </Button>
         <Link to="/" className="font-serif font-bold text-lg">EHDS Explorer</Link>
         <div className="flex items-center gap-1" data-tour="accessibility">
+          {!authLoading && user && isEditor && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link to="/admin">
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>Admin Dashboard</TooltipContent>
+            </Tooltip>
+          )}
           <TourButton onClick={startTour} />
           <ReportIssueButton />
           <AccessibilityControls />
@@ -86,6 +101,18 @@ const Layout = ({ children }: LayoutProps) => {
           <Link to="/" className="font-serif font-bold text-lg text-sidebar-foreground">EHDS Explorer</Link>
           <div className="flex items-center gap-1">
             <div className="hidden md:flex items-center gap-1" data-tour="accessibility">
+              {!authLoading && user && isEditor && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link to="/admin">
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Settings className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent>Admin Dashboard</TooltipContent>
+                </Tooltip>
+              )}
               <TourButton onClick={startTour} />
               <ReportIssueButton />
               <AccessibilityControls />

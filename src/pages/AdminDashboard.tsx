@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useSiteSettings, useUpdateSiteSettings } from '@/hooks/useSiteSettings';
 import { AdminTour, useAdminTour } from '@/components/AdminTour';
+import AnalyticsWidget from '@/components/AnalyticsWidget';
 
 const AdminDashboard = () => {
   const { user, loading, isEditor, isAdmin, signOut } = useAuth();
@@ -314,6 +315,13 @@ const AdminDashboard = () => {
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* Analytics Widget */}
+        {isAdmin && (
+          <div className="mb-8" data-tour="admin-analytics">
+            <AnalyticsWidget />
+          </div>
         )}
 
         <Card data-tour="admin-quick-actions">

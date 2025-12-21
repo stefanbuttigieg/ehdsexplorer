@@ -1,57 +1,71 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useQuery } from '@tanstack/react-query';
-import { format, subDays } from 'date-fns';
+import { format } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Users, Eye, Calendar, ExternalLink } from 'lucide-react';
+import { TrendingUp, Users, Eye, Clock, Activity, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
 
-interface AnalyticsData {
-  date: string;
-  pageViews: number;
-  uniqueVisitors: number;
+interface UmamiStats {
+  pageviews: number;
+  visitors: number;
+  visits: number;
+  bounces: number;
+  totaltime: number;
 }
 
-const UMAMI_WEBSITE_ID = import.meta.env.VITE_UMAMI_WEBSITE_ID;
+interface PageviewData {
+  x: string;
+  y: number;
+}
+
+interface TopPage {
+  x: string;
+  y: number;
+}
+
+interface AnalyticsResponse {
+  configured: boolean;
+  error?: string;
+  today: UmamiStats;
+  week: UmamiStats;
+  month: UmamiStats;
+  activeVisitors: number;
+  pageviewsChart: PageviewData[];
+  sessionsChart: PageviewData[];
+  topPages: TopPage[];
+}
 
 const AnalyticsWidget = () => {
-  const [dateRange, setDateRange] = useState('7');
-  
-  const isConfigured = !!UMAMI_WEBSITE_ID;
-
-  // Generate sample data for demonstration when not configured
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['analytics', dateRange],
-    queryFn: async () => {
-      const days = parseInt(dateRange);
-      const sampleData: AnalyticsData[] = [];
-      
-      // Generate sample data to show the UI structure
-      for (let i = days - 1; i >= 0; i--) {
-        const date = subDays(new Date(), i);
-        sampleData.push({
-          date: format(date, 'MMM dd'),
-          pageViews: Math.floor(Math.random() * 500) + 100,
-          uniqueVisitors: Math.floor(Math.random() * 200) + 50,
-        });
-      }
-      
-      return sampleData;
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['umami-analytics'],
+    queryFn: async (): Promise<AnalyticsResponse> => {
+      const { data, error } = await supabase.functions.invoke('get-umami-analytics');
+      if (error) throw error;
+      return data;
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60 * 1000, // Refresh every minute
+    refetchInterval: 60 * 1000, // Auto-refresh for real-time feel
   });
 
-  const totals = useMemo(() => {
-    if (!data) return { pageViews: 0, uniqueVisitors: 0, avgPerDay: 0 };
-    
-    const pageViews = data.reduce((sum, d) => sum + d.pageViews, 0);
-    const uniqueVisitors = data.reduce((sum, d) => sum + d.uniqueVisitors, 0);
-    const avgPerDay = Math.round(pageViews / data.length);
-    
-    return { pageViews, uniqueVisitors, avgPerDay };
+  const chartData = useMemo(() => {
+    if (!data?.pageviewsChart) return [];
+    return data.pageviewsChart.map((pv, index) => ({
+      date: format(new Date(pv.x), 'MMM dd'),
+      pageViews: pv.y,
+      sessions: data.sessionsChart?.[index]?.y ?? 0,
+    }));
   }, [data]);
+
+  const formatTime = (ms: number) => {
+    const seconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(seconds / 60);
+    if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
+    return `${seconds}s`;
+  };
 
   if (error) {
     return (
@@ -66,6 +80,40 @@ const AnalyticsWidget = () => {
           <p className="text-muted-foreground text-sm">
             Unable to load analytics data. Please try again later.
           </p>
+          <Button variant="outline" size="sm" onClick={() => refetch()} className="mt-2">
+            Retry
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!data?.configured) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Site Analytics
+          </CardTitle>
+          <CardDescription>Configure Umami to see real analytics data</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg space-y-3">
+            <p className="text-sm font-medium">Set up Umami Analytics</p>
+            <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside">
+              <li>Sign up at <a href="https://cloud.umami.is" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">cloud.umami.is</a></li>
+              <li>Create a website and copy your Website ID</li>
+              <li>Go to Settings → API → Create Token</li>
+              <li>Add VITE_UMAMI_WEBSITE_ID and UMAMI_API_TOKEN secrets</li>
+            </ol>
+            <Button variant="outline" size="sm" asChild>
+              <a href="https://umami.is/docs/api" target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="h-3 w-3 mr-1" />
+                Umami API Docs
+              </a>
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );
@@ -79,128 +127,175 @@ const AnalyticsWidget = () => {
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
               Site Analytics
-              {!isConfigured && (
-                <span className="text-xs font-normal text-muted-foreground">(Demo Data)</span>
+              {data.activeVisitors > 0 && (
+                <Badge variant="secondary" className="animate-pulse">
+                  <Activity className="h-3 w-3 mr-1" />
+                  {data.activeVisitors} online
+                </Badge>
               )}
             </CardTitle>
-            <CardDescription>
-              {isConfigured 
-                ? 'Powered by Umami Analytics' 
-                : 'Configure Umami to see real analytics data'}
-            </CardDescription>
+            <CardDescription>Powered by Umami Analytics</CardDescription>
           </div>
-          <Select value={dateRange} onValueChange={setDateRange}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7">Last 7 days</SelectItem>
-              <SelectItem value="14">Last 14 days</SelectItem>
-              <SelectItem value="30">Last 30 days</SelectItem>
-            </SelectContent>
-          </Select>
+          <Button variant="ghost" size="sm" onClick={() => refetch()}>
+            Refresh
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="p-4 bg-muted/50 rounded-lg">
-            <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
-              <Eye className="h-4 w-4" />
-              Page Views
+        {/* Today's Stats */}
+        <div>
+          <h4 className="text-sm font-medium text-muted-foreground mb-3">Today</h4>
+          <div className="grid grid-cols-4 gap-3">
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <div className="flex items-center gap-1.5 text-muted-foreground text-xs mb-1">
+                <Eye className="h-3.5 w-3.5" />
+                Views
+              </div>
+              {isLoading ? (
+                <Skeleton className="h-7 w-14" />
+              ) : (
+                <p className="text-xl font-bold">{data.today.pageviews.toLocaleString()}</p>
+              )}
             </div>
-            {isLoading ? (
-              <Skeleton className="h-8 w-20" />
-            ) : (
-              <p className="text-2xl font-bold">{totals.pageViews.toLocaleString()}</p>
-            )}
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <div className="flex items-center gap-1.5 text-muted-foreground text-xs mb-1">
+                <Users className="h-3.5 w-3.5" />
+                Visitors
+              </div>
+              {isLoading ? (
+                <Skeleton className="h-7 w-14" />
+              ) : (
+                <p className="text-xl font-bold">{data.today.visitors.toLocaleString()}</p>
+              )}
+            </div>
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <div className="flex items-center gap-1.5 text-muted-foreground text-xs mb-1">
+                <Activity className="h-3.5 w-3.5" />
+                Sessions
+              </div>
+              {isLoading ? (
+                <Skeleton className="h-7 w-14" />
+              ) : (
+                <p className="text-xl font-bold">{data.today.visits.toLocaleString()}</p>
+              )}
+            </div>
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <div className="flex items-center gap-1.5 text-muted-foreground text-xs mb-1">
+                <Clock className="h-3.5 w-3.5" />
+                Avg Time
+              </div>
+              {isLoading ? (
+                <Skeleton className="h-7 w-14" />
+              ) : (
+                <p className="text-xl font-bold">
+                  {data.today.visits > 0 ? formatTime(data.today.totaltime / data.today.visits) : '0s'}
+                </p>
+              )}
+            </div>
           </div>
-          <div className="p-4 bg-muted/50 rounded-lg">
-            <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
-              <Users className="h-4 w-4" />
-              Unique Visitors
+        </div>
+
+        {/* Week & Month Stats */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="p-4 border rounded-lg">
+            <h4 className="text-sm font-medium mb-2">Last 7 Days</h4>
+            <div className="space-y-1">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Page Views</span>
+                <span className="font-medium">{data.week.pageviews.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Unique Visitors</span>
+                <span className="font-medium">{data.week.visitors.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Sessions</span>
+                <span className="font-medium">{data.week.visits.toLocaleString()}</span>
+              </div>
             </div>
-            {isLoading ? (
-              <Skeleton className="h-8 w-20" />
-            ) : (
-              <p className="text-2xl font-bold">{totals.uniqueVisitors.toLocaleString()}</p>
-            )}
           </div>
-          <div className="p-4 bg-muted/50 rounded-lg">
-            <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
-              <Calendar className="h-4 w-4" />
-              Avg/Day
+          <div className="p-4 border rounded-lg">
+            <h4 className="text-sm font-medium mb-2">This Month</h4>
+            <div className="space-y-1">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Page Views</span>
+                <span className="font-medium">{data.month.pageviews.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Unique Visitors</span>
+                <span className="font-medium">{data.month.visitors.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Sessions</span>
+                <span className="font-medium">{data.month.visits.toLocaleString()}</span>
+              </div>
             </div>
-            {isLoading ? (
-              <Skeleton className="h-8 w-20" />
-            ) : (
-              <p className="text-2xl font-bold">{totals.avgPerDay.toLocaleString()}</p>
-            )}
           </div>
         </div>
 
         {/* Chart */}
-        <div className="h-64">
-          {isLoading ? (
-            <Skeleton className="h-full w-full" />
-          ) : data && data.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data}>
-                <XAxis 
-                  dataKey="date" 
-                  tick={{ fontSize: 12 }} 
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis 
-                  tick={{ fontSize: 12 }} 
-                  tickLine={false}
-                  axisLine={false}
-                  width={40}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                  }}
-                />
-                <Bar 
-                  dataKey="pageViews" 
-                  fill="hsl(var(--primary))" 
-                  radius={[4, 4, 0, 0]}
-                  name="Page Views"
-                />
-                <Bar 
-                  dataKey="uniqueVisitors" 
-                  fill="hsl(var(--primary) / 0.5)" 
-                  radius={[4, 4, 0, 0]}
-                  name="Unique Visitors"
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-full flex items-center justify-center text-muted-foreground">
-              No data available
-            </div>
-          )}
+        <div>
+          <h4 className="text-sm font-medium text-muted-foreground mb-3">Last 7 Days</h4>
+          <div className="h-48">
+            {isLoading ? (
+              <Skeleton className="h-full w-full" />
+            ) : chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                  <XAxis 
+                    dataKey="date" 
+                    tick={{ fontSize: 11 }} 
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 11 }} 
+                    tickLine={false}
+                    axisLine={false}
+                    width={35}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                    }}
+                  />
+                  <Bar 
+                    dataKey="pageViews" 
+                    fill="hsl(var(--primary))" 
+                    radius={[4, 4, 0, 0]}
+                    name="Page Views"
+                  />
+                  <Bar 
+                    dataKey="sessions" 
+                    fill="hsl(var(--primary) / 0.4)" 
+                    radius={[4, 4, 0, 0]}
+                    name="Sessions"
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
+                No data available yet
+              </div>
+            )}
+          </div>
         </div>
 
-        {!isConfigured && (
-          <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg space-y-3">
-            <p className="text-sm font-medium">Set up Umami Analytics</p>
-            <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside">
-              <li>Sign up at <a href="https://cloud.umami.is" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">cloud.umami.is</a> or self-host Umami</li>
-              <li>Create a website and copy your Website ID</li>
-              <li>Add <code className="px-1 py-0.5 bg-muted rounded text-xs">VITE_UMAMI_WEBSITE_ID</code> to your environment</li>
-              <li>Optionally add <code className="px-1 py-0.5 bg-muted rounded text-xs">VITE_UMAMI_SCRIPT_URL</code> if self-hosting</li>
-            </ol>
-            <Button variant="outline" size="sm" asChild>
-              <a href="https://umami.is/docs" target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="h-3 w-3 mr-1" />
-                Umami Docs
-              </a>
-            </Button>
+        {/* Top Pages */}
+        {data.topPages && data.topPages.length > 0 && (
+          <div>
+            <h4 className="text-sm font-medium text-muted-foreground mb-3">Top Pages (Last 7 Days)</h4>
+            <div className="space-y-2">
+              {data.topPages.slice(0, 5).map((page, index) => (
+                <div key={index} className="flex justify-between items-center text-sm py-1.5 border-b last:border-0">
+                  <span className="truncate max-w-[70%] text-muted-foreground">{page.x}</span>
+                  <span className="font-medium">{page.y.toLocaleString()}</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </CardContent>

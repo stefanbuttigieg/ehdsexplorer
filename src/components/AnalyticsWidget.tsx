@@ -1,13 +1,13 @@
-import { useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useQuery } from '@tanstack/react-query';
-import { format } from 'date-fns';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Users, Eye, Clock, Activity, ExternalLink } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/integrations/supabase/client';
+import { useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { TrendingUp, Users, Eye, Clock, Activity, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 
 interface UmamiStats {
   pageviews: number;
@@ -41,9 +41,9 @@ interface AnalyticsResponse {
 
 const AnalyticsWidget = () => {
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['umami-analytics'],
+    queryKey: ["umami-analytics"],
     queryFn: async (): Promise<AnalyticsResponse> => {
-      const { data, error } = await supabase.functions.invoke('get-umami-analytics');
+      const { data, error } = await supabase.functions.invoke("get-umami-analytics");
       if (error) throw error;
       return data;
     },
@@ -54,7 +54,7 @@ const AnalyticsWidget = () => {
   const chartData = useMemo(() => {
     if (!data?.pageviewsChart) return [];
     return data.pageviewsChart.map((pv, index) => ({
-      date: format(new Date(pv.x), 'MMM dd'),
+      date: format(new Date(pv.x), "MMM dd"),
       pageViews: pv.y,
       sessions: data.sessionsChart?.[index]?.y ?? 0,
     }));
@@ -77,9 +77,7 @@ const AnalyticsWidget = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-sm">
-            Unable to load analytics data. Please try again later.
-          </p>
+          <p className="text-muted-foreground text-sm">Unable to load analytics data. Please try again later.</p>
           <Button variant="outline" size="sm" onClick={() => refetch()} className="mt-2">
             Retry
           </Button>
@@ -102,7 +100,17 @@ const AnalyticsWidget = () => {
           <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg space-y-3">
             <p className="text-sm font-medium">Set up Umami Analytics</p>
             <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside">
-              <li>Sign up at <a href="https://cloud.umami.is" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">cloud.umami.is</a></li>
+              <li>
+                Sign up at{" "}
+                <a
+                  href="https://cloud.umami.is"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  cloud.umami.is
+                </a>
+              </li>
               <li>Create a website and copy your Website ID</li>
               <li>Go to Settings → API → Create Token</li>
               <li>Add VITE_UMAMI_WEBSITE_ID and UMAMI_API_TOKEN secrets</li>
@@ -134,7 +142,7 @@ const AnalyticsWidget = () => {
                 </Badge>
               )}
             </CardTitle>
-            <CardDescription>Powered by Umami Analytics</CardDescription>
+            <CardDescription>Powered by Umami Analytics as from 21/12/25 12:00</CardDescription>
           </div>
           <Button variant="ghost" size="sm" onClick={() => refetch()}>
             Refresh
@@ -188,7 +196,7 @@ const AnalyticsWidget = () => {
                 <Skeleton className="h-7 w-14" />
               ) : (
                 <p className="text-xl font-bold">
-                  {data.today.visits > 0 ? formatTime(data.today.totaltime / data.today.visits) : '0s'}
+                  {data.today.visits > 0 ? formatTime(data.today.totaltime / data.today.visits) : "0s"}
                 </p>
               )}
             </div>
@@ -242,38 +250,18 @@ const AnalyticsWidget = () => {
             ) : chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData}>
-                  <XAxis 
-                    dataKey="date" 
-                    tick={{ fontSize: 11 }} 
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis 
-                    tick={{ fontSize: 11 }} 
-                    tickLine={false}
-                    axisLine={false}
-                    width={35}
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                      fontSize: '12px',
+                  <XAxis dataKey="date" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={35} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "8px",
+                      fontSize: "12px",
                     }}
                   />
-                  <Bar 
-                    dataKey="pageViews" 
-                    fill="hsl(var(--primary))" 
-                    radius={[4, 4, 0, 0]}
-                    name="Page Views"
-                  />
-                  <Bar 
-                    dataKey="sessions" 
-                    fill="hsl(var(--primary) / 0.4)" 
-                    radius={[4, 4, 0, 0]}
-                    name="Sessions"
-                  />
+                  <Bar dataKey="pageViews" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="Page Views" />
+                  <Bar dataKey="sessions" fill="hsl(var(--primary) / 0.4)" radius={[4, 4, 0, 0]} name="Sessions" />
                 </BarChart>
               </ResponsiveContainer>
             ) : (

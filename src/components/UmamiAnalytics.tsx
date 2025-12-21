@@ -1,32 +1,45 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
-interface UmamiAnalyticsProps {
-  websiteId?: string;
-  scriptUrl?: string;
+interface UmamiConfig {
+  websiteId: string | null;
+  scriptUrl: string;
 }
 
 /**
  * Umami Analytics integration component.
  * 
- * To use this:
- * 1. Set up Umami (self-hosted or cloud at https://cloud.umami.is)
- * 2. Create a website in Umami and get your Website ID
- * 3. Set VITE_UMAMI_WEBSITE_ID in your environment
- * 4. Optionally set VITE_UMAMI_SCRIPT_URL if self-hosting
- * 
- * Default script URL points to Umami Cloud.
+ * Fetches Umami configuration from edge function and loads the tracking script.
  */
-const UmamiAnalytics = ({ 
-  websiteId = import.meta.env.VITE_UMAMI_WEBSITE_ID,
-  scriptUrl = import.meta.env.VITE_UMAMI_SCRIPT_URL || 'https://cloud.umami.is/script.js'
-}: UmamiAnalyticsProps) => {
+const UmamiAnalytics = () => {
   const location = useLocation();
+  const [config, setConfig] = useState<UmamiConfig | null>(null);
 
-  // Load Umami script
+  // Fetch Umami config from edge function
   useEffect(() => {
-    if (!websiteId) {
-      console.log('Umami Analytics: No website ID configured');
+    const fetchConfig = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('get-umami-config');
+        if (error) {
+          console.error('Failed to fetch Umami config:', error);
+          return;
+        }
+        setConfig(data);
+      } catch (err) {
+        console.error('Error fetching Umami config:', err);
+      }
+    };
+
+    fetchConfig();
+  }, []);
+
+  // Load Umami script once config is available
+  useEffect(() => {
+    if (!config?.websiteId) {
+      if (config) {
+        console.log('Umami Analytics: No website ID configured');
+      }
       return;
     }
 
@@ -37,30 +50,27 @@ const UmamiAnalytics = ({
     const script = document.createElement('script');
     script.async = true;
     script.defer = true;
-    script.src = scriptUrl;
-    script.setAttribute('data-website-id', websiteId);
+    script.src = config.scriptUrl;
+    script.setAttribute('data-website-id', config.websiteId);
     
     document.head.appendChild(script);
 
     return () => {
-      // Cleanup on unmount (rarely needed for analytics)
-      const scriptElement = document.querySelector(`script[data-website-id="${websiteId}"]`);
+      const scriptElement = document.querySelector(`script[data-website-id="${config.websiteId}"]`);
       if (scriptElement) {
         scriptElement.remove();
       }
     };
-  }, [websiteId, scriptUrl]);
+  }, [config]);
 
-  // Track page views on route change (Umami does this automatically, but this ensures SPA navigation is tracked)
+  // Track page views on route change
   useEffect(() => {
-    if (!websiteId) return;
+    if (!config?.websiteId) return;
 
-    // Umami automatically tracks page views when the script loads
-    // For SPAs, we can optionally trigger manual tracking
     if (typeof window !== 'undefined' && (window as any).umami) {
       (window as any).umami.track();
     }
-  }, [location.pathname, websiteId]);
+  }, [location.pathname, config]);
 
   return null;
 };

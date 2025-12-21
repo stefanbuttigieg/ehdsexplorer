@@ -6,5 +6,8 @@ verify_jwt = false
 [functions.generate-news-summary]
 verify_jwt = true
 
+[functions.get-umami-config]
+verify_jwt = false
+
 [functions.manage-user-password]
 verify_jwt = true

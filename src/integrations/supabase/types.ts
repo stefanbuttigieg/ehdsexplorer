@@ -235,6 +235,124 @@ export type Database = {
           },
         ]
       }
+      implementing_act_articles: {
+        Row: {
+          article_number: number
+          content: string
+          created_at: string
+          id: string
+          implementing_act_id: string
+          section_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          article_number: number
+          content: string
+          created_at?: string
+          id?: string
+          implementing_act_id: string
+          section_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          article_number?: number
+          content?: string
+          created_at?: string
+          id?: string
+          implementing_act_id?: string
+          section_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "implementing_act_articles_implementing_act_id_fkey"
+            columns: ["implementing_act_id"]
+            isOneToOne: false
+            referencedRelation: "implementing_acts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "implementing_act_articles_section_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "implementing_act_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      implementing_act_recitals: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          implementing_act_id: string
+          recital_number: number
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          implementing_act_id: string
+          recital_number: number
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          implementing_act_id?: string
+          recital_number?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "implementing_act_recitals_implementing_act_id_fkey"
+            columns: ["implementing_act_id"]
+            isOneToOne: false
+            referencedRelation: "implementing_acts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      implementing_act_sections: {
+        Row: {
+          created_at: string
+          id: string
+          implementing_act_id: string
+          section_number: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          implementing_act_id: string
+          section_number: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          implementing_act_id?: string
+          section_number?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "implementing_act_sections_implementing_act_id_fkey"
+            columns: ["implementing_act_id"]
+            isOneToOne: false
+            referencedRelation: "implementing_acts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       implementing_acts: {
         Row: {
           article_reference: string

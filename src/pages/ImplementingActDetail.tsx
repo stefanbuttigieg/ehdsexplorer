@@ -12,6 +12,7 @@ import Layout from "@/components/Layout";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { differenceInDays, parse, isAfter, isBefore } from "date-fns";
+import ImplementingActContent from "@/components/ImplementingActContent";
 
 const parseFeedbackDeadline = (deadline: string) => {
   const parts = deadline.split(" - ");
@@ -147,9 +148,14 @@ const ImplementingActDetail = () => {
           </CardContent>
         </Card>
 
+        {/* Implementing Act Content (Articles & Recitals) */}
+        <div className="mb-6">
+          <ImplementingActContent implementingActId={act.id} />
+        </div>
+
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-lg">Related Articles</CardTitle>
+            <CardTitle className="text-lg">Related EHDS Articles</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {act.relatedArticles.map(artId => {

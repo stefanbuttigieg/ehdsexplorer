@@ -31,6 +31,31 @@ serve(async (req) => {
     startOfWeek.setDate(startOfDay.getDate() - 7);
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
+    // Helper to extract stat values - Umami API returns { pageviews: 5 } not { pageviews: { value: 5 } }
+    const extractStats = (stats: unknown) => {
+      if (!stats || typeof stats !== 'object') {
+        return { pageviews: 0, visitors: 0, visits: 0, bounces: 0, totaltime: 0 };
+      }
+      const s = stats as Record<string, unknown>;
+      return {
+        pageviews: typeof s.pageviews === 'object' && s.pageviews !== null 
+          ? ((s.pageviews as Record<string, number>).value ?? 0)
+          : (typeof s.pageviews === 'number' ? s.pageviews : 0),
+        visitors: typeof s.visitors === 'object' && s.visitors !== null 
+          ? ((s.visitors as Record<string, number>).value ?? 0)
+          : (typeof s.visitors === 'number' ? s.visitors : 0),
+        visits: typeof s.visits === 'object' && s.visits !== null 
+          ? ((s.visits as Record<string, number>).value ?? 0)
+          : (typeof s.visits === 'number' ? s.visits : 0),
+        bounces: typeof s.bounces === 'object' && s.bounces !== null 
+          ? ((s.bounces as Record<string, number>).value ?? 0)
+          : (typeof s.bounces === 'number' ? s.bounces : 0),
+        totaltime: typeof s.totaltime === 'object' && s.totaltime !== null 
+          ? ((s.totaltime as Record<string, number>).value ?? 0)
+          : (typeof s.totaltime === 'number' ? s.totaltime : 0),
+      };
+    };
+
     // Get stats for different periods
     const [todayStats, weekStats, monthStats, activeVisitors] = await Promise.all([
       // Today's stats
@@ -84,40 +109,17 @@ serve(async (req) => {
       return null;
     });
 
-    console.log("Umami API responses:", { 
-      todayStats, 
-      weekStats, 
-      monthStats, 
-      activeVisitors,
-      pageviewsData: pageviewsData ? "received" : "error",
-      topPages: topPages ? `${topPages.length || 0} pages` : "error"
-    });
+    console.log("Umami API raw responses:", JSON.stringify({ todayStats, weekStats, monthStats, activeVisitors }));
 
     return new Response(
       JSON.stringify({
         configured: true,
-        today: {
-          pageviews: todayStats?.pageviews?.value ?? 0,
-          visitors: todayStats?.visitors?.value ?? 0,
-          visits: todayStats?.visits?.value ?? 0,
-          bounces: todayStats?.bounces?.value ?? 0,
-          totaltime: todayStats?.totaltime?.value ?? 0,
-        },
-        week: {
-          pageviews: weekStats?.pageviews?.value ?? 0,
-          visitors: weekStats?.visitors?.value ?? 0,
-          visits: weekStats?.visits?.value ?? 0,
-          bounces: weekStats?.bounces?.value ?? 0,
-          totaltime: weekStats?.totaltime?.value ?? 0,
-        },
-        month: {
-          pageviews: monthStats?.pageviews?.value ?? 0,
-          visitors: monthStats?.visitors?.value ?? 0,
-          visits: monthStats?.visits?.value ?? 0,
-          bounces: monthStats?.bounces?.value ?? 0,
-          totaltime: monthStats?.totaltime?.value ?? 0,
-        },
-        activeVisitors: activeVisitors?.x ?? 0,
+        today: extractStats(todayStats),
+        week: extractStats(weekStats),
+        month: extractStats(monthStats),
+        activeVisitors: typeof activeVisitors === 'object' && activeVisitors !== null 
+          ? (activeVisitors.x ?? activeVisitors.visitors ?? 0) 
+          : 0,
         pageviewsChart: pageviewsData?.pageviews ?? [],
         sessionsChart: pageviewsData?.sessions ?? [],
         topPages: (topPages ?? []).slice(0, 10),

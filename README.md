@@ -8,7 +8,8 @@ A comprehensive digital platform for exploring **Regulation (EU) 2025/327** - th
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?logo=tailwindcss)
 ![Supabase](https://img.shields.io/badge/Supabase-Backend-3FCF8E?logo=supabase)
 [![BuyMeACoffee](https://raw.githubusercontent.com/pachadotdev/buymeacoffee-badges/main/bmc-yellow.svg)](https://buymeacoffee.com/stefanbuttigieg)
-![Lovable Credits](https://img.shields.io/badge/Lovable%20Credits-250%20credits%20used-blue)
+![Lovable Credits](https://img.shields.io/badge/Lovable%20Credits-260%20credits%20used-blue)
+![Analytics](https://img.shields.io/badge/Analytics-Umami-brightgreen)
 
 
 ## 🎯 Overview
@@ -43,6 +44,9 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **"Open for Feedback" section** highlighting acts with active feedback windows
 - **Live deliverable links** to EHDS acceptance data platform
 - **Related articles** and official document links
+- **Detailed act pages** with dedicated articles and recitals per implementing act
+- **Searchable content** within each implementing act
+- **Section-based article organization** for complex acts
 
 ### 🔗 External Resources Linking
 - **Joint Action Deliverables** - Links to deliverables from EHDS-related joint actions
@@ -133,8 +137,9 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [X] Offline support (PWA)
 - [X] AI-generated news summaries
 - [X] Footnotes
-- [ ] Implementing Acts - Seperate Pages with relevant IA Articles
-- [ ] Self-Service Portal for Users (Password Management, Reset Password and Profile Management) 
+- [X] Implementing Acts - Separate Pages with relevant IA Articles and Recitals
+- [ ] Real-time Umami Analytics Dashboard for Admins
+- [ ] Self-Service Portal for Users (Password Management, Reset Password and Profile Management)
 
 ### Medium-term
 - [ ] AI-powered Q&A about the regulation

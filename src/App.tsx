@@ -49,6 +49,7 @@ import ApiDocsPage from "./pages/ApiDocsPage";
 import NewsPage from "./pages/NewsPage";
 import NewsDetailPage from "./pages/NewsDetailPage";
 import AdminNewsPage from "./pages/AdminNewsPage";
+import AdminImplementingActContentPage from "./pages/AdminImplementingActContentPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -102,6 +103,7 @@ const App = () => (
             <Route path="/admin/definitions" element={<AdminDefinitionsPage />} />
             <Route path="/admin/annexes" element={<AdminAnnexesPage />} />
             <Route path="/admin/implementing-acts" element={<AdminImplementingActsPage />} />
+            <Route path="/admin/implementing-acts/:id/content" element={<AdminImplementingActContentPage />} />
             <Route path="/admin/bulk-import" element={<AdminBulkImportPage />} />
             <Route path="/admin/chapters" element={<AdminChaptersPage />} />
             <Route path="/admin/overview" element={<AdminOverviewPage />} />

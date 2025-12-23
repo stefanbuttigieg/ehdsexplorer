@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Upload, FileText, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-type ContentType = "recitals" | "articles" | "definitions" | "annexes";
+type ContentType = "recitals" | "articles" | "definitions" | "annexes" | "joint_action_deliverables" | "published_works" | "footnotes";
 
 interface RecitalImport {
   recital_number: number;
@@ -37,6 +37,29 @@ interface AnnexImport {
   id: string;
   title: string;
   content: string;
+}
+
+interface JointActionDeliverableImport {
+  joint_action_name: string;
+  deliverable_name: string;
+  deliverable_link: string;
+  related_articles?: number[];
+  related_implementing_acts?: string[];
+}
+
+interface PublishedWorkImport {
+  name: string;
+  link: string;
+  affiliated_organization: string;
+  related_articles?: number[];
+  related_implementing_acts?: string[];
+}
+
+interface FootnoteImport {
+  marker: string;
+  content: string;
+  article_id?: number;
+  recital_id?: number;
 }
 
 export default function AdminBulkImportPage() {
@@ -115,6 +138,30 @@ export default function AdminBulkImportPage() {
             }
           }
           break;
+        case "joint_action_deliverables":
+          for (const item of parsed) {
+            if (!item.joint_action_name || !item.deliverable_name || !item.deliverable_link) {
+              setValidationError("Each deliverable must have 'joint_action_name', 'deliverable_name', and 'deliverable_link'");
+              return false;
+            }
+          }
+          break;
+        case "published_works":
+          for (const item of parsed) {
+            if (!item.name || !item.link || !item.affiliated_organization) {
+              setValidationError("Each published work must have 'name', 'link', and 'affiliated_organization'");
+              return false;
+            }
+          }
+          break;
+        case "footnotes":
+          for (const item of parsed) {
+            if (!item.marker || !item.content) {
+              setValidationError("Each footnote must have 'marker' and 'content'");
+              return false;
+            }
+          }
+          break;
       }
 
       setPreviewData(parsed.slice(0, 5));
@@ -187,11 +234,55 @@ export default function AdminBulkImportPage() {
           );
           if (annexError) throw annexError;
           break;
+          
+        case "joint_action_deliverables":
+          const deliverables = parsed as JointActionDeliverableImport[];
+          await supabase.from("joint_action_deliverables").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+          const { error: jadError } = await supabase.from("joint_action_deliverables").insert(
+            deliverables.map(d => ({
+              joint_action_name: d.joint_action_name,
+              deliverable_name: d.deliverable_name,
+              deliverable_link: d.deliverable_link,
+              related_articles: d.related_articles || [],
+              related_implementing_acts: d.related_implementing_acts || []
+            }))
+          );
+          if (jadError) throw jadError;
+          break;
+          
+        case "published_works":
+          const works = parsed as PublishedWorkImport[];
+          await supabase.from("published_works").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+          const { error: pwError } = await supabase.from("published_works").insert(
+            works.map(w => ({
+              name: w.name,
+              link: w.link,
+              affiliated_organization: w.affiliated_organization,
+              related_articles: w.related_articles || [],
+              related_implementing_acts: w.related_implementing_acts || []
+            }))
+          );
+          if (pwError) throw pwError;
+          break;
+          
+        case "footnotes":
+          const footnotes = parsed as FootnoteImport[];
+          await supabase.from("footnotes").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+          const { error: fnError } = await supabase.from("footnotes").insert(
+            footnotes.map(f => ({
+              marker: f.marker,
+              content: f.content,
+              article_id: f.article_id || null,
+              recital_id: f.recital_id || null
+            }))
+          );
+          if (fnError) throw fnError;
+          break;
       }
 
       toast({
         title: "Import Successful",
-        description: `Successfully imported ${parsed.length} ${contentType}`,
+        description: `Successfully imported ${parsed.length} ${contentType.replace(/_/g, " ")}`,
       });
       
       setJsonData("");
@@ -226,6 +317,34 @@ export default function AdminBulkImportPage() {
       case "annexes":
         return JSON.stringify([
           { id: "I", title: "Annex I - Priority Categories", content: "The priority categories..." }
+        ], null, 2);
+      case "joint_action_deliverables":
+        return JSON.stringify([
+          { 
+            joint_action_name: "TEHDAS", 
+            deliverable_name: "Guidelines on Secondary Use", 
+            deliverable_link: "https://example.com/guideline.pdf",
+            related_articles: [33, 34],
+            related_implementing_acts: ["art-5-1"]
+          }
+        ], null, 2);
+      case "published_works":
+        return JSON.stringify([
+          { 
+            name: "EHDS Implementation Guide", 
+            link: "https://example.com/guide.pdf",
+            affiliated_organization: "European Commission",
+            related_articles: [1, 2],
+            related_implementing_acts: ["art-5-1"]
+          }
+        ], null, 2);
+      case "footnotes":
+        return JSON.stringify([
+          { 
+            marker: "(1)", 
+            content: "OJ L 119, 4.5.2016, p. 1.",
+            article_id: 1
+          }
         ], null, 2);
     }
   };
@@ -271,6 +390,9 @@ export default function AdminBulkImportPage() {
                   <SelectItem value="articles">Articles</SelectItem>
                   <SelectItem value="definitions">Definitions</SelectItem>
                   <SelectItem value="annexes">Annexes</SelectItem>
+                  <SelectItem value="joint_action_deliverables">Joint Action Deliverables</SelectItem>
+                  <SelectItem value="published_works">Published Works</SelectItem>
+                  <SelectItem value="footnotes">Footnotes</SelectItem>
                 </SelectContent>
               </Select>
             </div>

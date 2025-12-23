@@ -109,14 +109,17 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Content management** for all content types:
   - Articles, Recitals, Chapters, Sections
   - Definitions, Annexes
-  - Implementing Acts
+  - Implementing Acts (with dedicated article/recital/section content)
   - Joint Action Deliverables
   - Published Works
   - Notifications
   - Footnotes (inline and attached)
 - **Markdown WYSIWYG editor** with live preview
 - **Bulk editing** with multi-select for recitals and articles
-- **Bulk import** functionality for JSON data
+- **Bulk import** functionality for JSON data:
+  - Recitals, Articles, Definitions, Annexes
+  - Joint Action Deliverables, Published Works, Footnotes
+  - Implementing Act Recitals, Articles, and Sections
 - **User management** with email invitation system
 - **Maintenance mode** with custom messaging
 - **Overview page** content management

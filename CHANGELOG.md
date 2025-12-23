@@ -10,8 +10,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Planned
 - Enhanced search with advanced filtering options
 - Comparative view between regulation versions
-- API access for developers
 - Multi-language support
+
+---
+
+## [1.2.0] - 2025-12-23
+
+### Added
+
+#### Implementing Acts Detailed Content
+- Dedicated database tables for implementing act recitals, articles, and sections
+- Full content management for each implementing act with its own articles, recitals, and sections
+- Searchable content within each implementing act detail page
+- Section-based article organization with accordion navigation
+- Tabbed interface for articles and recitals on detail pages
+
+#### Enhanced Bulk Import
+- Added bulk import for Joint Action Deliverables
+- Added bulk import for Published Works
+- Added bulk import for Footnotes
+- Added bulk import for Implementing Act Recitals
+- Added bulk import for Implementing Act Articles
+- Added bulk import for Implementing Act Sections
+- Smart import that replaces content per implementing act ID rather than all data
+
+#### Admin Improvements
+- New admin page for managing implementing act content (articles, recitals, sections)
+- Direct link from implementing acts list to content management
+- Fixed Select component issues with empty values in dialogs
 
 ---
 

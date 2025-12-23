@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Upload, FileText, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-type ContentType = "recitals" | "articles" | "definitions" | "annexes" | "joint_action_deliverables" | "published_works" | "footnotes";
+type ContentType = "recitals" | "articles" | "definitions" | "annexes" | "joint_action_deliverables" | "published_works" | "footnotes" | "ia_recitals" | "ia_articles" | "ia_sections";
 
 interface RecitalImport {
   recital_number: number;
@@ -60,6 +60,26 @@ interface FootnoteImport {
   content: string;
   article_id?: number;
   recital_id?: number;
+}
+
+interface IARecitalImport {
+  implementing_act_id: string;
+  recital_number: number;
+  content: string;
+}
+
+interface IAArticleImport {
+  implementing_act_id: string;
+  article_number: number;
+  title: string;
+  content: string;
+  section_id?: string;
+}
+
+interface IASectionImport {
+  implementing_act_id: string;
+  section_number: number;
+  title: string;
 }
 
 export default function AdminBulkImportPage() {
@@ -158,6 +178,30 @@ export default function AdminBulkImportPage() {
           for (const item of parsed) {
             if (!item.marker || !item.content) {
               setValidationError("Each footnote must have 'marker' and 'content'");
+              return false;
+            }
+          }
+          break;
+        case "ia_recitals":
+          for (const item of parsed) {
+            if (!item.implementing_act_id || typeof item.recital_number !== "number" || !item.content) {
+              setValidationError("Each IA recital must have 'implementing_act_id', 'recital_number' (number), and 'content'");
+              return false;
+            }
+          }
+          break;
+        case "ia_articles":
+          for (const item of parsed) {
+            if (!item.implementing_act_id || typeof item.article_number !== "number" || !item.title || !item.content) {
+              setValidationError("Each IA article must have 'implementing_act_id', 'article_number' (number), 'title', and 'content'");
+              return false;
+            }
+          }
+          break;
+        case "ia_sections":
+          for (const item of parsed) {
+            if (!item.implementing_act_id || typeof item.section_number !== "number" || !item.title) {
+              setValidationError("Each IA section must have 'implementing_act_id', 'section_number' (number), and 'title'");
               return false;
             }
           }
@@ -278,6 +322,57 @@ export default function AdminBulkImportPage() {
           );
           if (fnError) throw fnError;
           break;
+          
+        case "ia_recitals":
+          const iaRecitals = parsed as IARecitalImport[];
+          // Group by implementing_act_id for targeted deletion
+          const iaRecitalActIds = [...new Set(iaRecitals.map(r => r.implementing_act_id))];
+          for (const actId of iaRecitalActIds) {
+            await supabase.from("implementing_act_recitals").delete().eq("implementing_act_id", actId);
+          }
+          const { error: iaRecitalError } = await supabase.from("implementing_act_recitals").insert(
+            iaRecitals.map(r => ({
+              implementing_act_id: r.implementing_act_id,
+              recital_number: r.recital_number,
+              content: r.content
+            }))
+          );
+          if (iaRecitalError) throw iaRecitalError;
+          break;
+          
+        case "ia_articles":
+          const iaArticles = parsed as IAArticleImport[];
+          const iaArticleActIds = [...new Set(iaArticles.map(a => a.implementing_act_id))];
+          for (const actId of iaArticleActIds) {
+            await supabase.from("implementing_act_articles").delete().eq("implementing_act_id", actId);
+          }
+          const { error: iaArticleError } = await supabase.from("implementing_act_articles").insert(
+            iaArticles.map(a => ({
+              implementing_act_id: a.implementing_act_id,
+              article_number: a.article_number,
+              title: a.title,
+              content: a.content,
+              section_id: a.section_id || null
+            }))
+          );
+          if (iaArticleError) throw iaArticleError;
+          break;
+          
+        case "ia_sections":
+          const iaSections = parsed as IASectionImport[];
+          const iaSectionActIds = [...new Set(iaSections.map(s => s.implementing_act_id))];
+          for (const actId of iaSectionActIds) {
+            await supabase.from("implementing_act_sections").delete().eq("implementing_act_id", actId);
+          }
+          const { error: iaSectionError } = await supabase.from("implementing_act_sections").insert(
+            iaSections.map(s => ({
+              implementing_act_id: s.implementing_act_id,
+              section_number: s.section_number,
+              title: s.title
+            }))
+          );
+          if (iaSectionError) throw iaSectionError;
+          break;
       }
 
       toast({
@@ -346,6 +441,32 @@ export default function AdminBulkImportPage() {
             article_id: 1
           }
         ], null, 2);
+      case "ia_recitals":
+        return JSON.stringify([
+          { 
+            implementing_act_id: "art-5-1",
+            recital_number: 1, 
+            content: "Whereas the implementation of..."
+          }
+        ], null, 2);
+      case "ia_articles":
+        return JSON.stringify([
+          { 
+            implementing_act_id: "art-5-1",
+            article_number: 1, 
+            title: "Subject matter and scope",
+            content: "This implementing act establishes...",
+            section_id: null
+          }
+        ], null, 2);
+      case "ia_sections":
+        return JSON.stringify([
+          { 
+            implementing_act_id: "art-5-1",
+            section_number: 1, 
+            title: "General provisions"
+          }
+        ], null, 2);
     }
   };
 
@@ -393,6 +514,9 @@ export default function AdminBulkImportPage() {
                   <SelectItem value="joint_action_deliverables">Joint Action Deliverables</SelectItem>
                   <SelectItem value="published_works">Published Works</SelectItem>
                   <SelectItem value="footnotes">Footnotes</SelectItem>
+                  <SelectItem value="ia_recitals">IA Recitals</SelectItem>
+                  <SelectItem value="ia_articles">IA Articles</SelectItem>
+                  <SelectItem value="ia_sections">IA Sections</SelectItem>
                 </SelectContent>
               </Select>
             </div>

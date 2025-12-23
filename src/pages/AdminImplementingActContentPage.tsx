@@ -271,14 +271,14 @@ const AdminImplementingActContentPage = () => {
                         <div>
                           <Label>Section (optional)</Label>
                           <Select
-                            value={newArticle.section_id}
-                            onValueChange={(v) => setNewArticle({ ...newArticle, section_id: v })}
+                            value={newArticle.section_id || "none"}
+                            onValueChange={(v) => setNewArticle({ ...newArticle, section_id: v === "none" ? "" : v })}
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="No section" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="">No section</SelectItem>
+                              <SelectItem value="none">No section</SelectItem>
                               {sections.map((s) => (
                                 <SelectItem key={s.id} value={s.id}>
                                   Section {s.section_number}: {s.title}
@@ -370,14 +370,14 @@ const AdminImplementingActContentPage = () => {
                       <div>
                         <Label>Section</Label>
                         <Select
-                          value={editingArticle.section_id || ""}
-                          onValueChange={(v) => setEditingArticle({ ...editingArticle, section_id: v || null })}
+                          value={editingArticle.section_id || "none"}
+                          onValueChange={(v) => setEditingArticle({ ...editingArticle, section_id: v === "none" ? null : v })}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="No section" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">No section</SelectItem>
+                            <SelectItem value="none">No section</SelectItem>
                             {sections.map((s) => (
                               <SelectItem key={s.id} value={s.id}>
                                 Section {s.section_number}: {s.title}

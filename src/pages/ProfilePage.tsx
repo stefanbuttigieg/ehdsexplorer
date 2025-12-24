@@ -18,10 +18,12 @@ const ProfilePage = () => {
   const { toast } = useToast();
 
   const [displayName, setDisplayName] = useState("");
+  const [newEmail, setNewEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+  const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
 
@@ -84,6 +86,55 @@ const ProfilePage = () => {
       });
     } finally {
       setIsUpdatingProfile(false);
+    }
+  };
+
+  const handleUpdateEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !newEmail.trim()) return;
+
+    if (newEmail.trim().toLowerCase() === user.email?.toLowerCase()) {
+      toast({
+        title: "Same email",
+        description: "Please enter a different email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newEmail.trim())) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUpdatingEmail(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        email: newEmail.trim(),
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Confirmation email sent",
+        description: "Please check your new email address to confirm the change.",
+      });
+
+      setNewEmail("");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update email",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingEmail(false);
     }
   };
 
@@ -219,6 +270,48 @@ const ProfilePage = () => {
                 <Button type="submit" disabled={isUpdatingProfile}>
                   {isUpdatingProfile && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Save Changes
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Change Email Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5" />
+                Change Email
+              </CardTitle>
+              <CardDescription>
+                Update your email address. A confirmation link will be sent to your new email.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleUpdateEmail} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="currentEmail">Current Email</Label>
+                  <Input
+                    id="currentEmail"
+                    type="email"
+                    value={user.email || ""}
+                    disabled
+                    className="bg-muted"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="newEmail">New Email</Label>
+                  <Input
+                    id="newEmail"
+                    type="email"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    placeholder="Enter new email address"
+                    required
+                  />
+                </div>
+                <Button type="submit" disabled={isUpdatingEmail || !newEmail.trim()}>
+                  {isUpdatingEmail && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Update Email
                 </Button>
               </form>
             </CardContent>

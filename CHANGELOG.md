@@ -14,6 +14,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.0] - 2025-12-24
+
+### Added
+
+#### User Profile & Account Management
+- New profile page at `/profile` for logged-in users
+- Display name editing with profile settings
+- Email change functionality with confirmation link
+- Password change feature via secure edge function
+- Account information display (email, member since, roles)
+- Profile access button added to admin dashboard header
+
+---
+
 ## [1.2.0] - 2025-12-23
 
 ### Added

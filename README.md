@@ -141,8 +141,8 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [X] AI-generated news summaries
 - [X] Footnotes
 - [X] Implementing Acts - Separate Pages with relevant IA Articles and Recitals
+- [X] Self-Service Portal for Users (Password, Email, and Profile Management)
 - [ ] Real-time Umami Analytics Dashboard for Admins
-- [ ] Self-Service Portal for Users (Password Management, Reset Password and Profile Management)
 
 ### Medium-term
 - [ ] AI-powered Q&A about the regulation

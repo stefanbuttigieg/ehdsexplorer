@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote, HelpCircle, BookOpenCheck, Mail, Newspaper } from 'lucide-react';
+import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote, HelpCircle, BookOpenCheck, Mail, Newspaper, UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -162,7 +162,12 @@ const AdminDashboard = () => {
                 {isAdmin ? 'Admin' : 'Editor'}
               </Badge>
             </div>
-            <Button variant="outline" size="icon" onClick={handleSignOut}>
+            <Link to="/profile">
+              <Button variant="outline" size="icon" title="My Profile">
+                <UserCircle className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Button variant="outline" size="icon" onClick={handleSignOut} title="Sign Out">
               <LogOut className="h-4 w-4" />
             </Button>
           </div>

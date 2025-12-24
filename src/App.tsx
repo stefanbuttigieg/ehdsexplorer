@@ -50,6 +50,7 @@ import NewsPage from "./pages/NewsPage";
 import NewsDetailPage from "./pages/NewsDetailPage";
 import AdminNewsPage from "./pages/AdminNewsPage";
 import AdminImplementingActContentPage from "./pages/AdminImplementingActContentPage";
+import ProfilePage from "./pages/ProfilePage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -97,6 +98,7 @@ const App = () => (
             <Route path="/news/:id" element={<NewsDetailPage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin/set-password" element={<AdminSetPasswordPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/articles" element={<AdminArticlesPage />} />
             <Route path="/admin/recitals" element={<AdminRecitalsPage />} />

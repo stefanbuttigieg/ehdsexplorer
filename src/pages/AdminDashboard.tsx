@@ -143,37 +143,39 @@ const AdminDashboard = () => {
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto p-6 animate-fade-in">
-        <div className="flex items-center justify-between mb-8">
+      <div className="max-w-6xl mx-auto p-4 md:p-6 animate-fade-in">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold font-serif">Admin Dashboard</h1>
+            <h1 className="text-2xl md:text-3xl font-bold font-serif">Admin Dashboard</h1>
             <p className="text-muted-foreground mt-1">
               Manage EHDS Regulation content
             </p>
           </div>
-          <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm" onClick={startTour}>
-              <HelpCircle className="h-4 w-4 mr-2" />
-              Take Tour
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+            <Button variant="outline" size="sm" onClick={startTour} className="text-xs sm:text-sm">
+              <HelpCircle className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Take Tour</span>
             </Button>
-            <div className="text-right">
-              <p className="text-sm font-medium">{user.email}</p>
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-medium truncate max-w-[150px]">{user.email}</p>
               <Badge variant={isAdmin ? 'default' : 'secondary'}>
                 {isAdmin ? 'Admin' : 'Editor'}
               </Badge>
             </div>
-            <Link to="/profile">
-              <Button variant="outline" size="icon" title="My Profile">
-                <UserCircle className="h-4 w-4" />
+            <div className="flex items-center gap-1">
+              <Link to="/profile">
+                <Button variant="outline" size="icon" title="My Profile" className="h-8 w-8 sm:h-9 sm:w-9">
+                  <UserCircle className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Button variant="outline" size="icon" onClick={handleSignOut} title="Sign Out" className="h-8 w-8 sm:h-9 sm:w-9">
+                <LogOut className="h-4 w-4" />
               </Button>
-            </Link>
-            <Button variant="outline" size="icon" onClick={handleSignOut} title="Sign Out">
-              <LogOut className="h-4 w-4" />
-            </Button>
+            </div>
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8" data-tour="admin-content-sections">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8" data-tour="admin-content-sections">
           {contentSections.map((section) => {
             // Add specific data-tour attributes for key sections
             const tourAttr = section.title === 'Articles' ? { 'data-tour': 'admin-articles' } :
@@ -333,7 +335,7 @@ const AdminDashboard = () => {
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
-          <CardContent className="flex gap-4 flex-wrap">
+          <CardContent className="flex gap-2 md:gap-4 flex-wrap">
             <Link to="/">
               <Button variant="outline">View Public Site</Button>
             </Link>

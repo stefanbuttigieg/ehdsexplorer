@@ -11,15 +11,6 @@ export const useTour = (tourType: 'public' | 'admin' = 'public') => {
   useEffect(() => {
     const seen = localStorage.getItem(storageKey) === 'true';
     setHasSeenTour(seen);
-    
-    // Auto-start tour for first-time visitors
-    if (!seen) {
-      // Small delay to ensure UI is rendered
-      const timer = setTimeout(() => {
-        setIsTourOpen(true);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
   }, [storageKey]);
 
   const completeTour = () => {

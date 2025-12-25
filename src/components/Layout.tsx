@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText, Accessibility, Code, Newspaper, Settings } from "lucide-react";
+import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText, Accessibility, Code, Newspaper, Settings, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toRoman } from "@/lib/romanNumerals";
@@ -197,8 +197,17 @@ const Layout = ({ children }: LayoutProps) => {
             {/* Take a Tour Button */}
             <TourButton onClick={startTour} variant="full" />
 
-            {/* Developer Links */}
+            {/* Help Center & Developer Links */}
             <div className="pt-2 space-y-1">
+              <Link to="/help" onClick={() => setSidebarOpen(false)}>
+                <Button
+                  variant="ghost"
+                  className={cn("w-full justify-start gap-2 text-muted-foreground", isActive("/help") && "bg-sidebar-accent text-sidebar-accent-foreground")}
+                >
+                  <HelpCircle className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">Help Center</span>
+                </Button>
+              </Link>
               <Link to="/api" onClick={() => setSidebarOpen(false)}>
                 <Button
                   variant="ghost"

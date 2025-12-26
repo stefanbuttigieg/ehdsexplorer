@@ -60,11 +60,11 @@ const AnalyticsWidget = () => {
     }));
   }, [data]);
 
-  const formatTime = (ms: number) => {
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
-    return `${seconds}s`;
+  const formatTime = (seconds: number) => {
+    const totalSeconds = Math.floor(seconds);
+    const minutes = Math.floor(totalSeconds / 60);
+    if (minutes > 0) return `${minutes}m ${totalSeconds % 60}s`;
+    return `${totalSeconds}s`;
   };
 
   if (error) {

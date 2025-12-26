@@ -44,7 +44,7 @@ const HelpCenterPage = () => {
             <CardDescription>Jump to a specific topic</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
               <a href="#getting-started" className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors">
                 <Info className="h-4 w-4 text-primary" />
                 <span className="text-sm font-medium">Getting Started</span>
@@ -60,6 +60,10 @@ const HelpCenterPage = () => {
               <a href="#accessibility" className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors">
                 <AccessibilityIcon className="h-4 w-4 text-primary" />
                 <span className="text-sm font-medium">Accessibility</span>
+              </a>
+              <a href="#faq" className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors">
+                <HelpCircle className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">FAQ</span>
               </a>
             </div>
           </CardContent>
@@ -366,7 +370,195 @@ const HelpCenterPage = () => {
 
         <Separator className="my-8" />
 
-        {/* Contact & Support */}
+        {/* FAQ */}
+        <section id="faq" className="mb-12">
+          <h2 className="text-2xl font-bold font-serif mb-4 flex items-center gap-2">
+            <HelpCircle className="h-6 w-6 text-primary" />
+            Frequently Asked Questions
+          </h2>
+
+          <Accordion type="multiple" className="space-y-4">
+            <AccordionItem value="what-is-ehds" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <span className="font-semibold text-left">What is the European Health Data Space (EHDS)?</span>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-3 text-muted-foreground">
+                <p>
+                  The European Health Data Space (EHDS) is a health-specific data sharing framework established by 
+                  Regulation (EU) 2025/327. It aims to promote better exchange and access to different types of 
+                  health data across the EU for healthcare delivery (primary use) and for research, innovation, 
+                  policy-making, and regulatory activities (secondary use).
+                </p>
+                <p>
+                  The EHDS is one of the sectoral data spaces under the European strategy for data and represents 
+                  a significant step towards a genuine European Health Union.
+                </p>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="when-apply" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <span className="font-semibold text-left">When does the EHDS Regulation apply?</span>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-3 text-muted-foreground">
+                <p>
+                  The EHDS Regulation entered into force on 26 March 2025 (20 days after publication in the Official Journal). 
+                  However, the application dates are staggered:
+                </p>
+                <ul className="space-y-1 ml-4 list-disc">
+                  <li><strong>Primary use provisions (Chapter II):</strong> Apply from 26 March 2027</li>
+                  <li><strong>Secondary use provisions (Chapter IV):</strong> Apply from 26 March 2029</li>
+                  <li><strong>EHR systems requirements (Chapter III):</strong> Various dates from 2028-2030</li>
+                  <li><strong>Cross-border infrastructure:</strong> Phased implementation through 2031</li>
+                </ul>
+                <p>
+                  Check the Key Dates section on the Overview page for the complete implementation timeline.
+                </p>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="who-affected" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <span className="font-semibold text-left">Who is affected by the EHDS Regulation?</span>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-3 text-muted-foreground">
+                <p>The EHDS affects a wide range of stakeholders:</p>
+                <ul className="space-y-1 ml-4 list-disc">
+                  <li><strong>Citizens/Patients:</strong> New rights to access and control their health data</li>
+                  <li><strong>Healthcare providers:</strong> Obligations for data registration and interoperability</li>
+                  <li><strong>EHR system manufacturers:</strong> Compliance with essential requirements and CE marking</li>
+                  <li><strong>Researchers:</strong> New mechanisms to access health data for research</li>
+                  <li><strong>Health tech companies:</strong> Requirements for wellness apps and interoperability</li>
+                  <li><strong>Member States:</strong> Must establish digital health authorities and health data access bodies</li>
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="primary-vs-secondary" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <span className="font-semibold text-left">What is the difference between primary and secondary use?</span>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-3 text-muted-foreground">
+                <p>
+                  <strong>Primary use</strong> refers to using electronic health data for the direct delivery of healthcare 
+                  to the individual. This includes diagnosis, treatment, and care coordination. Patients have extensive 
+                  rights to access, share, and control their data for these purposes.
+                </p>
+                <p>
+                  <strong>Secondary use</strong> refers to using electronic health data for purposes beyond individual care, 
+                  such as research, innovation, public health, policy-making, and regulatory activities. This data is typically 
+                  accessed in pseudonymised or anonymised form through Health Data Access Bodies.
+                </p>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="implementing-acts" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <span className="font-semibold text-left">What are implementing acts and delegated acts?</span>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-3 text-muted-foreground">
+                <p>
+                  <strong>Implementing acts</strong> are EU legal instruments that set uniform conditions for implementing 
+                  the EHDS Regulation. They specify technical details like data formats, interoperability standards, 
+                  and operational procedures.
+                </p>
+                <p>
+                  <strong>Delegated acts</strong> allow the Commission to supplement or amend non-essential elements of 
+                  the Regulation, such as updating the list of priority categories of health data or adjusting technical requirements.
+                </p>
+                <p>
+                  Track the progress of these acts in the <Link to="/implementing-acts" className="text-primary hover:underline">Implementing Acts</Link> section.
+                </p>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="myhealth-eu" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <span className="font-semibold text-left">What is MyHealth@EU?</span>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-3 text-muted-foreground">
+                <p>
+                  MyHealth@EU is the cross-border digital health infrastructure for primary use of health data. 
+                  It enables secure exchange of patient summaries, electronic prescriptions, and other health data 
+                  between Member States when citizens travel or seek healthcare abroad.
+                </p>
+                <p>
+                  The infrastructure builds on the existing eHealth Digital Service Infrastructure (eHDSI) and 
+                  will be expanded to support all priority categories of health data.
+                </p>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="healthdata-eu" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <span className="font-semibold text-left">What is HealthData@EU?</span>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-3 text-muted-foreground">
+                <p>
+                  HealthData@EU is the cross-border infrastructure for secondary use of health data. It connects 
+                  national Health Data Access Bodies and enables researchers and other authorised users to access 
+                  health data from multiple Member States through a single application process.
+                </p>
+                <p>
+                  The infrastructure supports multi-country research projects while ensuring data protection 
+                  and secure processing environments.
+                </p>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="opt-out" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <span className="font-semibold text-left">Can patients opt out of data sharing?</span>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-3 text-muted-foreground">
+                <p>
+                  Yes, patients have opt-out rights under both primary and secondary use provisions:
+                </p>
+                <ul className="space-y-1 ml-4 list-disc">
+                  <li><strong>Primary use (Article 10):</strong> Patients can restrict health professionals&apos; access to their data, with limited exceptions for emergencies</li>
+                  <li><strong>Secondary use (Article 71):</strong> Member States may provide patients with the right to opt out of having their data used for secondary purposes</li>
+                </ul>
+                <p>
+                  The specific mechanisms for exercising these rights will be established by each Member State.
+                </p>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="official-source" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <span className="font-semibold text-left">Is this the official source of the EHDS Regulation?</span>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-3 text-muted-foreground">
+                <p>
+                  No, this explorer is an unofficial tool designed to help users navigate and understand the EHDS Regulation. 
+                  While we strive for accuracy, the official and legally binding text is published in the 
+                  <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=OJ:L_202500327" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline ml-1">Official Journal of the European Union</a>.
+                </p>
+                <p>
+                  Always refer to the official publication for legal purposes or when precise wording is required.
+                </p>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="data-api" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <span className="font-semibold text-left">Can I access the regulation data programmatically?</span>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-3 text-muted-foreground">
+                <p>
+                  Yes! We provide a public API for developers to access the regulation content. You can retrieve 
+                  articles, recitals, definitions, chapters, and implementing acts in JSON or CSV format.
+                </p>
+                <p>
+                  Visit the <Link to="/api" className="text-primary hover:underline">API Documentation</Link> page 
+                  for endpoints, usage examples, and rate limit information.
+                </p>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </section>
+
+        <Separator className="my-8" />
         <section id="support" className="mb-8">
           <h2 className="text-2xl font-bold font-serif mb-4 flex items-center gap-2">
             <MessageCircle className="h-6 w-6 text-primary" />

@@ -153,7 +153,7 @@ const AnalyticsWidget = () => {
         {/* Today's Stats */}
         <div>
           <h4 className="text-sm font-medium text-muted-foreground mb-3">Today</h4>
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-5 gap-3">
             <div className="p-3 bg-muted/50 rounded-lg">
               <div className="flex items-center gap-1.5 text-muted-foreground text-xs mb-1">
                 <Eye className="h-3.5 w-3.5" />
@@ -200,6 +200,19 @@ const AnalyticsWidget = () => {
                 </p>
               )}
             </div>
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <div className="flex items-center gap-1.5 text-muted-foreground text-xs mb-1">
+                <TrendingUp className="h-3.5 w-3.5" />
+                Bounce
+              </div>
+              {isLoading ? (
+                <Skeleton className="h-7 w-14" />
+              ) : (
+                <p className="text-xl font-bold">
+                  {data.today.visits > 0 ? Math.round((data.today.bounces / data.today.visits) * 100) : 0}%
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
@@ -220,6 +233,12 @@ const AnalyticsWidget = () => {
                 <span className="text-muted-foreground">Sessions</span>
                 <span className="font-medium">{data.week.visits.toLocaleString()}</span>
               </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Bounce Rate</span>
+                <span className="font-medium">
+                  {data.week.visits > 0 ? Math.round((data.week.bounces / data.week.visits) * 100) : 0}%
+                </span>
+              </div>
             </div>
           </div>
           <div className="p-4 border rounded-lg">
@@ -236,6 +255,12 @@ const AnalyticsWidget = () => {
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Sessions</span>
                 <span className="font-medium">{data.month.visits.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Bounce Rate</span>
+                <span className="font-medium">
+                  {data.month.visits > 0 ? Math.round((data.month.bounces / data.month.visits) * 100) : 0}%
+                </span>
               </div>
             </div>
           </div>

@@ -22,6 +22,7 @@ import FootnotesSection from "@/components/FootnotesSection";
 import ContentWithFootnotes from "@/components/ContentWithFootnotes";
 import { JsonLdMetadata } from "@/components/JsonLdMetadata";
 import { EliReference } from "@/components/EliReference";
+import PlainLanguageView from "@/components/PlainLanguageView";
 
 const ArticlePage = () => {
   const { id } = useParams();
@@ -113,17 +114,23 @@ const ArticlePage = () => {
           </div>
         </div>
 
-        {/* Article Content */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <ContentWithFootnotes 
-              content={article.content} 
-              footnotes={footnotes} 
-              className="article-content"
-            />
-            <FootnotesSection footnotes={footnotes} />
-          </CardContent>
-        </Card>
+        {/* Article Content with Plain Language View */}
+        <PlainLanguageView
+          contentType="article"
+          contentId={articleId}
+          originalContent={
+            <Card className="mb-8">
+              <CardContent className="p-6">
+                <ContentWithFootnotes 
+                  content={article.content} 
+                  footnotes={footnotes} 
+                  className="article-content"
+                />
+                <FootnotesSection footnotes={footnotes} />
+              </CardContent>
+            </Card>
+          }
+        />
 
         {/* Related Recitals */}
         {relatedRecitals.length > 0 && (

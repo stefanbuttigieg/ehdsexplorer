@@ -533,6 +533,45 @@ export type Database = {
         }
         Relationships: []
       }
+      plain_language_translations: {
+        Row: {
+          content_id: number
+          content_type: string
+          created_at: string
+          generated_by: string
+          id: string
+          is_published: boolean
+          plain_language_text: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          content_id: number
+          content_type: string
+          created_at?: string
+          generated_by?: string
+          id?: string
+          is_published?: boolean
+          plain_language_text: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content_id?: number
+          content_type?: string
+          created_at?: string
+          generated_by?: string
+          id?: string
+          is_published?: boolean
+          plain_language_text?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

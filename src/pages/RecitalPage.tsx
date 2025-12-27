@@ -16,6 +16,7 @@ import FootnotesSection from "@/components/FootnotesSection";
 import ContentWithFootnotes from "@/components/ContentWithFootnotes";
 import { JsonLdMetadata } from "@/components/JsonLdMetadata";
 import { EliReference } from "@/components/EliReference";
+import PlainLanguageView from "@/components/PlainLanguageView";
 
 const RecitalPage = () => {
   const { id } = useParams();
@@ -92,17 +93,23 @@ const RecitalPage = () => {
           </div>
         </div>
 
-        {/* Recital Content */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <ContentWithFootnotes 
-              content={recital.content} 
-              footnotes={footnotes} 
-              className="legal-text text-lg leading-relaxed"
-            />
-            <FootnotesSection footnotes={footnotes} />
-          </CardContent>
-        </Card>
+        {/* Recital Content with Plain Language View */}
+        <PlainLanguageView
+          contentType="recital"
+          contentId={recitalNumber}
+          originalContent={
+            <Card className="mb-8">
+              <CardContent className="p-6">
+                <ContentWithFootnotes 
+                  content={recital.content} 
+                  footnotes={footnotes} 
+                  className="legal-text text-lg leading-relaxed"
+                />
+                <FootnotesSection footnotes={footnotes} />
+              </CardContent>
+            </Card>
+          }
+        />
 
         {/* Related Articles */}
         {recital.related_articles && recital.related_articles.length > 0 && (

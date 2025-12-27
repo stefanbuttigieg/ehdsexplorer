@@ -52,6 +52,7 @@ import AdminNewsPage from "./pages/AdminNewsPage";
 import AdminImplementingActContentPage from "./pages/AdminImplementingActContentPage";
 import ProfilePage from "./pages/ProfilePage";
 import HelpCenterPage from "./pages/HelpCenterPage";
+import AdminPlainLanguagePage from "./pages/AdminPlainLanguagePage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -119,6 +120,7 @@ const App = () => (
             <Route path="/admin/help" element={<AdminHelpCenterPage />} />
             <Route path="/admin/email-templates" element={<AdminEmailTemplatesPage />} />
             <Route path="/admin/news" element={<AdminNewsPage />} />
+            <Route path="/admin/plain-language" element={<AdminPlainLanguagePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </MaintenanceGuard>

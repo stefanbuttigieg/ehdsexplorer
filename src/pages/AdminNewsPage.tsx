@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { ArrowLeft, Sparkles, Trash2, Eye, EyeOff, Loader2, Pencil, Settings, Link, Plus, X } from 'lucide-react';
+import { ArrowLeft, Sparkles, Trash2, Eye, EyeOff, Loader2, Pencil, Settings, Link, Plus, X, Globe, FileText } from 'lucide-react';
 import Layout from '@/components/Layout';
 import MarkdownEditor from '@/components/MarkdownEditor';
 import { Button } from '@/components/ui/button';
@@ -14,10 +14,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useNewsSummaries, useGenerateNewsSummary, useUpdateNewsSummary, useDeleteNewsSummary, useCreateNewsSummary, NewsSummary } from '@/hooks/useNewsSummaries';
 import { usePageContent, useUpdatePageContent } from '@/hooks/usePageContent';
+import { supabase } from '@/integrations/supabase/client';
 
 const AdminNewsPage = () => {
   const navigate = useNavigate();
@@ -48,6 +50,13 @@ const AdminNewsPage = () => {
   const [createNewSource, setCreateNewSource] = useState('');
   const [createWeekStart, setCreateWeekStart] = useState('');
   const [createWeekEnd, setCreateWeekEnd] = useState('');
+
+  // Firecrawl scraping state
+  const [showScrapeDialog, setShowScrapeDialog] = useState(false);
+  const [scrapeUrl, setScrapeUrl] = useState('');
+  const [isScrapingUrl, setIsScrapingUrl] = useState(false);
+  const [scrapedContent, setScrapedContent] = useState<{ title: string; markdown: string; url: string } | null>(null);
+  const [scrapedUrls, setScrapedUrls] = useState<Array<{ url: string; title: string; markdown: string }>>([]);
 
   if (authLoading) {
     return (
@@ -214,9 +223,75 @@ const AdminNewsPage = () => {
       });
       toast({ title: "Created", description: "Manual summary created successfully." });
       setShowCreateDialog(false);
+      setScrapedUrls([]);
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     }
+  };
+
+  const handleScrapeUrl = async () => {
+    if (!scrapeUrl.trim()) return;
+    
+    setIsScrapingUrl(true);
+    setScrapedContent(null);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('firecrawl-scrape', {
+        body: { url: scrapeUrl, options: { formats: ['markdown'] } },
+      });
+      
+      if (error) throw error;
+      
+      if (!data.success && data.error) {
+        throw new Error(data.error);
+      }
+      
+      const markdown = data.data?.markdown || data.markdown || '';
+      const title = data.data?.metadata?.title || data.metadata?.title || scrapeUrl;
+      
+      setScrapedContent({ title, markdown, url: scrapeUrl });
+      toast({ title: "Scraped", description: "URL content extracted successfully." });
+    } catch (error: any) {
+      console.error('Scrape error:', error);
+      toast({ 
+        title: "Scraping failed", 
+        description: error.message || "Failed to scrape URL. Make sure Firecrawl is connected.", 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsScrapingUrl(false);
+    }
+  };
+
+  const handleAddScrapedContent = () => {
+    if (!scrapedContent) return;
+    
+    // Add to scraped URLs list
+    setScrapedUrls([...scrapedUrls, scrapedContent]);
+    
+    // Add URL to sources
+    if (!createSources.includes(scrapedContent.url)) {
+      setCreateSources([...createSources, scrapedContent.url]);
+    }
+    
+    // Clear scrape dialog
+    setScrapedContent(null);
+    setScrapeUrl('');
+    setShowScrapeDialog(false);
+    
+    toast({ title: "Added", description: "Content added to your sources." });
+  };
+
+  const handleRemoveScrapedUrl = (index: number) => {
+    const removed = scrapedUrls[index];
+    setScrapedUrls(scrapedUrls.filter((_, i) => i !== index));
+    setCreateSources(createSources.filter(s => s !== removed.url));
+  };
+
+  const handleInsertScrapedContent = (content: typeof scrapedUrls[0]) => {
+    const insertion = `\n\n### ${content.title}\n\n${content.markdown.substring(0, 500)}...\n\n[Read more](${content.url})`;
+    setCreateSummary(createSummary + insertion);
+    toast({ title: "Inserted", description: "Content excerpt added to summary." });
   };
 
   return (
@@ -489,12 +564,13 @@ const AdminNewsPage = () => {
           <DialogHeader>
             <DialogTitle>Create Manual Summary</DialogTitle>
             <DialogDescription>
-              Create a news summary manually without AI generation.
+              Create a news summary manually. Use "Scrape Sources" to pull content from EHDS-related URLs.
             </DialogDescription>
           </DialogHeader>
           <Tabs defaultValue="content" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="content">Content</TabsTrigger>
+              <TabsTrigger value="scrape">Scrape Sources ({scrapedUrls.length})</TabsTrigger>
               <TabsTrigger value="sources">Sources ({createSources.length})</TabsTrigger>
             </TabsList>
             <TabsContent value="content" className="space-y-4 py-4">
@@ -534,6 +610,101 @@ const AdminNewsPage = () => {
                   rows={15}
                 />
               </div>
+            </TabsContent>
+            <TabsContent value="scrape" className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Scrape EHDS-Related URLs</Label>
+                <p className="text-sm text-muted-foreground">
+                  Enter a URL to scrape its content. You can then insert excerpts into your summary.
+                </p>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="https://health.ec.europa.eu/news/..."
+                    value={scrapeUrl}
+                    onChange={(e) => setScrapeUrl(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleScrapeUrl())}
+                  />
+                  <Button 
+                    type="button" 
+                    onClick={handleScrapeUrl}
+                    disabled={isScrapingUrl || !scrapeUrl.trim()}
+                  >
+                    {isScrapingUrl ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Globe className="h-4 w-4 mr-2" />
+                    )}
+                    Scrape
+                  </Button>
+                </div>
+              </div>
+
+              {scrapedContent && (
+                <Card className="border-primary/50">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">{scrapedContent.title}</CardTitle>
+                    <CardDescription className="truncate">{scrapedContent.url}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[200px] mb-4">
+                      <pre className="text-xs whitespace-pre-wrap font-sans">
+                        {scrapedContent.markdown.substring(0, 2000)}
+                        {scrapedContent.markdown.length > 2000 && '...'}
+                      </pre>
+                    </ScrollArea>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" size="sm" onClick={() => setScrapedContent(null)}>
+                        Discard
+                      </Button>
+                      <Button size="sm" onClick={handleAddScrapedContent}>
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add to Sources
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {scrapedUrls.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Scraped Content</Label>
+                  {scrapedUrls.map((item, index) => (
+                    <Card key={index} className="p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{item.title}</p>
+                          <p className="text-xs text-muted-foreground truncate">{item.url}</p>
+                        </div>
+                        <div className="flex gap-1 shrink-0">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleInsertScrapedContent(item)}
+                          >
+                            <FileText className="h-3 w-3 mr-1" />
+                            Insert
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handleRemoveScrapedUrl(index)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+
+              {scrapedUrls.length === 0 && !scrapedContent && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Globe className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p>Scrape URLs to pull EHDS-related news content</p>
+                </div>
+              )}
             </TabsContent>
             <TabsContent value="sources" className="space-y-4 py-4">
               <div className="space-y-2">

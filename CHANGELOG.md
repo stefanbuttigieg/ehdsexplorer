@@ -14,6 +14,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.0] - 2025-12-28
+
+### Added
+
+#### Plain Language Translations
+- AI-powered plain language translations for articles and recitals
+- Side-by-side view showing legal text alongside accessible plain language version
+- Clear AI disclaimer on all generated translations
+- Admin interface for generating, editing, and publishing translations
+- Batch generation capability for translating multiple articles/recitals at once
+- Progress tracking during batch generation with success/failure indicators
+- Draft/published workflow for editorial review
+
+#### Firecrawl Integration for News Summaries
+- Firecrawl connector integration for URL scraping
+- New "Scrape Sources" tab in manual news summary creation
+- Ability to scrape EHDS-related news URLs and extract content
+- Insert scraped content excerpts directly into summaries
+- Automatic source URL tracking from scraped content
+
+---
+
 ## [1.3.0] - 2025-12-24
 
 ### Added

@@ -114,6 +114,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
   - Published Works
   - Notifications
   - Footnotes (inline and attached)
+  - Plain Language Translations
 - **Markdown WYSIWYG editor** with live preview
 - **Bulk editing** with multi-select for recitals and articles
 - **Bulk import** functionality for JSON data:
@@ -123,6 +124,8 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **User management** with email invitation system
 - **Maintenance mode** with custom messaging
 - **Overview page** content management
+- **Plain language translations** with AI generation and batch processing
+- **News summaries** with AI generation and Firecrawl URL scraping
 
 ### 📜 Legal & Compliance
 - **Privacy Policy** page
@@ -142,6 +145,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [X] Footnotes
 - [X] Implementing Acts - Separate Pages with relevant IA Articles and Recitals
 - [X] Self-Service Portal for Users (Password, Email, and Profile Management)
+- [X] Plain Language Version of Legal Text - side-by-side to legal text
 - [ ] Real-time Umami Analytics Dashboard for Admins
 
 ### Medium-term
@@ -150,7 +154,6 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [ ] Annotation and note-taking
 - [ ] Collaboration features for teams
 - [ ] Email alerts for implementing act status changes
-- [ ] Plain Language Version of Legal Text - side-by-side to legal text
 - [ ] Sign-up of new users and creation of profiles
 
 ### Long-term

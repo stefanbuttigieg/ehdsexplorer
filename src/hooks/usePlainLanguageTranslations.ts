@@ -213,3 +213,98 @@ export const useDeleteTranslation = () => {
     },
   });
 };
+
+export interface BatchGenerationProgress {
+  total: number;
+  completed: number;
+  current: { type: string; id: number } | null;
+  results: Array<{ type: string; id: number; success: boolean; error?: string }>;
+}
+
+export const useBatchGenerateTranslations = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      items,
+      onProgress,
+    }: {
+      items: Array<{ contentType: "article" | "recital"; contentId: number }>;
+      onProgress?: (progress: BatchGenerationProgress) => void;
+    }) => {
+      const results: BatchGenerationProgress["results"] = [];
+      
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        
+        onProgress?.({
+          total: items.length,
+          completed: i,
+          current: { type: item.contentType, id: item.contentId },
+          results,
+        });
+
+        try {
+          const { data, error } = await supabase.functions.invoke(
+            "generate-plain-language",
+            {
+              body: { contentType: item.contentType, contentId: item.contentId },
+            }
+          );
+
+          if (error) throw error;
+
+          // Auto-save as draft
+          const { data: user } = await supabase.auth.getUser();
+          await supabase
+            .from("plain_language_translations")
+            .upsert(
+              {
+                content_type: item.contentType,
+                content_id: item.contentId,
+                plain_language_text: data.plainLanguageText,
+                is_published: false,
+                generated_by: "ai",
+                reviewed_by: user.user?.id || null,
+                reviewed_at: new Date().toISOString(),
+              },
+              {
+                onConflict: "content_type,content_id",
+              }
+            );
+
+          results.push({ type: item.contentType, id: item.contentId, success: true });
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : "Unknown error";
+          results.push({ type: item.contentType, id: item.contentId, success: false, error: errorMessage });
+        }
+
+        // Small delay to avoid rate limiting
+        if (i < items.length - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+      }
+
+      onProgress?.({
+        total: items.length,
+        completed: items.length,
+        current: null,
+        results,
+      });
+
+      return results;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["plain-language-translations"],
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Batch generation failed",
+        description: error.message || "Failed to complete batch generation",
+        variant: "destructive",
+      });
+    },
+  });
+};

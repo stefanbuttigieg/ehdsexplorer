@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Languages, Sparkles, FileText, Check, X, Loader2, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Languages, Sparkles, FileText, Check, X, Loader2, Eye, EyeOff, Zap, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,6 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import Layout from "@/components/Layout";
 import { useArticles } from "@/hooks/useArticles";
 import { useRecitals } from "@/hooks/useRecitals";
@@ -16,12 +19,19 @@ import {
   usePlainLanguageTranslation,
   useGenerateTranslation,
   useSaveTranslation,
+  useBatchGenerateTranslations,
+  BatchGenerationProgress,
 } from "@/hooks/usePlainLanguageTranslations";
 
 const AdminPlainLanguagePage = () => {
   const [selectedType, setSelectedType] = useState<"article" | "recital">("article");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [editedText, setEditedText] = useState<string>("");
+  
+  // Batch generation state
+  const [batchDialogOpen, setBatchDialogOpen] = useState(false);
+  const [selectedForBatch, setSelectedForBatch] = useState<Set<number>>(new Set());
+  const [batchProgress, setBatchProgress] = useState<BatchGenerationProgress | null>(null);
 
   const { data: articles } = useArticles();
   const { data: recitals } = useRecitals();
@@ -33,6 +43,7 @@ const AdminPlainLanguagePage = () => {
 
   const generateMutation = useGenerateTranslation();
   const saveMutation = useSaveTranslation();
+  const batchMutation = useBatchGenerateTranslations();
 
   const items = selectedType === "article" 
     ? articles?.map(a => ({ id: a.article_number, title: a.title })) || []
@@ -45,6 +56,9 @@ const AdminPlainLanguagePage = () => {
     if (!t) return null;
     return t.is_published ? "published" : "draft";
   };
+
+  // Get items without translations for batch generation
+  const itemsWithoutTranslation = items.filter(item => !getTranslationStatus(item.id));
 
   const handleSelectItem = (id: number) => {
     setSelectedId(id);
@@ -71,27 +85,227 @@ const AdminPlainLanguagePage = () => {
     });
   };
 
+  const handleBatchSelect = (id: number, checked: boolean) => {
+    const newSet = new Set(selectedForBatch);
+    if (checked) {
+      newSet.add(id);
+    } else {
+      newSet.delete(id);
+    }
+    setSelectedForBatch(newSet);
+  };
+
+  const handleSelectAllForBatch = (checked: boolean) => {
+    if (checked) {
+      setSelectedForBatch(new Set(itemsWithoutTranslation.map(item => item.id)));
+    } else {
+      setSelectedForBatch(new Set());
+    }
+  };
+
+  const handleStartBatch = async () => {
+    if (selectedForBatch.size === 0) return;
+    
+    const itemsToGenerate = Array.from(selectedForBatch).map(id => ({
+      contentType: selectedType,
+      contentId: id,
+    }));
+
+    await batchMutation.mutateAsync({
+      items: itemsToGenerate,
+      onProgress: setBatchProgress,
+    });
+  };
+
+  const handleCloseBatchDialog = () => {
+    if (!batchMutation.isPending) {
+      setBatchDialogOpen(false);
+      setSelectedForBatch(new Set());
+      setBatchProgress(null);
+    }
+  };
+
   // When translation loads, update edited text
   const displayText = editedText || currentTranslation?.plain_language_text || "";
 
   return (
     <Layout>
       <div className="max-w-7xl mx-auto p-4 md:p-6 animate-fade-in">
-        <div className="flex items-center gap-4 mb-6">
-          <Link to="/admin">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold font-serif flex items-center gap-2">
-              <Languages className="h-7 w-7 text-primary" />
-              Plain Language Translations
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Generate and manage AI-powered plain language versions of legal content
-            </p>
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            <Link to="/admin">
+              <Button variant="ghost" size="icon">
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold font-serif flex items-center gap-2">
+                <Languages className="h-7 w-7 text-primary" />
+                Plain Language Translations
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Generate and manage AI-powered plain language versions of legal content
+              </p>
+            </div>
           </div>
+          
+          {/* Batch Generation Button */}
+          <Dialog open={batchDialogOpen} onOpenChange={setBatchDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="shrink-0">
+                <Zap className="h-4 w-4 mr-2" />
+                Batch Generate
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-primary" />
+                  Batch Generate Translations
+                </DialogTitle>
+                <DialogDescription>
+                  Select multiple {selectedType}s to generate plain language translations at once.
+                  Translations will be saved as drafts for review.
+                </DialogDescription>
+              </DialogHeader>
+              
+              {!batchProgress ? (
+                <>
+                  {/* Selection tabs */}
+                  <Tabs value={selectedType} onValueChange={(v) => {
+                    setSelectedType(v as "article" | "recital");
+                    setSelectedForBatch(new Set());
+                  }} className="mt-2">
+                    <TabsList className="w-full">
+                      <TabsTrigger value="article" className="flex-1">
+                        Articles
+                      </TabsTrigger>
+                      <TabsTrigger value="recital" className="flex-1">
+                        Recitals
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+
+                  {itemsWithoutTranslation.length === 0 ? (
+                    <div className="py-8 text-center text-muted-foreground">
+                      <CheckCircle2 className="h-12 w-12 mx-auto mb-3 text-green-500" />
+                      <p>All {selectedType}s already have translations!</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between py-2 border-b">
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id="select-all"
+                            checked={selectedForBatch.size === itemsWithoutTranslation.length && itemsWithoutTranslation.length > 0}
+                            onCheckedChange={handleSelectAllForBatch}
+                          />
+                          <label htmlFor="select-all" className="text-sm font-medium cursor-pointer">
+                            Select All ({itemsWithoutTranslation.length} without translation)
+                          </label>
+                        </div>
+                        <Badge variant="secondary">
+                          {selectedForBatch.size} selected
+                        </Badge>
+                      </div>
+
+                      <ScrollArea className="flex-1 max-h-[300px]">
+                        <div className="space-y-1 p-1">
+                          {itemsWithoutTranslation.map((item) => (
+                            <div
+                              key={item.id}
+                              className="flex items-center gap-3 p-2 rounded hover:bg-muted"
+                            >
+                              <Checkbox
+                                id={`batch-${item.id}`}
+                                checked={selectedForBatch.has(item.id)}
+                                onCheckedChange={(checked) => handleBatchSelect(item.id, checked as boolean)}
+                              />
+                              <label
+                                htmlFor={`batch-${item.id}`}
+                                className="text-sm cursor-pointer flex-1"
+                              >
+                                <span className="font-medium">
+                                  {selectedType === "article" ? `Article ${item.id}` : `Recital ${item.id}`}:
+                                </span>{" "}
+                                {selectedType === "article" ? item.title : ""}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </>
+                  )}
+
+                  <DialogFooter className="mt-4">
+                    <Button variant="outline" onClick={handleCloseBatchDialog}>
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleStartBatch}
+                      disabled={selectedForBatch.size === 0 || batchMutation.isPending}
+                    >
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Generate {selectedForBatch.size} Translation{selectedForBatch.size !== 1 ? "s" : ""}
+                    </Button>
+                  </DialogFooter>
+                </>
+              ) : (
+                /* Progress View */
+                <div className="py-6 space-y-6">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span>
+                        {batchProgress.current 
+                          ? `Generating ${batchProgress.current.type} ${batchProgress.current.id}...`
+                          : "Complete!"}
+                      </span>
+                      <span className="text-muted-foreground">
+                        {batchProgress.completed} / {batchProgress.total}
+                      </span>
+                    </div>
+                    <Progress 
+                      value={(batchProgress.completed / batchProgress.total) * 100} 
+                      className="h-2"
+                    />
+                  </div>
+
+                  {batchProgress.results.length > 0 && (
+                    <ScrollArea className="max-h-[250px]">
+                      <div className="space-y-1">
+                        {batchProgress.results.map((result, i) => (
+                          <div
+                            key={i}
+                            className={`flex items-center gap-2 p-2 rounded text-sm ${
+                              result.success ? "bg-green-50 dark:bg-green-950/20" : "bg-red-50 dark:bg-red-950/20"
+                            }`}
+                          >
+                            {result.success ? (
+                              <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+                            ) : (
+                              <XCircle className="h-4 w-4 text-red-600 shrink-0" />
+                            )}
+                            <span className="capitalize">{result.type}</span> {result.id}
+                            {result.error && (
+                              <span className="text-red-600 text-xs ml-2">({result.error})</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  )}
+
+                  {!batchMutation.isPending && (
+                    <DialogFooter>
+                      <Button onClick={handleCloseBatchDialog}>
+                        Done
+                      </Button>
+                    </DialogFooter>
+                  )}
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
         </div>
 
         <Alert className="mb-6">

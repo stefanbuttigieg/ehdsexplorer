@@ -103,26 +103,26 @@ const Index = () => {
                   <MessageSquare className="h-5 w-5 text-primary" />
                   <h2 className="text-xl font-bold font-serif">Open for Feedback</h2>
                 </div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {feedbackActs.map(act => (
                     <Card key={act.id} className="border-primary/20 bg-background">
                       <CardContent className="p-4">
-                        <div className="flex items-start justify-between gap-2 mb-2">
-                          <Badge variant="outline">{act.articleReference}</Badge>
-                          <Badge variant="default" className="bg-primary">
+                        <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
+                          <Badge variant="outline" className="text-xs">{act.articleReference}</Badge>
+                          <Badge variant="default" className="bg-primary text-xs">
                             <Clock className="h-3 w-3 mr-1" />
                             {act.feedbackStatus?.label}
                           </Badge>
                         </div>
-                        <h3 className="font-semibold mb-1">{act.title}</h3>
-                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{act.description}</p>
-                        <div className="flex items-center gap-2">
-                          <Link to={`/implementing-acts/${act.id}`}>
-                            <Button variant="outline" size="sm">View details</Button>
+                        <h3 className="font-semibold mb-1 text-sm sm:text-base">{act.title}</h3>
+                        <p className="text-xs sm:text-sm text-muted-foreground mb-3 line-clamp-2">{act.description}</p>
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                          <Link to={`/implementing-acts/${act.id}`} className="w-full sm:w-auto">
+                            <Button variant="outline" size="sm" className="w-full sm:w-auto text-xs sm:text-sm">View details</Button>
                           </Link>
                           {act.officialLink && (
-                            <a href={act.officialLink} target="_blank" rel="noopener noreferrer">
-                              <Button variant="default" size="sm">
+                            <a href={act.officialLink} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
+                              <Button variant="default" size="sm" className="w-full sm:w-auto text-xs sm:text-sm">
                                 Submit feedback <ExternalLink className="h-3 w-3 ml-1" />
                               </Button>
                             </a>
@@ -150,7 +150,7 @@ const Index = () => {
               </Link>
             </div>
             {newsSummaries.length > 0 ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {newsSummaries.slice(0, 3).map(summary => (
                   <Card key={summary.id} className="border-secondary/20 bg-background">
                     <CardContent className="p-4">
@@ -181,7 +181,7 @@ const Index = () => {
         {/* Quick Links */}
         <section className="py-8 px-4 border-b border-border bg-muted/30">
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
               <Link to="/overview">
                 <Card className="hover:border-primary transition-colors cursor-pointer h-full">
                   <CardContent className="p-4 flex items-center gap-3">
@@ -256,7 +256,7 @@ const Index = () => {
         <section className="py-12 px-4">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-2xl font-bold mb-6 font-serif">Chapters</h2>
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {chaptersLoading ? (
                 <>
                   {[1, 2, 3, 4, 5, 6].map((i) => (

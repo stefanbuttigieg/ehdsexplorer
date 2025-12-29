@@ -294,9 +294,9 @@ const ApiDocsPage = () => {
         <h2 className="text-xl sm:text-2xl font-bold font-serif mb-3 sm:mb-4">Endpoints</h2>
 
         <Tabs defaultValue="articles" className="mb-6 sm:mb-8">
-          <TabsList className="flex flex-wrap h-auto gap-1 mb-3 sm:mb-4 w-full justify-start">
+          <TabsList className="grid grid-cols-3 sm:grid-cols-6 h-auto gap-1 mb-3 sm:mb-4 w-full bg-muted/50 p-1">
             {endpoints.map((ep) => (
-              <TabsTrigger key={ep.resource} value={ep.resource} className="text-xs px-2 py-1.5 sm:px-3 sm:py-2">
+              <TabsTrigger key={ep.resource} value={ep.resource} className="text-xs px-1.5 py-1.5 sm:px-3 sm:py-2 data-[state=active]:bg-background">
                 {ep.resource}
               </TabsTrigger>
             ))}

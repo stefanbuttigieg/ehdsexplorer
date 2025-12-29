@@ -164,11 +164,11 @@ const TryItButton = ({ resource, id }: { resource: string; id?: number }) => {
 
 const CodeBlock = ({ code, language = "json" }: { code: string; language?: string }) => (
   <div className="relative">
-    <div className="absolute right-2 top-2">
+    <div className="absolute right-1 top-1 sm:right-2 sm:top-2 z-10">
       <CopyButton text={code} />
     </div>
-    <pre className="bg-muted p-4 rounded-lg overflow-x-auto text-sm font-mono">
-      <code>{code}</code>
+    <pre className="bg-muted p-3 sm:p-4 rounded-lg overflow-x-auto text-xs sm:text-sm font-mono max-w-full">
+      <code className="break-all whitespace-pre-wrap sm:whitespace-pre">{code}</code>
     </pre>
   </div>
 );
@@ -176,67 +176,67 @@ const CodeBlock = ({ code, language = "json" }: { code: string; language?: strin
 const ApiDocsPage = () => {
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto p-6 animate-fade-in">
+      <div className="max-w-4xl mx-auto px-4 py-6 sm:px-6 animate-fade-in">
         <Breadcrumbs items={[{ label: "API Documentation" }]} />
 
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <Code className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold font-serif">API Documentation</h1>
+        <div className="mb-6 sm:mb-8">
+          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <Code className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+            <h1 className="text-2xl sm:text-3xl font-bold font-serif">API Documentation</h1>
           </div>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-base sm:text-lg">
             Access EHDS Regulation data programmatically. This public API provides FAIR-compliant 
             access to articles, recitals, definitions, and more.
           </p>
         </div>
 
         {/* Quick Start - Hero Section */}
-        <Card className="mb-8 border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-          <CardHeader>
-            <div className="flex items-center gap-2">
+        <Card className="mb-6 sm:mb-8 border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+          <CardHeader className="p-4 sm:p-6">
+            <div className="flex flex-wrap items-center gap-2">
               <Badge variant="secondary" className="text-xs">Public API</Badge>
               <Badge variant="outline" className="text-xs">No Auth Required</Badge>
             </div>
-            <CardTitle className="flex items-center gap-2 text-2xl mt-2">
-              <Database className="h-6 w-6" />
+            <CardTitle className="flex items-center gap-2 text-xl sm:text-2xl mt-2">
+              <Database className="h-5 w-5 sm:h-6 sm:w-6" />
               Quick Start
             </CardTitle>
-            <CardDescription className="text-base">
+            <CardDescription className="text-sm sm:text-base">
               Get started in seconds. Copy the base URL and start making requests.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6 pt-0 sm:pt-0">
             {/* Prominent Base URL Section */}
-            <div className="p-4 rounded-lg bg-background border-2 border-dashed border-primary/30">
-              <div className="flex items-center justify-between mb-3">
+            <div className="p-3 sm:p-4 rounded-lg bg-background border-2 border-dashed border-primary/30">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-3">
                 <p className="text-sm font-semibold text-primary">Base URL</p>
                 <CopyButton text={API_BASE} label="Copy URL" />
               </div>
-              <code className="block text-sm font-mono bg-muted p-3 rounded-md break-all">
+              <code className="block text-xs sm:text-sm font-mono bg-muted p-2 sm:p-3 rounded-md break-all overflow-x-auto">
                 {API_BASE}
               </code>
             </div>
 
             {/* Quick Examples */}
-            <div className="grid gap-4">
+            <div className="grid gap-3 sm:gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Badge variant="outline" className="text-xs font-mono">GET</Badge>
-                  <p className="text-sm font-medium">Fetch all articles</p>
+                  <p className="text-xs sm:text-sm font-medium">Fetch all articles</p>
                 </div>
                 <CodeBlock code={`curl "${API_BASE}?resource=articles"`} language="bash" />
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Badge variant="outline" className="text-xs font-mono">GET</Badge>
-                  <p className="text-sm font-medium">Fetch a specific article</p>
+                  <p className="text-xs sm:text-sm font-medium">Fetch a specific article</p>
                 </div>
                 <CodeBlock code={`curl "${API_BASE}?resource=articles&id=42"`} language="bash" />
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Badge variant="outline" className="text-xs font-mono">GET</Badge>
-                  <p className="text-sm font-medium">Export as CSV</p>
+                  <p className="text-xs sm:text-sm font-medium">Export as CSV</p>
                 </div>
                 <CodeBlock code={`curl "${API_BASE}?resource=definitions&format=csv"`} language="bash" />
               </div>
@@ -245,7 +245,7 @@ const ApiDocsPage = () => {
             {/* Available Resources */}
             <div>
               <p className="text-sm font-medium mb-2">Available Resources</p>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {["articles", "recitals", "definitions", "chapters", "implementing-acts", "metadata"].map((resource) => (
                   <Badge key={resource} variant="secondary" className="font-mono text-xs">
                     {resource}
@@ -257,15 +257,15 @@ const ApiDocsPage = () => {
         </Card>
 
         {/* Response Format */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileJson className="h-5 w-5" />
+        <Card className="mb-6 sm:mb-8">
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <FileJson className="h-4 w-4 sm:h-5 sm:w-5" />
               Response Format
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">
+          <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
+            <p className="text-muted-foreground mb-4 text-sm sm:text-base">
               All JSON responses are wrapped in a Schema.org Dataset structure for FAIR compliance:
             </p>
             <CodeBlock
@@ -291,12 +291,12 @@ const ApiDocsPage = () => {
         </Card>
 
         {/* Endpoints */}
-        <h2 className="text-2xl font-bold font-serif mb-4">Endpoints</h2>
+        <h2 className="text-xl sm:text-2xl font-bold font-serif mb-3 sm:mb-4">Endpoints</h2>
 
-        <Tabs defaultValue="articles" className="mb-8">
-          <TabsList className="flex flex-wrap h-auto gap-1 mb-4">
+        <Tabs defaultValue="articles" className="mb-6 sm:mb-8">
+          <TabsList className="flex flex-wrap h-auto gap-1 mb-3 sm:mb-4 w-full justify-start">
             {endpoints.map((ep) => (
-              <TabsTrigger key={ep.resource} value={ep.resource} className="text-xs">
+              <TabsTrigger key={ep.resource} value={ep.resource} className="text-xs px-2 py-1.5 sm:px-3 sm:py-2">
                 {ep.resource}
               </TabsTrigger>
             ))}
@@ -305,17 +305,17 @@ const ApiDocsPage = () => {
           {endpoints.map((ep) => (
             <TabsContent key={ep.resource} value={ep.resource}>
               <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
+                <CardHeader className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="flex items-center gap-2">
-                      <CardTitle className="text-lg">{ep.resource}</CardTitle>
+                      <CardTitle className="text-base sm:text-lg">{ep.resource}</CardTitle>
                       <Badge variant="outline">GET</Badge>
                     </div>
                     <TryItButton resource={ep.resource} />
                   </div>
-                  <CardDescription>{ep.description}</CardDescription>
+                  <CardDescription className="text-sm">{ep.description}</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6 pt-0 sm:pt-0">
                   <div>
                     <p className="text-sm font-medium mb-2">Endpoint</p>
                     <CodeBlock code={`${API_BASE}?resource=${ep.resource}`} />
@@ -324,7 +324,20 @@ const ApiDocsPage = () => {
                   {ep.parameters.length > 0 && (
                     <div>
                       <p className="text-sm font-medium mb-2">Parameters</p>
-                      <div className="border rounded-lg overflow-hidden">
+                      {/* Mobile: Stack layout */}
+                      <div className="block sm:hidden space-y-3">
+                        {ep.parameters.map((param) => (
+                          <div key={param.name} className="p-3 bg-muted rounded-lg">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-mono text-primary text-sm">{param.name}</span>
+                              <span className="text-xs text-muted-foreground">({param.type})</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{param.description}</p>
+                          </div>
+                        ))}
+                      </div>
+                      {/* Desktop: Table layout */}
+                      <div className="hidden sm:block border rounded-lg overflow-hidden">
                         <table className="w-full text-sm">
                           <thead className="bg-muted">
                             <tr>
@@ -358,36 +371,36 @@ const ApiDocsPage = () => {
         </Tabs>
 
         {/* FAIR Compliance */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>FAIR Data Principles</CardTitle>
-            <CardDescription>
+        <Card className="mb-6 sm:mb-8">
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl">FAIR Data Principles</CardTitle>
+            <CardDescription className="text-sm">
               This API is designed following FAIR principles for research data
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="p-4 rounded-lg bg-muted">
-                <h4 className="font-semibold mb-1">Findable</h4>
-                <p className="text-sm text-muted-foreground">
+          <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
+            <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
+              <div className="p-3 sm:p-4 rounded-lg bg-muted">
+                <h4 className="font-semibold mb-1 text-sm sm:text-base">Findable</h4>
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Persistent URLs, unique identifiers, rich metadata
                 </p>
               </div>
-              <div className="p-4 rounded-lg bg-muted">
-                <h4 className="font-semibold mb-1">Accessible</h4>
-                <p className="text-sm text-muted-foreground">
+              <div className="p-3 sm:p-4 rounded-lg bg-muted">
+                <h4 className="font-semibold mb-1 text-sm sm:text-base">Accessible</h4>
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Open HTTP API, no authentication required, multiple formats
                 </p>
               </div>
-              <div className="p-4 rounded-lg bg-muted">
-                <h4 className="font-semibold mb-1">Interoperable</h4>
-                <p className="text-sm text-muted-foreground">
+              <div className="p-3 sm:p-4 rounded-lg bg-muted">
+                <h4 className="font-semibold mb-1 text-sm sm:text-base">Interoperable</h4>
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Schema.org vocabulary, JSON/CSV formats, ELI identifiers
                 </p>
               </div>
-              <div className="p-4 rounded-lg bg-muted">
-                <h4 className="font-semibold mb-1">Reusable</h4>
-                <p className="text-sm text-muted-foreground">
+              <div className="p-3 sm:p-4 rounded-lg bg-muted">
+                <h4 className="font-semibold mb-1 text-sm sm:text-base">Reusable</h4>
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   MIT license, clear provenance, version information
                 </p>
               </div>
@@ -397,35 +410,35 @@ const ApiDocsPage = () => {
 
         {/* Legal References */}
         <Card>
-          <CardHeader>
-            <CardTitle>Legal References</CardTitle>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl">Legal References</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-3 p-4 sm:p-6 pt-0 sm:pt-0">
             <a
               href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32025R0327"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-primary hover:underline"
+              className="flex items-center gap-2 text-primary hover:underline text-sm sm:text-base"
             >
-              <ExternalLink className="h-4 w-4" />
+              <ExternalLink className="h-4 w-4 flex-shrink-0" />
               EUR-Lex Official Publication
             </a>
             <a
               href="http://data.europa.eu/eli/reg/2025/327"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-primary hover:underline"
+              className="flex items-center gap-2 text-primary hover:underline text-sm sm:text-base"
             >
-              <ExternalLink className="h-4 w-4" />
+              <ExternalLink className="h-4 w-4 flex-shrink-0" />
               European Legislation Identifier (ELI)
             </a>
             <a
               href="https://github.com/stefanbuttigieg/ehdsexplorer"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-primary hover:underline"
+              className="flex items-center gap-2 text-primary hover:underline text-sm sm:text-base"
             >
-              <ExternalLink className="h-4 w-4" />
+              <ExternalLink className="h-4 w-4 flex-shrink-0" />
               Source Code on GitHub
             </a>
           </CardContent>

@@ -145,8 +145,8 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [X] Footnotes
 - [X] Implementing Acts - Separate Pages with relevant IA Articles and Recitals
 - [X] Self-Service Portal for Users (Password, Email, and Profile Management)
-- [X] Plain Language Version of Legal Text - side-by-side to legal text
-- [ ] Real-time Umami Analytics Dashboard for Admins
+- [X] Plain Language Version of Legal Text - side-by-side to legal text (with admin management)
+- [X] Real-time Umami Analytics Dashboard for Admins
 
 ### Medium-term
 - [ ] AI-powered Q&A about the regulation

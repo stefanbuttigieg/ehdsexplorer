@@ -16,7 +16,7 @@ A comprehensive digital platform for exploring **Regulation (EU) 2025/327** - th
 
 The EHDS Regulation Explorer provides an intuitive interface for healthcare professionals, legal experts, policymakers, health tech companies, and citizens to navigate and understand the European Health Data Space Regulation.
 
-**Source**: Complete EHDS Regulation (10 chapters, 105 articles, 115 recitals, 4 annexes)
+**Source**: Complete EHDS Regulation (9 chapters, 105 articles, 115 recitals, 4 annexes)
 
 ## ✨ Current Features
 
@@ -147,6 +147,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [X] Self-Service Portal for Users (Password, Email, and Profile Management)
 - [X] Plain Language Version of Legal Text - side-by-side to legal text (with admin management)
 - [X] Real-time Umami Analytics Dashboard for Admins
+- [ ] Rating System for Translation (especially Plain language)
 
 ### Medium-term
 - [ ] AI-powered Q&A about the regulation

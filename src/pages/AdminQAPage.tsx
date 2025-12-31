@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, X, AlertTriangle, ExternalLink, RefreshCw, ClipboardCheck } from "lucide-react";
+import { Check, X, AlertTriangle, ExternalLink, RefreshCw, ClipboardCheck, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,8 @@ import { useChapters } from "@/hooks/useChapters";
 import { useDefinitions } from "@/hooks/useDefinitions";
 import { useImplementingActs } from "@/hooks/useImplementingActs";
 import { toast } from "sonner";
+
+const API_BASE_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/api-data`;
 
 interface CheckItem {
   id: string;
@@ -50,10 +52,15 @@ const initialChecks: CheckItem[] = [
   { id: "feat-font", category: "Features", label: "Font size controls", description: "Font size adjustment works", status: "pending", notes: "" },
   { id: "feat-keyboard", category: "Features", label: "Keyboard shortcuts", description: "Keyboard shortcuts work (/, ?, h, b)", status: "pending", notes: "" },
   
-  // API
-  { id: "api-articles", category: "API", label: "API articles endpoint", description: "GET /api-data?resource=articles returns data", status: "pending", notes: "" },
-  { id: "api-recitals", category: "API", label: "API recitals endpoint", description: "GET /api-data?resource=recitals returns data", status: "pending", notes: "" },
-  { id: "api-csv", category: "API", label: "API CSV export", description: "CSV format parameter works correctly", status: "pending", notes: "" },
+  // API Endpoints
+  { id: "api-articles", category: "API Endpoints", label: "API articles endpoint", description: "GET /api-data?resource=articles returns data", status: "pending", notes: "" },
+  { id: "api-recitals", category: "API Endpoints", label: "API recitals endpoint", description: "GET /api-data?resource=recitals returns data", status: "pending", notes: "" },
+  { id: "api-definitions", category: "API Endpoints", label: "API definitions endpoint", description: "GET /api-data?resource=definitions returns data", status: "pending", notes: "" },
+  { id: "api-chapters", category: "API Endpoints", label: "API chapters endpoint", description: "GET /api-data?resource=chapters returns data", status: "pending", notes: "" },
+  { id: "api-implementing", category: "API Endpoints", label: "API implementing-acts endpoint", description: "GET /api-data?resource=implementing-acts returns data", status: "pending", notes: "" },
+  { id: "api-metadata", category: "API Endpoints", label: "API metadata endpoint", description: "GET /api-data?resource=metadata returns data", status: "pending", notes: "" },
+  { id: "api-csv", category: "API Endpoints", label: "API CSV export", description: "CSV format parameter works correctly", status: "pending", notes: "" },
+  { id: "api-rate-limit", category: "API Endpoints", label: "API rate limit headers", description: "Response includes X-RateLimit headers", status: "pending", notes: "" },
   
   // Admin
   { id: "admin-login", category: "Admin", label: "Admin login", description: "Admin authentication works", status: "pending", notes: "" },
@@ -96,6 +103,8 @@ const AdminQAPage = () => {
     ));
   };
 
+  const [isRunningApiTests, setIsRunningApiTests] = useState(false);
+
   const runAutoChecks = () => {
     // Data integrity auto-checks
     if (!articlesLoading && articles) {
@@ -120,6 +129,72 @@ const AdminQAPage = () => {
     }
 
     toast.success("Auto-checks completed!");
+  };
+
+  const runApiTests = async () => {
+    setIsRunningApiTests(true);
+    
+    const apiTests = [
+      { id: "api-articles", resource: "articles", expectedField: "articles" },
+      { id: "api-recitals", resource: "recitals", expectedField: "recitals" },
+      { id: "api-definitions", resource: "definitions", expectedField: "definitions" },
+      { id: "api-chapters", resource: "chapters", expectedField: "chapters" },
+      { id: "api-implementing", resource: "implementing-acts", expectedField: "implementing_acts" },
+      { id: "api-metadata", resource: "metadata", expectedField: "regulation" },
+    ];
+
+    for (const test of apiTests) {
+      try {
+        const response = await fetch(`${API_BASE_URL}?resource=${test.resource}`);
+        const data = await response.json();
+        
+        if (response.ok && data[test.expectedField]) {
+          const count = Array.isArray(data[test.expectedField]) 
+            ? data[test.expectedField].length 
+            : "object";
+          updateCheck(test.id, "pass", `Status: ${response.status}, Records: ${count}`);
+        } else {
+          updateCheck(test.id, "fail", `Status: ${response.status}, Error: ${data.error || 'Unknown'}`);
+        }
+      } catch (error) {
+        updateCheck(test.id, "fail", `Error: ${error instanceof Error ? error.message : 'Network error'}`);
+      }
+    }
+
+    // Test CSV export
+    try {
+      const csvResponse = await fetch(`${API_BASE_URL}?resource=articles&format=csv`);
+      const csvText = await csvResponse.text();
+      
+      if (csvResponse.ok && csvText.includes("article_number")) {
+        updateCheck("api-csv", "pass", `CSV headers present, length: ${csvText.length} chars`);
+      } else {
+        updateCheck("api-csv", "fail", `Status: ${csvResponse.status}`);
+      }
+    } catch (error) {
+      updateCheck("api-csv", "fail", `Error: ${error instanceof Error ? error.message : 'Network error'}`);
+    }
+
+    // Test rate limit headers
+    try {
+      const rlResponse = await fetch(`${API_BASE_URL}?resource=metadata`);
+      const hasRateLimitHeaders = 
+        rlResponse.headers.has('x-ratelimit-limit') || 
+        rlResponse.headers.has('x-ratelimit-remaining');
+      
+      if (hasRateLimitHeaders) {
+        const limit = rlResponse.headers.get('x-ratelimit-limit');
+        const remaining = rlResponse.headers.get('x-ratelimit-remaining');
+        updateCheck("api-rate-limit", "pass", `Limit: ${limit}, Remaining: ${remaining}`);
+      } else {
+        updateCheck("api-rate-limit", "fail", "Rate limit headers not found in response");
+      }
+    } catch (error) {
+      updateCheck("api-rate-limit", "fail", `Error: ${error instanceof Error ? error.message : 'Network error'}`);
+    }
+
+    setIsRunningApiTests(false);
+    toast.success("API endpoint tests completed!");
   };
 
   const resetChecks = () => {
@@ -187,7 +262,20 @@ const AdminQAPage = () => {
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" onClick={runAutoChecks}>
               <RefreshCw className="h-4 w-4 mr-2" />
-              Run Auto-Checks
+              Run Data Checks
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={runApiTests}
+              disabled={isRunningApiTests}
+            >
+              {isRunningApiTests ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Test API Endpoints
             </Button>
             <Button variant="outline" size="sm" onClick={resetChecks}>
               Reset All

@@ -27,7 +27,7 @@ const initialChecks: CheckItem[] = [
   // Data Integrity
   { id: "data-articles", category: "Data Integrity", label: "All 105 articles loaded", description: "Verify all articles are accessible from the database", status: "pending", notes: "" },
   { id: "data-recitals", category: "Data Integrity", label: "All 115 recitals loaded", description: "Verify all recitals are accessible from the database", status: "pending", notes: "" },
-  { id: "data-chapters", category: "Data Integrity", label: "All 10 chapters loaded", description: "Verify chapter structure is correct", status: "pending", notes: "" },
+  { id: "data-chapters", category: "Data Integrity", label: "All 9 chapters loaded", description: "Verify chapter structure is correct", status: "pending", notes: "" },
   { id: "data-definitions", category: "Data Integrity", label: "Definitions loaded", description: "Verify all definitions from Article 2 are present", status: "pending", notes: "" },
   { id: "data-implementing", category: "Data Integrity", label: "Implementing acts loaded", description: "Verify implementing acts tracker data", status: "pending", notes: "" },
   
@@ -107,7 +107,7 @@ const AdminQAPage = () => {
         `Found ${recitals.length} recitals`);
     }
     if (!chaptersLoading && chapters) {
-      updateCheck("data-chapters", chapters.length === 10 ? "pass" : "fail",
+      updateCheck("data-chapters", chapters.length === 9 ? "pass" : "fail",
         `Found ${chapters.length} chapters`);
     }
     if (!definitionsLoading && definitions) {

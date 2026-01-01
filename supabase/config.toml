@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.manage-user-password]
 verify_jwt = true
+
+[functions.send-status-alert]
+verify_jwt = true

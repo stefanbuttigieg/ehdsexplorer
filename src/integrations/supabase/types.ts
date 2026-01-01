@@ -449,6 +449,44 @@ export type Database = {
           },
         ]
       }
+      implementing_act_subscriptions: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          implementing_act_id: string | null
+          subscribe_all: boolean
+          unsubscribe_token: string
+          verified: boolean
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          implementing_act_id?: string | null
+          subscribe_all?: boolean
+          unsubscribe_token?: string
+          verified?: boolean
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          implementing_act_id?: string | null
+          subscribe_all?: boolean
+          unsubscribe_token?: string
+          verified?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "implementing_act_subscriptions_implementing_act_id_fkey"
+            columns: ["implementing_act_id"]
+            isOneToOne: false
+            referencedRelation: "implementing_acts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       implementing_acts: {
         Row: {
           article_reference: string
@@ -458,6 +496,7 @@ export type Database = {
           feedback_deadline: string | null
           id: string
           official_link: string | null
+          previous_status: string | null
           related_articles: number[] | null
           status: string
           theme: string
@@ -473,6 +512,7 @@ export type Database = {
           feedback_deadline?: string | null
           id: string
           official_link?: string | null
+          previous_status?: string | null
           related_articles?: number[] | null
           status: string
           theme: string
@@ -488,6 +528,7 @@ export type Database = {
           feedback_deadline?: string | null
           id?: string
           official_link?: string | null
+          previous_status?: string | null
           related_articles?: number[] | null
           status?: string
           theme?: string

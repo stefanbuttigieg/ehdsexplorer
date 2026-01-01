@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, X, AlertTriangle, RefreshCw, ClipboardCheck, Loader2, ExternalLink } from "lucide-react";
+import { Check, X, AlertTriangle, RefreshCw, ClipboardCheck, Loader2, ExternalLink, History, Save, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/hooks/useAuth";
 import { useArticles } from "@/hooks/useArticles";
@@ -13,7 +14,9 @@ import { useRecitals } from "@/hooks/useRecitals";
 import { useChapters } from "@/hooks/useChapters";
 import { useDefinitions } from "@/hooks/useDefinitions";
 import { useImplementingActs } from "@/hooks/useImplementingActs";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { format } from "date-fns";
 
 const API_BASE_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/api-data`;
 
@@ -69,9 +72,19 @@ const initialChecks: CheckItem[] = [
   { id: "admin-news", category: "Admin", label: "News management", description: "Can create and publish news summaries", status: "pending", notes: "" },
 ];
 
+interface QAHistoryItem {
+  id: string;
+  run_at: string;
+  total_checks: number;
+  passed: number;
+  failed: number;
+  pending: number;
+  checks: CheckItem[];
+}
+
 const AdminQAPage = () => {
   const navigate = useNavigate();
-  const { isAdmin, loading: authLoading } = useAuth();
+  const { isAdmin, user, loading: authLoading } = useAuth();
   const { data: articles, isLoading: articlesLoading } = useArticles();
   const { data: recitals, isLoading: recitalsLoading } = useRecitals();
   const { data: chapters, isLoading: chaptersLoading } = useChapters();
@@ -82,12 +95,41 @@ const AdminQAPage = () => {
   const [showOnlyFailed, setShowOnlyFailed] = useState(false);
   const [isRunningApiTests, setIsRunningApiTests] = useState(false);
   const [isRunningAllTests, setIsRunningAllTests] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [history, setHistory] = useState<QAHistoryItem[]>([]);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+
+  const fetchHistory = async () => {
+    setIsLoadingHistory(true);
+    const { data, error } = await supabase
+      .from("qa_test_results")
+      .select("*")
+      .order("run_at", { ascending: false })
+      .limit(10);
+    
+    if (error) {
+      console.error("Failed to fetch QA history:", error);
+    } else {
+      setHistory(data?.map(item => ({
+        ...item,
+        checks: item.checks as unknown as CheckItem[]
+      })) || []);
+    }
+    setIsLoadingHistory(false);
+  };
 
   useEffect(() => {
     if (!authLoading && !isAdmin) {
       navigate("/admin");
     }
   }, [authLoading, isAdmin, navigate]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchHistory();
+    }
+  }, [isAdmin]);
 
   if (authLoading) {
     return (
@@ -228,6 +270,58 @@ const AdminQAPage = () => {
     toast.info("All checks reset");
   };
 
+  const saveResults = async () => {
+    setIsSaving(true);
+    const summary = {
+      total: checks.length,
+      passed: checks.filter(c => c.status === "pass").length,
+      failed: checks.filter(c => c.status === "fail").length,
+      pending: checks.filter(c => c.status === "pending").length,
+    };
+
+    const { error } = await supabase.from("qa_test_results").insert({
+      run_by: user?.id,
+      total_checks: summary.total,
+      passed: summary.passed,
+      failed: summary.failed,
+      pending: summary.pending,
+      checks: checks.map(c => ({
+        id: c.id,
+        category: c.category,
+        label: c.label,
+        status: c.status,
+        notes: c.notes,
+      })),
+    });
+
+    if (error) {
+      toast.error("Failed to save results");
+      console.error(error);
+    } else {
+      toast.success("Results saved to history");
+      fetchHistory();
+    }
+    setIsSaving(false);
+  };
+
+  const deleteHistoryItem = async (id: string) => {
+    const { error } = await supabase.from("qa_test_results").delete().eq("id", id);
+    if (error) {
+      toast.error("Failed to delete");
+    } else {
+      toast.success("Deleted from history");
+      fetchHistory();
+    }
+  };
+
+  const loadFromHistory = (item: QAHistoryItem) => {
+    setChecks(item.checks.map(c => ({
+      ...c,
+      description: initialChecks.find(ic => ic.id === c.id)?.description || "",
+    })));
+    toast.success("Loaded results from history");
+  };
+
   const exportResults = () => {
     const date = new Date().toISOString().split('T')[0];
     const results = {
@@ -316,11 +410,84 @@ const AdminQAPage = () => {
             <Button variant="outline" size="sm" onClick={resetChecks} disabled={isRunningAllTests}>
               Reset All
             </Button>
-            <Button variant="secondary" size="sm" onClick={exportResults}>
-              Export Report
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              onClick={saveResults}
+              disabled={isSaving || summary.pending === checks.length}
+            >
+              {isSaving ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4 mr-2" />
+              )}
+              Save Results
+            </Button>
+            <Button variant="outline" size="sm" onClick={exportResults}>
+              Export JSON
             </Button>
           </div>
         </div>
+
+        {/* History Section */}
+        <Collapsible open={isHistoryOpen} onOpenChange={setIsHistoryOpen} className="mb-6">
+          <Card>
+            <CollapsibleTrigger asChild>
+              <CardHeader className="p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <History className="h-4 w-4" />
+                  Test History
+                  <Badge variant="outline" className="ml-2">{history.length}</Badge>
+                </CardTitle>
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="p-4 pt-0">
+                {isLoadingHistory ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  </div>
+                ) : history.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No test history yet. Run tests and save results to build history.
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {history.map(item => (
+                      <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-4">
+                          <div>
+                            <p className="text-sm font-medium">
+                              {format(new Date(item.run_at), "MMM d, yyyy 'at' h:mm a")}
+                            </p>
+                            <div className="flex gap-2 mt-1">
+                              <Badge variant="default" className="bg-green-500 text-xs">{item.passed} pass</Badge>
+                              <Badge variant="destructive" className="text-xs">{item.failed} fail</Badge>
+                              <Badge variant="secondary" className="text-xs">{item.pending} pending</Badge>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" onClick={() => loadFromHistory(item)}>
+                            Load
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => deleteHistoryItem(item.id)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
 
         {/* Summary */}
         <Card className="mb-6">

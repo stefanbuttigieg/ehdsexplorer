@@ -855,6 +855,42 @@ export type Database = {
         }
         Relationships: []
       }
+      qa_test_results: {
+        Row: {
+          checks: Json
+          created_at: string
+          failed: number
+          id: string
+          passed: number
+          pending: number
+          run_at: string
+          run_by: string | null
+          total_checks: number
+        }
+        Insert: {
+          checks?: Json
+          created_at?: string
+          failed: number
+          id?: string
+          passed: number
+          pending: number
+          run_at?: string
+          run_by?: string | null
+          total_checks: number
+        }
+        Update: {
+          checks?: Json
+          created_at?: string
+          failed?: number
+          id?: string
+          passed?: number
+          pending?: number
+          run_at?: string
+          run_by?: string | null
+          total_checks?: number
+        }
+        Relationships: []
+      }
       recitals: {
         Row: {
           content: string

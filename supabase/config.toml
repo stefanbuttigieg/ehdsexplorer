@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.generate-product-updates]
 verify_jwt = true
+
+[functions.ehds-assistant]
+verify_jwt = true

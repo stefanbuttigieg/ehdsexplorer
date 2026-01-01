@@ -20,6 +20,7 @@ import { ShareTextButton } from "@/components/ShareTextButton";
 import { useTextHighlight } from "@/hooks/useTextHighlight";
 import { useAuth } from "@/hooks/useAuth";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import AIAssistant from "@/components/AIAssistant";
 
 interface LayoutProps {
   children: ReactNode;
@@ -299,6 +300,9 @@ const Layout = ({ children }: LayoutProps) => {
 
       {/* Share Text Button - appears when user selects text */}
       <ShareTextButton />
+
+      {/* AI Assistant - only for authenticated users */}
+      {!authLoading && user && <AIAssistant />}
     </div>
   );
 };

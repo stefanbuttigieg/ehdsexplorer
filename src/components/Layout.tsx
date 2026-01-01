@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText, Accessibility, Code, Newspaper, Settings, HelpCircle } from "lucide-react";
+import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText, Accessibility, Code, Newspaper, Settings, HelpCircle, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toRoman } from "@/lib/romanNumerals";
@@ -55,6 +55,7 @@ const Layout = ({ children }: LayoutProps) => {
     { path: "/implementing-acts", icon: ListChecks, label: "Implementing Acts" },
     { path: "/news", icon: Newspaper, label: "News" },
     { path: "/bookmarks", icon: Bookmark, label: "Bookmarks" },
+    { path: "/notes", icon: StickyNote, label: "Notes" },
   ];
 
   return (

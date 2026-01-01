@@ -80,12 +80,14 @@ export const AnnotationToolbar = ({
 
   return (
     <div
+      data-annotation-toolbar
       className="fixed z-[110] bg-background border border-border rounded-lg shadow-lg p-2 animate-in fade-in zoom-in-95"
       style={{
         left: Math.min(position.x, window.innerWidth - 320),
         top: Math.min(position.y, window.innerHeight - 200),
       }}
       onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
     >
       <div className="flex items-center gap-1 mb-2">
         {HIGHLIGHT_COLORS.map((color) => (
@@ -189,11 +191,6 @@ export const AnnotationToolbar = ({
         </div>
       )}
       
-      {!isLoggedIn && (
-        <p className="text-xs text-muted-foreground mt-2">
-          Log in to sync annotations across devices
-        </p>
-      )}
     </div>
   );
 };

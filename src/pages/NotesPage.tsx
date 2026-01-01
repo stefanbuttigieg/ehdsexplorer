@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Search, Pin, PinOff, Trash2, Tag, StickyNote, Cloud, HardDrive, Download, FileJson, FileText, Copy } from 'lucide-react';
+import { Plus, Search, Pin, PinOff, Trash2, Tag, StickyNote, Cloud, HardDrive, Download, FileJson, FileText, Copy, Highlighter } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -423,30 +423,60 @@ const NotesPage = () => {
               )}
             </div>
 
-            {/* Annotations Summary */}
-            {annotations.length > 0 && (
-              <Card>
-                <CardHeader className="py-3">
-                  <CardTitle className="text-sm font-medium">Recent Annotations</CardTitle>
-                </CardHeader>
-                <CardContent className="py-2">
-                  <p className="text-sm text-muted-foreground mb-2">
-                    You have {annotations.length} annotation{annotations.length !== 1 ? 's' : ''} across your content.
-                  </p>
-                  <div className="space-y-1">
-                    {annotations.slice(0, 3).map((ann) => (
+            {/* All Annotations */}
+            <Card>
+              <CardHeader className="py-3">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Highlighter className="h-4 w-4" />
+                  Annotations ({annotations.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="py-2 max-h-64 overflow-y-auto space-y-2">
+                {annotations.length > 0 ? (
+                  annotations.map((ann) => (
+                    <div
+                      key={ann.id}
+                      className="p-2 rounded border border-border hover:border-primary/50 transition-colors"
+                    >
                       <Link
-                        key={ann.id}
-                        to={`/${ann.content_type === 'implementing_act' ? 'implementing-acts' : ann.content_type}/${ann.content_id}`}
-                        className="block text-sm hover:text-primary truncate"
+                        to={`/${ann.content_type === 'implementing_act' ? 'implementing-acts' : ann.content_type + 's'}/${ann.content_id}`}
+                        className="block"
                       >
-                        "{ann.selected_text.slice(0, 40)}..."
+                        <div
+                          className={cn(
+                            'text-sm font-medium px-1 rounded inline-block',
+                            ann.highlight_color === 'yellow' && 'bg-yellow-200/70 dark:bg-yellow-300/40',
+                            ann.highlight_color === 'green' && 'bg-green-200/70 dark:bg-green-300/40',
+                            ann.highlight_color === 'blue' && 'bg-blue-200/70 dark:bg-blue-300/40',
+                            ann.highlight_color === 'pink' && 'bg-pink-200/70 dark:bg-pink-300/40',
+                            ann.highlight_color === 'orange' && 'bg-orange-200/70 dark:bg-orange-300/40'
+                          )}
+                        >
+                          "{ann.selected_text.slice(0, 50)}{ann.selected_text.length > 50 ? '...' : ''}"
+                        </div>
+                        {ann.comment && (
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                            {ann.comment}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="outline" className="text-xs capitalize">
+                            {ann.content_type.replace('_', ' ')} {ann.content_id}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {format(new Date(ann.created_at), 'MMM d')}
+                          </span>
+                        </div>
                       </Link>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No annotations yet. Select text on articles or recitals to highlight.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
           {/* Note Editor */}

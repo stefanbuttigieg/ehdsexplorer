@@ -4,24 +4,64 @@ import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout";
-import { useImplementingActSubscriptions } from "@/hooks/useImplementingActSubscriptions";
+import { supabase } from "@/integrations/supabase/client";
 
 const UnsubscribePage = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
-  
-  const { unsubscribe } = useImplementingActSubscriptions();
 
   useEffect(() => {
-    if (!token) {
-      setStatus("error");
-      return;
-    }
+    const handleUnsubscribe = async () => {
+      if (!token) {
+        setStatus("error");
+        return;
+      }
 
-    unsubscribe.mutateAsync(token)
-      .then(() => setStatus("success"))
-      .catch(() => setStatus("error"));
+      try {
+        // First get the subscription details before deleting
+        const { data: subscription, error: fetchError } = await supabase
+          .from("implementing_act_subscriptions")
+          .select("email, subscribe_all, implementing_acts(title)")
+          .eq("unsubscribe_token", token)
+          .single();
+
+        if (fetchError || !subscription) {
+          setStatus("error");
+          return;
+        }
+
+        // Delete the subscription
+        const { error: deleteError } = await supabase
+          .from("implementing_act_subscriptions")
+          .delete()
+          .eq("unsubscribe_token", token);
+
+        if (deleteError) {
+          setStatus("error");
+          return;
+        }
+
+        // Send confirmation email
+        const unsubscribedFrom = subscription.subscribe_all 
+          ? "all" 
+          : (subscription.implementing_acts as any)?.[0]?.title || "an implementing act";
+
+        await supabase.functions.invoke("send-unsubscribe-confirmation", {
+          body: { 
+            email: subscription.email,
+            unsubscribed_from: unsubscribedFrom
+          },
+        });
+
+        setStatus("success");
+      } catch (err) {
+        console.error("Unsubscribe error:", err);
+        setStatus("error");
+      }
+    };
+
+    handleUnsubscribe();
   }, [token]);
 
   return (

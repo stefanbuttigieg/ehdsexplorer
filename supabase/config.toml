@@ -35,3 +35,6 @@ verify_jwt = true
 
 [functions.update-own-password]
 verify_jwt = true
+
+[functions.send-unsubscribe-confirmation]
+verify_jwt = false

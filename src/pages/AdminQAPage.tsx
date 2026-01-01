@@ -191,16 +191,20 @@ const AdminQAPage = () => {
     // Test rate limit headers
     try {
       const rlResponse = await fetch(`${API_BASE_URL}?resource=metadata`);
+      // Check both casing variants as some proxies normalize header names
       const hasRateLimitHeaders = 
-        rlResponse.headers.has('x-ratelimit-limit') || 
-        rlResponse.headers.has('x-ratelimit-remaining');
+        rlResponse.headers.get('x-ratelimit-limit') !== null || 
+        rlResponse.headers.get('X-RateLimit-Limit') !== null;
       
       if (hasRateLimitHeaders) {
-        const limit = rlResponse.headers.get('x-ratelimit-limit');
-        const remaining = rlResponse.headers.get('x-ratelimit-remaining');
+        const limit = rlResponse.headers.get('x-ratelimit-limit') || rlResponse.headers.get('X-RateLimit-Limit');
+        const remaining = rlResponse.headers.get('x-ratelimit-remaining') || rlResponse.headers.get('X-RateLimit-Remaining');
         updateCheck("api-rate-limit", "pass", `Limit: ${limit}, Remaining: ${remaining}`);
       } else {
-        updateCheck("api-rate-limit", "fail", "Rate limit headers not found in response");
+        // Log available headers for debugging
+        const allHeaders: string[] = [];
+        rlResponse.headers.forEach((value, key) => allHeaders.push(key));
+        updateCheck("api-rate-limit", "fail", `Rate limit headers not found. Available: ${allHeaders.join(', ')}`);
       }
     } catch (error) {
       updateCheck("api-rate-limit", "fail", `Error: ${error instanceof Error ? error.message : 'Network error'}`);

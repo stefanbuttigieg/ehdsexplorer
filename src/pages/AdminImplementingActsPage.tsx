@@ -334,20 +334,20 @@ const AdminImplementingActsPage = () => {
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto p-6 animate-fade-in">
-        <div className="flex items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-4">
+      <div className="max-w-6xl mx-auto p-4 sm:p-6 animate-fade-in">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-6">
+          <div className="flex items-center gap-3 sm:gap-4">
             <Link to="/admin">
               <Button variant="ghost" size="icon">
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             </Link>
             <div>
-              <h1 className="text-3xl font-bold font-serif">Manage Implementing Acts</h1>
-              <p className="text-muted-foreground">Create, edit, and manage implementing acts</p>
+              <h1 className="text-2xl sm:text-3xl font-bold font-serif">Manage Implementing Acts</h1>
+              <p className="text-sm sm:text-base text-muted-foreground">Create, edit, and manage implementing acts</p>
             </div>
           </div>
-          <Button onClick={handleOpenCreate}>
+          <Button onClick={handleOpenCreate} size="sm" className="self-start sm:self-auto">
             <Plus className="h-4 w-4 mr-1" />
             Add New
           </Button>
@@ -392,29 +392,29 @@ const AdminImplementingActsPage = () => {
           <div className="space-y-3">
             {filteredActs.map((act) => (
               <Card key={act.id} className="hover:border-primary/50 transition-colors">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-4">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <Badge variant="outline">{act.id}</Badge>
-                        <Badge className={getStatusColor(act.status)}>{act.status}</Badge>
-                        <Badge variant="secondary">{act.theme}</Badge>
+                      <div className="flex items-center gap-1.5 sm:gap-2 mb-1 flex-wrap">
+                        <Badge variant="outline" className="text-xs">{act.id}</Badge>
+                        <Badge className={`text-xs ${getStatusColor(act.status)}`}>{act.status}</Badge>
+                        <Badge variant="secondary" className="text-xs hidden sm:inline-flex">{act.theme}</Badge>
                       </div>
-                      <p className="font-medium mb-1">{act.title}</p>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
+                      <p className="font-medium text-sm sm:text-base mb-1 line-clamp-1">{act.title}</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1 sm:line-clamp-2 hidden sm:block">
                         {act.description.substring(0, 200)}...
                       </p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 shrink-0">
                       <Link to={`/admin/implementing-acts/${act.id}/content`}>
-                        <Button variant="outline" size="sm">
-                          <FileText className="h-4 w-4 mr-1" />
-                          Content
+                        <Button variant="outline" size="sm" className="text-xs sm:text-sm">
+                          <FileText className="h-4 w-4 sm:mr-1" />
+                          <span className="hidden sm:inline">Content</span>
                         </Button>
                       </Link>
-                      <Button variant="outline" size="sm" onClick={() => handleEdit(act)}>
-                        <Edit className="h-4 w-4 mr-1" />
-                        Edit
+                      <Button variant="outline" size="sm" onClick={() => handleEdit(act)} className="text-xs sm:text-sm">
+                        <Edit className="h-4 w-4 sm:mr-1" />
+                        <span className="hidden sm:inline">Edit</span>
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => setDeletingAct(act)} className="text-destructive hover:text-destructive">
                         <Trash2 className="h-4 w-4" />
@@ -458,7 +458,7 @@ const AdminImplementingActsPage = () => {
                   rows={8}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Article Reference*</Label>
                   <Input
@@ -480,7 +480,7 @@ const AdminImplementingActsPage = () => {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Theme</Label>
                   <Select value={editedTheme} onValueChange={setEditedTheme}>

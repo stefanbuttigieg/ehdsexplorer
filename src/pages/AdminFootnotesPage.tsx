@@ -110,23 +110,24 @@ const AdminFootnotesPage = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
-      <div className="flex items-center gap-4 mb-6">
-        <Button variant="ghost" onClick={() => navigate("/admin")}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Dashboard
+    <div className="container mx-auto p-4 sm:p-6 max-w-6xl">
+      <div className="flex items-center gap-3 sm:gap-4 mb-6">
+        <Button variant="ghost" onClick={() => navigate("/admin")} size="icon">
+          <ArrowLeft className="h-4 w-4" />
         </Button>
+        <h1 className="text-xl sm:text-2xl font-bold font-serif">Footnotes Management</h1>
       </div>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <FileText className="h-5 w-5" />
-            Footnotes Management
+            Manage Footnotes
           </CardTitle>
-          <Button onClick={openCreateDialog}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Footnote
+          <Button onClick={openCreateDialog} size="sm" className="self-start sm:self-auto">
+            <Plus className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Add Footnote</span>
+            <span className="sm:hidden">Add</span>
           </Button>
         </CardHeader>
         <CardContent>

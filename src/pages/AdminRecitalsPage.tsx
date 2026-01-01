@@ -228,21 +228,21 @@ const AdminRecitalsPage = () => {
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto p-6 animate-fade-in">
-        <div className="flex items-center gap-4 mb-6">
+      <div className="max-w-6xl mx-auto p-4 sm:p-6 animate-fade-in">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-6">
           <Link to="/admin">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold font-serif">Manage Recitals</h1>
-            <p className="text-muted-foreground">Edit recital content and related articles</p>
+            <h1 className="text-2xl sm:text-3xl font-bold font-serif">Manage Recitals</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Edit recital content and related articles</p>
           </div>
         </div>
 
-        <div className="mb-6 flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
+        <div className="mb-6 flex flex-col gap-3 sm:gap-4">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search recitals by number or content..."
@@ -252,12 +252,12 @@ const AdminRecitalsPage = () => {
             />
           </div>
           {selectedIds.size > 0 && (
-            <div className="flex gap-2">
-              <Button onClick={() => setShowBulkEdit(true)}>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={() => setShowBulkEdit(true)} size="sm" className="text-xs sm:text-sm">
                 <Edit className="h-4 w-4 mr-1" />
                 Bulk Edit ({selectedIds.size})
               </Button>
-              <Button variant="outline" onClick={() => setSelectedIds(new Set())}>
+              <Button variant="outline" size="sm" onClick={() => setSelectedIds(new Set())} className="text-xs sm:text-sm">
                 <X className="h-4 w-4 mr-1" />
                 Clear
               </Button>
@@ -295,30 +295,30 @@ const AdminRecitalsPage = () => {
                 key={recital.id} 
                 className={`hover:border-primary/50 transition-colors ${selectedIds.has(recital.id) ? 'border-primary bg-primary/5' : ''}`}
               >
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-start gap-2 sm:gap-3">
                     <Checkbox
                       checked={selectedIds.has(recital.id)}
                       onCheckedChange={() => toggleSelect(recital.id)}
                       aria-label={`Select recital ${recital.recital_number}`}
-                      className="mt-1"
+                      className="mt-1 shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Badge variant="outline">Recital {recital.recital_number}</Badge>
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <Badge variant="outline" className="text-xs">Recital {recital.recital_number}</Badge>
                         {recital.related_articles && recital.related_articles.length > 0 && (
-                          <span className="text-xs text-muted-foreground">
-                            Related: Art. {recital.related_articles.join(', ')}
+                          <span className="text-xs text-muted-foreground hidden sm:inline">
+                            Related: Art. {recital.related_articles.slice(0, 3).join(', ')}{recital.related_articles.length > 3 ? '...' : ''}
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
+                      <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
                         {recital.content.substring(0, 200)}...
                       </p>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(recital)}>
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit
+                    <Button variant="outline" size="sm" onClick={() => handleEdit(recital)} className="shrink-0">
+                      <Edit className="h-4 w-4 sm:mr-1" />
+                      <span className="hidden sm:inline">Edit</span>
                     </Button>
                   </div>
                 </CardContent>

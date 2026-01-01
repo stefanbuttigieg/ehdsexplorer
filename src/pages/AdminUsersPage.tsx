@@ -432,35 +432,38 @@ const AdminUsersPage = () => {
 
   return (
     <Layout>
-      <div className="p-6 max-w-4xl mx-auto animate-fade-in">
+      <div className="p-4 sm:p-6 max-w-4xl mx-auto animate-fade-in">
         <div className="mb-6">
           <Link to="/admin">
             <Button variant="ghost" size="sm" className="mb-4">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
+              Back
             </Button>
           </Link>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-2">
               <Users className="h-6 w-6" />
-              <h1 className="text-2xl font-bold font-serif">User Management</h1>
+              <h1 className="text-xl sm:text-2xl font-bold font-serif">User Management</h1>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Button 
-                variant="outline" 
+                variant="outline"
+                size="sm"
                 onClick={handleTestEmail}
                 disabled={isTestingEmail}
+                className="text-xs sm:text-sm"
               >
-                <TestTube2 className="h-4 w-4 mr-2" />
-                {isTestingEmail ? "Sending..." : "Test Email"}
+                <TestTube2 className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">{isTestingEmail ? "Sending..." : "Test Email"}</span>
               </Button>
-              <Button onClick={() => setInviteDialogOpen(true)}>
-                <Mail className="h-4 w-4 mr-2" />
-                Invite User
+              <Button onClick={() => setInviteDialogOpen(true)} size="sm" className="text-xs sm:text-sm">
+                <Mail className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Invite User</span>
+                <span className="sm:hidden">Invite</span>
               </Button>
             </div>
           </div>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Manage user roles and pending invitations
           </p>
         </div>

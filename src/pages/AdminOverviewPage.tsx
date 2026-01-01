@@ -111,18 +111,18 @@ const AdminOverviewPage = () => {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto p-6 animate-fade-in">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
+      <div className="max-w-4xl mx-auto p-4 sm:p-6 animate-fade-in">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3 sm:gap-4">
             <Link to="/admin">
               <Button variant="ghost" size="icon"><ArrowLeft className="h-4 w-4" /></Button>
             </Link>
             <div>
-              <h1 className="text-3xl font-bold font-serif">Manage Overview Page</h1>
-              <p className="text-muted-foreground">Edit the overview page content</p>
+              <h1 className="text-2xl sm:text-3xl font-bold font-serif">Manage Overview Page</h1>
+              <p className="text-sm sm:text-base text-muted-foreground">Edit the overview page content</p>
             </div>
           </div>
-          <Button onClick={handleSave} disabled={updatePage.isPending}>
+          <Button onClick={handleSave} disabled={updatePage.isPending} size="sm" className="self-start sm:self-auto">
             <Save className="h-4 w-4 mr-2" />
             {updatePage.isPending ? 'Saving...' : 'Save Changes'}
           </Button>
@@ -162,7 +162,7 @@ const AdminOverviewPage = () => {
               </div>
               <Label>Key Points</Label>
               {content.what_is_ehds.points.map((point, idx) => (
-                <div key={idx} className="grid grid-cols-[1fr_2fr] gap-2 p-3 bg-muted rounded-lg">
+                <div key={idx} className="grid grid-cols-1 sm:grid-cols-[1fr_2fr] gap-2 p-3 bg-muted rounded-lg">
                   <Input placeholder="Title" value={point.title} onChange={(e) => updatePoint(idx, 'title', e.target.value)} />
                   <Input placeholder="Description" value={point.description} onChange={(e) => updatePoint(idx, 'description', e.target.value)} />
                 </div>
@@ -203,11 +203,11 @@ const AdminOverviewPage = () => {
                 <Input value={content.key_dates.title} onChange={(e) => setContent({ ...content, key_dates: { ...content.key_dates, title: e.target.value } })} />
               </div>
               {content.key_dates.dates.map((item, idx) => (
-                <div key={idx} className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 bg-muted rounded-lg">
                   <Input placeholder="Label" value={item.label} onChange={(e) => updateDate(idx, 'label', e.target.value)} className="flex-1" />
-                  <Input placeholder="Date (e.g. 26 March 2029)" value={item.date} onChange={(e) => updateDate(idx, 'date', e.target.value)} className="w-44" />
+                  <Input placeholder="Date (e.g. 26 March 2029)" value={item.date} onChange={(e) => updateDate(idx, 'date', e.target.value)} className="sm:w-44" />
                   <Select value={item.category || 'general'} onValueChange={(value) => updateDate(idx, 'category', value)}>
-                    <SelectTrigger className="w-40">
+                    <SelectTrigger className="sm:w-40">
                       <SelectValue placeholder="Category" />
                     </SelectTrigger>
                     <SelectContent>

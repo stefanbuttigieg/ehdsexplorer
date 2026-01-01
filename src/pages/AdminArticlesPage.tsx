@@ -271,16 +271,16 @@ const AdminArticlesPage = () => {
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto p-6 animate-fade-in">
-        <div className="flex items-center gap-4 mb-6">
+      <div className="max-w-6xl mx-auto p-4 sm:p-6 animate-fade-in">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-6">
           <Link to="/admin">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold font-serif">Manage Articles</h1>
-            <p className="text-muted-foreground">Edit article titles, content, and assignments</p>
+            <h1 className="text-2xl sm:text-3xl font-bold font-serif">Manage Articles</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Edit article titles, content, and assignments</p>
           </div>
         </div>
 
@@ -296,25 +296,25 @@ const AdminArticlesPage = () => {
           </div>
 
           {/* Bulk Actions Bar */}
-          <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={selectAllFiltered}>
-                <CheckSquare className="h-4 w-4 mr-1" />
-                Select All ({filteredArticles.length})
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-muted/50 rounded-lg">
+            <div className="flex flex-wrap items-center gap-2">
+              <Button variant="outline" size="sm" onClick={selectAllFiltered} className="text-xs sm:text-sm">
+                <CheckSquare className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">Select All</span> ({filteredArticles.length})
               </Button>
               {selectedArticles.size > 0 && (
-                <Button variant="ghost" size="sm" onClick={clearSelection}>
-                  <X className="h-4 w-4 mr-1" />
-                  Clear
+                <Button variant="ghost" size="sm" onClick={clearSelection} className="text-xs sm:text-sm">
+                  <X className="h-4 w-4 sm:mr-1" />
+                  <span className="hidden sm:inline">Clear</span>
                 </Button>
               )}
             </div>
             {selectedArticles.size > 0 && (
-              <div className="flex items-center gap-2 ml-auto">
-                <span className="text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 sm:ml-auto">
+                <span className="text-xs sm:text-sm text-muted-foreground">
                   {selectedArticles.size} selected
                 </span>
-                <Button onClick={openBulkDialog}>
+                <Button onClick={openBulkDialog} size="sm" className="text-xs sm:text-sm">
                   Assign Chapter/Section
                 </Button>
               </div>
@@ -340,35 +340,35 @@ const AdminArticlesPage = () => {
                 key={article.id} 
                 className={`hover:border-primary/50 transition-colors ${selectedArticles.has(article.id) ? 'border-primary bg-primary/5' : ''}`}
               >
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-start gap-2 sm:gap-3">
                     <Checkbox
                       checked={selectedArticles.has(article.id)}
                       onCheckedChange={() => toggleArticleSelection(article.id)}
-                      className="mt-1"
+                      className="mt-1 shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <Badge variant="outline">Art. {article.article_number}</Badge>
+                      <div className="flex items-center gap-1.5 sm:gap-2 mb-1 flex-wrap">
+                        <Badge variant="outline" className="text-xs">Art. {article.article_number}</Badge>
                         {getChapterName(article.chapter_id) && (
-                          <Badge variant="secondary" className="text-xs">
+                          <Badge variant="secondary" className="text-xs hidden sm:inline-flex">
                             {getChapterName(article.chapter_id)}
                           </Badge>
                         )}
                         {getSectionName(article.section_id) && (
-                          <Badge variant="secondary" className="text-xs">
+                          <Badge variant="secondary" className="text-xs hidden sm:inline-flex">
                             {getSectionName(article.section_id)}
                           </Badge>
                         )}
-                        <span className="font-medium truncate">{article.title}</span>
                       </div>
-                      <p className="text-sm text-muted-foreground line-clamp-1">
+                      <p className="font-medium text-sm sm:text-base line-clamp-1">{article.title}</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1 hidden sm:block">
                         {article.content.substring(0, 150)}...
                       </p>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(article)}>
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit
+                    <Button variant="outline" size="sm" onClick={() => handleEdit(article)} className="shrink-0">
+                      <Edit className="h-4 w-4 sm:mr-1" />
+                      <span className="hidden sm:inline">Edit</span>
                     </Button>
                   </div>
                 </CardContent>
@@ -391,7 +391,7 @@ const AdminArticlesPage = () => {
                   onChange={(e) => setEditedTitle(e.target.value)}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Chapter</Label>
                   <Select

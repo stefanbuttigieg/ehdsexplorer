@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { ArrowLeft, Sparkles, Trash2, Eye, EyeOff, Loader2, Pencil, Settings, Link, Plus, X, Globe, FileText } from 'lucide-react';
+import { ArrowLeft, Sparkles, Trash2, Eye, EyeOff, Loader2, Pencil, Settings, Link, Plus, X, Globe, FileText, Rocket } from 'lucide-react';
 import Layout from '@/components/Layout';
 import MarkdownEditor from '@/components/MarkdownEditor';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { useNewsSummaries, useGenerateNewsSummary, useUpdateNewsSummary, useDeleteNewsSummary, useCreateNewsSummary, NewsSummary } from '@/hooks/useNewsSummaries';
+import { useNewsSummaries, useGenerateNewsSummary, useGenerateProductUpdates, useUpdateNewsSummary, useDeleteNewsSummary, useCreateNewsSummary, NewsSummary } from '@/hooks/useNewsSummaries';
 import { usePageContent, useUpdatePageContent } from '@/hooks/usePageContent';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -27,6 +27,7 @@ const AdminNewsPage = () => {
   const { user, loading: authLoading, isEditor } = useAuth();
   const { data: summaries, isLoading } = useNewsSummaries(false);
   const generateMutation = useGenerateNewsSummary();
+  const generateProductUpdatesMutation = useGenerateProductUpdates();
   const updateMutation = useUpdateNewsSummary();
   const deleteMutation = useDeleteNewsSummary();
   const createMutation = useCreateNewsSummary();
@@ -85,6 +86,29 @@ const AdminNewsPage = () => {
       toast({
         title: "Generation Failed",
         description: error.message || "Failed to generate summary. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleGenerateProductUpdates = async () => {
+    try {
+      // Fetch the changelog content from the repo
+      const changelogResponse = await fetch('/CHANGELOG.md');
+      let changelog = '';
+      if (changelogResponse.ok) {
+        changelog = await changelogResponse.text();
+      }
+      
+      const result = await generateProductUpdatesMutation.mutateAsync(changelog || undefined);
+      toast({
+        title: "Product Updates Generated",
+        description: result.message || "Product updates summary has been generated. Review and publish it.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Generation Failed",
+        description: error.message || "Failed to generate product updates. Please try again.",
         variant: "destructive",
       });
     }
@@ -319,7 +343,19 @@ const AdminNewsPage = () => {
               ) : (
                 <Sparkles className="h-4 w-4 mr-2" />
               )}
-              Generate with AI
+              EHDS News
+            </Button>
+            <Button 
+              onClick={handleGenerateProductUpdates} 
+              disabled={generateProductUpdatesMutation.isPending}
+              variant="secondary"
+            >
+              {generateProductUpdatesMutation.isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Rocket className="h-4 w-4 mr-2" />
+              )}
+              Explorer Updates
             </Button>
           </div>
         </div>
@@ -357,7 +393,8 @@ const AdminNewsPage = () => {
                         {summary.is_published ? "Published" : "Draft"}
                       </Badge>
                       <Badge variant="outline">
-                        {summary.generated_by === 'ai' ? 'AI' : 'Manual'}
+                        {summary.generated_by === 'ai' ? 'EHDS News' : 
+                         summary.generated_by === 'product_update' ? 'Explorer Updates' : 'Manual'}
                       </Badge>
                     </div>
                   </div>

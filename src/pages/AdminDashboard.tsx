@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote, HelpCircle, BookOpenCheck, Mail, Newspaper, UserCircle, Languages, ClipboardCheck } from 'lucide-react';
+import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote, HelpCircle, BookOpenCheck, Mail, Newspaper, UserCircle, Languages, ClipboardCheck, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -239,6 +239,18 @@ const AdminDashboard = () => {
                     </div>
                     <CardTitle className="mt-4">Email Templates</CardTitle>
                     <CardDescription>Customize invitation and notification emails</CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
+              <Link to="/admin/ai-feedback">
+                <Card className="hover:border-primary transition-colors h-full border-dashed">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <Bot className="h-8 w-8 text-primary" />
+                      <Badge>Admin Only</Badge>
+                    </div>
+                    <CardTitle className="mt-4">AI Feedback</CardTitle>
+                    <CardDescription>Analyze AI assistant response quality</CardDescription>
                   </CardHeader>
                 </Card>
               </Link>

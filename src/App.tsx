@@ -56,6 +56,7 @@ import HelpCenterPage from "./pages/HelpCenterPage";
 import AdminPlainLanguagePage from "./pages/AdminPlainLanguagePage";
 import AdminQAPage from "./pages/AdminQAPage";
 import AdminSubscriptionsPage from "./pages/AdminSubscriptionsPage";
+import AdminAIFeedbackPage from "./pages/AdminAIFeedbackPage";
 import NotesPage from "./pages/NotesPage";
 import UnsubscribePage from "./pages/UnsubscribePage";
 import VerifySubscriptionPage from "./pages/VerifySubscriptionPage";
@@ -135,6 +136,7 @@ const App = () => (
             <Route path="/admin/plain-language" element={<AdminPlainLanguagePage />} />
             <Route path="/admin/qa" element={<AdminQAPage />} />
             <Route path="/admin/subscriptions" element={<AdminSubscriptionsPage />} />
+            <Route path="/admin/ai-feedback" element={<AdminAIFeedbackPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </MaintenanceGuard>

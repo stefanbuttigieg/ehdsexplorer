@@ -86,6 +86,11 @@ export const AnnotatedContent = ({
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      // Don't close if clicking inside toolbar or popover
+      if (target.closest('[data-annotation-toolbar]') || target.closest('[data-annotation-popover]')) {
+        return;
+      }
       if (toolbarPosition) {
         closeToolbar();
       }
@@ -95,8 +100,9 @@ export const AnnotatedContent = ({
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    // Use click instead of mousedown to avoid closing during selection
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, [toolbarPosition, activeAnnotation, closeToolbar]);
 
   // Render content with highlights

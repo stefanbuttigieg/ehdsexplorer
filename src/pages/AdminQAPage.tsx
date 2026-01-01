@@ -146,11 +146,11 @@ const AdminQAPage = () => {
     setIsRunningApiTests(true);
     
     const apiTests = [
-      { id: "api-articles", resource: "articles", expectedField: "articles" },
-      { id: "api-recitals", resource: "recitals", expectedField: "recitals" },
-      { id: "api-definitions", resource: "definitions", expectedField: "definitions" },
-      { id: "api-chapters", resource: "chapters", expectedField: "chapters" },
-      { id: "api-implementing", resource: "implementing-acts", expectedField: "implementing_acts" },
+      { id: "api-articles", resource: "articles", expectedField: "data" },
+      { id: "api-recitals", resource: "recitals", expectedField: "data" },
+      { id: "api-definitions", resource: "definitions", expectedField: "data" },
+      { id: "api-chapters", resource: "chapters", expectedField: "data" },
+      { id: "api-implementing", resource: "implementing-acts", expectedField: "data" },
       { id: "api-metadata", resource: "metadata", expectedField: "regulation" },
     ];
 

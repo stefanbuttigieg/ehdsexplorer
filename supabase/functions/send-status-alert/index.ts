@@ -59,7 +59,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send emails to all subscribers
     const emailPromises = subscribers.map(async (subscriber) => {
       const unsubscribeUrl = `${baseUrl}/unsubscribe?token=${subscriber.unsubscribe_token}`;
-      
+      const manageUrl = `${baseUrl}/manage-subscription?token=${subscriber.unsubscribe_token}`;
       try {
         await resend.emails.send({
           from: "EHDS Explorer <notifications@ehdsexplorer.eu>",
@@ -95,7 +95,11 @@ const handler = async (req: Request): Promise<Response> => {
               
               <div style="padding: 20px; text-align: center; color: #64748b; font-size: 12px;">
                 <p>You received this email because you subscribed to updates for this implementing act.</p>
-                <p><a href="${unsubscribeUrl}" style="color: #64748b;">Unsubscribe from these alerts</a></p>
+                <p>
+                  <a href="${manageUrl}" style="color: #1e40af;">Manage subscriptions</a>
+                  &nbsp;•&nbsp;
+                  <a href="${unsubscribeUrl}" style="color: #64748b;">Unsubscribe</a>
+                </p>
               </div>
             </body>
             </html>

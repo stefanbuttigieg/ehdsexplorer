@@ -58,6 +58,7 @@ import AdminSubscriptionsPage from "./pages/AdminSubscriptionsPage";
 import NotesPage from "./pages/NotesPage";
 import UnsubscribePage from "./pages/UnsubscribePage";
 import VerifySubscriptionPage from "./pages/VerifySubscriptionPage";
+import ManageSubscriptionPage from "./pages/ManageSubscriptionPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -107,6 +108,7 @@ const App = () => (
             <Route path="/notes" element={<NotesPage />} />
             <Route path="/unsubscribe" element={<UnsubscribePage />} />
             <Route path="/verify-subscription" element={<VerifySubscriptionPage />} />
+            <Route path="/manage-subscription" element={<ManageSubscriptionPage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin/set-password" element={<AdminSetPasswordPage />} />
             <Route path="/profile" element={<ProfilePage />} />

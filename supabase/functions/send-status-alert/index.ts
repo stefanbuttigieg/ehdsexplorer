@@ -31,10 +31,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Status change alert: ${title} changed from ${old_status} to ${new_status}`);
 
-    // Get all subscribers for this implementing act or those subscribed to all
+    // Get all verified subscribers for this implementing act or those subscribed to all
     const { data: subscribers, error: fetchError } = await supabase
       .from("implementing_act_subscriptions")
       .select("email, unsubscribe_token")
+      .eq("verified", true)
       .or(`implementing_act_id.eq.${implementing_act_id},subscribe_all.eq.true`);
 
     if (fetchError) {

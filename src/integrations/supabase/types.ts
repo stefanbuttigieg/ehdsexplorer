@@ -457,6 +457,7 @@ export type Database = {
           implementing_act_id: string | null
           subscribe_all: boolean
           unsubscribe_token: string
+          verification_token: string | null
           verified: boolean
         }
         Insert: {
@@ -466,6 +467,7 @@ export type Database = {
           implementing_act_id?: string | null
           subscribe_all?: boolean
           unsubscribe_token?: string
+          verification_token?: string | null
           verified?: boolean
         }
         Update: {
@@ -475,6 +477,7 @@ export type Database = {
           implementing_act_id?: string | null
           subscribe_all?: boolean
           unsubscribe_token?: string
+          verification_token?: string | null
           verified?: boolean
         }
         Relationships: [

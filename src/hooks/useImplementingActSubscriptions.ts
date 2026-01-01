@@ -9,6 +9,8 @@ export interface Subscription {
   subscribe_all: boolean;
   created_at: string;
   unsubscribe_token: string;
+  verified: boolean;
+  verification_token: string;
 }
 
 export const useImplementingActSubscriptions = () => {
@@ -41,10 +43,20 @@ export const useImplementingActSubscriptions = () => {
         }
         throw error;
       }
+
+      // Send verification email
+      try {
+        await supabase.functions.invoke("send-verification-email", {
+          body: { subscription_id: data.id },
+        });
+      } catch (emailError) {
+        console.error("Failed to send verification email:", emailError);
+      }
+
       return data;
     },
     onSuccess: () => {
-      toast.success("Successfully subscribed! You will receive email alerts when the status changes.");
+      toast.success("Please check your email to verify your subscription.");
       queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
     },
     onError: (error: Error) => {

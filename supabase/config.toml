@@ -23,3 +23,15 @@ verify_jwt = true
 
 [functions.send-status-alert]
 verify_jwt = true
+
+[functions.send-verification-email]
+verify_jwt = true
+
+[functions.send-invite]
+verify_jwt = true
+
+[functions.test-email]
+verify_jwt = true
+
+[functions.update-own-password]
+verify_jwt = true

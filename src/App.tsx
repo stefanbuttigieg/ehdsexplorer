@@ -54,6 +54,7 @@ import ProfilePage from "./pages/ProfilePage";
 import HelpCenterPage from "./pages/HelpCenterPage";
 import AdminPlainLanguagePage from "./pages/AdminPlainLanguagePage";
 import AdminQAPage from "./pages/AdminQAPage";
+import AdminSubscriptionsPage from "./pages/AdminSubscriptionsPage";
 import NotesPage from "./pages/NotesPage";
 import UnsubscribePage from "./pages/UnsubscribePage";
 
@@ -127,6 +128,7 @@ const App = () => (
             <Route path="/admin/news" element={<AdminNewsPage />} />
             <Route path="/admin/plain-language" element={<AdminPlainLanguagePage />} />
             <Route path="/admin/qa" element={<AdminQAPage />} />
+            <Route path="/admin/subscriptions" element={<AdminSubscriptionsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </MaintenanceGuard>

@@ -14,6 +14,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.0] - 2026-01-01
+
+### Added
+
+#### Annotations & Note-Taking System
+- Inline text highlighting on articles, recitals, and implementing acts
+- 5 highlight color options (yellow, green, blue, pink, orange)
+- Add comments to any highlighted text
+- Custom annotation tags with color coding
+- Dedicated Notes page at `/notes` for managing all notes and annotations
+- Create, edit, pin, and delete personal notes
+- Search and filter notes by title, content, or tags
+- View all annotations with links to source content
+- Clickable highlighted text that shows annotation details
+
+#### Export Functionality
+- Export notes and annotations to Markdown
+- Export to JSON format for data portability
+- Notion-compatible export with YAML frontmatter
+- Obsidian-compatible export with wikilinks and hashtag tags
+- Copy individual notes as Markdown to clipboard
+
+#### Hybrid Storage
+- Local storage for anonymous users (works offline)
+- Cloud sync for logged-in users via database
+- Seamless transition between local and synced storage
+
+---
+
 ## [1.4.0] - 2025-12-28
 
 ### Added

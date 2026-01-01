@@ -53,6 +53,15 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Published Works** - Academic research and publications linked to articles and implementing acts
 - **Live Deliverables** - Direct links to EHDS acceptance data platform resources
 
+### ✏️ Annotations & Notes
+- **Inline text highlighting** - Select text on articles, recitals, or implementing acts to highlight
+- **5 highlight colors** - Yellow, green, blue, pink, and orange
+- **Comments on highlights** - Add notes to any highlighted text
+- **Annotation tags** - Organize highlights with custom color-coded tags
+- **Notes page** - Central hub for managing all notes and annotations
+- **Export options** - Export to Markdown, JSON, Notion, and Obsidian formats
+- **Local & synced storage** - Works offline for anonymous users, syncs when logged in
+
 ### 🎨 User Experience
 - **Dark/Light mode** toggle with system preference detection
 - **Adjustable font sizes** (small, medium, large, x-large)
@@ -152,7 +161,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 ### Medium-term
 - [ ] AI-powered Q&A about the regulation
 - [ ] Comparison view between articles
-- [ ] Annotation and note-taking
+- [x] Annotation and note-taking
 - [ ] Collaboration features for teams
 - [ ] Email alerts for implementing act status changes
 - [ ] Sign-up of new users and creation of profiles

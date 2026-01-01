@@ -7,6 +7,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePublishedTranslation } from "@/hooks/usePlainLanguageTranslations";
 import ReactMarkdown from "react-markdown";
+import remarkBreaks from "remark-breaks";
 
 interface PlainLanguageViewProps {
   contentType: "article" | "recital";
@@ -82,7 +83,7 @@ const PlainLanguageView = ({
             </CardHeader>
             <CardContent>
               <div className="prose prose-sm dark:prose-invert max-w-none">
-                <ReactMarkdown>{translation.plain_language_text}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkBreaks]}>{translation.plain_language_text}</ReactMarkdown>
               </div>
               
               {/* Disclaimer */}

@@ -8,6 +8,7 @@ import { useBookmarks } from "@/hooks/useBookmarks";
 import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import ReactMarkdown from "react-markdown";
+import remarkBreaks from "remark-breaks";
 
 const AnnexDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -87,7 +88,7 @@ const AnnexDetailPage = () => {
           </CardHeader>
           <CardContent>
             <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:font-serif prose-h2:text-lg prose-h2:mt-6 prose-h2:mb-3">
-              <ReactMarkdown>{annex.content}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkBreaks]}>{annex.content}</ReactMarkdown>
             </div>
           </CardContent>
         </Card>

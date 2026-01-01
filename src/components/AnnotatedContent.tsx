@@ -4,6 +4,7 @@ import { AnnotationToolbar } from './AnnotationToolbar';
 import { AnnotationPopover } from './AnnotationPopover';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
+import remarkBreaks from 'remark-breaks';
 
 interface AnnotatedContentProps {
   content: string;
@@ -258,7 +259,7 @@ export const AnnotatedContent = ({
         className="select-text"
       >
         <div className={cn('prose prose-sm dark:prose-invert max-w-none', className)}>
-          <ReactMarkdown components={markdownComponents}>{content}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkBreaks]} components={markdownComponents}>{content}</ReactMarkdown>
         </div>
       </div>
 

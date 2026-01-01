@@ -1,15 +1,118 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 type Message = {
+  id?: string;
   role: 'user' | 'assistant';
   content: string;
+};
+
+type Conversation = {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
 };
 
 export const useEHDSAssistant = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  // Fetch user's conversations
+  const { data: conversations, isLoading: conversationsLoading } = useQuery({
+    queryKey: ['ai-conversations'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      
+      const { data, error } = await supabase
+        .from('ai_assistant_conversations')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false })
+        .limit(20);
+      
+      if (error) throw error;
+      return data as Conversation[];
+    },
+  });
+
+  // Load messages when conversation changes
+  useEffect(() => {
+    if (currentConversationId) {
+      loadConversationMessages(currentConversationId);
+    }
+  }, [currentConversationId]);
+
+  const loadConversationMessages = async (conversationId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('ai_assistant_messages')
+        .select('*')
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: true });
+      
+      if (error) throw error;
+      
+      setMessages(data.map(m => ({
+        id: m.id,
+        role: m.role as 'user' | 'assistant',
+        content: m.content,
+      })));
+    } catch (e) {
+      console.error('Error loading messages:', e);
+    }
+  };
+
+  const createConversation = async (firstMessage: string): Promise<string | null> => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      // Generate title from first message (first 50 chars)
+      const title = firstMessage.length > 50 
+        ? firstMessage.substring(0, 50) + '...' 
+        : firstMessage;
+
+      const { data, error } = await supabase
+        .from('ai_assistant_conversations')
+        .insert({ user_id: user.id, title })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      queryClient.invalidateQueries({ queryKey: ['ai-conversations'] });
+      return data.id;
+    } catch (e) {
+      console.error('Error creating conversation:', e);
+      return null;
+    }
+  };
+
+  const saveMessage = async (conversationId: string, role: 'user' | 'assistant', content: string) => {
+    try {
+      const { error } = await supabase
+        .from('ai_assistant_messages')
+        .insert({ conversation_id: conversationId, role, content });
+      
+      if (error) throw error;
+
+      // Update conversation timestamp
+      await supabase
+        .from('ai_assistant_conversations')
+        .update({ updated_at: new Date().toISOString() })
+        .eq('id', conversationId);
+      
+      queryClient.invalidateQueries({ queryKey: ['ai-conversations'] });
+    } catch (e) {
+      console.error('Error saving message:', e);
+    }
+  };
 
   const sendMessage = useCallback(async (input: string) => {
     const userMsg: Message = { role: 'user', content: input };
@@ -18,6 +121,20 @@ export const useEHDSAssistant = () => {
     setError(null);
 
     let assistantContent = '';
+    let convId = currentConversationId;
+
+    // Create new conversation if needed
+    if (!convId) {
+      convId = await createConversation(input);
+      if (convId) {
+        setCurrentConversationId(convId);
+      }
+    }
+
+    // Save user message
+    if (convId) {
+      await saveMessage(convId, 'user', input);
+    }
 
     const updateAssistant = (chunk: string) => {
       assistantContent += chunk;
@@ -91,7 +208,6 @@ export const useEHDSAssistant = () => {
             const content = parsed.choices?.[0]?.delta?.content;
             if (content) updateAssistant(content);
           } catch {
-            // Incomplete JSON, put it back
             buffer = line + '\n' + buffer;
             break;
           }
@@ -114,10 +230,14 @@ export const useEHDSAssistant = () => {
           } catch { /* ignore */ }
         }
       }
+
+      // Save assistant response
+      if (convId && assistantContent) {
+        await saveMessage(convId, 'assistant', assistantContent);
+      }
     } catch (e) {
       console.error('EHDS Assistant error:', e);
       setError(e instanceof Error ? e.message : 'An error occurred');
-      // Remove the assistant message if there was an error
       setMessages(prev => {
         const last = prev[prev.length - 1];
         if (last?.role === 'assistant' && last.content === '') {
@@ -128,12 +248,41 @@ export const useEHDSAssistant = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [messages]);
+  }, [messages, currentConversationId]);
 
-  const clearMessages = useCallback(() => {
+  const loadConversation = useCallback((conversationId: string) => {
+    setCurrentConversationId(conversationId);
+    setError(null);
+  }, []);
+
+  const startNewConversation = useCallback(() => {
+    setCurrentConversationId(null);
     setMessages([]);
     setError(null);
   }, []);
+
+  const deleteConversation = useCallback(async (conversationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('ai_assistant_conversations')
+        .delete()
+        .eq('id', conversationId);
+      
+      if (error) throw error;
+      
+      if (currentConversationId === conversationId) {
+        startNewConversation();
+      }
+      
+      queryClient.invalidateQueries({ queryKey: ['ai-conversations'] });
+    } catch (e) {
+      console.error('Error deleting conversation:', e);
+    }
+  }, [currentConversationId, startNewConversation, queryClient]);
+
+  const clearMessages = useCallback(() => {
+    startNewConversation();
+  }, [startNewConversation]);
 
   return {
     messages,
@@ -141,5 +290,11 @@ export const useEHDSAssistant = () => {
     error,
     sendMessage,
     clearMessages,
+    conversations,
+    conversationsLoading,
+    currentConversationId,
+    loadConversation,
+    startNewConversation,
+    deleteConversation,
   };
 };

@@ -1,12 +1,13 @@
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Mail, Trash2, Globe, FileText } from 'lucide-react';
+import { ArrowLeft, Mail, Trash2, Globe, FileText, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import Layout from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -77,6 +78,28 @@ const AdminSubscriptionsPage = () => {
     },
   });
 
+  const resendMutation = useMutation({
+    mutationFn: async (subscriptionId: string) => {
+      const { error } = await supabase.functions.invoke('send-verification-email', {
+        body: { subscription_id: subscriptionId },
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Verification Email Sent',
+        description: 'The verification email has been resent.',
+      });
+    },
+    onError: () => {
+      toast({
+        title: 'Error',
+        description: 'Failed to resend verification email.',
+        variant: 'destructive',
+      });
+    },
+  });
+
   if (loading) {
     return (
       <Layout>
@@ -93,6 +116,8 @@ const AdminSubscriptionsPage = () => {
 
   const globalSubscriptions = subscriptions.filter(s => s.subscribe_all);
   const specificSubscriptions = subscriptions.filter(s => !s.subscribe_all);
+  const verifiedCount = subscriptions.filter(s => s.verified).length;
+  const unverifiedCount = subscriptions.filter(s => !s.verified).length;
 
   return (
     <Layout>
@@ -112,11 +137,29 @@ const AdminSubscriptionsPage = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           <Card>
             <CardHeader className="pb-2">
-              <CardDescription>Total Subscriptions</CardDescription>
+              <CardDescription>Total</CardDescription>
               <CardTitle className="text-3xl">{subscriptions.length}</CardTitle>
+            </CardHeader>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Verified</CardDescription>
+              <CardTitle className="text-3xl flex items-center gap-2 text-green-600">
+                <CheckCircle className="h-6 w-6" />
+                {verifiedCount}
+              </CardTitle>
+            </CardHeader>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Pending</CardDescription>
+              <CardTitle className="text-3xl flex items-center gap-2 text-amber-600">
+                <XCircle className="h-6 w-6" />
+                {unverifiedCount}
+              </CardTitle>
             </CardHeader>
           </Card>
           <Card>
@@ -125,15 +168,6 @@ const AdminSubscriptionsPage = () => {
               <CardTitle className="text-3xl flex items-center gap-2">
                 <Globe className="h-6 w-6 text-primary" />
                 {globalSubscriptions.length}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Specific Acts</CardDescription>
-              <CardTitle className="text-3xl flex items-center gap-2">
-                <FileText className="h-6 w-6 text-muted-foreground" />
-                {specificSubscriptions.length}
               </CardTitle>
             </CardHeader>
           </Card>
@@ -169,16 +203,30 @@ const AdminSubscriptionsPage = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Email</TableHead>
+                      <TableHead>Status</TableHead>
                       <TableHead>Type</TableHead>
                       <TableHead>Implementing Act</TableHead>
                       <TableHead>Subscribed</TableHead>
-                      <TableHead className="w-[80px]">Actions</TableHead>
+                      <TableHead className="w-[100px]">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {subscriptions.map((subscription) => (
                       <TableRow key={subscription.id}>
                         <TableCell className="font-medium">{subscription.email}</TableCell>
+                        <TableCell>
+                          {subscription.verified ? (
+                            <Badge variant="outline" className="text-green-600 border-green-600">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Verified
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-amber-600 border-amber-600">
+                              <XCircle className="h-3 w-3 mr-1" />
+                              Pending
+                            </Badge>
+                          )}
+                        </TableCell>
                         <TableCell>
                           {subscription.subscribe_all ? (
                             <Badge className="bg-primary">
@@ -210,30 +258,48 @@ const AdminSubscriptionsPage = () => {
                           {format(new Date(subscription.created_at), 'MMM d, yyyy')}
                         </TableCell>
                         <TableCell>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Subscription?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  This will remove {subscription.email} from receiving status alerts. This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => deleteMutation.mutate(subscription.id)}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                >
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                          <div className="flex items-center gap-1">
+                            {!subscription.verified && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-8 w-8"
+                                    onClick={() => resendMutation.mutate(subscription.id)}
+                                    disabled={resendMutation.isPending}
+                                  >
+                                    <RefreshCw className={`h-4 w-4 ${resendMutation.isPending ? 'animate-spin' : ''}`} />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Resend verification email</TooltipContent>
+                              </Tooltip>
+                            )}
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Subscription?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This will remove {subscription.email} from receiving status alerts. This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => deleteMutation.mutate(subscription.id)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}

@@ -320,42 +320,47 @@ const AdminNewsPage = () => {
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/admin')}>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 overflow-x-hidden">
+        {/* Header - Stack on mobile */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3 min-w-0">
+            <Button variant="ghost" size="icon" onClick={() => navigate('/admin')} className="shrink-0">
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <h1 className="text-2xl font-bold">Manage News Summaries</h1>
+            <h1 className="text-xl sm:text-2xl font-bold truncate">Manage News Summaries</h1>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={openPromptEditor}>
-              <Settings className="h-4 w-4 mr-2" />
-              Edit AI Prompt
+          
+          {/* Action buttons - wrap on mobile */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" size="sm" onClick={openPromptEditor} className="text-xs sm:text-sm">
+              <Settings className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Edit AI Prompt</span>
             </Button>
-            <Button variant="outline" onClick={openCreateDialog}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Manual
+            <Button variant="outline" size="sm" onClick={openCreateDialog} className="text-xs sm:text-sm">
+              <Plus className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Create Manual</span>
             </Button>
-            <Button onClick={handleGenerate} disabled={generateMutation.isPending}>
+            <Button size="sm" onClick={handleGenerate} disabled={generateMutation.isPending} className="text-xs sm:text-sm">
               {generateMutation.isPending ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 sm:mr-2 animate-spin" />
               ) : (
-                <Sparkles className="h-4 w-4 mr-2" />
+                <Sparkles className="h-4 w-4 sm:mr-2" />
               )}
-              EHDS News
+              <span className="hidden sm:inline">EHDS News</span>
             </Button>
             <Button 
+              size="sm"
               onClick={handleGenerateProductUpdates} 
               disabled={generateProductUpdatesMutation.isPending}
               variant="secondary"
+              className="text-xs sm:text-sm"
             >
               {generateProductUpdatesMutation.isPending ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 sm:mr-2 animate-spin" />
               ) : (
-                <Rocket className="h-4 w-4 mr-2" />
+                <Rocket className="h-4 w-4 sm:mr-2" />
               )}
-              Explorer Updates
+              <span className="hidden sm:inline">Explorer Updates</span>
             </Button>
           </div>
         </div>
@@ -373,26 +378,28 @@ const AdminNewsPage = () => {
         ) : summaries && summaries.length > 0 ? (
           <div className="space-y-4">
             {summaries.map((summary) => (
-              <Card key={summary.id}>
+              <Card key={summary.id} className="overflow-hidden">
                 <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg">{summary.title}</CardTitle>
-                      <CardDescription>
+                  {/* Stack layout on mobile, row on desktop */}
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-base sm:text-lg break-words">{summary.title}</CardTitle>
+                      <CardDescription className="text-xs sm:text-sm">
                         Week: {format(new Date(summary.week_start), 'MMM d')} - {format(new Date(summary.week_end), 'MMM d, yyyy')}
                       </CardDescription>
                     </div>
-                    <div className="flex items-center gap-2">
+                    {/* Badges wrap on mobile */}
+                    <div className="flex flex-wrap items-center gap-1.5">
                       {summary.sources && summary.sources.length > 0 && (
-                        <Badge variant="outline" className="gap-1">
+                        <Badge variant="outline" className="gap-1 text-xs">
                           <Link className="h-3 w-3" />
-                          {summary.sources.length} sources
+                          {summary.sources.length}
                         </Badge>
                       )}
-                      <Badge variant={summary.is_published ? "default" : "secondary"}>
+                      <Badge variant={summary.is_published ? "default" : "secondary"} className="text-xs">
                         {summary.is_published ? "Published" : "Draft"}
                       </Badge>
-                      <Badge variant="outline">
+                      <Badge variant="outline" className="text-xs">
                         {summary.generated_by === 'ai' ? 'EHDS News' : 
                          summary.generated_by === 'product_update' ? 'Explorer Updates' : 'Manual'}
                       </Badge>
@@ -403,37 +410,39 @@ const AdminNewsPage = () => {
                   <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
                     {summary.summary.substring(0, 200)}...
                   </p>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => openEdit(summary)}>
-                      <Pencil className="h-4 w-4 mr-1" />
-                      Edit
+                  {/* Action buttons wrap on mobile */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={() => openEdit(summary)} className="text-xs sm:text-sm">
+                      <Pencil className="h-4 w-4 sm:mr-1" />
+                      <span className="hidden sm:inline">Edit</span>
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleTogglePublish(summary)}
                       disabled={updateMutation.isPending}
+                      className="text-xs sm:text-sm"
                     >
                       {summary.is_published ? (
                         <>
-                          <EyeOff className="h-4 w-4 mr-1" />
-                          Unpublish
+                          <EyeOff className="h-4 w-4 sm:mr-1" />
+                          <span className="hidden sm:inline">Unpublish</span>
                         </>
                       ) : (
                         <>
-                          <Eye className="h-4 w-4 mr-1" />
-                          Publish
+                          <Eye className="h-4 w-4 sm:mr-1" />
+                          <span className="hidden sm:inline">Publish</span>
                         </>
                       )}
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Delete
+                        <Button variant="outline" size="sm" className="text-destructive hover:text-destructive text-xs sm:text-sm">
+                          <Trash2 className="h-4 w-4 sm:mr-1" />
+                          <span className="hidden sm:inline">Delete</span>
                         </Button>
                       </AlertDialogTrigger>
-                      <AlertDialogContent>
+                      <AlertDialogContent className="max-w-[95vw] sm:max-w-lg">
                         <AlertDialogHeader>
                           <AlertDialogTitle>Delete Summary?</AlertDialogTitle>
                           <AlertDialogDescription>

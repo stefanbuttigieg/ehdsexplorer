@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { SearchCommand } from "@/components/SearchCommand";
-import { Search, Book, FileText, Scale, ListChecks, Bookmark, Files, Clock, MessageSquare, ExternalLink, Gamepad2, Newspaper, StickyNote } from "lucide-react";
+import { Search, Book, FileText, Scale, ListChecks, Bookmark, Files, Clock, MessageSquare, ExternalLink, Gamepad2, Newspaper, StickyNote, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -253,8 +253,19 @@ const Index = () => {
                   <CardContent className="p-4 flex items-center gap-3">
                     <Gamepad2 className="h-8 w-8 text-primary" />
                     <div>
-                      <p className="font-semibold">Learn</p>
-                      <p className="text-sm text-muted-foreground">Match Game</p>
+                      <p className="font-semibold">Match Game</p>
+                      <p className="text-sm text-muted-foreground">Match terms</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link to="/flashcards">
+                <Card className="hover:border-primary transition-colors cursor-pointer h-full">
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <GraduationCap className="h-8 w-8 text-primary" />
+                    <div>
+                      <p className="font-semibold">Flashcards</p>
+                      <p className="text-sm text-muted-foreground">Study cards</p>
                     </div>
                   </CardContent>
                 </Card>

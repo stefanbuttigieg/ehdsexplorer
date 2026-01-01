@@ -105,7 +105,14 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
   - Hover interactions with milestone highlighting
 
 ### 🎮 Learning Tools
-
+- **Match Game** - Card-matching game to learn EHDS terminology by pairing terms with definitions
+  - Selectable difficulty levels (4, 6, or 8 pairs)
+  - Timer tracking and accuracy metrics
+  - Accessible from homepage "Learn" quick link
+- **Flashcard Game** - Study EHDS definitions with interactive flashcards
+  - Flip cards to reveal definitions
+  - Self-assessment marking (knew it / didn't know)
+  - Progress tracking and shuffle functionality
 ### 📝 Footnotes System
 - **Inline footnote markers** in article and recital content (e.g., [^1], *, †)
 - **Clickable markers** that smooth-scroll to footnote with highlight effect

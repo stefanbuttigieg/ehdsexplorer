@@ -101,10 +101,22 @@ const ManageSubscriptionPage = () => {
 
       if (error) throw error;
 
+      // Send confirmation email
+      const unsubscribedFrom = subscription.subscribe_all 
+        ? "all" 
+        : subscription.implementing_acts?.title || "an implementing act";
+
+      await supabase.functions.invoke("send-unsubscribe-confirmation", {
+        body: { 
+          email: subscription.email,
+          unsubscribed_from: unsubscribedFrom
+        },
+      });
+
       setSubscriptions(prev => prev.filter(s => s.id !== subscriptionId));
       toast({
         title: "Unsubscribed",
-        description: "You have been unsubscribed from this alert.",
+        description: "You have been unsubscribed. A confirmation email has been sent.",
       });
     } catch (err) {
       toast({
@@ -120,6 +132,8 @@ const ManageSubscriptionPage = () => {
   const handleUnsubscribeAll = async () => {
     setDeletingId("all");
     try {
+      const userEmail = email;
+      
       // Delete all subscriptions for this email
       for (const subscription of subscriptions) {
         await supabase
@@ -128,10 +142,20 @@ const ManageSubscriptionPage = () => {
           .eq("unsubscribe_token", subscription.unsubscribe_token);
       }
 
+      // Send confirmation email for unsubscribing from all
+      if (userEmail) {
+        await supabase.functions.invoke("send-unsubscribe-confirmation", {
+          body: { 
+            email: userEmail,
+            unsubscribed_from: "all"
+          },
+        });
+      }
+
       setSubscriptions([]);
       toast({
         title: "Unsubscribed from all",
-        description: "You have been unsubscribed from all alerts.",
+        description: "You have been unsubscribed from all alerts. A confirmation email has been sent.",
       });
     } catch (err) {
       toast({

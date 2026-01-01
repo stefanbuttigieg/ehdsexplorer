@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Trash2, Loader2, Bot, User, AlertCircle } from 'lucide-react';
+import { MessageCircle, X, Send, Trash2, Loader2, Bot, User, AlertCircle, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useEHDSAssistant } from '@/hooks/useEHDSAssistant';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface AIAssistantProps {
   className?: string;
@@ -14,6 +16,7 @@ interface AIAssistantProps {
 const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
+  const [feedbackGiven, setFeedbackGiven] = useState<Record<number, 'positive' | 'negative'>>({});
   const { messages, isLoading, error, sendMessage, clearMessages } = useEHDSAssistant();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -32,6 +35,13 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
     }
   }, [isOpen]);
 
+  // Reset feedback when messages are cleared
+  useEffect(() => {
+    if (messages.length === 0) {
+      setFeedbackGiven({});
+    }
+  }, [messages.length]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
@@ -43,6 +53,60 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e);
+    }
+  };
+
+  const handleFeedback = async (messageIndex: number, feedbackType: 'positive' | 'negative') => {
+    // Find the assistant message and the preceding user query
+    const assistantMessage = messages[messageIndex];
+    if (assistantMessage.role !== 'assistant') return;
+
+    // Find the user query that preceded this response
+    let userQuery = '';
+    for (let i = messageIndex - 1; i >= 0; i--) {
+      if (messages[i].role === 'user') {
+        userQuery = messages[i].content;
+        break;
+      }
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to provide feedback",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { error: insertError } = await supabase
+        .from('ai_assistant_feedback')
+        .insert({
+          user_id: user.id,
+          message_content: assistantMessage.content,
+          user_query: userQuery,
+          feedback_type: feedbackType,
+        });
+
+      if (insertError) throw insertError;
+
+      setFeedbackGiven(prev => ({ ...prev, [messageIndex]: feedbackType }));
+      
+      toast({
+        title: feedbackType === 'positive' ? "Thanks for the feedback!" : "Feedback recorded",
+        description: feedbackType === 'positive' 
+          ? "Glad this was helpful!" 
+          : "We'll work on improving responses like this.",
+      });
+    } catch (err) {
+      console.error('Error submitting feedback:', err);
+      toast({
+        title: "Error",
+        description: "Failed to submit feedback. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -65,7 +129,10 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8"
-                onClick={clearMessages}
+                onClick={() => {
+                  clearMessages();
+                  setFeedbackGiven({});
+                }}
                 disabled={messages.length === 0}
                 title="Clear conversation"
               >
@@ -128,20 +195,53 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
                         <Bot className="h-4 w-4 text-primary" />
                       </div>
                     )}
-                    <div
-                      className={cn(
-                        "max-w-[85%] rounded-lg px-3 py-2 text-sm",
-                        message.role === 'user'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted'
-                      )}
-                    >
-                      {message.role === 'assistant' ? (
-                        <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2">
-                          <ReactMarkdown>{message.content || '...'}</ReactMarkdown>
+                    <div className="flex flex-col gap-1 max-w-[85%]">
+                      <div
+                        className={cn(
+                          "rounded-lg px-3 py-2 text-sm",
+                          message.role === 'user'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted'
+                        )}
+                      >
+                        {message.role === 'assistant' ? (
+                          <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2">
+                            <ReactMarkdown>{message.content || '...'}</ReactMarkdown>
+                          </div>
+                        ) : (
+                          message.content
+                        )}
+                      </div>
+                      {/* Feedback buttons for assistant messages */}
+                      {message.role === 'assistant' && message.content && !isLoading && (
+                        <div className="flex items-center gap-1 pl-1">
+                          {feedbackGiven[index] ? (
+                            <span className="text-xs text-muted-foreground">
+                              {feedbackGiven[index] === 'positive' ? '👍 Thanks!' : '👎 Noted'}
+                            </span>
+                          ) : (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 text-muted-foreground hover:text-green-600"
+                                onClick={() => handleFeedback(index, 'positive')}
+                                title="Helpful"
+                              >
+                                <ThumbsUp className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 text-muted-foreground hover:text-red-600"
+                                onClick={() => handleFeedback(index, 'negative')}
+                                title="Not helpful"
+                              >
+                                <ThumbsDown className="h-3.5 w-3.5" />
+                              </Button>
+                            </>
+                          )}
                         </div>
-                      ) : (
-                        message.content
                       )}
                     </div>
                     {message.role === 'user' && (

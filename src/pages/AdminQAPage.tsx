@@ -80,6 +80,7 @@ const AdminQAPage = () => {
   
   const [checks, setChecks] = useState<CheckItem[]>(initialChecks);
   const [showOnlyFailed, setShowOnlyFailed] = useState(false);
+  const [isRunningApiTests, setIsRunningApiTests] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !isAdmin) {
@@ -114,8 +115,6 @@ const AdminQAPage = () => {
       check.id === id ? { ...check, notes } : check
     ));
   };
-
-  const [isRunningApiTests, setIsRunningApiTests] = useState(false);
 
   const runAutoChecks = () => {
     // Data integrity auto-checks

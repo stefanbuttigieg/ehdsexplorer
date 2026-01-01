@@ -66,6 +66,20 @@ const NotesPage = () => {
   const { annotations } = useAnnotations();
   const { tags, createTag, deleteTag } = useAnnotationTags();
 
+  // Helper to generate correct URL for annotation
+  const getAnnotationUrl = (ann: Annotation) => {
+    switch (ann.content_type) {
+      case 'article':
+        return `/article/${ann.content_id}`;
+      case 'recital':
+        return `/recital/${ann.content_id}`;
+      case 'implementing_act':
+        return `/implementing-acts/${ann.content_id}`;
+      default:
+        return '/';
+    }
+  };
+
   const filteredNotes = notes.filter(note =>
     note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -439,7 +453,7 @@ const NotesPage = () => {
                       className="p-2 rounded border border-border hover:border-primary/50 transition-colors"
                     >
                       <Link
-                        to={`/${ann.content_type === 'implementing_act' ? 'implementing-acts' : ann.content_type + 's'}/${ann.content_id}`}
+                        to={getAnnotationUrl(ann)}
                         className="block"
                       >
                         <div

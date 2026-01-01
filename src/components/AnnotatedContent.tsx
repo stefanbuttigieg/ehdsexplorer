@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useAnnotations, Annotation } from '@/hooks/useAnnotations';
 import { AnnotationToolbar } from './AnnotationToolbar';
 import { AnnotationPopover } from './AnnotationPopover';
@@ -18,6 +18,84 @@ const HIGHLIGHT_COLOR_MAP: Record<string, string> = {
   blue: 'bg-blue-200/70 dark:bg-blue-300/40',
   pink: 'bg-pink-200/70 dark:bg-pink-300/40',
   orange: 'bg-orange-200/70 dark:bg-orange-300/40',
+};
+
+// Component to render text with highlights
+const HighlightedText = ({ 
+  text, 
+  annotations, 
+  onAnnotationClick 
+}: { 
+  text: string; 
+  annotations: Annotation[];
+  onAnnotationClick: (annotation: Annotation, event: React.MouseEvent) => void;
+}) => {
+  if (!annotations.length) {
+    return <>{text}</>;
+  }
+
+  // Find all annotations that match text in this segment
+  const elements: React.ReactNode[] = [];
+  let lastIndex = 0;
+  const textLower = text.toLowerCase();
+
+  // Sort annotations and find matches by selected_text
+  const matches: { start: number; end: number; annotation: Annotation }[] = [];
+  
+  for (const annotation of annotations) {
+    const searchText = annotation.selected_text.toLowerCase();
+    let searchStart = 0;
+    
+    while (searchStart < text.length) {
+      const index = textLower.indexOf(searchText, searchStart);
+      if (index === -1) break;
+      
+      matches.push({
+        start: index,
+        end: index + annotation.selected_text.length,
+        annotation
+      });
+      searchStart = index + 1;
+    }
+  }
+
+  // Sort by start position and remove overlaps
+  matches.sort((a, b) => a.start - b.start);
+  const nonOverlapping = matches.filter((match, i) => {
+    if (i === 0) return true;
+    return match.start >= matches[i - 1].end;
+  });
+
+  for (const match of nonOverlapping) {
+    // Add text before the match
+    if (match.start > lastIndex) {
+      elements.push(text.slice(lastIndex, match.start));
+    }
+    
+    // Add highlighted text
+    elements.push(
+      <mark
+        key={`${match.annotation.id}-${match.start}`}
+        className={cn(
+          'cursor-pointer rounded px-0.5 transition-all hover:ring-2 hover:ring-primary/50',
+          HIGHLIGHT_COLOR_MAP[match.annotation.highlight_color] || HIGHLIGHT_COLOR_MAP.yellow
+        )}
+        onClick={(e) => onAnnotationClick(match.annotation, e)}
+        title={match.annotation.comment || 'Click to view annotation'}
+      >
+        {text.slice(match.start, match.end)}
+      </mark>
+    );
+    
+    lastIndex = match.end;
+  }
+
+  // Add remaining text
+  if (lastIndex < text.length) {
+    elements.push(text.slice(lastIndex));
+  }
+
+  return <>{elements}</>;
 };
 
 export const AnnotatedContent = ({
@@ -54,7 +132,6 @@ export const AnnotatedContent = ({
     }
 
     // Get text content and offsets
-    const contentText = contentRef.current.textContent || '';
     const preSelectionRange = document.createRange();
     preSelectionRange.selectNodeContents(contentRef.current);
     preSelectionRange.setEnd(range.startContainer, range.startOffset);
@@ -82,14 +159,14 @@ export const AnnotatedContent = ({
     window.getSelection()?.removeAllRanges();
   }, []);
 
-  const handleAnnotationClick = (annotation: Annotation, event: React.MouseEvent) => {
+  const handleAnnotationClick = useCallback((annotation: Annotation, event: React.MouseEvent) => {
     event.stopPropagation();
     setActiveAnnotation(annotation);
     setAnnotationPopoverPosition({
       x: event.clientX,
       y: event.clientY,
     });
-  };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -117,47 +194,61 @@ export const AnnotatedContent = ({
     return () => document.removeEventListener('click', handleClickOutside);
   }, [toolbarPosition, activeAnnotation, closeToolbar]);
 
-  // Render content with highlights
-  const renderHighlightedContent = () => {
-    if (!annotations.length) {
-      return (
-        <div className={cn('prose prose-sm dark:prose-invert max-w-none', className)}>
-          <ReactMarkdown>{content}</ReactMarkdown>
-        </div>
-      );
-    }
-
-    // For simplicity, we'll render the content normally and overlay highlights
-    // A more sophisticated implementation would parse and interleave highlights
-    return (
-      <div className={cn('prose prose-sm dark:prose-invert max-w-none relative', className)}>
-        <ReactMarkdown>{content}</ReactMarkdown>
-        {/* Highlight indicators */}
-        {annotations.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-border not-prose">
-            <p className="text-xs text-muted-foreground mb-2">
-              {annotations.length} annotation{annotations.length !== 1 ? 's' : ''} on this content
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {annotations.map((annotation) => (
-                <button
-                  key={annotation.id}
-                  onClick={(e) => handleAnnotationClick(annotation, e)}
-                  className={cn(
-                    'px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer',
-                    HIGHLIGHT_COLOR_MAP[annotation.highlight_color] || HIGHLIGHT_COLOR_MAP.yellow,
-                    'hover:ring-2 hover:ring-primary/50'
-                  )}
-                >
-                  "{annotation.selected_text.slice(0, 30)}{annotation.selected_text.length > 30 ? '...' : ''}"
-                </button>
-              ))}
-            </div>
-          </div>
+  // Custom components for ReactMarkdown that apply highlighting
+  const markdownComponents = useMemo(() => ({
+    p: ({ children, ...props }: any) => (
+      <p {...props}>
+        {typeof children === 'string' ? (
+          <HighlightedText 
+            text={children} 
+            annotations={annotations} 
+            onAnnotationClick={handleAnnotationClick} 
+          />
+        ) : (
+          children
         )}
-      </div>
-    );
-  };
+      </p>
+    ),
+    li: ({ children, ...props }: any) => (
+      <li {...props}>
+        {typeof children === 'string' ? (
+          <HighlightedText 
+            text={children} 
+            annotations={annotations} 
+            onAnnotationClick={handleAnnotationClick} 
+          />
+        ) : (
+          children
+        )}
+      </li>
+    ),
+    strong: ({ children, ...props }: any) => (
+      <strong {...props}>
+        {typeof children === 'string' ? (
+          <HighlightedText 
+            text={children} 
+            annotations={annotations} 
+            onAnnotationClick={handleAnnotationClick} 
+          />
+        ) : (
+          children
+        )}
+      </strong>
+    ),
+    em: ({ children, ...props }: any) => (
+      <em {...props}>
+        {typeof children === 'string' ? (
+          <HighlightedText 
+            text={children} 
+            annotations={annotations} 
+            onAnnotationClick={handleAnnotationClick} 
+          />
+        ) : (
+          children
+        )}
+      </em>
+    ),
+  }), [annotations, handleAnnotationClick]);
 
   return (
     <>
@@ -166,7 +257,9 @@ export const AnnotatedContent = ({
         onMouseUp={handleTextSelection}
         className="select-text"
       >
-        {renderHighlightedContent()}
+        <div className={cn('prose prose-sm dark:prose-invert max-w-none', className)}>
+          <ReactMarkdown components={markdownComponents}>{content}</ReactMarkdown>
+        </div>
       </div>
 
       {toolbarPosition && (

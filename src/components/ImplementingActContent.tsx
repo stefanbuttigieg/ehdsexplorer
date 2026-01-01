@@ -3,9 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Search, FileText, BookOpen } from "lucide-react";
+import { Search, FileText, BookOpen, ChevronsUpDown, ChevronsDownUp } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   useImplementingActRecitals,
@@ -13,7 +14,7 @@ import {
   useImplementingActArticles,
   groupArticlesBySection,
 } from "@/hooks/useImplementingActContent";
-import ReactMarkdown from "react-markdown";
+import { AnnotatedContent } from "@/components/AnnotatedContent";
 
 interface ImplementingActContentProps {
   implementingActId: string;
@@ -21,6 +22,7 @@ interface ImplementingActContentProps {
 
 const ImplementingActContent = ({ implementingActId }: ImplementingActContentProps) => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [expandedArticles, setExpandedArticles] = useState<string[]>([]);
   const { data: recitals = [], isLoading: loadingRecitals } = useImplementingActRecitals(implementingActId);
   const { data: sections = [], isLoading: loadingSections } = useImplementingActSections(implementingActId);
   const { data: articles = [], isLoading: loadingArticles } = useImplementingActArticles(implementingActId);
@@ -53,6 +55,21 @@ const ImplementingActContent = ({ implementingActId }: ImplementingActContentPro
     () => groupArticlesBySection(filteredArticles, sections),
     [filteredArticles, sections]
   );
+
+  const allArticleIds = useMemo(() => 
+    filteredArticles.map(a => a.id),
+    [filteredArticles]
+  );
+
+  const handleExpandAll = () => {
+    setExpandedArticles(allArticleIds);
+  };
+
+  const handleCollapseAll = () => {
+    setExpandedArticles([]);
+  };
+
+  const isAllExpanded = expandedArticles.length === allArticleIds.length && allArticleIds.length > 0;
 
   const hasContent = recitals.length > 0 || articles.length > 0;
 
@@ -114,6 +131,28 @@ const ImplementingActContent = ({ implementingActId }: ImplementingActContentPro
           </TabsList>
 
           <TabsContent value="articles" className="mt-4">
+            {filteredArticles.length > 0 && (
+              <div className="flex justify-end gap-2 mb-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={isAllExpanded ? handleCollapseAll : handleExpandAll}
+                  className="gap-2"
+                >
+                  {isAllExpanded ? (
+                    <>
+                      <ChevronsDownUp className="h-4 w-4" />
+                      Collapse All
+                    </>
+                  ) : (
+                    <>
+                      <ChevronsUpDown className="h-4 w-4" />
+                      Expand All
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
             <ScrollArea className="h-[500px] pr-4">
               {filteredArticles.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">
@@ -128,7 +167,12 @@ const ImplementingActContent = ({ implementingActId }: ImplementingActContentPro
                         <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
                           Section {section.section_number}: {section.title}
                         </h3>
-                        <Accordion type="single" collapsible className="space-y-2">
+                        <Accordion 
+                          type="multiple" 
+                          value={expandedArticles}
+                          onValueChange={setExpandedArticles}
+                          className="space-y-2"
+                        >
                           {sectionArticles.map((article) => (
                             <AccordionItem
                               key={article.id}
@@ -144,9 +188,12 @@ const ImplementingActContent = ({ implementingActId }: ImplementingActContentPro
                                 </div>
                               </AccordionTrigger>
                               <AccordionContent className="px-4 pb-4">
-                                <div className="prose prose-sm dark:prose-invert max-w-none legal-text">
-                                  <ReactMarkdown>{article.content}</ReactMarkdown>
-                                </div>
+                                <AnnotatedContent
+                                  content={article.content}
+                                  contentType="implementing_act"
+                                  contentId={`${implementingActId}-art-${article.article_number}`}
+                                  className="legal-text"
+                                />
                               </AccordionContent>
                             </AccordionItem>
                           ))}
@@ -157,7 +204,12 @@ const ImplementingActContent = ({ implementingActId }: ImplementingActContentPro
 
                   {/* Ungrouped articles */}
                   {ungroupedArticles.length > 0 && (
-                    <Accordion type="single" collapsible className="space-y-2">
+                    <Accordion 
+                      type="multiple" 
+                      value={expandedArticles}
+                      onValueChange={setExpandedArticles}
+                      className="space-y-2"
+                    >
                       {ungroupedArticles.map((article) => (
                         <AccordionItem
                           key={article.id}
@@ -173,9 +225,12 @@ const ImplementingActContent = ({ implementingActId }: ImplementingActContentPro
                             </div>
                           </AccordionTrigger>
                           <AccordionContent className="px-4 pb-4">
-                            <div className="prose prose-sm dark:prose-invert max-w-none legal-text">
-                              <ReactMarkdown>{article.content}</ReactMarkdown>
-                            </div>
+                            <AnnotatedContent
+                              content={article.content}
+                              contentType="implementing_act"
+                              contentId={`${implementingActId}-art-${article.article_number}`}
+                              className="legal-text"
+                            />
                           </AccordionContent>
                         </AccordionItem>
                       ))}
@@ -203,9 +258,12 @@ const ImplementingActContent = ({ implementingActId }: ImplementingActContentPro
                         <Badge variant="outline" className="shrink-0">
                           ({recital.recital_number})
                         </Badge>
-                        <div className="prose prose-sm dark:prose-invert max-w-none legal-text">
-                          <ReactMarkdown>{recital.content}</ReactMarkdown>
-                        </div>
+                        <AnnotatedContent
+                          content={recital.content}
+                          contentType="implementing_act"
+                          contentId={`${implementingActId}-rec-${recital.recital_number}`}
+                          className="legal-text"
+                        />
                       </div>
                     </div>
                   ))}

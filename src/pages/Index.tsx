@@ -116,13 +116,13 @@ const Index = () => {
                         </div>
                         <h3 className="font-semibold mb-1 text-sm sm:text-base">{act.title}</h3>
                         <p className="text-xs sm:text-sm text-muted-foreground mb-3 line-clamp-2">{act.description}</p>
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                          <Link to={`/implementing-acts/${act.id}`} className="w-full sm:w-auto">
-                            <Button variant="outline" size="sm" className="w-full sm:w-auto text-xs sm:text-sm">View details</Button>
+                        <div className="flex flex-col gap-2">
+                          <Link to={`/implementing-acts/${act.id}`} className="w-full">
+                            <Button variant="outline" size="sm" className="w-full text-xs sm:text-sm">View details</Button>
                           </Link>
                           {act.officialLink && (
-                            <a href={act.officialLink} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
-                              <Button variant="default" size="sm" className="w-full sm:w-auto text-xs sm:text-sm">
+                            <a href={act.officialLink} target="_blank" rel="noopener noreferrer" className="w-full">
+                              <Button variant="default" size="sm" className="w-full text-xs sm:text-sm">
                                 Submit feedback <ExternalLink className="h-3 w-3 ml-1" />
                               </Button>
                             </a>

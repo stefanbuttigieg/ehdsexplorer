@@ -17,7 +17,8 @@ export const SubscribeAlertButton = ({
   implementingActTitle 
 }: SubscribeAlertButtonProps) => {
   const [email, setEmail] = useState("");
-  const [subscribeAll, setSubscribeAll] = useState(false);
+  const isGlobalSubscribe = !implementingActId;
+  const [subscribeAll, setSubscribeAll] = useState(isGlobalSubscribe);
   const [isOpen, setIsOpen] = useState(false);
   
   const { subscribe } = useImplementingActSubscriptions();

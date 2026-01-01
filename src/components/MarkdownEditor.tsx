@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ReactMarkdown from 'react-markdown';
+import remarkBreaks from 'remark-breaks';
 
 interface MarkdownEditorProps {
   value: string;
@@ -47,7 +48,7 @@ const MarkdownEditor = ({ value, onChange, rows = 16, placeholder }: MarkdownEdi
             style={{ minHeight: `${rows * 1.5}rem` }}
           >
             {value ? (
-              <ReactMarkdown>{value}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkBreaks]}>{value}</ReactMarkdown>
             ) : (
               <p className="text-muted-foreground italic">Nothing to preview</p>
             )}

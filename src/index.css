@@ -153,6 +153,27 @@
     @apply mb-2;
   }
 
+  /* Enhanced prose spacing for markdown content */
+  .prose p {
+    @apply mb-6;
+  }
+
+  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    @apply mt-8 mb-4;
+  }
+
+  .prose ul, .prose ol {
+    @apply my-6;
+  }
+
+  .prose li {
+    @apply mb-3;
+  }
+
+  .prose blockquote {
+    @apply my-6;
+  }
+
   .status-badge {
     @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium;
   }

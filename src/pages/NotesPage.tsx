@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Search, Pin, PinOff, Trash2, Tag, StickyNote, Cloud, HardDrive } from 'lucide-react';
+import { Plus, Search, Pin, PinOff, Trash2, Tag, StickyNote, Cloud, HardDrive, Download, FileJson, FileText, Copy } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,12 +9,50 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { useUserNotes, UserNote, RelatedContent } from '@/hooks/useUserNotes';
-import { useAnnotations, useAnnotationTags } from '@/hooks/useAnnotations';
+import { useAnnotations, useAnnotationTags, Annotation } from '@/hooks/useAnnotations';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Helmet } from 'react-helmet-async';
+
+// Export helper functions
+const formatNoteAsMarkdown = (note: UserNote): string => {
+  let md = `# ${note.title}\n\n`;
+  if (note.tags.length > 0) {
+    md += `**Tags:** ${note.tags.join(', ')}\n\n`;
+  }
+  md += `${note.content}\n\n`;
+  md += `---\n`;
+  md += `Created: ${format(new Date(note.created_at), 'yyyy-MM-dd HH:mm')}\n`;
+  md += `Updated: ${format(new Date(note.updated_at), 'yyyy-MM-dd HH:mm')}\n`;
+  return md;
+};
+
+const formatAnnotationAsMarkdown = (annotation: Annotation): string => {
+  let md = `## Annotation\n\n`;
+  md += `> "${annotation.selected_text}"\n\n`;
+  if (annotation.comment) {
+    md += `**Comment:** ${annotation.comment}\n\n`;
+  }
+  md += `**Source:** ${annotation.content_type} ${annotation.content_id}\n`;
+  md += `**Highlighted:** ${annotation.highlight_color}\n`;
+  md += `**Created:** ${format(new Date(annotation.created_at), 'yyyy-MM-dd HH:mm')}\n`;
+  return md;
+};
+
+const downloadFile = (content: string, filename: string, type: string) => {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
 
 const NotesPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -116,6 +154,68 @@ const NotesPage = () => {
     setEditingNote({ id: note.id, title: note.title, content: note.content, tags: note.tags });
   };
 
+  // Export functions
+  const exportAllAsMarkdown = () => {
+    let content = `# EHDS Explorer Notes & Annotations\n\nExported: ${format(new Date(), 'yyyy-MM-dd HH:mm')}\n\n`;
+    
+    if (notes.length > 0) {
+      content += `## Notes\n\n`;
+      notes.forEach(note => {
+        content += formatNoteAsMarkdown(note) + '\n\n';
+      });
+    }
+    
+    if (annotations.length > 0) {
+      content += `## Annotations\n\n`;
+      annotations.forEach(ann => {
+        content += formatAnnotationAsMarkdown(ann) + '\n\n';
+      });
+    }
+    
+    downloadFile(content, `ehds-notes-${format(new Date(), 'yyyy-MM-dd')}.md`, 'text/markdown');
+    toast.success('Exported as Markdown');
+  };
+
+  const exportAllAsJson = () => {
+    const data = {
+      exportedAt: new Date().toISOString(),
+      notes: notes,
+      annotations: annotations,
+    };
+    downloadFile(JSON.stringify(data, null, 2), `ehds-notes-${format(new Date(), 'yyyy-MM-dd')}.json`, 'application/json');
+    toast.success('Exported as JSON');
+  };
+
+  const exportForNotion = () => {
+    // Notion import format (Markdown with YAML frontmatter)
+    let content = '';
+    notes.forEach(note => {
+      content += `---\ntitle: "${note.title}"\ntags: [${note.tags.map(t => `"${t}"`).join(', ')}]\ncreated: ${note.created_at}\n---\n\n`;
+      content += `${note.content}\n\n---\n\n`;
+    });
+    downloadFile(content, `ehds-notes-notion-${format(new Date(), 'yyyy-MM-dd')}.md`, 'text/markdown');
+    toast.success('Exported for Notion (import as Markdown)');
+  };
+
+  const exportForObsidian = () => {
+    // Obsidian format with wikilinks and tags
+    let content = '';
+    notes.forEach(note => {
+      const tags = note.tags.map(t => `#${t.replace(/\s+/g, '-')}`).join(' ');
+      content += `# ${note.title}\n\n${tags}\n\n${note.content}\n\n`;
+      content += `Created: [[${format(new Date(note.created_at), 'yyyy-MM-dd')}]]\n\n---\n\n`;
+    });
+    downloadFile(content, `ehds-notes-obsidian-${format(new Date(), 'yyyy-MM-dd')}.md`, 'text/markdown');
+    toast.success('Exported for Obsidian');
+  };
+
+  const copySelectedNoteAsMarkdown = () => {
+    if (!selectedNote) return;
+    const markdown = formatNoteAsMarkdown(selectedNote);
+    navigator.clipboard.writeText(markdown);
+    toast.success('Copied to clipboard');
+  };
+
   return (
     <Layout>
       <Helmet>
@@ -145,6 +245,45 @@ const NotesPage = () => {
                 </>
               )}
             </Badge>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Export All</DropdownMenuLabel>
+                <DropdownMenuItem onClick={exportAllAsMarkdown}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Markdown (.md)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={exportAllAsJson}>
+                  <FileJson className="h-4 w-4 mr-2" />
+                  JSON (.json)
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>For Note-Taking Apps</DropdownMenuLabel>
+                <DropdownMenuItem onClick={exportForNotion}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Notion (Markdown)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={exportForObsidian}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Obsidian (Markdown)
+                </DropdownMenuItem>
+                {selectedNote && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel>Current Note</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={copySelectedNoteAsMarkdown}>
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copy as Markdown
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Dialog open={showTagManager} onOpenChange={setShowTagManager}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm">

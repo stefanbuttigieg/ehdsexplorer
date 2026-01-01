@@ -218,6 +218,18 @@ const AdminDashboard = () => {
                   </CardHeader>
                 </Card>
               </Link>
+              <Link to="/admin/subscriptions">
+                <Card className="hover:border-primary transition-colors h-full border-dashed">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <Bell className="h-8 w-8 text-primary" />
+                      <Badge>Admin Only</Badge>
+                    </div>
+                    <CardTitle className="mt-4">Email Subscriptions</CardTitle>
+                    <CardDescription>Manage implementing act alert subscriptions</CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
               <Link to="/admin/email-templates">
                 <Card className="hover:border-primary transition-colors h-full border-dashed">
                   <CardHeader>

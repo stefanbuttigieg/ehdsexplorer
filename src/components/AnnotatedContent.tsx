@@ -32,6 +32,7 @@ export const AnnotatedContent = ({
   const [selectionOffsets, setSelectionOffsets] = useState({ start: 0, end: 0 });
   const [activeAnnotation, setActiveAnnotation] = useState<Annotation | null>(null);
   const [annotationPopoverPosition, setAnnotationPopoverPosition] = useState<{ x: number; y: number } | null>(null);
+  const justOpenedRef = useRef(false);
   
   const { annotations } = useAnnotations(contentType, contentId);
 
@@ -67,6 +68,12 @@ export const AnnotatedContent = ({
     });
     setSelectedText(text);
     setSelectionOffsets({ start: startOffset, end: endOffset });
+    
+    // Prevent the click handler from immediately closing the toolbar
+    justOpenedRef.current = true;
+    setTimeout(() => {
+      justOpenedRef.current = false;
+    }, 100);
   }, []);
 
   const closeToolbar = useCallback(() => {
@@ -86,6 +93,11 @@ export const AnnotatedContent = ({
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
+      // Skip if we just opened the toolbar
+      if (justOpenedRef.current) {
+        return;
+      }
+      
       const target = e.target as HTMLElement;
       // Don't close if clicking inside toolbar or popover
       if (target.closest('[data-annotation-toolbar]') || target.closest('[data-annotation-popover]')) {

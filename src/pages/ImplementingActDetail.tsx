@@ -13,6 +13,7 @@ import { useBookmarks } from "@/hooks/useBookmarks";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { differenceInDays, parse, isAfter, isBefore } from "date-fns";
 import ImplementingActContent from "@/components/ImplementingActContent";
+import { SubscribeAlertButton } from "@/components/SubscribeAlertButton";
 
 const parseFeedbackDeadline = (deadline: string) => {
   const parts = deadline.split(" - ");
@@ -91,13 +92,19 @@ const ImplementingActDetail = () => {
             </div>
             <h1 className="text-3xl font-bold font-serif">{act.title}</h1>
           </div>
-          <Button
-            variant={isBookmarked('act', act.id) ? "default" : "outline"}
-            size="icon"
-            onClick={() => toggleBookmark('act', act.id)}
-          >
-            <Bookmark className={isBookmarked('act', act.id) ? "fill-current" : ""} />
-          </Button>
+          <div className="flex items-center gap-2">
+            <SubscribeAlertButton 
+              implementingActId={act.id} 
+              implementingActTitle={act.title} 
+            />
+            <Button
+              variant={isBookmarked('act', act.id) ? "default" : "outline"}
+              size="icon"
+              onClick={() => toggleBookmark('act', act.id)}
+            >
+              <Bookmark className={isBookmarked('act', act.id) ? "fill-current" : ""} />
+            </Button>
+          </div>
         </div>
 
         <Card className="mb-6">

@@ -216,6 +216,9 @@ const AdminImplementingActsPage = () => {
         .map(s => parseInt(s.trim()))
         .filter(n => !isNaN(n));
 
+      const oldStatus = editingAct.status;
+      const statusChanged = oldStatus !== editedStatus;
+
       const { error } = await supabase
         .from('implementing_acts')
         .update({ 
@@ -228,11 +231,37 @@ const AdminImplementingActsPage = () => {
           official_link: editedOfficialLink || null,
           deliverable_link: editedDeliverableLink || null,
           feedback_deadline: editedFeedbackDeadline || null,
-          related_articles: relatedArticlesArray.length > 0 ? relatedArticlesArray : null
+          related_articles: relatedArticlesArray.length > 0 ? relatedArticlesArray : null,
+          previous_status: statusChanged ? oldStatus : editingAct.status
         })
         .eq('id', editingAct.id);
 
       if (error) throw error;
+
+      // Send email alerts if status changed
+      if (statusChanged) {
+        try {
+          const { error: alertError } = await supabase.functions.invoke('send-status-alert', {
+            body: {
+              implementing_act_id: editingAct.id,
+              old_status: oldStatus,
+              new_status: editedStatus,
+              title: editedTitle
+            }
+          });
+          
+          if (alertError) {
+            console.error('Failed to send status alerts:', alertError);
+          } else {
+            toast({
+              title: 'Status Alerts Sent',
+              description: 'Subscribers have been notified of the status change.',
+            });
+          }
+        } catch (alertErr) {
+          console.error('Error sending alerts:', alertErr);
+        }
+      }
 
       toast({
         title: 'Implementing Act Updated',

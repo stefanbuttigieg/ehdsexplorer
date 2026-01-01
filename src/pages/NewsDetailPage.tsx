@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { format } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
+import remarkBreaks from 'remark-breaks';
 import { ArrowLeft, Calendar, Sparkles } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -76,7 +77,7 @@ const NewsDetailPage = () => {
           <Card>
             <CardContent className="pt-6">
               <div className="prose prose-slate dark:prose-invert max-w-none">
-                <ReactMarkdown>{summary.summary}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkBreaks]}>{summary.summary}</ReactMarkdown>
               </div>
             </CardContent>
           </Card>

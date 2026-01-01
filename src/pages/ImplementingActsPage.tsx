@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useImplementingActs, themeLabels, statusLabels, ActStatus, ActTheme, getActStats } from "@/hooks/useImplementingActs";
 import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { SubscribeAlertButton } from "@/components/SubscribeAlertButton";
 import { differenceInDays, parse, isAfter, isBefore } from "date-fns";
 
 const getFeedbackDaysRemaining = (deadline: string) => {
@@ -73,7 +74,10 @@ const ImplementingActsPage = () => {
     <Layout>
       <div className="max-w-5xl mx-auto p-6 animate-fade-in">
         <Breadcrumbs items={[{ label: "Implementing Acts" }]} />
-        <h1 className="text-3xl font-bold font-serif mb-2">Implementing Acts Tracker</h1>
+        <div className="flex items-start justify-between gap-4 mb-2">
+          <h1 className="text-3xl font-bold font-serif">Implementing Acts Tracker</h1>
+          <SubscribeAlertButton implementingActId="" implementingActTitle="All Implementing Acts" />
+        </div>
         <p className="text-muted-foreground mb-8">Track the progress of delegated and implementing acts required by the EHDS Regulation</p>
 
         {/* Stats */}

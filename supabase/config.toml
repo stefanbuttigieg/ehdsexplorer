@@ -38,3 +38,6 @@ verify_jwt = true
 
 [functions.send-unsubscribe-confirmation]
 verify_jwt = false
+
+[functions.generate-product-updates]
+verify_jwt = true

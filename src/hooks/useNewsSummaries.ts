@@ -66,6 +66,23 @@ export const useGenerateNewsSummary = () => {
   });
 };
 
+export const useGenerateProductUpdates = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (changelog?: string) => {
+      const { data, error } = await supabase.functions.invoke("generate-product-updates", {
+        body: changelog ? { changelog } : undefined,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["news-summaries"] });
+    },
+  });
+};
+
 export const useUpdateNewsSummary = () => {
   const queryClient = useQueryClient();
 

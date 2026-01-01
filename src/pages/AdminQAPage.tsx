@@ -81,6 +81,7 @@ const AdminQAPage = () => {
   const [checks, setChecks] = useState<CheckItem[]>(initialChecks);
   const [showOnlyFailed, setShowOnlyFailed] = useState(false);
   const [isRunningApiTests, setIsRunningApiTests] = useState(false);
+  const [isRunningAllTests, setIsRunningAllTests] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !isAdmin) {
@@ -214,6 +215,14 @@ const AdminQAPage = () => {
     toast.success("API endpoint tests completed!");
   };
 
+  const runAllTests = async () => {
+    setIsRunningAllTests(true);
+    runAutoChecks();
+    await runApiTests();
+    setIsRunningAllTests(false);
+    toast.success("All tests completed!");
+  };
+
   const resetChecks = () => {
     setChecks(initialChecks);
     toast.info("All checks reset");
@@ -277,27 +286,37 @@ const AdminQAPage = () => {
           </div>
           
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={runAutoChecks}>
-              <RefreshCw className="h-4 w-4 mr-2" />
+            <Button 
+              variant="default" 
+              size="sm" 
+              onClick={runAllTests}
+              disabled={isRunningAllTests || isRunningApiTests}
+            >
+              {isRunningAllTests ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Run All Tests
+            </Button>
+            <Button variant="outline" size="sm" onClick={runAutoChecks} disabled={isRunningAllTests}>
               Run Data Checks
             </Button>
             <Button 
               variant="outline" 
               size="sm" 
               onClick={runApiTests}
-              disabled={isRunningApiTests}
+              disabled={isRunningApiTests || isRunningAllTests}
             >
-              {isRunningApiTests ? (
+              {isRunningApiTests && !isRunningAllTests ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <RefreshCw className="h-4 w-4 mr-2" />
-              )}
+              ) : null}
               Test API Endpoints
             </Button>
-            <Button variant="outline" size="sm" onClick={resetChecks}>
+            <Button variant="outline" size="sm" onClick={resetChecks} disabled={isRunningAllTests}>
               Reset All
             </Button>
-            <Button variant="default" size="sm" onClick={exportResults}>
+            <Button variant="secondary" size="sm" onClick={exportResults}>
               Export Report
             </Button>
           </div>

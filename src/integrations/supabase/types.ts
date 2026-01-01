@@ -38,6 +38,102 @@ export type Database = {
         }
         Relationships: []
       }
+      annotation_tag_links: {
+        Row: {
+          annotation_id: string
+          tag_id: string
+        }
+        Insert: {
+          annotation_id: string
+          tag_id: string
+        }
+        Update: {
+          annotation_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "annotation_tag_links_annotation_id_fkey"
+            columns: ["annotation_id"]
+            isOneToOne: false
+            referencedRelation: "annotations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annotation_tag_links_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "annotation_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      annotation_tags: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      annotations: {
+        Row: {
+          comment: string | null
+          content_id: string
+          content_type: string
+          created_at: string
+          end_offset: number
+          highlight_color: string | null
+          id: string
+          selected_text: string
+          start_offset: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          content_id: string
+          content_type: string
+          created_at?: string
+          end_offset: number
+          highlight_color?: string | null
+          id?: string
+          selected_text: string
+          start_offset: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          content_id?: string
+          content_type?: string
+          created_at?: string
+          end_offset?: number
+          highlight_color?: string | null
+          id?: string
+          selected_text?: string
+          start_offset?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       api_rate_limits: {
         Row: {
           created_at: string
@@ -784,6 +880,42 @@ export type Database = {
           role?: string
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      user_notes: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_pinned: boolean
+          related_content: Json | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_pinned?: boolean
+          related_content?: Json | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_pinned?: boolean
+          related_content?: Json | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

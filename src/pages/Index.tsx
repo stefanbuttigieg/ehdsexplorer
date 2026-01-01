@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { SearchCommand } from "@/components/SearchCommand";
-import { Search, Book, FileText, Scale, ListChecks, Bookmark, Files, Clock, MessageSquare, ExternalLink, Gamepad2, Newspaper } from "lucide-react";
+import { Search, Book, FileText, Scale, ListChecks, Bookmark, Files, Clock, MessageSquare, ExternalLink, Gamepad2, Newspaper, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -233,6 +233,17 @@ const Index = () => {
                     <div>
                       <p className="font-semibold">Bookmarks</p>
                       <p className="text-sm text-muted-foreground">Saved items</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link to="/notes">
+                <Card className="hover:border-primary transition-colors cursor-pointer h-full">
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <StickyNote className="h-8 w-8 text-primary" />
+                    <div>
+                      <p className="font-semibold">Notes</p>
+                      <p className="text-sm text-muted-foreground">Annotations</p>
                     </div>
                   </CardContent>
                 </Card>

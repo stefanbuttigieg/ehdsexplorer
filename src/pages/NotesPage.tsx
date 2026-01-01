@@ -203,10 +203,28 @@ const NotesPage = () => {
   const exportForNotion = () => {
     // Notion import format (Markdown with YAML frontmatter)
     let content = '';
-    notes.forEach(note => {
-      content += `---\ntitle: "${note.title}"\ntags: [${note.tags.map(t => `"${t}"`).join(', ')}]\ncreated: ${note.created_at}\n---\n\n`;
-      content += `${note.content}\n\n---\n\n`;
-    });
+    
+    if (notes.length > 0) {
+      content += '# Notes\n\n';
+      notes.forEach(note => {
+        content += `---\ntitle: "${note.title}"\ntags: [${note.tags.map(t => `"${t}"`).join(', ')}]\ncreated: ${note.created_at}\n---\n\n`;
+        content += `${note.content}\n\n---\n\n`;
+      });
+    }
+    
+    if (annotations.length > 0) {
+      content += '# Annotations\n\n';
+      annotations.forEach(ann => {
+        const sourceLabel = `${ann.content_type.replace('_', ' ')} ${ann.content_id}`;
+        content += `---\ntitle: "Annotation - ${sourceLabel}"\ntags: ["annotation", "${ann.highlight_color}"]\ncreated: ${ann.created_at}\n---\n\n`;
+        content += `> "${ann.selected_text}"\n\n`;
+        if (ann.comment) {
+          content += `${ann.comment}\n\n`;
+        }
+        content += `Source: ${sourceLabel}\n\n---\n\n`;
+      });
+    }
+    
     downloadFile(content, `ehds-notes-notion-${format(new Date(), 'yyyy-MM-dd')}.md`, 'text/markdown');
     toast.success('Exported for Notion (import as Markdown)');
   };
@@ -214,11 +232,30 @@ const NotesPage = () => {
   const exportForObsidian = () => {
     // Obsidian format with wikilinks and tags
     let content = '';
-    notes.forEach(note => {
-      const tags = note.tags.map(t => `#${t.replace(/\s+/g, '-')}`).join(' ');
-      content += `# ${note.title}\n\n${tags}\n\n${note.content}\n\n`;
-      content += `Created: [[${format(new Date(note.created_at), 'yyyy-MM-dd')}]]\n\n---\n\n`;
-    });
+    
+    if (notes.length > 0) {
+      content += '# Notes\n\n';
+      notes.forEach(note => {
+        const tags = note.tags.map(t => `#${t.replace(/\s+/g, '-')}`).join(' ');
+        content += `## ${note.title}\n\n${tags}\n\n${note.content}\n\n`;
+        content += `Created: [[${format(new Date(note.created_at), 'yyyy-MM-dd')}]]\n\n---\n\n`;
+      });
+    }
+    
+    if (annotations.length > 0) {
+      content += '# Annotations\n\n';
+      annotations.forEach(ann => {
+        const sourceLabel = `${ann.content_type.replace('_', ' ')} ${ann.content_id}`;
+        const colorTag = `#highlight-${ann.highlight_color}`;
+        content += `## Annotation from ${sourceLabel}\n\n${colorTag} #annotation\n\n`;
+        content += `> "${ann.selected_text}"\n\n`;
+        if (ann.comment) {
+          content += `${ann.comment}\n\n`;
+        }
+        content += `Source: [[${sourceLabel}]]\nCreated: [[${format(new Date(ann.created_at), 'yyyy-MM-dd')}]]\n\n---\n\n`;
+      });
+    }
+    
     downloadFile(content, `ehds-notes-obsidian-${format(new Date(), 'yyyy-MM-dd')}.md`, 'text/markdown');
     toast.success('Exported for Obsidian');
   };

@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_assistant_feedback: {
+        Row: {
+          created_at: string
+          feedback_type: string
+          id: string
+          message_content: string
+          user_id: string
+          user_query: string
+        }
+        Insert: {
+          created_at?: string
+          feedback_type: string
+          id?: string
+          message_content: string
+          user_id: string
+          user_query: string
+        }
+        Update: {
+          created_at?: string
+          feedback_type?: string
+          id?: string
+          message_content?: string
+          user_id?: string
+          user_query?: string
+        }
+        Relationships: []
+      }
       annexes: {
         Row: {
           content: string

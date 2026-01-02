@@ -14,6 +14,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.1] - 2026-01-02
+
+### Added
+
+#### QA Test System Enhancements
+- "Run All Tests" button to execute data integrity checks and API endpoint tests in sequence
+- QA test history with database persistence for tracking test results over time
+- Save, load, and delete historical test results
+- Visual history panel showing past test runs with pass/fail/pending counts
+- Collapsible test history interface with load/delete actions per entry
+
+---
+
 ## [1.5.0] - 2026-01-01
 
 ### Added

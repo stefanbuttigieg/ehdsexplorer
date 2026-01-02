@@ -137,6 +137,10 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
   - Recitals, Articles, Definitions, Annexes
   - Joint Action Deliverables, Published Works, Footnotes
   - Implementing Act Recitals, Articles, and Sections
+- **QA test system** with data integrity and API endpoint checks:
+  - Run all tests button for sequential execution
+  - Test history with database persistence
+  - Save, load, and compare historical results
 - **User management** with email invitation system
 - **Maintenance mode** with custom messaging
 - **Overview page** content management

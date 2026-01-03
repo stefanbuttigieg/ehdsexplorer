@@ -301,8 +301,8 @@ const Layout = ({ children }: LayoutProps) => {
       {/* Share Text Button - appears when user selects text */}
       <ShareTextButton />
 
-      {/* AI Assistant - only for authenticated users */}
-      {!authLoading && user && <AIAssistant />}
+      {/* AI Assistant - available to everyone */}
+      <AIAssistant />
     </div>
   );
 };

@@ -15,12 +15,51 @@ type Conversation = {
   updated_at: string;
 };
 
+type UsageInfo = {
+  remaining: number;
+  limit: number;
+};
+
 export const useEHDSAssistant = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+  const [usageInfo, setUsageInfo] = useState<UsageInfo | null>(null);
   const queryClient = useQueryClient();
+
+  // Fetch current usage on mount
+  useEffect(() => {
+    fetchUsage();
+  }, []);
+
+  const fetchUsage = async () => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const { data, error } = await supabase
+        .from('ai_daily_usage')
+        .select('request_count, daily_limit')
+        .eq('usage_date', today)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching usage:', error);
+        return;
+      }
+      
+      if (data) {
+        setUsageInfo({
+          remaining: data.daily_limit - data.request_count,
+          limit: data.daily_limit
+        });
+      } else {
+        // No record for today yet, use default
+        setUsageInfo({ remaining: 30, limit: 30 });
+      }
+    } catch (e) {
+      console.error('Error fetching usage:', e);
+    }
+  };
 
   // Fetch user's conversations
   const { data: conversations, isLoading: conversationsLoading } = useQuery({
@@ -115,6 +154,12 @@ export const useEHDSAssistant = () => {
   };
 
   const sendMessage = useCallback(async (input: string) => {
+    // Check if limit is exceeded before sending
+    if (usageInfo && usageInfo.remaining <= 0) {
+      setError("Daily limit reached. The AI assistant will be available again tomorrow.");
+      return;
+    }
+
     const userMsg: Message = { role: 'user', content: input };
     setMessages(prev => [...prev, userMsg]);
     setIsLoading(true);
@@ -123,16 +168,19 @@ export const useEHDSAssistant = () => {
     let assistantContent = '';
     let convId = currentConversationId;
 
-    // Create new conversation if needed
-    if (!convId) {
+    // Get user for authenticated features (optional)
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Create new conversation if user is logged in
+    if (user && !convId) {
       convId = await createConversation(input);
       if (convId) {
         setCurrentConversationId(convId);
       }
     }
 
-    // Save user message
-    if (convId) {
+    // Save user message if logged in
+    if (user && convId) {
       await saveMessage(convId, 'user', input);
     }
 
@@ -150,18 +198,14 @@ export const useEHDSAssistant = () => {
     };
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('You must be logged in to use the assistant');
-      }
-
+      // Use anon key for public access
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ehds-assistant`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
           body: JSON.stringify({ 
             messages: [...messages, userMsg].map(m => ({
@@ -174,7 +218,26 @@ export const useEHDSAssistant = () => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        
+        // Update usage info if we got remaining info
+        if (errorData.remaining !== undefined) {
+          setUsageInfo({
+            remaining: errorData.remaining,
+            limit: errorData.limit || 30
+          });
+        }
+        
         throw new Error(errorData.error || `Request failed with status ${response.status}`);
+      }
+
+      // Update usage from headers if available
+      const remainingHeader = response.headers.get('X-Remaining-Uses');
+      const limitHeader = response.headers.get('X-Daily-Limit');
+      if (remainingHeader !== null) {
+        setUsageInfo({
+          remaining: parseInt(remainingHeader, 10),
+          limit: limitHeader ? parseInt(limitHeader, 10) : 30
+        });
       }
 
       if (!response.body) {
@@ -231,8 +294,8 @@ export const useEHDSAssistant = () => {
         }
       }
 
-      // Save assistant response
-      if (convId && assistantContent) {
+      // Save assistant response if logged in
+      if (user && convId && assistantContent) {
         await saveMessage(convId, 'assistant', assistantContent);
       }
     } catch (e) {
@@ -248,7 +311,7 @@ export const useEHDSAssistant = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, currentConversationId]);
+  }, [messages, currentConversationId, usageInfo]);
 
   const loadConversation = useCallback((conversationId: string) => {
     setCurrentConversationId(conversationId);
@@ -296,5 +359,6 @@ export const useEHDSAssistant = () => {
     loadConversation,
     startNewConversation,
     deleteConversation,
+    usageInfo,
   };
 };

@@ -31,6 +31,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
     loadConversation,
     startNewConversation,
     deleteConversation,
+    usageInfo,
   } = useEHDSAssistant();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -408,9 +409,18 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
                     )}
                   </Button>
                 </div>
-                <p className="text-[10px] text-muted-foreground text-center pb-2 px-4">
-                  AI-generated responses may be inaccurate. Daily limits apply.
-                </p>
+                <div className="flex items-center justify-between text-[10px] text-muted-foreground pb-2 px-4">
+                  <span>AI-generated • may be inaccurate</span>
+                  {usageInfo && (
+                    <span className={cn(
+                      "font-medium",
+                      usageInfo.remaining <= 5 && "text-amber-600 dark:text-amber-400",
+                      usageInfo.remaining <= 0 && "text-destructive"
+                    )}>
+                      {usageInfo.remaining}/{usageInfo.limit} uses left today
+                    </span>
+                  )}
+                </div>
               </form>
             </>
           )}

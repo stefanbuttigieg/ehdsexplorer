@@ -281,6 +281,11 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
                         "Which articles cover secondary use?"
                       </button>
                     </div>
+                    {/* Disclaimer */}
+                    <div className="mt-4 p-2 bg-amber-500/10 border border-amber-500/20 rounded-md text-xs text-amber-700 dark:text-amber-400">
+                      <p className="font-medium mb-1">⚠️ Please note:</p>
+                      <p>Responses are AI-generated and may contain errors. Always verify with official sources. Daily usage limits apply.</p>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -378,8 +383,8 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
               )}
 
               {/* Input */}
-              <form onSubmit={handleSubmit} className="p-4 border-t bg-background">
-                <div className="flex gap-2">
+              <form onSubmit={handleSubmit} className="border-t bg-background">
+                <div className="flex gap-2 p-4 pb-2">
                   <Textarea
                     ref={inputRef}
                     value={input}
@@ -403,6 +408,9 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
                     )}
                   </Button>
                 </div>
+                <p className="text-[10px] text-muted-foreground text-center pb-2 px-4">
+                  AI-generated responses may be inaccurate. Daily limits apply.
+                </p>
               </form>
             </>
           )}

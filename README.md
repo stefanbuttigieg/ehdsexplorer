@@ -170,11 +170,11 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [ ] Rating System for Translation (especially Plain language)
 
 ### Medium-term
-- [ ] AI-powered Q&A about the regulation
+- [X] AI-powered Q&A about the regulation
 - [ ] Comparison view between articles
-- [x] Annotation and note-taking
+- [X] Annotation and note-taking
 - [ ] Collaboration features for teams
-- [ ] Email alerts for implementing act status changes
+- [X] Email alerts for implementing act status changes
 - [ ] Sign-up of new users and creation of profiles
 
 ### Long-term

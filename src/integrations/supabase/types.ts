@@ -97,6 +97,33 @@ export type Database = {
           },
         ]
       }
+      ai_daily_usage: {
+        Row: {
+          created_at: string
+          daily_limit: number
+          id: string
+          request_count: number
+          updated_at: string
+          usage_date: string
+        }
+        Insert: {
+          created_at?: string
+          daily_limit?: number
+          id?: string
+          request_count?: number
+          updated_at?: string
+          usage_date?: string
+        }
+        Update: {
+          created_at?: string
+          daily_limit?: number
+          id?: string
+          request_count?: number
+          updated_at?: string
+          usage_date?: string
+        }
+        Relationships: []
+      }
       annexes: {
         Row: {
           content: string

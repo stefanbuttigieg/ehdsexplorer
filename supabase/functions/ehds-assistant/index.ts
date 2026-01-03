@@ -6,22 +6,65 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const DAILY_LIMIT = 30;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Check and update daily usage
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Get or create today's usage record
+    let { data: usageData, error: usageError } = await supabase
+      .from("ai_daily_usage")
+      .select("*")
+      .eq("usage_date", today)
+      .single();
+
+    if (usageError && usageError.code === 'PGRST116') {
+      // No record for today, create one
+      const { data: newUsage, error: insertError } = await supabase
+        .from("ai_daily_usage")
+        .insert({ usage_date: today, request_count: 0, daily_limit: DAILY_LIMIT })
+        .select()
+        .single();
+      
+      if (insertError) {
+        console.error("Error creating usage record:", insertError);
+        throw new Error("Failed to initialize usage tracking");
+      }
+      usageData = newUsage;
+    } else if (usageError) {
+      console.error("Error fetching usage:", usageError);
+      throw new Error("Failed to check usage limits");
+    }
+
+    // Check if limit exceeded
+    if (usageData.request_count >= usageData.daily_limit) {
+      console.log("Daily limit exceeded:", usageData.request_count, "/", usageData.daily_limit);
+      return new Response(JSON.stringify({ 
+        error: "Daily limit reached. The AI assistant will be available again tomorrow.",
+        remaining: 0,
+        limit: usageData.daily_limit
+      }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { messages } = await req.json();
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Fetch relevant content for context
     console.log("Fetching EHDS content for context...");
@@ -131,9 +174,24 @@ When users ask about specific topics, reference the most relevant articles and e
       });
     }
 
-    console.log("Streaming response...");
+    // Increment usage count after successful request
+    const { error: updateError } = await supabase
+      .from("ai_daily_usage")
+      .update({ request_count: usageData.request_count + 1 })
+      .eq("usage_date", today);
+
+    if (updateError) {
+      console.error("Error updating usage count:", updateError);
+    }
+
+    console.log("Streaming response... Usage:", usageData.request_count + 1, "/", usageData.daily_limit);
     return new Response(response.body, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+      headers: { 
+        ...corsHeaders, 
+        "Content-Type": "text/event-stream",
+        "X-Remaining-Uses": String(usageData.daily_limit - usageData.request_count - 1),
+        "X-Daily-Limit": String(usageData.daily_limit)
+      },
     });
   } catch (e) {
     console.error("EHDS assistant error:", e);

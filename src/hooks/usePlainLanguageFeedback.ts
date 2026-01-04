@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
@@ -53,4 +54,31 @@ export const usePlainLanguageFeedback = (translationId: string) => {
     isSubmitting,
     submitFeedback,
   };
+};
+
+// Admin hook to fetch all feedback with translation details
+export const usePlainLanguageFeedbackList = () => {
+  return useQuery({
+    queryKey: ["plain-language-feedback"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("plain_language_feedback")
+        .select(`
+          id,
+          translation_id,
+          feedback_type,
+          comment,
+          session_id,
+          created_at,
+          plain_language_translations (
+            content_type,
+            content_id
+          )
+        `)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+  });
 };

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Languages, Sparkles, FileText, Check, X, Loader2, Eye, EyeOff, Zap, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, Languages, Sparkles, FileText, Check, X, Loader2, Eye, EyeOff, Zap, CheckCircle2, XCircle, MessageSquare, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,6 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Layout from "@/components/Layout";
 import { useArticles } from "@/hooks/useArticles";
 import { useRecitals } from "@/hooks/useRecitals";
@@ -22,11 +23,13 @@ import {
   useBatchGenerateTranslations,
   BatchGenerationProgress,
 } from "@/hooks/usePlainLanguageTranslations";
+import { usePlainLanguageFeedbackList } from "@/hooks/usePlainLanguageFeedback";
 
 const AdminPlainLanguagePage = () => {
   const [selectedType, setSelectedType] = useState<"article" | "recital">("article");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [editedText, setEditedText] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<"translations" | "feedback">("translations");
   
   // Batch generation state
   const [batchDialogOpen, setBatchDialogOpen] = useState(false);
@@ -36,6 +39,7 @@ const AdminPlainLanguagePage = () => {
   const { data: articles } = useArticles();
   const { data: recitals } = useRecitals();
   const { data: translations } = usePlainLanguageTranslations();
+  const { data: feedbackList, isLoading: loadingFeedback } = usePlainLanguageFeedbackList();
   const { data: currentTranslation, isLoading: loadingTranslation } = usePlainLanguageTranslation(
     selectedType,
     selectedId || 0
@@ -308,14 +312,32 @@ const AdminPlainLanguagePage = () => {
           </Dialog>
         </div>
 
-        <Alert className="mb-6">
-          <AlertDescription>
-            Plain language translations are AI-generated and should be reviewed for accuracy before publishing.
-            Published translations will appear alongside the original legal text for users.
-          </AlertDescription>
-        </Alert>
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "translations" | "feedback")} className="mb-6">
+          <TabsList>
+            <TabsTrigger value="translations" className="flex items-center gap-2">
+              <Languages className="h-4 w-4" />
+              Translations
+            </TabsTrigger>
+            <TabsTrigger value="feedback" className="flex items-center gap-2">
+              <MessageSquare className="h-4 w-4" />
+              Feedback
+              {feedbackList && feedbackList.length > 0 && (
+                <Badge variant="secondary" className="ml-1">{feedbackList.length}</Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        {activeTab === "translations" && (
+          <>
+            <Alert className="mb-6">
+              <AlertDescription>
+                Plain language translations are AI-generated and should be reviewed for accuracy before publishing.
+                Published translations will appear alongside the original legal text for users.
+              </AlertDescription>
+            </Alert>
+
+            <div className="grid lg:grid-cols-3 gap-6">
           {/* Left panel - Content selector */}
           <Card className="lg:col-span-1">
             <CardHeader className="pb-3">
@@ -475,37 +497,152 @@ const AdminPlainLanguagePage = () => {
           </Card>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+            {/* Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-2xl font-bold">{articles?.length || 0}</div>
+                  <p className="text-sm text-muted-foreground">Total Articles</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-2xl font-bold">{recitals?.length || 0}</div>
+                  <p className="text-sm text-muted-foreground">Total Recitals</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-2xl font-bold text-green-600">
+                    {translations?.filter(t => t.is_published).length || 0}
+                  </div>
+                  <p className="text-sm text-muted-foreground">Published</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-2xl font-bold text-amber-600">
+                    {translations?.filter(t => !t.is_published).length || 0}
+                  </div>
+                  <p className="text-sm text-muted-foreground">Drafts</p>
+                </CardContent>
+              </Card>
+            </div>
+          </>
+        )}
+
+        {activeTab === "feedback" && (
           <Card>
-            <CardContent className="pt-6">
-              <div className="text-2xl font-bold">{articles?.length || 0}</div>
-              <p className="text-sm text-muted-foreground">Total Articles</p>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5" />
+                User Feedback
+              </CardTitle>
+              <CardDescription>
+                View feedback submitted by users on plain language translations
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loadingFeedback ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+              ) : !feedbackList || feedbackList.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p>No feedback has been submitted yet</p>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="text-2xl font-bold">{feedbackList.length}</div>
+                        <p className="text-sm text-muted-foreground">Total Feedback</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="text-2xl font-bold text-green-600">
+                          {feedbackList.filter(f => f.feedback_type === "positive").length}
+                        </div>
+                        <p className="text-sm text-muted-foreground">Positive</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="text-2xl font-bold text-red-600">
+                          {feedbackList.filter(f => f.feedback_type === "negative").length}
+                        </div>
+                        <p className="text-sm text-muted-foreground">Negative</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="text-2xl font-bold">
+                          {feedbackList.length > 0 
+                            ? Math.round((feedbackList.filter(f => f.feedback_type === "positive").length / feedbackList.length) * 100)
+                            : 0}%
+                        </div>
+                        <p className="text-sm text-muted-foreground">Positive Rate</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Content</TableHead>
+                          <TableHead>Feedback</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Session</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {feedbackList.map((feedback) => {
+                          const translation = feedback.plain_language_translations as { content_type: string; content_id: number } | null;
+                          return (
+                            <TableRow key={feedback.id}>
+                              <TableCell>
+                                {translation ? (
+                                  <span className="font-medium">
+                                    {translation.content_type === "article" ? "Article" : "Recital"} {translation.content_id}
+                                  </span>
+                                ) : (
+                                  <span className="text-muted-foreground">Unknown</span>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {feedback.feedback_type === "positive" ? (
+                                  <Badge variant="default" className="bg-green-600">
+                                    <ThumbsUp className="h-3 w-3 mr-1" />
+                                    Helpful
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="destructive">
+                                    <ThumbsDown className="h-3 w-3 mr-1" />
+                                    Not Helpful
+                                  </Badge>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-muted-foreground">
+                                {new Date(feedback.created_at).toLocaleDateString()}
+                              </TableCell>
+                              <TableCell className="text-xs text-muted-foreground font-mono">
+                                {feedback.session_id?.slice(0, 8) || "-"}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-2xl font-bold">{recitals?.length || 0}</div>
-              <p className="text-sm text-muted-foreground">Total Recitals</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-2xl font-bold text-green-600">
-                {translations?.filter(t => t.is_published).length || 0}
-              </div>
-              <p className="text-sm text-muted-foreground">Published</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-2xl font-bold text-amber-600">
-                {translations?.filter(t => !t.is_published).length || 0}
-              </div>
-              <p className="text-sm text-muted-foreground">Drafts</p>
-            </CardContent>
-          </Card>
-        </div>
+        )}
       </div>
     </Layout>
   );

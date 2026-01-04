@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Languages, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
+import { Languages, AlertTriangle, ChevronDown, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePublishedTranslation } from "@/hooks/usePlainLanguageTranslations";
+import { usePlainLanguageFeedback } from "@/hooks/usePlainLanguageFeedback";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 
@@ -22,6 +23,7 @@ const PlainLanguageView = ({
 }: PlainLanguageViewProps) => {
   const [showPlainLanguage, setShowPlainLanguage] = useState(false);
   const { data: translation, isLoading } = usePublishedTranslation(contentType, contentId);
+  const { feedbackGiven, isSubmitting, submitFeedback } = usePlainLanguageFeedback(translation?.id || "");
 
   if (isLoading) {
     return (
@@ -84,6 +86,41 @@ const PlainLanguageView = ({
             <CardContent>
               <div className="prose prose-sm dark:prose-invert max-w-none">
                 <ReactMarkdown remarkPlugins={[remarkBreaks]}>{translation.plain_language_text}</ReactMarkdown>
+              </div>
+              
+              {/* Feedback Rating */}
+              <div className="mt-4 pt-4 border-t border-green-500/20">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">Was this helpful?</span>
+                  <div className="flex items-center gap-2">
+                    {feedbackGiven ? (
+                      <span className="text-xs text-green-600 dark:text-green-400">
+                        Thanks for your feedback!
+                      </span>
+                    ) : (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 hover:bg-green-100 dark:hover:bg-green-900/30 hover:text-green-600"
+                          onClick={() => submitFeedback("positive")}
+                          disabled={isSubmitting}
+                        >
+                          <ThumbsUp className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600"
+                          onClick={() => submitFeedback("negative")}
+                          disabled={isSubmitting}
+                        >
+                          <ThumbsDown className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
               
               {/* Disclaimer */}

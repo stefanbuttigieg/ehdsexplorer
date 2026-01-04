@@ -783,6 +783,41 @@ export type Database = {
         }
         Relationships: []
       }
+      plain_language_feedback: {
+        Row: {
+          comment: string | null
+          created_at: string
+          feedback_type: string
+          id: string
+          session_id: string | null
+          translation_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          feedback_type: string
+          id?: string
+          session_id?: string | null
+          translation_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          feedback_type?: string
+          id?: string
+          session_id?: string | null
+          translation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plain_language_feedback_translation_id_fkey"
+            columns: ["translation_id"]
+            isOneToOne: false
+            referencedRelation: "plain_language_translations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plain_language_translations: {
         Row: {
           content_id: number

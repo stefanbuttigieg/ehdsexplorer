@@ -28,7 +28,7 @@ import { usePlainLanguageFeedbackList } from "@/hooks/usePlainLanguageFeedback";
 const AdminPlainLanguagePage = () => {
   const [selectedType, setSelectedType] = useState<"article" | "recital">("article");
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [editedText, setEditedText] = useState<string>("");
+  const [editedText, setEditedText] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"translations" | "feedback">("translations");
   
   // Batch generation state
@@ -66,7 +66,7 @@ const AdminPlainLanguagePage = () => {
 
   const handleSelectItem = (id: number) => {
     setSelectedId(id);
-    setEditedText("");
+    setEditedText(null); // Reset to null so it uses currentTranslation's text
   };
 
   const handleGenerate = async () => {
@@ -130,7 +130,7 @@ const AdminPlainLanguagePage = () => {
   };
 
   // When translation loads, update edited text
-  const displayText = editedText || currentTranslation?.plain_language_text || "";
+  const displayText = editedText !== null ? editedText : (currentTranslation?.plain_language_text || "");
 
   return (
     <Layout>
@@ -348,7 +348,7 @@ const AdminPlainLanguagePage = () => {
               <Tabs value={selectedType} onValueChange={(v) => {
                 setSelectedType(v as "article" | "recital");
                 setSelectedId(null);
-                setEditedText("");
+                setEditedText(null);
               }}>
                 <TabsList className="w-full rounded-none border-b">
                   <TabsTrigger value="article" className="flex-1">

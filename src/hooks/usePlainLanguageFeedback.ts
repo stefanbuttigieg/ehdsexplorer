@@ -17,7 +17,7 @@ export const usePlainLanguageFeedback = (translationId: string) => {
   const [feedbackGiven, setFeedbackGiven] = useState<"positive" | "negative" | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const submitFeedback = async (type: "positive" | "negative") => {
+  const submitFeedback = async (type: "positive" | "negative", comment?: string) => {
     if (feedbackGiven) return; // Already submitted
     
     setIsSubmitting(true);
@@ -28,6 +28,7 @@ export const usePlainLanguageFeedback = (translationId: string) => {
           translation_id: translationId,
           feedback_type: type,
           session_id: getSessionId(),
+          comment: comment?.trim() || null,
         });
 
       if (error) throw error;

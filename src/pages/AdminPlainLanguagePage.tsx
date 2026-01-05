@@ -595,6 +595,7 @@ const AdminPlainLanguagePage = () => {
                         <TableRow>
                           <TableHead>Content</TableHead>
                           <TableHead>Feedback</TableHead>
+                          <TableHead>Comment</TableHead>
                           <TableHead>Date</TableHead>
                           <TableHead>Session</TableHead>
                         </TableRow>
@@ -624,6 +625,15 @@ const AdminPlainLanguagePage = () => {
                                     <ThumbsDown className="h-3 w-3 mr-1" />
                                     Not Helpful
                                   </Badge>
+                                )}
+                              </TableCell>
+                              <TableCell className="max-w-xs">
+                                {feedback.comment ? (
+                                  <p className="text-sm text-foreground line-clamp-2" title={feedback.comment}>
+                                    {feedback.comment}
+                                  </p>
+                                ) : (
+                                  <span className="text-muted-foreground text-sm">—</span>
                                 )}
                               </TableCell>
                               <TableCell className="text-muted-foreground">

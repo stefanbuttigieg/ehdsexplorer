@@ -308,3 +308,93 @@ export const useBatchGenerateTranslations = () => {
     },
   });
 };
+
+export interface BulkPublishProgress {
+  total: number;
+  completed: number;
+  results: Array<{ type: string; id: number; success: boolean; error?: string }>;
+}
+
+export const useBulkPublishTranslations = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      translationIds,
+      translations,
+      onProgress,
+    }: {
+      translationIds: string[];
+      translations: PlainLanguageTranslation[];
+      onProgress?: (progress: BulkPublishProgress) => void;
+    }) => {
+      const results: BulkPublishProgress["results"] = [];
+      const { data: user } = await supabase.auth.getUser();
+
+      for (let i = 0; i < translationIds.length; i++) {
+        const id = translationIds[i];
+        const translation = translations.find(t => t.id === id);
+
+        try {
+          const { error } = await supabase
+            .from("plain_language_translations")
+            .update({
+              is_published: true,
+              reviewed_by: user.user?.id || null,
+              reviewed_at: new Date().toISOString(),
+            })
+            .eq("id", id);
+
+          if (error) throw error;
+
+          results.push({
+            type: translation?.content_type || "unknown",
+            id: translation?.content_id || 0,
+            success: true,
+          });
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : "Unknown error";
+          results.push({
+            type: translation?.content_type || "unknown",
+            id: translation?.content_id || 0,
+            success: false,
+            error: errorMessage,
+          });
+        }
+
+        onProgress?.({
+          total: translationIds.length,
+          completed: i + 1,
+          results,
+        });
+      }
+
+      return results;
+    },
+    onSuccess: (results) => {
+      queryClient.invalidateQueries({
+        queryKey: ["plain-language-translations"],
+      });
+      // Also invalidate individual translation queries
+      queryClient.invalidateQueries({
+        queryKey: ["plain-language-translation"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["published-translation"],
+      });
+
+      const successCount = results.filter(r => r.success).length;
+      toast({
+        title: "Bulk publish complete",
+        description: `Successfully published ${successCount} of ${results.length} translations.`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Bulk publish failed",
+        description: error.message || "Failed to complete bulk publish",
+        variant: "destructive",
+      });
+    },
+  });
+};

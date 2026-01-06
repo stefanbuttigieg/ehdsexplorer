@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Languages, Sparkles, FileText, Check, X, Loader2, Eye, EyeOff, Zap, CheckCircle2, XCircle, MessageSquare, ThumbsUp, ThumbsDown } from "lucide-react";
+import { ArrowLeft, Languages, Sparkles, FileText, Check, X, Loader2, Eye, EyeOff, Zap, CheckCircle2, XCircle, MessageSquare, ThumbsUp, ThumbsDown, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,7 +21,9 @@ import {
   useGenerateTranslation,
   useSaveTranslation,
   useBatchGenerateTranslations,
+  useBulkPublishTranslations,
   BatchGenerationProgress,
+  BulkPublishProgress,
 } from "@/hooks/usePlainLanguageTranslations";
 import { usePlainLanguageFeedbackList } from "@/hooks/usePlainLanguageFeedback";
 
@@ -36,6 +38,11 @@ const AdminPlainLanguagePage = () => {
   const [selectedForBatch, setSelectedForBatch] = useState<Set<number>>(new Set());
   const [batchProgress, setBatchProgress] = useState<BatchGenerationProgress | null>(null);
 
+  // Bulk publish state
+  const [bulkPublishDialogOpen, setBulkPublishDialogOpen] = useState(false);
+  const [selectedForPublish, setSelectedForPublish] = useState<Set<string>>(new Set());
+  const [bulkPublishProgress, setBulkPublishProgress] = useState<BulkPublishProgress | null>(null);
+
   const { data: articles } = useArticles();
   const { data: recitals } = useRecitals();
   const { data: translations } = usePlainLanguageTranslations();
@@ -48,6 +55,7 @@ const AdminPlainLanguagePage = () => {
   const generateMutation = useGenerateTranslation();
   const saveMutation = useSaveTranslation();
   const batchMutation = useBatchGenerateTranslations();
+  const bulkPublishMutation = useBulkPublishTranslations();
 
   const items = selectedType === "article" 
     ? articles?.map(a => ({ id: a.article_number, title: a.title })) || []
@@ -63,6 +71,9 @@ const AdminPlainLanguagePage = () => {
 
   // Get items without translations for batch generation
   const itemsWithoutTranslation = items.filter(item => !getTranslationStatus(item.id));
+
+  // Get draft translations for bulk publish
+  const draftTranslations = translations?.filter(t => !t.is_published) || [];
 
   const handleSelectItem = (id: number) => {
     setSelectedId(id);
@@ -130,6 +141,43 @@ const AdminPlainLanguagePage = () => {
     }
   };
 
+  // Bulk publish handlers
+  const handlePublishSelect = (id: string, checked: boolean) => {
+    const newSet = new Set(selectedForPublish);
+    if (checked) {
+      newSet.add(id);
+    } else {
+      newSet.delete(id);
+    }
+    setSelectedForPublish(newSet);
+  };
+
+  const handleSelectAllForPublish = (checked: boolean) => {
+    if (checked) {
+      setSelectedForPublish(new Set(draftTranslations.map(t => t.id)));
+    } else {
+      setSelectedForPublish(new Set());
+    }
+  };
+
+  const handleStartBulkPublish = async () => {
+    if (selectedForPublish.size === 0 || !translations) return;
+    
+    await bulkPublishMutation.mutateAsync({
+      translationIds: Array.from(selectedForPublish),
+      translations,
+      onProgress: setBulkPublishProgress,
+    });
+  };
+
+  const handleCloseBulkPublishDialog = () => {
+    if (!bulkPublishMutation.isPending) {
+      setBulkPublishDialogOpen(false);
+      setSelectedForPublish(new Set());
+      setBulkPublishProgress(null);
+    }
+  };
+
   // When translation loads, update edited text
   const displayText = editedText !== null ? editedText : (currentTranslation?.plain_language_text || "");
 
@@ -154,163 +202,316 @@ const AdminPlainLanguagePage = () => {
             </div>
           </div>
           
-          {/* Batch Generation Button */}
-          <Dialog open={batchDialogOpen} onOpenChange={setBatchDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="shrink-0">
-                <Zap className="h-4 w-4 mr-2" />
-                Batch Generate
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-primary" />
-                  Batch Generate Translations
-                </DialogTitle>
-                <DialogDescription>
-                  Select multiple {selectedType}s to generate plain language translations at once.
-                  Translations will be saved as drafts for review.
-                </DialogDescription>
-              </DialogHeader>
-              
-              {!batchProgress ? (
-                <>
-                  {/* Selection tabs */}
-                  <Tabs value={selectedType} onValueChange={(v) => {
-                    setSelectedType(v as "article" | "recital");
-                    setSelectedForBatch(new Set());
-                  }} className="mt-2">
-                    <TabsList className="w-full">
-                      <TabsTrigger value="article" className="flex-1">
-                        Articles
-                      </TabsTrigger>
-                      <TabsTrigger value="recital" className="flex-1">
-                        Recitals
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-
-                  {itemsWithoutTranslation.length === 0 ? (
-                    <div className="py-8 text-center text-muted-foreground">
-                      <CheckCircle2 className="h-12 w-12 mx-auto mb-3 text-green-500" />
-                      <p>All {selectedType}s already have translations!</p>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex items-center justify-between py-2 border-b">
-                        <div className="flex items-center gap-2">
-                          <Checkbox
-                            id="select-all"
-                            checked={selectedForBatch.size === itemsWithoutTranslation.length && itemsWithoutTranslation.length > 0}
-                            onCheckedChange={handleSelectAllForBatch}
-                          />
-                          <label htmlFor="select-all" className="text-sm font-medium cursor-pointer">
-                            Select All ({itemsWithoutTranslation.length} without translation)
-                          </label>
-                        </div>
-                        <Badge variant="secondary">
-                          {selectedForBatch.size} selected
-                        </Badge>
+          <div className="flex gap-2">
+            {/* Bulk Publish Button */}
+            <Dialog open={bulkPublishDialogOpen} onOpenChange={setBulkPublishDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="shrink-0">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Bulk Publish
+                  {draftTranslations.length > 0 && (
+                    <Badge variant="secondary" className="ml-2">{draftTranslations.length}</Badge>
+                  )}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Upload className="h-5 w-5 text-primary" />
+                    Bulk Publish Translations
+                  </DialogTitle>
+                  <DialogDescription>
+                    Select draft translations to publish all at once.
+                  </DialogDescription>
+                </DialogHeader>
+                
+                {!bulkPublishProgress ? (
+                  <>
+                    {draftTranslations.length === 0 ? (
+                      <div className="py-8 text-center text-muted-foreground">
+                        <CheckCircle2 className="h-12 w-12 mx-auto mb-3 text-green-500" />
+                        <p>All translations are already published!</p>
                       </div>
+                    ) : (
+                      <>
+                        <div className="flex items-center justify-between py-2 border-b">
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              id="select-all-publish"
+                              checked={selectedForPublish.size === draftTranslations.length && draftTranslations.length > 0}
+                              onCheckedChange={handleSelectAllForPublish}
+                            />
+                            <label htmlFor="select-all-publish" className="text-sm font-medium cursor-pointer">
+                              Select All ({draftTranslations.length} drafts)
+                            </label>
+                          </div>
+                          <Badge variant="secondary">
+                            {selectedForPublish.size} selected
+                          </Badge>
+                        </div>
 
-                      <ScrollArea className="flex-1 max-h-[300px]">
-                        <div className="space-y-1 p-1">
-                          {itemsWithoutTranslation.map((item) => (
-                            <div
-                              key={item.id}
-                              className="flex items-center gap-3 p-2 rounded hover:bg-muted"
-                            >
-                              <Checkbox
-                                id={`batch-${item.id}`}
-                                checked={selectedForBatch.has(item.id)}
-                                onCheckedChange={(checked) => handleBatchSelect(item.id, checked as boolean)}
-                              />
-                              <label
-                                htmlFor={`batch-${item.id}`}
-                                className="text-sm cursor-pointer flex-1"
+                        <ScrollArea className="flex-1 max-h-[300px]">
+                          <div className="space-y-1 p-1">
+                            {draftTranslations.map((translation) => (
+                              <div
+                                key={translation.id}
+                                className="flex items-center gap-3 p-2 rounded hover:bg-muted"
                               >
-                                <span className="font-medium">
-                                  {selectedType === "article" ? `Article ${item.id}` : `Recital ${item.id}`}:
-                                </span>{" "}
-                                {selectedType === "article" ? item.title : ""}
-                              </label>
+                                <Checkbox
+                                  id={`publish-${translation.id}`}
+                                  checked={selectedForPublish.has(translation.id)}
+                                  onCheckedChange={(checked) => handlePublishSelect(translation.id, checked as boolean)}
+                                />
+                                <label
+                                  htmlFor={`publish-${translation.id}`}
+                                  className="text-sm cursor-pointer flex-1 flex items-center justify-between"
+                                >
+                                  <span className="font-medium">
+                                    {translation.content_type === "article" ? "Article" : "Recital"} {translation.content_id}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    Updated: {new Date(translation.updated_at).toLocaleDateString()}
+                                  </span>
+                                </label>
+                              </div>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </>
+                    )}
+
+                    <DialogFooter className="mt-4">
+                      <Button variant="outline" onClick={handleCloseBulkPublishDialog}>
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleStartBulkPublish}
+                        disabled={selectedForPublish.size === 0 || bulkPublishMutation.isPending}
+                      >
+                        {bulkPublishMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Check className="h-4 w-4 mr-2" />
+                        )}
+                        Publish {selectedForPublish.size} Translation{selectedForPublish.size !== 1 ? "s" : ""}
+                      </Button>
+                    </DialogFooter>
+                  </>
+                ) : (
+                  /* Progress View */
+                  <div className="py-6 space-y-6">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span>
+                          {bulkPublishProgress.completed < bulkPublishProgress.total
+                            ? "Publishing translations..."
+                            : "Complete!"}
+                        </span>
+                        <span className="text-muted-foreground">
+                          {bulkPublishProgress.completed} / {bulkPublishProgress.total}
+                        </span>
+                      </div>
+                      <Progress 
+                        value={(bulkPublishProgress.completed / bulkPublishProgress.total) * 100} 
+                        className="h-2"
+                      />
+                    </div>
+
+                    {bulkPublishProgress.results.length > 0 && (
+                      <ScrollArea className="max-h-[250px]">
+                        <div className="space-y-1">
+                          {bulkPublishProgress.results.map((result, i) => (
+                            <div
+                              key={i}
+                              className={`flex items-center gap-2 p-2 rounded text-sm ${
+                                result.success ? "bg-green-50 dark:bg-green-950/20" : "bg-red-50 dark:bg-red-950/20"
+                              }`}
+                            >
+                              {result.success ? (
+                                <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+                              ) : (
+                                <XCircle className="h-4 w-4 text-red-600 shrink-0" />
+                              )}
+                              <span className="capitalize">{result.type}</span> {result.id}
+                              {result.error && (
+                                <span className="text-red-600 text-xs ml-2">({result.error})</span>
+                              )}
                             </div>
                           ))}
                         </div>
                       </ScrollArea>
-                    </>
-                  )}
+                    )}
 
-                  <DialogFooter className="mt-4">
-                    <Button variant="outline" onClick={handleCloseBatchDialog}>
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={handleStartBatch}
-                      disabled={selectedForBatch.size === 0 || batchMutation.isPending}
-                    >
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Generate {selectedForBatch.size} Translation{selectedForBatch.size !== 1 ? "s" : ""}
-                    </Button>
-                  </DialogFooter>
-                </>
-              ) : (
-                /* Progress View */
-                <div className="py-6 space-y-6">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span>
-                        {batchProgress.current 
-                          ? `Generating ${batchProgress.current.type} ${batchProgress.current.id}...`
-                          : "Complete!"}
-                      </span>
-                      <span className="text-muted-foreground">
-                        {batchProgress.completed} / {batchProgress.total}
-                      </span>
-                    </div>
-                    <Progress 
-                      value={(batchProgress.completed / batchProgress.total) * 100} 
-                      className="h-2"
-                    />
+                    {!bulkPublishMutation.isPending && (
+                      <DialogFooter>
+                        <Button onClick={handleCloseBulkPublishDialog}>
+                          Done
+                        </Button>
+                      </DialogFooter>
+                    )}
                   </div>
+                )}
+              </DialogContent>
+            </Dialog>
 
-                  {batchProgress.results.length > 0 && (
-                    <ScrollArea className="max-h-[250px]">
-                      <div className="space-y-1">
-                        {batchProgress.results.map((result, i) => (
-                          <div
-                            key={i}
-                            className={`flex items-center gap-2 p-2 rounded text-sm ${
-                              result.success ? "bg-green-50 dark:bg-green-950/20" : "bg-red-50 dark:bg-red-950/20"
-                            }`}
-                          >
-                            {result.success ? (
-                              <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
-                            ) : (
-                              <XCircle className="h-4 w-4 text-red-600 shrink-0" />
-                            )}
-                            <span className="capitalize">{result.type}</span> {result.id}
-                            {result.error && (
-                              <span className="text-red-600 text-xs ml-2">({result.error})</span>
-                            )}
-                          </div>
-                        ))}
+            {/* Batch Generation Button */}
+            <Dialog open={batchDialogOpen} onOpenChange={setBatchDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="shrink-0">
+                  <Zap className="h-4 w-4 mr-2" />
+                  Batch Generate
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Zap className="h-5 w-5 text-primary" />
+                    Batch Generate Translations
+                  </DialogTitle>
+                  <DialogDescription>
+                    Select multiple {selectedType}s to generate plain language translations at once.
+                    Translations will be saved as drafts for review.
+                  </DialogDescription>
+                </DialogHeader>
+                
+                {!batchProgress ? (
+                  <>
+                    {/* Selection tabs */}
+                    <Tabs value={selectedType} onValueChange={(v) => {
+                      setSelectedType(v as "article" | "recital");
+                      setSelectedForBatch(new Set());
+                    }} className="mt-2">
+                      <TabsList className="w-full">
+                        <TabsTrigger value="article" className="flex-1">
+                          Articles
+                        </TabsTrigger>
+                        <TabsTrigger value="recital" className="flex-1">
+                          Recitals
+                        </TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+
+                    {itemsWithoutTranslation.length === 0 ? (
+                      <div className="py-8 text-center text-muted-foreground">
+                        <CheckCircle2 className="h-12 w-12 mx-auto mb-3 text-green-500" />
+                        <p>All {selectedType}s already have translations!</p>
                       </div>
-                    </ScrollArea>
-                  )}
+                    ) : (
+                      <>
+                        <div className="flex items-center justify-between py-2 border-b">
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              id="select-all"
+                              checked={selectedForBatch.size === itemsWithoutTranslation.length && itemsWithoutTranslation.length > 0}
+                              onCheckedChange={handleSelectAllForBatch}
+                            />
+                            <label htmlFor="select-all" className="text-sm font-medium cursor-pointer">
+                              Select All ({itemsWithoutTranslation.length} without translation)
+                            </label>
+                          </div>
+                          <Badge variant="secondary">
+                            {selectedForBatch.size} selected
+                          </Badge>
+                        </div>
 
-                  {!batchMutation.isPending && (
-                    <DialogFooter>
-                      <Button onClick={handleCloseBatchDialog}>
-                        Done
+                        <ScrollArea className="flex-1 max-h-[300px]">
+                          <div className="space-y-1 p-1">
+                            {itemsWithoutTranslation.map((item) => (
+                              <div
+                                key={item.id}
+                                className="flex items-center gap-3 p-2 rounded hover:bg-muted"
+                              >
+                                <Checkbox
+                                  id={`batch-${item.id}`}
+                                  checked={selectedForBatch.has(item.id)}
+                                  onCheckedChange={(checked) => handleBatchSelect(item.id, checked as boolean)}
+                                />
+                                <label
+                                  htmlFor={`batch-${item.id}`}
+                                  className="text-sm cursor-pointer flex-1"
+                                >
+                                  <span className="font-medium">
+                                    {selectedType === "article" ? `Article ${item.id}` : `Recital ${item.id}`}:
+                                  </span>{" "}
+                                  {selectedType === "article" ? item.title : ""}
+                                </label>
+                              </div>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </>
+                    )}
+
+                    <DialogFooter className="mt-4">
+                      <Button variant="outline" onClick={handleCloseBatchDialog}>
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleStartBatch}
+                        disabled={selectedForBatch.size === 0 || batchMutation.isPending}
+                      >
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Generate {selectedForBatch.size} Translation{selectedForBatch.size !== 1 ? "s" : ""}
                       </Button>
                     </DialogFooter>
-                  )}
-                </div>
-              )}
-            </DialogContent>
-          </Dialog>
+                  </>
+                ) : (
+                  /* Progress View */
+                  <div className="py-6 space-y-6">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span>
+                          {batchProgress.current 
+                            ? `Generating ${batchProgress.current.type} ${batchProgress.current.id}...`
+                            : "Complete!"}
+                        </span>
+                        <span className="text-muted-foreground">
+                          {batchProgress.completed} / {batchProgress.total}
+                        </span>
+                      </div>
+                      <Progress 
+                        value={(batchProgress.completed / batchProgress.total) * 100} 
+                        className="h-2"
+                      />
+                    </div>
+
+                    {batchProgress.results.length > 0 && (
+                      <ScrollArea className="max-h-[250px]">
+                        <div className="space-y-1">
+                          {batchProgress.results.map((result, i) => (
+                            <div
+                              key={i}
+                              className={`flex items-center gap-2 p-2 rounded text-sm ${
+                                result.success ? "bg-green-50 dark:bg-green-950/20" : "bg-red-50 dark:bg-red-950/20"
+                              }`}
+                            >
+                              {result.success ? (
+                                <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+                              ) : (
+                                <XCircle className="h-4 w-4 text-red-600 shrink-0" />
+                              )}
+                              <span className="capitalize">{result.type}</span> {result.id}
+                              {result.error && (
+                                <span className="text-red-600 text-xs ml-2">({result.error})</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    )}
+
+                    {!batchMutation.isPending && (
+                      <DialogFooter>
+                        <Button onClick={handleCloseBatchDialog}>
+                          Done
+                        </Button>
+                      </DialogFooter>
+                    )}
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "translations" | "feedback")} className="mb-6">

@@ -8,7 +8,7 @@ A comprehensive digital platform for exploring **Regulation (EU) 2025/327** - th
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?logo=tailwindcss)
 ![Supabase](https://img.shields.io/badge/Supabase-Backend-3FCF8E?logo=supabase)
 [![BuyMeACoffee](https://raw.githubusercontent.com/pachadotdev/buymeacoffee-badges/main/bmc-yellow.svg)](https://buymeacoffee.com/stefanbuttigieg)
-![Lovable Credits](https://img.shields.io/badge/Lovable%20Credits-260%20credits%20used-blue)
+![Lovable Credits](https://img.shields.io/badge/Lovable%20Credits-400%20credits%20used-blue)
 ![Analytics](https://img.shields.io/badge/Analytics-Umami-brightgreen)
 
 
@@ -167,7 +167,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [X] Self-Service Portal for Users (Password, Email, and Profile Management)
 - [X] Plain Language Version of Legal Text - side-by-side to legal text (with admin management)
 - [X] Real-time Umami Analytics Dashboard for Admins
-- [ ] Rating System for Translation (especially Plain language)
+- [X] Rating System for Translation (especially Plain language)
 
 ### Medium-term
 - [X] AI-powered Q&A about the regulation

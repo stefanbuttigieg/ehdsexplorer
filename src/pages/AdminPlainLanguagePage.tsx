@@ -79,11 +79,12 @@ const AdminPlainLanguagePage = () => {
   };
 
   const handleSave = async (publish: boolean) => {
-    if (!selectedId || !editedText.trim()) return;
+    const textToSave = editedText !== null ? editedText : currentTranslation?.plain_language_text;
+    if (!selectedId || !textToSave?.trim()) return;
     await saveMutation.mutateAsync({
       contentType: selectedType,
       contentId: selectedId,
-      plainLanguageText: editedText,
+      plainLanguageText: textToSave,
       isPublished: publish,
       generatedBy: currentTranslation?.generated_by || "ai",
     });

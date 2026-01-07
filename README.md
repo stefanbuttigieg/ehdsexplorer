@@ -142,9 +142,11 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
   - Test history with database persistence
   - Save, load, and compare historical results
 - **User management** with email invitation system
+- **Resend confirmation emails** for users who haven't verified their email
 - **Maintenance mode** with custom messaging
 - **Overview page** content management
 - **Plain language translations** with AI generation and batch processing
+- **Bulk publish** for plain language translations
 - **News summaries** with AI generation and Firecrawl URL scraping
 
 ### 📜 Legal & Compliance

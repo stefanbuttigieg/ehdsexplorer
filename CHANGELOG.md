@@ -14,6 +14,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.2] - 2026-01-07
+
+### Added
+
+#### Admin User Management
+- Resend confirmation email feature for admins to help users who haven't confirmed their email
+- New edge function `resend-confirmation-email` with admin authentication and magic link generation
+- Visual feedback during confirmation email resending process
+
+#### Search Improvements
+- Improved search accuracy with lower fuzzy matching threshold (0.35)
+- Direct article matching for standalone numbers (e.g., typing "42" finds Article 42)
+
+#### Plain Language Translations
+- Bulk publish feature for publishing multiple draft translations at once
+- Progress tracking and selection interface in bulk publish dialog
+
+---
+
 ## [1.5.1] - 2026-01-02
 
 ### Added

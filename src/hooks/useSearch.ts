@@ -64,7 +64,7 @@ const generateAnnexSearchTerms = (annexId: string): string => {
 // Improved Fuse.js options with better scoring
 const createFuseOptions = <T>(keys: Array<{name: keyof T | string; weight: number}>): IFuseOptions<T> => ({
   keys: keys.map(k => ({ name: k.name as string, weight: k.weight })),
-  threshold: 0.4,           // More lenient threshold
+  threshold: 0.35,          // Balanced threshold for accuracy
   distance: 200,            // Search further into the text
   ignoreLocation: true,     // Match anywhere in the field
   includeScore: true,       // Include match scores
@@ -164,6 +164,8 @@ const matchPatterns = {
   recital: /^(?:recital|rec\.?)\s*(\d+)$/i,
   chapter: /^(?:chapter|ch\.?)\s*(\d+)$/i,
   annex: /^(?:annex)\s*([IVXivx]+|\d+)$/i,
+  // Also match standalone numbers to prioritize articles
+  number: /^(\d+)$/,
 };
 
 export const useSearch = (): UseSearchReturn => {
@@ -297,6 +299,16 @@ export const useSearch = (): UseSearchReturn => {
       const annexId = /^\d+$/.test(input) ? numberToRoman(parseInt(input)) : input;
       const annex = searchableData.annexes.find(a => a.id === annexId);
       return annex ? { type: 'annex', item: annex } : null;
+    }
+
+    // Check for standalone number - prioritize article match
+    const numberMatch = trimmed.match(matchPatterns.number);
+    if (numberMatch) {
+      const num = parseInt(numberMatch[1]);
+      const article = searchableData.articles.find(a => a.article_number === num);
+      if (article) {
+        return { type: 'article', item: article };
+      }
     }
 
     return null;

@@ -3,6 +3,9 @@ project_id = "lmjjghvrjgffmbidajih"
 [functions.api-data]
 verify_jwt = false
 
+[functions.resend-confirmation-email]
+verify_jwt = true
+
 [functions.firecrawl-scrape]
 verify_jwt = true
 

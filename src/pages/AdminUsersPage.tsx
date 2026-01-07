@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Users, ArrowLeft, Shield, ShieldCheck, Trash2, Plus, Search, Mail, Clock, AlertCircle, CheckCircle2, XCircle, RefreshCw, TestTube2, Key } from "lucide-react";
+import { Users, ArrowLeft, Shield, ShieldCheck, Trash2, Plus, Search, Mail, Clock, AlertCircle, CheckCircle2, XCircle, RefreshCw, TestTube2, Key, MailCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -53,6 +53,7 @@ const AdminUsersPage = () => {
   const [newPassword, setNewPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTestingEmail, setIsTestingEmail] = useState(false);
+  const [resendingConfirmation, setResendingConfirmation] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) {
@@ -377,6 +378,44 @@ const AdminUsersPage = () => {
     }
   };
 
+  const handleResendConfirmation = async (userId: string, email: string | null) => {
+    setResendingConfirmation(userId);
+    try {
+      const { data, error } = await supabase.functions.invoke("resend-confirmation-email", {
+        body: { userId },
+      });
+
+      if (error) throw error;
+
+      if (data?.already_confirmed) {
+        toast({
+          title: "Already confirmed",
+          description: data.message || "This user's email is already confirmed.",
+        });
+      } else if (data?.success) {
+        toast({
+          title: "Confirmation email sent",
+          description: data.message || `Confirmation email sent to ${email}`,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: data?.error || "Failed to send confirmation email",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error("Resend confirmation error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send confirmation email",
+        variant: "destructive",
+      });
+    } finally {
+      setResendingConfirmation(null);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "sent":
@@ -567,7 +606,19 @@ const AdminUsersPage = () => {
                             Joined: {format(new Date(userItem.created_at), "PPp")}
                           </p>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {userItem.id !== user?.id && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleResendConfirmation(userItem.id, userItem.email)}
+                              disabled={resendingConfirmation === userItem.id}
+                              title="Resend confirmation email"
+                            >
+                              <MailCheck className={`h-4 w-4 mr-1 ${resendingConfirmation === userItem.id ? 'animate-pulse' : ''}`} />
+                              {resendingConfirmation === userItem.id ? "Sending..." : "Resend Confirmation"}
+                            </Button>
+                          )}
                           <Button
                             variant="outline"
                             size="sm"

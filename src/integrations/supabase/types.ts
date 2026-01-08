@@ -1051,6 +1051,122 @@ export type Database = {
           },
         ]
       }
+      shared_annotations: {
+        Row: {
+          annotation_id: string
+          id: string
+          shared_at: string
+          shared_by: string
+          team_id: string
+        }
+        Insert: {
+          annotation_id: string
+          id?: string
+          shared_at?: string
+          shared_by: string
+          team_id: string
+        }
+        Update: {
+          annotation_id?: string
+          id?: string
+          shared_at?: string
+          shared_by?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_annotations_annotation_id_fkey"
+            columns: ["annotation_id"]
+            isOneToOne: false
+            referencedRelation: "annotations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shared_annotations_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_bookmarks: {
+        Row: {
+          content_id: string
+          content_type: string
+          id: string
+          shared_at: string
+          shared_by: string
+          team_id: string
+          title: string
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          id?: string
+          shared_at?: string
+          shared_by: string
+          team_id: string
+          title: string
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          id?: string
+          shared_at?: string
+          shared_by?: string
+          team_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_bookmarks_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_notes: {
+        Row: {
+          id: string
+          note_id: string
+          shared_at: string
+          shared_by: string
+          team_id: string
+        }
+        Insert: {
+          id?: string
+          note_id: string
+          shared_at?: string
+          shared_by: string
+          team_id: string
+        }
+        Update: {
+          id?: string
+          note_id?: string
+          shared_at?: string
+          shared_by?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_notes_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "user_notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shared_notes_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_settings: {
         Row: {
           id: string
@@ -1072,6 +1188,109 @@ export type Database = {
           maintenance_mode?: boolean
           updated_at?: string
           updated_by?: string | null
+        }
+        Relationships: []
+      }
+      team_activity: {
+        Row: {
+          action: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          metadata: Json | null
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          metadata?: Json | null
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          metadata?: Json | null
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_activity_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_memberships: {
+        Row: {
+          id: string
+          joined_at: string
+          role: Database["public"]["Enums"]["team_role"]
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          role?: Database["public"]["Enums"]["team_role"]
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          role?: Database["public"]["Enums"]["team_role"]
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_memberships_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1201,11 +1420,24 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_team_role: {
+        Args: {
+          _roles: Database["public"]["Enums"]["team_role"][]
+          _team_id: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_admin_or_editor: { Args: { _user_id: string }; Returns: boolean }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_team_member: {
+        Args: { _team_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "editor" | "super_admin"
+      team_role: "owner" | "admin" | "member" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1334,6 +1566,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "editor", "super_admin"],
+      team_role: ["owner", "admin", "member", "viewer"],
     },
   },
 } as const

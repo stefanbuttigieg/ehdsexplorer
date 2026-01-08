@@ -58,6 +58,7 @@ import AdminQAPage from "./pages/AdminQAPage";
 import AdminSubscriptionsPage from "./pages/AdminSubscriptionsPage";
 import AdminAIFeedbackPage from "./pages/AdminAIFeedbackPage";
 import NotesPage from "./pages/NotesPage";
+import TeamsPage from "./pages/TeamsPage";
 import UnsubscribePage from "./pages/UnsubscribePage";
 import VerifySubscriptionPage from "./pages/VerifySubscriptionPage";
 import ManageSubscriptionPage from "./pages/ManageSubscriptionPage";
@@ -109,6 +110,7 @@ const App = () => (
             <Route path="/news/:id" element={<NewsDetailPage />} />
             <Route path="/help" element={<HelpCenterPage />} />
             <Route path="/notes" element={<NotesPage />} />
+            <Route path="/teams" element={<TeamsPage />} />
             <Route path="/unsubscribe" element={<UnsubscribePage />} />
             <Route path="/verify-subscription" element={<VerifySubscriptionPage />} />
             <Route path="/manage-subscription" element={<ManageSubscriptionPage />} />

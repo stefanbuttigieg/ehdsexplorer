@@ -62,6 +62,12 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Export options** - Export to Markdown, JSON, Notion, and Obsidian formats
 - **Local & synced storage** - Works offline for anonymous users, syncs when logged in
 
+### 👥 Team Collaboration
+- **Create teams** - Organize workspaces for collaborative research
+- **Invite members** - Add team members by email with role-based access
+- **Role management** - Owner, Admin, Member, and Viewer roles with different permissions
+- **Team settings** - Edit team name, description, and manage members
+
 ### 🎨 User Experience
 - **Dark/Light mode** toggle with system preference detection
 - **Adjustable font sizes** (small, medium, large, x-large)
@@ -175,7 +181,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [X] AI-powered Q&A about the regulation
 - [ ] Comparison view between articles
 - [X] Annotation and note-taking
-- [ ] Collaboration features for teams
+- [X] Collaboration features for teams
 - [X] Email alerts for implementing act status changes
 - [ ] Sign-up of new users and creation of profiles
 

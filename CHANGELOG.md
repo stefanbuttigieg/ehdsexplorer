@@ -14,6 +14,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.0] - 2026-01-09
+
+### Added
+
+#### Team Collaboration
+- New Teams page at `/teams` for managing collaborative workspaces
+- Create teams with name and description
+- Invite team members by email
+- Role-based access control: Owner, Admin, Member, Viewer
+- Team member management (update roles, remove members)
+- Leave team functionality for non-owners
+- Delete team option for owners
+- Database tables for teams, team memberships, and team activity
+- Row-level security policies for team data protection
+- Automatic owner assignment on team creation via database trigger
+
+---
+
 ## [1.5.2] - 2026-01-07
 
 ### Added

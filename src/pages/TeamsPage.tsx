@@ -16,8 +16,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTeams, useTeamMembers, TeamRole, TeamWithMembership } from "@/hooks/useTeams";
 import { useAuth } from "@/hooks/useAuth";
-import { Plus, Users, Settings, MoreVertical, UserPlus, Crown, Shield, User, Eye, LogOut, Trash2, Pencil } from "lucide-react";
+import { Plus, Users, Settings, MoreVertical, UserPlus, Crown, Shield, User, Eye, LogOut, Trash2, Pencil, Activity } from "lucide-react";
 import { Link } from "react-router-dom";
+import TeamActivityFeed from "@/components/TeamActivityFeed";
 
 const roleIcons: Record<TeamRole, React.ElementType> = {
   owner: Crown,
@@ -407,6 +408,10 @@ const TeamsPage = () => {
                     <Tabs defaultValue="members">
                       <TabsList>
                         <TabsTrigger value="members">Members</TabsTrigger>
+                        <TabsTrigger value="activity">
+                          <Activity className="h-4 w-4 mr-1" />
+                          Activity
+                        </TabsTrigger>
                         <TabsTrigger value="settings">Settings</TabsTrigger>
                       </TabsList>
                       
@@ -483,6 +488,10 @@ const TeamsPage = () => {
                             })}
                           </div>
                         )}
+                      </TabsContent>
+
+                      <TabsContent value="activity" className="mt-4">
+                        <TeamActivityFeed teamId={selectedTeam.id} />
                       </TabsContent>
                       
                       <TabsContent value="settings" className="mt-4">

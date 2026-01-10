@@ -64,14 +64,15 @@ const generateAnnexSearchTerms = (annexId: string): string => {
 // Improved Fuse.js options with better scoring
 const createFuseOptions = <T>(keys: Array<{name: keyof T | string; weight: number}>): IFuseOptions<T> => ({
   keys: keys.map(k => ({ name: k.name as string, weight: k.weight })),
-  threshold: 0.35,          // Balanced threshold for accuracy
-  distance: 200,            // Search further into the text
+  threshold: 0.4,           // More lenient threshold for content matching
+  distance: 1000,           // Search deeper into long content
   ignoreLocation: true,     // Match anywhere in the field
   includeScore: true,       // Include match scores
   includeMatches: true,     // Include match indices for highlighting
   minMatchCharLength: 2,    // Minimum characters to match
   useExtendedSearch: false,
   findAllMatches: true,     // Find all matches, not just first
+  ignoreFieldNorm: true,    // Don't penalize matches in long content
 });
 
 export interface SearchableArticle {

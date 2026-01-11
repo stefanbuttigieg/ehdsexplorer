@@ -124,6 +124,63 @@ export type Database = {
         }
         Relationships: []
       }
+      annex_translations: {
+        Row: {
+          annex_id: string
+          content: string
+          created_at: string | null
+          id: string
+          is_published: boolean | null
+          language_code: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          title: string
+          translated_by: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          annex_id: string
+          content: string
+          created_at?: string | null
+          id?: string
+          is_published?: boolean | null
+          language_code: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          title: string
+          translated_by?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          annex_id?: string
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_published?: boolean | null
+          language_code?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          title?: string
+          translated_by?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "annex_translations_annex_id_fkey"
+            columns: ["annex_id"]
+            isOneToOne: false
+            referencedRelation: "annexes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annex_translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       annexes: {
         Row: {
           content: string
@@ -268,6 +325,63 @@ export type Database = {
         }
         Relationships: []
       }
+      article_translations: {
+        Row: {
+          article_id: number
+          content: string
+          created_at: string | null
+          id: string
+          is_published: boolean | null
+          language_code: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          title: string
+          translated_by: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          article_id: number
+          content: string
+          created_at?: string | null
+          id?: string
+          is_published?: boolean | null
+          language_code: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          title: string
+          translated_by?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          article_id?: number
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_published?: boolean | null
+          language_code?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          title?: string
+          translated_by?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_translations_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "article_translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       articles: {
         Row: {
           article_number: number
@@ -309,6 +423,63 @@ export type Database = {
           },
         ]
       }
+      chapter_translations: {
+        Row: {
+          chapter_id: number
+          created_at: string | null
+          description: string | null
+          id: string
+          is_published: boolean | null
+          language_code: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          title: string
+          translated_by: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          chapter_id: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_published?: boolean | null
+          language_code: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          title: string
+          translated_by?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          chapter_id?: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_published?: boolean | null
+          language_code?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          title?: string
+          translated_by?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chapter_translations_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chapter_translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       chapters: {
         Row: {
           chapter_number: number
@@ -335,6 +506,63 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      definition_translations: {
+        Row: {
+          created_at: string | null
+          definition: string
+          definition_id: number
+          id: string
+          is_published: boolean | null
+          language_code: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          term: string
+          translated_by: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          definition: string
+          definition_id: number
+          id?: string
+          is_published?: boolean | null
+          language_code: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          term: string
+          translated_by?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          definition?: string
+          definition_id?: number
+          id?: string
+          is_published?: boolean | null
+          language_code?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          term?: string
+          translated_by?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "definition_translations_definition_id_fkey"
+            columns: ["definition_id"]
+            isOneToOne: false
+            referencedRelation: "definitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "definition_translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       definitions: {
         Row: {
@@ -441,6 +669,63 @@ export type Database = {
           },
         ]
       }
+      implementing_act_article_translations: {
+        Row: {
+          article_id: string
+          content: string
+          created_at: string | null
+          id: string
+          is_published: boolean | null
+          language_code: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          title: string
+          translated_by: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          article_id: string
+          content: string
+          created_at?: string | null
+          id?: string
+          is_published?: boolean | null
+          language_code: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          title: string
+          translated_by?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          article_id?: string
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_published?: boolean | null
+          language_code?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          title?: string
+          translated_by?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "implementing_act_article_translations_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "implementing_act_articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "implementing_act_article_translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       implementing_act_articles: {
         Row: {
           article_number: number
@@ -485,6 +770,60 @@ export type Database = {
             columns: ["section_id"]
             isOneToOne: false
             referencedRelation: "implementing_act_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      implementing_act_recital_translations: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          is_published: boolean | null
+          language_code: string
+          recital_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          translated_by: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          is_published?: boolean | null
+          language_code: string
+          recital_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          translated_by?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_published?: boolean | null
+          language_code?: string
+          recital_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          translated_by?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "implementing_act_recital_translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "implementing_act_recital_translations_recital_id_fkey"
+            columns: ["recital_id"]
+            isOneToOne: false
+            referencedRelation: "implementing_act_recitals"
             referencedColumns: ["id"]
           },
         ]
@@ -600,6 +939,63 @@ export type Database = {
           },
         ]
       }
+      implementing_act_translations: {
+        Row: {
+          created_at: string | null
+          description: string
+          id: string
+          implementing_act_id: string
+          is_published: boolean | null
+          language_code: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          title: string
+          translated_by: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          id?: string
+          implementing_act_id: string
+          is_published?: boolean | null
+          language_code: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          title: string
+          translated_by?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          id?: string
+          implementing_act_id?: string
+          is_published?: boolean | null
+          language_code?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          title?: string
+          translated_by?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "implementing_act_translations_implementing_act_id_fkey"
+            columns: ["implementing_act_id"]
+            isOneToOne: false
+            referencedRelation: "implementing_acts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "implementing_act_translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       implementing_acts: {
         Row: {
           article_reference: string
@@ -684,6 +1080,36 @@ export type Database = {
         }
         Relationships: []
       }
+      languages: {
+        Row: {
+          code: string
+          created_at: string | null
+          is_active: boolean | null
+          name: string
+          native_name: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          is_active?: boolean | null
+          name: string
+          native_name: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          is_active?: boolean | null
+          name?: string
+          native_name?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       news_summaries: {
         Row: {
           created_at: string
@@ -722,6 +1148,63 @@ export type Database = {
           week_start?: string
         }
         Relationships: []
+      }
+      news_summary_translations: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_published: boolean | null
+          language_code: string
+          news_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          summary: string
+          title: string
+          translated_by: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_published?: boolean | null
+          language_code: string
+          news_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          summary: string
+          title: string
+          translated_by?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_published?: boolean | null
+          language_code?: string
+          news_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          summary?: string
+          title?: string
+          translated_by?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "news_summary_translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "news_summary_translations_news_id_fkey"
+            columns: ["news_id"]
+            isOneToOne: false
+            referencedRelation: "news_summaries"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -953,6 +1436,60 @@ export type Database = {
         }
         Relationships: []
       }
+      recital_translations: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          is_published: boolean | null
+          language_code: string
+          recital_id: number
+          reviewed_at: string | null
+          reviewed_by: string | null
+          translated_by: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          is_published?: boolean | null
+          language_code: string
+          recital_id: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          translated_by?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_published?: boolean | null
+          language_code?: string
+          recital_id?: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          translated_by?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recital_translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "recital_translations_recital_id_fkey"
+            columns: ["recital_id"]
+            isOneToOne: false
+            referencedRelation: "recitals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recitals: {
         Row: {
           content: string
@@ -1015,6 +1552,60 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      section_translations: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_published: boolean | null
+          language_code: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          section_id: number
+          title: string
+          translated_by: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_published?: boolean | null
+          language_code: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          section_id: number
+          title: string
+          translated_by?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_published?: boolean | null
+          language_code?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          section_id?: number
+          title?: string
+          translated_by?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "section_translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "section_translations_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sections: {
         Row: {
@@ -1294,6 +1885,47 @@ export type Database = {
         }
         Relationships: []
       }
+      ui_translations: {
+        Row: {
+          context: string | null
+          created_at: string | null
+          id: string
+          is_ai_generated: boolean | null
+          key: string
+          language_code: string
+          updated_at: string | null
+          value: string
+        }
+        Insert: {
+          context?: string | null
+          created_at?: string | null
+          id?: string
+          is_ai_generated?: boolean | null
+          key: string
+          language_code: string
+          updated_at?: string | null
+          value: string
+        }
+        Update: {
+          context?: string | null
+          created_at?: string | null
+          id?: string
+          is_ai_generated?: boolean | null
+          key?: string
+          language_code?: string
+          updated_at?: string | null
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ui_translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       user_invitations: {
         Row: {
           created_at: string
@@ -1326,6 +1958,38 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      user_language_preferences: {
+        Row: {
+          created_at: string | null
+          id: string
+          language_code: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          language_code: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          language_code?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_language_preferences_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       user_notes: {
         Row: {

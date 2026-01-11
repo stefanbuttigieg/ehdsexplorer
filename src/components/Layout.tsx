@@ -21,6 +21,7 @@ import { useTextHighlight } from "@/hooks/useTextHighlight";
 import { useAuth } from "@/hooks/useAuth";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import AIAssistant from "@/components/AIAssistant";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 interface LayoutProps {
   children: ReactNode;
@@ -81,6 +82,7 @@ const Layout = ({ children }: LayoutProps) => {
               <TooltipContent>Admin Dashboard</TooltipContent>
             </Tooltip>
           )}
+          <LanguageSelector variant="compact" />
           <TourButton onClick={startTour} />
           <ReportIssueButton />
           <AccessibilityControls />
@@ -116,6 +118,7 @@ const Layout = ({ children }: LayoutProps) => {
                   <TooltipContent>Admin Dashboard</TooltipContent>
                 </Tooltip>
               )}
+              <LanguageSelector variant="compact" />
               <TourButton onClick={startTour} />
               <ReportIssueButton />
               <AccessibilityControls />

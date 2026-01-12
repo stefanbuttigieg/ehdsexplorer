@@ -10,7 +10,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Planned
 - Enhanced search with advanced filtering options
 - Comparative view between regulation versions
-- Multi-language support
+
+---
+
+## [1.7.0] - 2026-01-12
+
+### Added
+
+#### Multi-Language Support
+- Full multi-lingual infrastructure supporting all 24 official EU languages
+- Language selection via header dropdown, URL parameter (`?lang=de`), and saved user preferences
+- English fallback for untranslated content with user-friendly notice
+- Database tables for translations of all content types:
+  - Articles, Recitals, Definitions, Annexes
+  - Chapters, Sections
+  - Implementing Acts (including their articles and recitals)
+  - News Summaries
+  - UI strings
+- User language preference persistence for logged-in users
+- Language-aware content hooks with automatic fallback
+
+#### Translation Admin Dashboard
+- New admin page at `/admin/translations` for managing translations
+- Translation statistics showing progress per content type and language
+- Side-by-side editor for original English content and translations
+- Search and filter source content items
+- Translation status indicators (translated/not translated, published/draft)
+- Publish/unpublish toggle for individual translations
+- Support for all translatable fields per content type
 
 ---
 

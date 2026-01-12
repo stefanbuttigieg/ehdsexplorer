@@ -68,6 +68,15 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Role management** - Owner, Admin, Member, and Viewer roles with different permissions
 - **Team settings** - Edit team name, description, and manage members
 
+### 🌍 Multi-Language Support
+- **24 EU languages** - Full translation infrastructure for all official EU languages
+- **Language selector** - Easy switching via header dropdown
+- **URL language parameter** - Share links with `?lang=de` for specific language
+- **User preferences** - Language choice saved for logged-in users
+- **English fallback** - Graceful fallback to English when translations unavailable
+- **Translation notice** - Clear indicator when viewing fallback content
+- **Admin translation dashboard** - Manage translations with side-by-side editor
+
 ### 🎨 User Experience
 - **Dark/Light mode** toggle with system preference detection
 - **Adjustable font sizes** (small, medium, large, x-large)
@@ -154,6 +163,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Plain language translations** with AI generation and batch processing
 - **Bulk publish** for plain language translations
 - **News summaries** with AI generation and Firecrawl URL scraping
+- **Translation management** - Admin dashboard for multi-language content translations
 
 ### 📜 Legal & Compliance
 - **Privacy Policy** page
@@ -186,7 +196,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [ ] Sign-up of new users and creation of profiles
 
 ### Long-term
-- [ ] Multi-language support (all EU languages)
+- [x] Multi-language support (all 24 EU languages)
 - [ ] Integration with national implementation trackers
 - [x] API for third-party integrations
 - [ ] Mobile apps (iOS/Android)

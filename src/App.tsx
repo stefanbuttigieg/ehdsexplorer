@@ -58,6 +58,7 @@ import AdminPlainLanguagePage from "./pages/AdminPlainLanguagePage";
 import AdminQAPage from "./pages/AdminQAPage";
 import AdminSubscriptionsPage from "./pages/AdminSubscriptionsPage";
 import AdminAIFeedbackPage from "./pages/AdminAIFeedbackPage";
+import AdminTranslationsPage from "./pages/AdminTranslationsPage";
 import NotesPage from "./pages/NotesPage";
 import TeamsPage from "./pages/TeamsPage";
 import UnsubscribePage from "./pages/UnsubscribePage";
@@ -141,6 +142,7 @@ const App = () => (
             <Route path="/admin/qa" element={<AdminQAPage />} />
             <Route path="/admin/subscriptions" element={<AdminSubscriptionsPage />} />
             <Route path="/admin/ai-feedback" element={<AdminAIFeedbackPage />} />
+            <Route path="/admin/translations" element={<AdminTranslationsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </MaintenanceGuard>

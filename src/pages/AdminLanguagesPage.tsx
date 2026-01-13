@@ -68,44 +68,7 @@ const AdminLanguagesPage = () => {
     },
   });
 
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/admin/auth');
-    } else if (!loading && user && !isEditor) {
-      navigate('/');
-    }
-  }, [user, loading, isEditor, navigate]);
-
-  if (loading || languagesLoading) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <p>Loading...</p>
-        </div>
-      </Layout>
-    );
-  }
-
-  if (!user || !isEditor) {
-    return null;
-  }
-
-  const filteredLanguages = languages?.filter(lang => 
-    lang.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    lang.native_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    lang.code.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
-
-  // Selectable languages (exclude English)
-  const selectableLanguages = useMemo(() => 
-    filteredLanguages.filter(l => l.code !== 'en'),
-    [filteredLanguages]
-  );
-
-  const activeCount = languages?.filter(l => l.is_active).length || 0;
-  const totalCount = languages?.length || 0;
-
-  // Bulk update mutation
+  // Bulk update mutation - must be before any conditional returns
   const bulkUpdateMutation = useMutation({
     mutationFn: async ({ codes, isActive }: { codes: string[]; isActive: boolean }) => {
       const { error } = await supabase
@@ -124,6 +87,52 @@ const AdminLanguagesPage = () => {
       toast.error('Failed to update languages: ' + error.message);
     },
   });
+
+  // Derived state - compute from languages
+  const filteredLanguages = useMemo(() => 
+    languages?.filter(lang => 
+      lang.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      lang.native_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      lang.code.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || [],
+    [languages, searchQuery]
+  );
+
+  // Selectable languages (exclude English)
+  const selectableLanguages = useMemo(() => 
+    filteredLanguages.filter(l => l.code !== 'en'),
+    [filteredLanguages]
+  );
+
+  const activeCount = languages?.filter(l => l.is_active).length || 0;
+  const totalCount = languages?.length || 0;
+
+  const isAllSelected = selectableLanguages.length > 0 && 
+    selectableLanguages.every(l => selectedLanguages.has(l.code));
+  const isSomeSelected = selectedLanguages.size > 0;
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/admin/auth');
+    } else if (!loading && user && !isEditor) {
+      navigate('/');
+    }
+  }, [user, loading, isEditor, navigate]);
+
+  // Early returns AFTER all hooks
+  if (loading || languagesLoading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <p>Loading...</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (!user || !isEditor) {
+    return null;
+  }
 
   const handleToggleActive = (lang: Language) => {
     // Don't allow disabling English
@@ -173,10 +182,6 @@ const AdminLanguagesPage = () => {
     const codes = Array.from(selectedLanguages);
     bulkUpdateMutation.mutate({ codes, isActive: false });
   };
-
-  const isAllSelected = selectableLanguages.length > 0 && 
-    selectableLanguages.every(l => selectedLanguages.has(l.code));
-  const isSomeSelected = selectedLanguages.size > 0;
 
   return (
     <Layout>

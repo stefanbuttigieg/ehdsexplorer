@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Globe, Check, X, GripVertical, Search, Settings2 } from 'lucide-react';
+import { ArrowLeft, Globe, Check, X, GripVertical, Search, Settings2, Power, PowerOff } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Table,
   TableBody,
@@ -27,11 +28,13 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguages, useToggleLanguageActive, useUpdateLanguage, Language } from '@/hooks/useLanguages';
 import { supabase } from '@/integrations/supabase/client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 const AdminLanguagesPage = () => {
   const { user, loading, isAdmin, isEditor } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data: languages, isLoading: languagesLoading } = useLanguages();
   const toggleActive = useToggleLanguageActive();
   const updateLanguage = useUpdateLanguage();
@@ -39,6 +42,7 @@ const AdminLanguagesPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [editingLanguage, setEditingLanguage] = useState<Language | null>(null);
   const [editForm, setEditForm] = useState({ sort_order: 0 });
+  const [selectedLanguages, setSelectedLanguages] = useState<Set<string>>(new Set());
 
   // Fetch translation stats for each language
   const { data: translationStats } = useQuery({
@@ -92,8 +96,34 @@ const AdminLanguagesPage = () => {
     lang.code.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
+  // Selectable languages (exclude English)
+  const selectableLanguages = useMemo(() => 
+    filteredLanguages.filter(l => l.code !== 'en'),
+    [filteredLanguages]
+  );
+
   const activeCount = languages?.filter(l => l.is_active).length || 0;
   const totalCount = languages?.length || 0;
+
+  // Bulk update mutation
+  const bulkUpdateMutation = useMutation({
+    mutationFn: async ({ codes, isActive }: { codes: string[]; isActive: boolean }) => {
+      const { error } = await supabase
+        .from('languages')
+        .update({ is_active: isActive })
+        .in('code', codes);
+      
+      if (error) throw error;
+    },
+    onSuccess: (_, { codes, isActive }) => {
+      queryClient.invalidateQueries({ queryKey: ['languages'] });
+      toast.success(`${codes.length} language(s) ${isActive ? 'enabled' : 'disabled'}`);
+      setSelectedLanguages(new Set());
+    },
+    onError: (error) => {
+      toast.error('Failed to update languages: ' + error.message);
+    },
+  });
 
   const handleToggleActive = (lang: Language) => {
     // Don't allow disabling English
@@ -115,6 +145,38 @@ const AdminLanguagesPage = () => {
       onSuccess: () => setEditingLanguage(null),
     });
   };
+
+  const handleSelectLanguage = (code: string, checked: boolean) => {
+    const newSelected = new Set(selectedLanguages);
+    if (checked) {
+      newSelected.add(code);
+    } else {
+      newSelected.delete(code);
+    }
+    setSelectedLanguages(newSelected);
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedLanguages(new Set(selectableLanguages.map(l => l.code)));
+    } else {
+      setSelectedLanguages(new Set());
+    }
+  };
+
+  const handleBulkEnable = () => {
+    const codes = Array.from(selectedLanguages);
+    bulkUpdateMutation.mutate({ codes, isActive: true });
+  };
+
+  const handleBulkDisable = () => {
+    const codes = Array.from(selectedLanguages);
+    bulkUpdateMutation.mutate({ codes, isActive: false });
+  };
+
+  const isAllSelected = selectableLanguages.length > 0 && 
+    selectableLanguages.every(l => selectedLanguages.has(l.code));
+  const isSomeSelected = selectedLanguages.size > 0;
 
   return (
     <Layout>
@@ -174,6 +236,50 @@ const AdminLanguagesPage = () => {
           </CardContent>
         </Card>
 
+        {/* Bulk Actions Bar */}
+        {isSomeSelected && (
+          <Card className="mb-6 border-primary">
+            <CardContent className="py-3">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <Badge variant="secondary" className="text-sm">
+                    {selectedLanguages.size} selected
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedLanguages(new Set())}
+                  >
+                    Clear selection
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleBulkEnable}
+                    disabled={bulkUpdateMutation.isPending}
+                    className="gap-2"
+                  >
+                    <Power className="h-4 w-4" />
+                    Enable Selected
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleBulkDisable}
+                    disabled={bulkUpdateMutation.isPending}
+                    className="gap-2"
+                  >
+                    <PowerOff className="h-4 w-4" />
+                    Disable Selected
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Languages Table */}
         <Card>
           <CardHeader>
@@ -197,6 +303,13 @@ const AdminLanguagesPage = () => {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12">
+                    <Checkbox
+                      checked={isAllSelected}
+                      onCheckedChange={handleSelectAll}
+                      aria-label="Select all languages"
+                    />
+                  </TableHead>
                   <TableHead className="w-16">Order</TableHead>
                   <TableHead>Code</TableHead>
                   <TableHead>Language</TableHead>
@@ -210,9 +323,21 @@ const AdminLanguagesPage = () => {
                 {filteredLanguages.map((lang) => {
                   const stats = translationStats?.[lang.code];
                   const progress = stats ? Math.round((stats.translated / stats.total) * 100) : 0;
+                  const isSelected = selectedLanguages.has(lang.code);
                   
                   return (
-                    <TableRow key={lang.code}>
+                    <TableRow key={lang.code} className={isSelected ? 'bg-muted/50' : ''}>
+                      <TableCell>
+                        {lang.code === 'en' ? (
+                          <span className="text-muted-foreground text-xs">—</span>
+                        ) : (
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={(checked) => handleSelectLanguage(lang.code, !!checked)}
+                            aria-label={`Select ${lang.name}`}
+                          />
+                        )}
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <GripVertical className="h-4 w-4" />

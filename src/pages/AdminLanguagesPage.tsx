@@ -186,42 +186,43 @@ const AdminLanguagesPage = () => {
   return (
     <Layout>
       <div className="max-w-6xl mx-auto p-4 md:p-6 animate-fade-in">
-        <div className="flex items-center gap-4 mb-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-6">
           <Link to="/admin">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-5 w-5" />
+            <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9">
+              <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold font-serif">Language Management</h1>
-            <p className="text-muted-foreground">Enable/disable languages and configure translation settings</p>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-serif">Language Management</h1>
+            <p className="text-sm text-muted-foreground hidden sm:block">Enable/disable languages and configure translation settings</p>
           </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-2xl">{totalCount}</CardTitle>
-              <CardDescription>Total Languages</CardDescription>
+            <CardHeader className="p-3 sm:pb-2 sm:p-6">
+              <CardTitle className="text-lg sm:text-2xl">{totalCount}</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">Total</CardDescription>
             </CardHeader>
           </Card>
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-2xl text-green-600">{activeCount}</CardTitle>
-              <CardDescription>Active Languages</CardDescription>
+            <CardHeader className="p-3 sm:pb-2 sm:p-6">
+              <CardTitle className="text-lg sm:text-2xl text-green-600">{activeCount}</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">Active</CardDescription>
             </CardHeader>
           </Card>
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-2xl text-muted-foreground">{totalCount - activeCount}</CardTitle>
-              <CardDescription>Inactive Languages</CardDescription>
+            <CardHeader className="p-3 sm:pb-2 sm:p-6">
+              <CardTitle className="text-lg sm:text-2xl text-muted-foreground">{totalCount - activeCount}</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">Inactive</CardDescription>
             </CardHeader>
           </Card>
         </div>
 
-        {/* Info Card */}
-        <Card className="mb-6">
+        {/* Info Card - Hidden on mobile */}
+        <Card className="mb-4 sm:mb-6 hidden sm:block">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Globe className="h-5 w-5 text-primary" />
@@ -243,41 +244,44 @@ const AdminLanguagesPage = () => {
 
         {/* Bulk Actions Bar */}
         {isSomeSelected && (
-          <Card className="mb-6 border-primary">
-            <CardContent className="py-3">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <Badge variant="secondary" className="text-sm">
+          <Card className="mb-4 sm:mb-6 border-primary">
+            <CardContent className="p-3 sm:py-3">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Badge variant="secondary" className="text-xs sm:text-sm">
                     {selectedLanguages.size} selected
                   </Badge>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setSelectedLanguages(new Set())}
+                    className="h-7 text-xs sm:text-sm"
                   >
-                    Clear selection
+                    Clear
                   </Button>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handleBulkEnable}
                     disabled={bulkUpdateMutation.isPending}
-                    className="gap-2"
+                    className="flex-1 sm:flex-none gap-1 sm:gap-2 h-8 text-xs sm:text-sm"
                   >
-                    <Power className="h-4 w-4" />
-                    Enable Selected
+                    <Power className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden xs:inline">Enable</span>
+                    <span className="xs:hidden">On</span>
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handleBulkDisable}
                     disabled={bulkUpdateMutation.isPending}
-                    className="gap-2"
+                    className="flex-1 sm:flex-none gap-1 sm:gap-2 h-8 text-xs sm:text-sm"
                   >
-                    <PowerOff className="h-4 w-4" />
-                    Disable Selected
+                    <PowerOff className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden xs:inline">Disable</span>
+                    <span className="xs:hidden">Off</span>
                   </Button>
                 </div>
               </div>
@@ -285,136 +289,236 @@ const AdminLanguagesPage = () => {
           </Card>
         )}
 
-        {/* Languages Table */}
+        {/* Languages Card */}
         <Card>
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <CardHeader className="p-4 sm:p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <div>
-                <CardTitle>All Languages</CardTitle>
-                <CardDescription>Manage available languages for the platform</CardDescription>
+                <CardTitle className="text-base sm:text-lg">All Languages</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Manage available languages</CardDescription>
               </div>
               <div className="relative w-full sm:w-64">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search languages..."
+                  placeholder="Search..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
+                  className="pl-9 h-9"
                 />
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">
-                    <Checkbox
-                      checked={isAllSelected}
-                      onCheckedChange={handleSelectAll}
-                      aria-label="Select all languages"
-                    />
-                  </TableHead>
-                  <TableHead className="w-16">Order</TableHead>
-                  <TableHead>Code</TableHead>
-                  <TableHead>Language</TableHead>
-                  <TableHead>Native Name</TableHead>
-                  <TableHead>Translation Progress</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredLanguages.map((lang) => {
-                  const stats = translationStats?.[lang.code];
-                  const progress = stats ? Math.round((stats.translated / stats.total) * 100) : 0;
-                  const isSelected = selectedLanguages.has(lang.code);
-                  
-                  return (
-                    <TableRow key={lang.code} className={isSelected ? 'bg-muted/50' : ''}>
-                      <TableCell>
-                        {lang.code === 'en' ? (
-                          <span className="text-muted-foreground text-xs">—</span>
-                        ) : (
+          <CardContent className="p-2 sm:p-6 pt-0 sm:pt-0">
+            {/* Desktop Table View */}
+            <div className="hidden md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-12">
+                      <Checkbox
+                        checked={isAllSelected}
+                        onCheckedChange={handleSelectAll}
+                        aria-label="Select all languages"
+                      />
+                    </TableHead>
+                    <TableHead className="w-16">Order</TableHead>
+                    <TableHead>Code</TableHead>
+                    <TableHead>Language</TableHead>
+                    <TableHead>Native Name</TableHead>
+                    <TableHead>Translation Progress</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredLanguages.map((lang) => {
+                    const stats = translationStats?.[lang.code];
+                    const progress = stats ? Math.round((stats.translated / stats.total) * 100) : 0;
+                    const isSelected = selectedLanguages.has(lang.code);
+                    
+                    return (
+                      <TableRow key={lang.code} className={isSelected ? 'bg-muted/50' : ''}>
+                        <TableCell>
+                          {lang.code === 'en' ? (
+                            <span className="text-muted-foreground text-xs">—</span>
+                          ) : (
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={(checked) => handleSelectLanguage(lang.code, !!checked)}
+                              aria-label={`Select ${lang.name}`}
+                            />
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <GripVertical className="h-4 w-4" />
+                            <span>{lang.sort_order}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="font-mono uppercase">
+                            {lang.code}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="font-medium">{lang.name}</TableCell>
+                        <TableCell>{lang.native_name}</TableCell>
+                        <TableCell>
+                          {lang.code === 'en' ? (
+                            <span className="text-muted-foreground text-sm">Primary</span>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-primary transition-all"
+                                  style={{ width: `${progress}%` }}
+                                />
+                              </div>
+                              <span className="text-sm text-muted-foreground">{progress}%</span>
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={lang.is_active}
+                              onCheckedChange={() => handleToggleActive(lang)}
+                              disabled={lang.code === 'en' || toggleActive.isPending}
+                            />
+                            {lang.is_active ? (
+                              <Badge variant="default" className="gap-1">
+                                <Check className="h-3 w-3" />
+                                Active
+                              </Badge>
+                            ) : (
+                              <Badge variant="secondary" className="gap-1">
+                                <X className="h-3 w-3" />
+                                Inactive
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditLanguage(lang)}
+                            >
+                              <Settings2 className="h-4 w-4" />
+                            </Button>
+                            <Link to={`/admin/translations?lang=${lang.code}`}>
+                              <Button variant="outline" size="sm" disabled={lang.code === 'en'}>
+                                Translations
+                              </Button>
+                            </Link>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-2">
+              {/* Select All Row */}
+              <div className="flex items-center justify-between px-3 py-2 bg-muted/30 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={isAllSelected}
+                    onCheckedChange={handleSelectAll}
+                    aria-label="Select all languages"
+                  />
+                  <span className="text-sm text-muted-foreground">Select all</span>
+                </div>
+                <span className="text-xs text-muted-foreground">{filteredLanguages.length} languages</span>
+              </div>
+
+              {filteredLanguages.map((lang) => {
+                const stats = translationStats?.[lang.code];
+                const progress = stats ? Math.round((stats.translated / stats.total) * 100) : 0;
+                const isSelected = selectedLanguages.has(lang.code);
+                
+                return (
+                  <div 
+                    key={lang.code} 
+                    className={`border rounded-lg p-3 ${isSelected ? 'bg-muted/50 border-primary' : ''}`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3">
+                        {lang.code !== 'en' && (
                           <Checkbox
                             checked={isSelected}
                             onCheckedChange={(checked) => handleSelectLanguage(lang.code, !!checked)}
                             aria-label={`Select ${lang.name}`}
+                            className="mt-1"
                           />
                         )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <GripVertical className="h-4 w-4" />
-                          <span>{lang.sort_order}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="font-mono uppercase">
-                          {lang.code}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="font-medium">{lang.name}</TableCell>
-                      <TableCell>{lang.native_name}</TableCell>
-                      <TableCell>
-                        {lang.code === 'en' ? (
-                          <span className="text-muted-foreground text-sm">Primary</span>
-                        ) : (
+                        <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-                              <div 
-                                className="h-full bg-primary transition-all"
-                                style={{ width: `${progress}%` }}
-                              />
-                            </div>
-                            <span className="text-sm text-muted-foreground">{progress}%</span>
+                            <span className="font-medium text-sm">{lang.name}</span>
+                            <Badge variant="outline" className="font-mono uppercase text-xs h-5">
+                              {lang.code}
+                            </Badge>
                           </div>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
+                          <p className="text-xs text-muted-foreground">{lang.native_name}</p>
+                          {lang.code !== 'en' && (
+                            <div className="flex items-center gap-2 mt-2">
+                              <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-primary transition-all"
+                                  style={{ width: `${progress}%` }}
+                                />
+                              </div>
+                              <span className="text-xs text-muted-foreground">{progress}%</span>
+                            </div>
+                          )}
+                          {lang.code === 'en' && (
+                            <Badge variant="outline" className="text-xs mt-1">Primary</Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <div className="flex items-center gap-1">
                           <Switch
                             checked={lang.is_active}
                             onCheckedChange={() => handleToggleActive(lang)}
                             disabled={lang.code === 'en' || toggleActive.isPending}
+                            className="scale-90"
                           />
                           {lang.is_active ? (
-                            <Badge variant="default" className="gap-1">
-                              <Check className="h-3 w-3" />
-                              Active
-                            </Badge>
+                            <Check className="h-3 w-3 text-green-600" />
                           ) : (
-                            <Badge variant="secondary" className="gap-1">
-                              <X className="h-3 w-3" />
-                              Inactive
-                            </Badge>
+                            <X className="h-3 w-3 text-muted-foreground" />
                           )}
                         </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
+                        <div className="flex gap-1">
                           <Button
                             variant="ghost"
-                            size="sm"
+                            size="icon"
+                            className="h-7 w-7"
                             onClick={() => handleEditLanguage(lang)}
                           >
-                            <Settings2 className="h-4 w-4" />
+                            <Settings2 className="h-3.5 w-3.5" />
                           </Button>
-                          <Link to={`/admin/translations?lang=${lang.code}`}>
-                            <Button variant="outline" size="sm" disabled={lang.code === 'en'}>
-                              Translations
-                            </Button>
-                          </Link>
+                          {lang.code !== 'en' && (
+                            <Link to={`/admin/translations?lang=${lang.code}`}>
+                              <Button variant="ghost" size="icon" className="h-7 w-7">
+                                <Globe className="h-3.5 w-3.5" />
+                              </Button>
+                            </Link>
+                          )}
                         </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
 
             {filteredLanguages.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className="text-center py-8 text-muted-foreground text-sm">
                 No languages found matching your search.
               </div>
             )}

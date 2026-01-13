@@ -151,6 +151,12 @@ const AdminDashboard = () => {
       icon: Globe,
       href: '/admin/translations',
     },
+    {
+      title: 'Languages',
+      description: 'Enable/disable languages and translation settings',
+      icon: Languages,
+      href: '/admin/languages',
+    },
   ];
 
   return (

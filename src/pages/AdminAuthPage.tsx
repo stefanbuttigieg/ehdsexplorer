@@ -5,11 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import Layout from '@/components/Layout';
 import { supabase } from '@/integrations/supabase/client';
-import { Info, ArrowLeft } from 'lucide-react';
+import { Info, ArrowLeft, UserPlus, LogIn } from 'lucide-react';
 
 const authSchema = z.object({
   email: z.string().email('Invalid email address').max(255),
@@ -23,9 +24,11 @@ const emailSchema = z.object({
 const AdminAuthPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
   const { user, loading, signIn, isEditor } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -42,10 +45,20 @@ const AdminAuthPage = () => {
       return;
     }
 
-    if (!loading && user && isEditor) {
-      navigate('/admin');
+    if (!loading && user) {
+      // If user is an editor/admin, go to admin dashboard
+      if (isEditor) {
+        navigate('/admin');
+      } else {
+        // Regular user - redirect to home with a message
+        toast({
+          title: 'Welcome!',
+          description: 'You have read-only access. An admin can grant you editor permissions.',
+        });
+        navigate('/');
+      }
     }
-  }, [user, loading, isEditor, navigate]);
+  }, [user, loading, isEditor, navigate, toast]);
 
   // Also listen for auth state changes to detect invite/recovery
   useEffect(() => {
@@ -90,6 +103,52 @@ const AdminAuthPage = () => {
       });
     } else {
       toast({ title: 'Signed in successfully' });
+    }
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const validation = authSchema.safeParse({ email, password });
+    if (!validation.success) {
+      toast({
+        title: 'Validation Error',
+        description: validation.error.errors[0].message,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast({
+        title: 'Validation Error',
+        description: 'Passwords do not match',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: window.location.origin,
+      },
+    });
+    setIsLoading(false);
+
+    if (error) {
+      toast({
+        title: 'Sign Up Failed',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } else {
+      toast({
+        title: 'Account created!',
+        description: 'You now have read-only access. An admin can grant you editor permissions.',
+      });
     }
   };
 
@@ -162,8 +221,8 @@ const AdminAuthPage = () => {
               </>
             ) : (
               <>
-                <CardTitle className="text-2xl font-serif">Admin Access</CardTitle>
-                <CardDescription>Sign in to manage EHDS content</CardDescription>
+                <CardTitle className="text-2xl font-serif">EHDS Explorer</CardTitle>
+                <CardDescription>Sign in or create an account</CardDescription>
               </>
             )}
           </CardHeader>
@@ -196,7 +255,7 @@ const AdminAuthPage = () => {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="admin@example.com"
+                      placeholder="you@example.com"
                       required
                     />
                   </div>
@@ -207,52 +266,108 @@ const AdminAuthPage = () => {
               )
             ) : (
               <>
-                <form onSubmit={handleSignIn} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-email">Email</Label>
-                    <Input
-                      id="signin-email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="admin@example.com"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="signin-password">Password</Label>
-                      <Button
-                        type="button"
-                        variant="link"
-                        className="px-0 h-auto text-xs"
-                        onClick={() => setShowForgotPassword(true)}
-                      >
-                        Forgot password?
+                <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'signin' | 'signup')}>
+                  <TabsList className="grid w-full grid-cols-2 mb-4">
+                    <TabsTrigger value="signin" className="gap-1">
+                      <LogIn className="h-4 w-4" />
+                      Sign In
+                    </TabsTrigger>
+                    <TabsTrigger value="signup" className="gap-1">
+                      <UserPlus className="h-4 w-4" />
+                      Sign Up
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="signin">
+                    <form onSubmit={handleSignIn} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="signin-email">Email</Label>
+                        <Input
+                          id="signin-email"
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="you@example.com"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="signin-password">Password</Label>
+                          <Button
+                            type="button"
+                            variant="link"
+                            className="px-0 h-auto text-xs"
+                            onClick={() => setShowForgotPassword(true)}
+                          >
+                            Forgot password?
+                          </Button>
+                        </div>
+                        <Input
+                          id="signin-password"
+                          type="password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <Button type="submit" className="w-full" disabled={isLoading}>
+                        {isLoading ? 'Signing in...' : 'Sign In'}
                       </Button>
+                    </form>
+                  </TabsContent>
+
+                  <TabsContent value="signup">
+                    <form onSubmit={handleSignUp} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-email">Email</Label>
+                        <Input
+                          id="signup-email"
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="you@example.com"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-password">Password</Label>
+                        <Input
+                          id="signup-password"
+                          type="password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Min. 6 characters"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="signup-confirm">Confirm Password</Label>
+                        <Input
+                          id="signup-confirm"
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="Confirm your password"
+                          required
+                        />
+                      </div>
+                      <Button type="submit" className="w-full" disabled={isLoading}>
+                        {isLoading ? 'Creating account...' : 'Create Account'}
+                      </Button>
+                    </form>
+
+                    <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <Info className="h-4 w-4 mt-0.5 shrink-0" />
+                        <p>
+                          New accounts have read-only access. An administrator can grant you 
+                          editor or admin permissions after you sign up.
+                        </p>
+                      </div>
                     </div>
-                    <Input
-                      id="signin-password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? 'Signing in...' : 'Sign In'}
-                  </Button>
-                </form>
-                
-                <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-                  <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                    <Info className="h-4 w-4 mt-0.5 shrink-0" />
-                    <p>
-                      New users are added by invitation only. If you've received an invitation email, 
-                      click the link in the email to set up your account.
-                    </p>
-                  </div>
-                </div>
+                  </TabsContent>
+                </Tabs>
               </>
             )}
           </CardContent>

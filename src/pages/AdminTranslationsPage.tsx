@@ -60,7 +60,8 @@ const AdminTranslationsPage = () => {
     }
   }, [languages, selectedLanguage]);
 
-  const activeLanguages = languages?.filter(l => l.is_active && l.code !== 'en') || [];
+  // Show all non-English languages, not just active ones - allows working on translations before activation
+  const availableLanguages = languages?.filter(l => l.code !== 'en') || [];
 
   if (loading || !user || !isEditor) {
     return (
@@ -108,19 +109,24 @@ const AdminTranslationsPage = () => {
             <div className="flex flex-wrap gap-2">
               {languagesLoading ? (
                 <p className="text-muted-foreground">Loading languages...</p>
-              ) : activeLanguages.length === 0 ? (
-                <p className="text-muted-foreground">No active languages configured. Contact an administrator.</p>
+              ) : availableLanguages.length === 0 ? (
+                <p className="text-muted-foreground">No languages configured. Add languages in the Languages admin panel.</p>
               ) : (
-                activeLanguages.map((lang) => (
+                availableLanguages.map((lang) => (
                   <Button
                     key={lang.code}
                     variant={selectedLanguage === lang.code ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setSelectedLanguage(lang.code)}
-                    className="gap-1"
+                    className={`gap-1 ${!lang.is_active ? 'opacity-70 border-dashed' : ''}`}
                   >
                     {lang.native_name}
                     <span className="text-xs opacity-70">({lang.code.toUpperCase()})</span>
+                    {!lang.is_active && (
+                      <Badge variant="secondary" className="text-[10px] px-1 py-0 ml-1">
+                        Inactive
+                      </Badge>
+                    )}
                   </Button>
                 ))
               )}

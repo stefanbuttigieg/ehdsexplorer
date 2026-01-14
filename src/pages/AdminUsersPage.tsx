@@ -23,7 +23,7 @@ interface UserWithRoles {
   email: string | null;
   display_name: string | null;
   created_at: string;
-  roles: Array<{ id: string; role: "admin" | "editor" }>;
+  roles: Array<{ id: string; role: "admin" | "editor" | "super_admin" }>;
 }
 
 interface Invitation {
@@ -576,21 +576,23 @@ const AdminUsersPage = () => {
                           </p>
                           <div className="flex items-center gap-2 flex-wrap">
                             {userItem.roles.length === 0 ? (
-                              <span className="text-sm text-muted-foreground">No special roles</span>
+                              <Badge variant="outline" className="text-muted-foreground">
+                                Read-only
+                              </Badge>
                             ) : (
                               userItem.roles.map((role) => (
                                 <Badge
                                   key={role.id}
-                                  variant={role.role === "admin" ? "default" : "secondary"}
+                                  variant={role.role === "admin" || role.role === "super_admin" ? "default" : "secondary"}
                                   className="flex items-center gap-1"
                                 >
-                                  {role.role === "admin" ? (
+                                  {role.role === "admin" || role.role === "super_admin" ? (
                                     <ShieldCheck className="h-3 w-3" />
                                   ) : (
                                     <Shield className="h-3 w-3" />
                                   )}
-                                  {role.role}
-                                  {userItem.id !== user?.id && (
+                                  {role.role === "super_admin" ? "Super Admin" : role.role}
+                                  {userItem.id !== user?.id && role.role !== "super_admin" && (
                                     <button
                                       onClick={() => handleRemoveRole(role.id)}
                                       className="ml-1 hover:bg-background/20 rounded-full p-0.5"

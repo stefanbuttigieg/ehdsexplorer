@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const CHANGELOG_URL = "https://raw.githubusercontent.com/ehds-explorer/ehds-regulation-explorer/main/CHANGELOG.md";
+// Changelog should be provided in request body or stored in page_content table
 
 const PRODUCT_UPDATES_PROMPT = `You are a product communications expert for the EHDS Regulation Explorer, a digital platform for exploring EU health data space regulations.
 
@@ -55,18 +55,7 @@ serve(async (req) => {
       // No body provided, will fetch from URL or use fallback
     }
 
-    // Try to fetch changelog from GitHub if not provided
-    if (!changelogContent) {
-      try {
-        const changelogResponse = await fetch(CHANGELOG_URL);
-        if (changelogResponse.ok) {
-          changelogContent = await changelogResponse.text();
-          console.log("Fetched changelog from GitHub");
-        }
-      } catch (e) {
-        console.log("Could not fetch from GitHub, will use local data");
-      }
-    }
+    // If not provided, try to fetch from page_content table
 
     // If still no changelog, fetch from page_content table
     if (!changelogContent) {

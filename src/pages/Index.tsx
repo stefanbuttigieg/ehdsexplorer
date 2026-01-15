@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { SearchCommand } from "@/components/SearchCommand";
 import { Search, Book, FileText, Scale, ListChecks, Bookmark, Files, Clock, MessageSquare, ExternalLink, Gamepad2, Newspaper, StickyNote, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,7 +15,6 @@ import { useReadingProgress } from "@/hooks/useReadingProgress";
 import { RecitalsQuickExplorer } from "@/components/RecitalsQuickExplorer";
 import { ArticlesQuickExplorer } from "@/components/ArticlesQuickExplorer";
 import { ContinueReading } from "@/components/ContinueReading";
-import { SignupCTA } from "@/components/SignupCTA";
 import { differenceInDays, parse, isAfter, isBefore, format } from "date-fns";
 
 const getFeedbackStatus = (deadline: string) => {
@@ -84,9 +82,6 @@ const Index = () => {
             <SearchCommand open={searchOpen} onOpenChange={setSearchOpen} />
           </div>
         </section>
-
-        {/* Signup CTA for non-logged-in users */}
-        <SignupCTA />
 
         {/* Continue Reading */}
         <ContinueReading />

@@ -22,6 +22,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import AIAssistant from "@/components/AIAssistant";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { SignupCTA } from "@/components/SignupCTA";
 
 interface LayoutProps {
   children: ReactNode;
@@ -87,6 +88,7 @@ const Layout = ({ children }: LayoutProps) => {
               </Button>
             </Link>
           )}
+          <SignupCTA />
           <LanguageSelector variant="compact" />
           <TourButton onClick={startTour} />
           <ReportIssueButton />
@@ -140,6 +142,7 @@ const Layout = ({ children }: LayoutProps) => {
                 </Button>
               </Link>
             )}
+            <SignupCTA />
             <LanguageSelector variant="compact" />
             <TourButton onClick={startTour} />
             <ReportIssueButton />

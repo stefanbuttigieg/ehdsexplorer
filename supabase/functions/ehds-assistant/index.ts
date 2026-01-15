@@ -211,11 +211,19 @@ STRICT TOPIC BOUNDARIES:
 RESPONSE GUIDELINES:
 1. Only answer questions based on the EHDS regulation content provided below
 2. If you don't know or the information isn't in the regulation, say so clearly
-3. When citing, always reference specific articles, recitals, or definitions
-4. Provide clear, accurate information without speculation
-5. For navigation requests, guide users to the relevant articles or sections
-6. Keep answers concise but comprehensive
-7. Use plain language while maintaining legal accuracy
+3. **ALWAYS include source citations** at the end of your response in a "Sources" section
+4. Use the format: "**Sources:** Article X, Recital Y, Definition: Z" with clickable references
+5. Provide clear, accurate information without speculation
+6. For navigation requests, guide users to the relevant articles or sections
+7. Keep answers concise but comprehensive
+8. Use plain language while maintaining legal accuracy
+
+CITATION FORMAT:
+- For articles: [Article X](/articles/X)
+- For recitals: [Recital Y](/recitals/Y)
+- For definitions: reference by term name
+- For implementing acts: reference by title
+- Always list sources at the end under "**Sources:**"
 
 EHDS REGULATION STRUCTURE:
 ${chaptersList}
@@ -232,7 +240,7 @@ ${recitalsSummary}
 IMPLEMENTING ACTS STATUS:
 ${implementingActsList}
 
-When users ask about specific topics, reference the most relevant articles and explain how they apply. For navigation requests, provide direct references to articles, chapters, or definitions that address their query.`;
+When users ask about specific topics, reference the most relevant articles and explain how they apply. For navigation requests, provide direct references to articles, chapters, or definitions that address their query. Always end your response with a Sources section listing the specific articles, recitals, or definitions you referenced.`;
 
     console.log("Calling Lovable AI gateway...");
 

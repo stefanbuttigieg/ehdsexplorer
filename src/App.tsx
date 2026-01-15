@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { ComparisonProvider } from "@/contexts/ComparisonContext";
 import MaintenanceGuard from "@/components/MaintenanceGuard";
 import UmamiAnalytics from "@/components/UmamiAnalytics";
 import { ComparisonBar } from "@/components/ComparisonBar";
@@ -83,14 +84,15 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="system" storageKey="ehds-theme">
       <LanguageProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <UmamiAnalytics />
-            <CookieConsentBanner />
-            <ComparisonBar />
-            <MaintenanceGuard>
+        <ComparisonProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <UmamiAnalytics />
+              <CookieConsentBanner />
+              <ComparisonBar />
+              <MaintenanceGuard>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/overview" element={<OverviewPage />} />
@@ -154,6 +156,7 @@ const App = () => (
           </MaintenanceGuard>
           </BrowserRouter>
         </TooltipProvider>
+        </ComparisonProvider>
       </LanguageProvider>
     </ThemeProvider>
   </QueryClientProvider>

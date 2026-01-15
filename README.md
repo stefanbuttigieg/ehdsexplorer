@@ -48,6 +48,16 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Searchable content** within each implementing act
 - **Section-based article organization** for complex acts
 
+### 🗺️ National EHDS Entities
+- **Directory of DHAs and HDABs** across all 27 EU member states
+- **Digital Health Authorities (DHAs)** - Primary use of health data (citizen access to EHRs)
+- **Health Data Access Bodies (HDABs)** - Secondary use of health data (research, policy)
+- **Interactive EU map** showing countries with designated entities
+- **Color-coded entity types** - Blue for DHAs, purple for HDABs
+- **Status tracking** - Active, pending, planned, or inactive
+- **Contact information** - Email, phone, website, and address for each entity
+- **Filterable directory** - Search by name, country, type, or status
+
 ### 🔗 External Resources Linking
 - **Joint Action Deliverables** - Links to deliverables from EHDS-related joint actions
 - **Published Works** - Academic research and publications linked to articles and implementing acts
@@ -184,7 +194,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [X] Plain Language Version of Legal Text - side-by-side to legal text (with admin management)
 - [X] Real-time Umami Analytics Dashboard for Admins
 - [X] Rating System for Translation (especially Plain language)
-- [X] AI-powered Q&A about the regulation
+- [X] AI-powered Q&A about the regulation with voice input/output
 - [X] Comparison view between articles
 - [X] Annotation and note-taking
 - [X] Collaboration features for teams
@@ -192,12 +202,14 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [X] Sign-up of new users and creation of profiles
 - [X] Multi-language support (all 24 EU languages)
 - [X] API for third-party integrations
+- [X] National EHDS Entities directory (DHAs and HDABs)
 
 ## 🚀 Planned Features and Actions
 
 ### Near-term - Q1 and Q2 2026
 - [X] Update Help Centres content (Public-facing and Admin)
 - [X] Add link and integration to Comitology Register in the Implementing Acts Pages
+- [X] Map of officially designated Digital Health Authorities and Health Data Access Bodies
 - [ ] Add links to existing regulatory-focused portals
 - [ ] Help Centre Content Manager
 - [ ] Website Layout Manager
@@ -207,7 +219,6 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [ ] Complete content updates - Joint Action Deliverables
 - [ ] Complete content updates - Footnotes
 - [ ] Complete content updates - Published Works
-- [ ] Map of officially designated Digital Health Authorities and Health Data Access Bodies
 - [ ] Add links to relevant national legislations
 
 ### Medium-term - Q2 to Q4 2026

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote, HelpCircle, BookOpenCheck, Mail, Newspaper, UserCircle, Languages, ClipboardCheck, Bot, Globe, Sparkles } from 'lucide-react';
+import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote, HelpCircle, BookOpenCheck, Mail, Newspaper, UserCircle, Languages, ClipboardCheck, Bot, Globe, Sparkles, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -168,6 +168,12 @@ const AdminDashboard = () => {
       description: 'Enable/disable languages and translation settings',
       icon: Languages,
       href: '/admin/languages',
+    },
+    {
+      title: 'Health Authorities',
+      description: 'Manage DHAs and HDABs across EU member states',
+      icon: MapPin,
+      href: '/admin/health-authorities',
     },
   ];
 

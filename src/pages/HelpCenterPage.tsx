@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { 
   BookOpen, FileText, Scale, Files, ListChecks, Search, Bookmark,
   ArrowLeft, ChevronRight, Info, Keyboard, HelpCircle, ExternalLink,
-  Home, MessageCircle, Eye, Accessibility as AccessibilityIcon
+  Home, MessageCircle, Eye, Accessibility as AccessibilityIcon, UserPlus, Sparkles
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,8 +14,10 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import Layout from '@/components/Layout';
+import { useAuth } from '@/hooks/useAuth';
 
 const HelpCenterPage = () => {
+  const { user } = useAuth();
   return (
     <Layout>
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
@@ -131,6 +133,39 @@ const HelpCenterPage = () => {
             </CardContent>
           </Card>
         </section>
+
+        {/* Sign Up CTA - Only show if not logged in */}
+        {!user && (
+          <Card className="mb-8 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-primary/20">
+            <CardContent className="pt-6">
+              <div className="flex flex-col md:flex-row items-center gap-6">
+                <div className="flex-shrink-0 w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Sparkles className="h-8 w-8 text-primary" />
+                </div>
+                <div className="flex-1 text-center md:text-left">
+                  <h3 className="text-xl font-bold mb-2">Unlock More Features</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Create a free account to save bookmarks across devices, take personal notes, 
+                    collaborate with teams, and receive alerts on implementing acts updates.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
+                    <Link to="/admin/auth">
+                      <Button size="lg" className="gap-2">
+                        <UserPlus className="h-4 w-4" />
+                        Sign Up Free
+                      </Button>
+                    </Link>
+                    <Link to="/admin/auth">
+                      <Button variant="outline" size="lg">
+                        Already have an account? Log in
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Separator className="my-8" />
 

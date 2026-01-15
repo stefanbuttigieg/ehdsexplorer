@@ -27,6 +27,13 @@ export const useKeyboardShortcuts = (handlers: ShortcutHandlers = {}) => {
       const articleMatch = location.pathname.match(/\/article\/(\d+)/);
       const currentArticleId = articleMatch ? parseInt(articleMatch[1]) : null;
 
+      // Ctrl+Shift+C for Compare page
+      if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "c") {
+        event.preventDefault();
+        navigate("/compare");
+        return;
+      }
+
       switch (event.key) {
         case "ArrowLeft":
         case "j":
@@ -96,5 +103,6 @@ export const shortcuts = [
   { key: "/ or s", description: "Focus search" },
   { key: "h", description: "Go home" },
   { key: "?", description: "Show shortcuts" },
+  { key: "Ctrl+Shift+C", description: "Open Compare" },
   { key: "Esc", description: "Unfocus input" },
 ];

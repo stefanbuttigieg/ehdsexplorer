@@ -171,9 +171,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Terms of Service** page
 - **Accessibility Statement** page
 
-## 🚀 Planned Features
-
-### Near-term
+## 🚀 Completed Features
 - [X] Search result highlighting showing matched text
 - [X] Recent searches history
 - [X] Export bookmarks to PDF/JSON
@@ -186,20 +184,35 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [X] Plain Language Version of Legal Text - side-by-side to legal text (with admin management)
 - [X] Real-time Umami Analytics Dashboard for Admins
 - [X] Rating System for Translation (especially Plain language)
-
-### Medium-term
 - [X] AI-powered Q&A about the regulation
-- [ ] Comparison view between articles
+- [X] Comparison view between articles
 - [X] Annotation and note-taking
 - [X] Collaboration features for teams
 - [X] Email alerts for implementing act status changes
-- [ ] Sign-up of new users and creation of profiles
+- [X] Sign-up of new users and creation of profiles
+- [X] Multi-language support (all 24 EU languages)
+- [X] API for third-party integrations
 
-### Long-term
-- [x] Multi-language support (all 24 EU languages)
+## 🚀 Planned Features and Actions
+
+### Near-term - Q1 and Q2 2026
+- [ ] Update Help Centres content (Public-facing and Admin)
+- [ ] Complete content updates - Implementing Acts
+- [ ] Complete content updates - Annexes
+- [ ] Complete content updates - Language Translations
+- [ ] Complete content updates - Joint Action Deliverables
+- [ ] Complete content updates - Footnotes
+- [ ] Complete content updates - Published Works
+- [ ] Map of officially designated Digital Health Authorities and Health Data Access Bodies
+
+### Medium-term - Q2 to Q4 2026
 - [ ] Integration with national implementation trackers
-- [x] API for third-party integrations
 - [ ] Mobile apps (iOS/Android)
+- [ ] Linkages with other EU Acts and Regulations such as AI Act, MDR, Data Act, Data Governance Act, GDPR and more
+
+## Long-term - Q1 to Q4 2027
+- [ ] Funding and Support for Project
+- [ ] Set up EHDS Explorer Team for long-term project sustainability
 
 ## 🔌 Public API
 

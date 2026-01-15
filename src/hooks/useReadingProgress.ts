@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useAchievements } from "./useAchievements";
 
 const STORAGE_KEY = "ehds-reading-progress";
 
@@ -12,6 +13,7 @@ export const useReadingProgress = () => {
     readArticles: [],
     lastRead: null,
   });
+  const { checkAndUnlock } = useAchievements();
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -39,9 +41,14 @@ export const useReadingProgress = () => {
         lastRead: articleId,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newProgress));
+      
+      // Check for reading achievements
+      const articleCount = newProgress.readArticles.length;
+      checkAndUnlock('articles_read', articleCount);
+      
       return newProgress;
     });
-  }, []);
+  }, [checkAndUnlock]);
 
   const isRead = useCallback((articleId: number) => {
     return progress.readArticles.includes(articleId);

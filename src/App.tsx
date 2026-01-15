@@ -9,6 +9,7 @@ import { ComparisonProvider } from "@/contexts/ComparisonContext";
 import MaintenanceGuard from "@/components/MaintenanceGuard";
 import UmamiAnalytics from "@/components/UmamiAnalytics";
 import { ComparisonBar } from "@/components/ComparisonBar";
+import { AchievementUnlockedToast } from "@/components/achievements/AchievementUnlockedToast";
 import Index from "./pages/Index";
 import ArticlePage from "./pages/ArticlePage";
 import ArticlesPage from "./pages/ArticlesPage";
@@ -70,6 +71,7 @@ import TeamsPage from "./pages/TeamsPage";
 import UnsubscribePage from "./pages/UnsubscribePage";
 import VerifySubscriptionPage from "./pages/VerifySubscriptionPage";
 import ManageSubscriptionPage from "./pages/ManageSubscriptionPage";
+import AchievementsPage from "./pages/AchievementsPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -81,6 +83,9 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+// Wrapper to use achievements hook within providers
+const AchievementToastWrapper = () => <AchievementUnlockedToast />;
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -94,6 +99,7 @@ const App = () => (
               <UmamiAnalytics />
               <CookieConsentBanner />
               <ComparisonBar />
+              <AchievementToastWrapper />
               <MaintenanceGuard>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -122,6 +128,7 @@ const App = () => (
             <Route path="/news/:id" element={<NewsDetailPage />} />
             <Route path="/help" element={<HelpCenterPage />} />
             <Route path="/notes" element={<NotesPage />} />
+            <Route path="/achievements" element={<AchievementsPage />} />
             <Route path="/teams" element={<TeamsPage />} />
             <Route path="/unsubscribe" element={<UnsubscribePage />} />
             <Route path="/verify-subscription" element={<VerifySubscriptionPage />} />

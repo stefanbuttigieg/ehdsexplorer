@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, RotateCcw, Trophy, Sparkles, Timer, CheckCircle2 } from "lucide-react";
 import { useDefinitions } from "@/hooks/useDefinitions";
+import { useAchievements } from "@/hooks/useAchievements";
 import { cn } from "@/lib/utils";
 
 interface GameCard {
@@ -20,6 +21,7 @@ interface GameCard {
 const MatchGamePage = () => {
   const navigate = useNavigate();
   const { data: definitions, isLoading } = useDefinitions();
+  const { checkAndUnlock } = useAchievements();
   
   const [cards, setCards] = useState<GameCard[]>([]);
   const [selectedCards, setSelectedCards] = useState<GameCard[]>([]);
@@ -135,6 +137,22 @@ const MatchGamePage = () => {
             if (newMatches === difficulty) {
               setGameComplete(true);
               setIsPlaying(false);
+              
+              // Check for game achievements
+              checkAndUnlock('match_games', 1);
+              
+              // Check for speed achievement (under 60 seconds)
+              if (timer < 60) {
+                checkAndUnlock('match_speed', 60);
+              }
+              
+              // Check for perfect game (no wrong attempts)
+              if (attempts === difficulty) {
+                checkAndUnlock('match_perfect', 1);
+              }
+              
+              // Track definitions studied
+              checkAndUnlock('definitions_studied', difficulty);
             }
             return newMatches;
           });

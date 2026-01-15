@@ -18,6 +18,7 @@ import {
   GraduationCap
 } from "lucide-react";
 import { useDefinitions } from "@/hooks/useDefinitions";
+import { useAchievements } from "@/hooks/useAchievements";
 import { cn } from "@/lib/utils";
 
 interface FlashcardResult {
@@ -28,6 +29,7 @@ interface FlashcardResult {
 const FlashcardGamePage = () => {
   const navigate = useNavigate();
   const { data: definitions, isLoading } = useDefinitions();
+  const { checkAndUnlock } = useAchievements();
   
   const [cards, setCards] = useState<Array<{ id: number; term: string; definition: string }>>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -72,6 +74,9 @@ const FlashcardGamePage = () => {
       setIsFlipped(false);
     } else {
       setIsComplete(true);
+      // Track flashcard session completion and definitions studied
+      checkAndUnlock('flashcard_sessions', results.length + 1);
+      checkAndUnlock('definitions_studied', cards.length);
     }
   };
 

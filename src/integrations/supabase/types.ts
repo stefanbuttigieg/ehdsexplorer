@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievement_definitions: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string
+          icon: string
+          id: string
+          is_active: boolean | null
+          name: string
+          points: number
+          requirement_type: string
+          requirement_value: number
+          tier: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description: string
+          icon?: string
+          id: string
+          is_active?: boolean | null
+          name: string
+          points?: number
+          requirement_type: string
+          requirement_value: number
+          tier?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string
+          icon?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          points?: number
+          requirement_type?: string
+          requirement_value?: number
+          tier?: string
+        }
+        Relationships: []
+      }
       ai_assistant_conversations: {
         Row: {
           created_at: string
@@ -1994,6 +2036,30 @@ export type Database = {
             referencedColumns: ["code"]
           },
         ]
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          id: string
+          progress: number | null
+          unlocked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          id?: string
+          progress?: number | null
+          unlocked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          id?: string
+          progress?: number | null
+          unlocked_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       user_invitations: {
         Row: {

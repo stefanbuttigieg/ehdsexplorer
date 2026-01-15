@@ -13,6 +13,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.8.0] - 2026-01-15
+
+### Added
+
+#### National EHDS Entities Directory
+- New public page at `/health-authorities` for browsing Digital Health Authorities (DHAs) and Health Data Access Bodies (HDABs)
+- Interactive EU map visualization showing countries with designated entities
+- Color-coded entity types: blue for DHAs, purple for HDABs
+- Filter entities by type (DHA/HDAB), status (active, pending, planned, inactive), and search
+- Entity cards displaying contact information, websites, and descriptions
+- Explanatory info cards differentiating DHA and HDAB responsibilities
+- Database table `health_authorities` with full CRUD operations and RLS policies
+
+#### Admin Entity Management
+- New admin page at `/admin/health-authorities` for managing national entities
+- Create, edit, and delete DHAs and HDABs for all 27 EU member states
+- Track entity status: active, pending, planned, or inactive
+- Store contact details, websites, addresses, and EHDS-specific roles
+
+#### Enhanced AI Assistant
+- Voice input via ElevenLabs Speech-to-Text integration
+- Text-to-Speech playback for AI responses using ElevenLabs
+- Improved system prompt with stricter topic boundaries
+- Citation links to articles and recitals in AI responses
+- Stop playback control for TTS audio
+
+---
+
 ## [1.7.0] - 2026-01-12
 
 ### Added

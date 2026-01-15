@@ -50,9 +50,14 @@ const statusColors: Record<AuthorityStatus, string> = {
   inactive: 'bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/20',
 };
 
-const typeLabels: Record<AuthorityType, string> = {
-  digital_health_authority: 'Digital Health Authority',
-  health_data_access_body: 'Health Data Access Body',
+const typeLabels: Record<AuthorityType, { short: string; full: string }> = {
+  digital_health_authority: { short: 'DHA', full: 'Digital Health Authority' },
+  health_data_access_body: { short: 'HDAB', full: 'Health Data Access Body' },
+};
+
+const typeColors: Record<AuthorityType, string> = {
+  digital_health_authority: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/30',
+  health_data_access_body: 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/30',
 };
 
 function AuthorityCard({ authority }: { authority: HealthAuthority }) {
@@ -61,11 +66,16 @@ function AuthorityCard({ authority }: { authority: HealthAuthority }) {
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2">
-            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+            <div className={cn(
+              "h-10 w-10 rounded-lg flex items-center justify-center",
+              authority.authority_type === 'digital_health_authority' 
+                ? "bg-blue-500/10" 
+                : "bg-purple-500/10"
+            )}>
               {authority.authority_type === 'digital_health_authority' ? (
-                <Building2 className="h-5 w-5 text-primary" />
+                <Building2 className="h-5 w-5 text-blue-500" />
               ) : (
-                <Shield className="h-5 w-5 text-primary" />
+                <Shield className="h-5 w-5 text-purple-500" />
               )}
             </div>
             <div>
@@ -82,8 +92,8 @@ function AuthorityCard({ authority }: { authority: HealthAuthority }) {
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        <Badge variant="secondary" className="text-xs">
-          {typeLabels[authority.authority_type]}
+        <Badge variant="outline" className={cn("text-xs", typeColors[authority.authority_type])}>
+          {typeLabels[authority.authority_type].short} - {typeLabels[authority.authority_type].full}
         </Badge>
         
         {authority.description && (
@@ -174,7 +184,7 @@ function MapView({ authorities, selectedCountry, onCountryClick }: {
       <div className="absolute bottom-2 left-2 bg-background/90 backdrop-blur-sm rounded-md p-2 text-xs space-y-1">
         <div className="flex items-center gap-2">
           <div className="h-4 w-4 rounded-full bg-primary" />
-          <span>Has authorities</span>
+          <span>Has entities</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="h-4 w-4 rounded-full bg-muted" />
@@ -233,17 +243,47 @@ export default function HealthAuthoritiesPage() {
   return (
     <Layout>
       <Helmet>
-        <title>Health Authorities Directory | EHDS Explorer</title>
-        <meta name="description" content="Directory of Digital Health Authorities and Health Data Access Bodies across EU member states implementing the EHDS regulation." />
+        <title>National EHDS Entities | EHDS Explorer</title>
+        <meta name="description" content="Directory of Digital Health Authorities (DHAs) and Health Data Access Bodies (HDABs) across EU member states implementing the EHDS regulation." />
       </Helmet>
 
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold mb-2">Health Authorities Directory</h1>
+          <h1 className="text-3xl font-bold mb-2">National EHDS Entities</h1>
           <p className="text-muted-foreground">
-            Explore Digital Health Authorities and Health Data Access Bodies across EU member states.
+            Explore Digital Health Authorities (DHAs) and Health Data Access Bodies (HDABs) across EU member states.
           </p>
+        </div>
+
+        {/* Entity Type Info Cards */}
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card className="border-l-4 border-l-blue-500">
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-blue-500" />
+                <CardTitle className="text-lg">Digital Health Authorities (DHAs)</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Responsible for primary use of health data - ensuring citizens can access and control their electronic health records across the EU.
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="border-l-4 border-l-purple-500">
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-purple-500" />
+                <CardTitle className="text-lg">Health Data Access Bodies (HDABs)</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Responsible for secondary use of health data - managing access requests for research, innovation, and policy-making purposes.
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
         {/* View Toggle & Filters */}
@@ -340,7 +380,7 @@ export default function HealthAuthoritiesPage() {
             {/* Results count */}
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                {filteredAuthorities.length} {filteredAuthorities.length === 1 ? 'authority' : 'authorities'} found
+                {filteredAuthorities.length} {filteredAuthorities.length === 1 ? 'entity' : 'entities'} found
               </p>
             </div>
 
@@ -355,10 +395,10 @@ export default function HealthAuthoritiesPage() {
               <Card className="text-center py-12">
                 <CardContent>
                   <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="font-semibold mb-2">No authorities found</h3>
+                  <h3 className="font-semibold mb-2">No entities found</h3>
                   <p className="text-sm text-muted-foreground">
                     {authorities?.length === 0 
-                      ? "No health authorities have been added yet. Check back later as member states designate their authorities."
+                      ? "No national entities have been added yet. Check back later as member states designate their DHAs and HDABs."
                       : "Try adjusting your filters or search query."}
                   </p>
                 </CardContent>

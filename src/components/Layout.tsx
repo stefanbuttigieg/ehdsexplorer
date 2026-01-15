@@ -65,7 +65,7 @@ const Layout = ({ children }: LayoutProps) => {
     { path: "/recitals", icon: Scale, label: "Recitals" },
     { path: "/annexes", icon: Files, label: "Annexes" },
     { path: "/implementing-acts", icon: ListChecks, label: "Implementing Acts" },
-    { path: "/health-authorities", icon: MapPin, label: "Health Authorities" },
+    { path: "/health-authorities", icon: MapPin, label: "National Entities" },
     { path: "/news", icon: Newspaper, label: "News" },
     { path: "/bookmarks", icon: Bookmark, label: "Bookmarks" },
     { path: "/notes", icon: StickyNote, label: "Notes" },

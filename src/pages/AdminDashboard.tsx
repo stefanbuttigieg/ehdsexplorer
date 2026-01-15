@@ -170,8 +170,8 @@ const AdminDashboard = () => {
       href: '/admin/languages',
     },
     {
-      title: 'Health Authorities',
-      description: 'Manage DHAs and HDABs across EU member states',
+      title: 'National EHDS Entities',
+      description: 'Manage Digital Health Authorities (DHAs) and Health Data Access Bodies (HDABs)',
       icon: MapPin,
       href: '/admin/health-authorities',
     },

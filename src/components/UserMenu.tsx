@@ -41,14 +41,14 @@ export function UserMenu() {
 
   if (!user) {
     return (
-      <div className="flex items-center gap-1.5">
-        <Link to="/admin/auth">
-          <Button variant="ghost" size="sm" className="text-sm font-medium">
+      <div className="flex items-center gap-2 w-full">
+        <Link to="/admin/auth" className="flex-1">
+          <Button variant="outline" size="sm" className="w-full text-sm font-medium">
             Sign In
           </Button>
         </Link>
-        <Link to="/admin/auth">
-          <Button size="sm" className="text-sm font-medium">
+        <Link to="/admin/auth" className="flex-1">
+          <Button size="sm" className="w-full text-sm font-medium">
             Sign Up
           </Button>
         </Link>

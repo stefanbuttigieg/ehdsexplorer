@@ -24,6 +24,7 @@ import { JsonLdMetadata } from "@/components/JsonLdMetadata";
 import { EliReference } from "@/components/EliReference";
 import PlainLanguageView from "@/components/PlainLanguageView";
 import { AnnotatedContent } from "@/components/AnnotatedContent";
+import { CompareButton } from "@/components/CompareButton";
 
 const ArticlePage = () => {
   const { id } = useParams();
@@ -104,6 +105,14 @@ const ArticlePage = () => {
             </div>
           </div>
           <div className="flex gap-2">
+            <CompareButton
+              item={{
+                id: articleId.toString(),
+                type: "article",
+                title: `Article ${article.article_number}`,
+                number: article.article_number,
+              }}
+            />
             <PrintButton />
             <Button
               variant={isBookmarked('article', articleId) ? "default" : "outline"}

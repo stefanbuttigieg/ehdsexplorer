@@ -14,6 +14,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { differenceInDays, parse, isAfter, isBefore } from "date-fns";
 import ImplementingActContent from "@/components/ImplementingActContent";
 import { SubscribeAlertButton } from "@/components/SubscribeAlertButton";
+import { CompareButton } from "@/components/CompareButton";
 
 const parseFeedbackDeadline = (deadline: string) => {
   const parts = deadline.split(" - ");
@@ -93,6 +94,13 @@ const ImplementingActDetail = () => {
             <h1 className="text-3xl font-bold font-serif">{act.title}</h1>
           </div>
           <div className="flex items-center gap-2">
+            <CompareButton
+              item={{
+                id: act.id,
+                type: "implementing-act",
+                title: act.title,
+              }}
+            />
             <SubscribeAlertButton 
               implementingActId={act.id} 
               implementingActTitle={act.title} 

@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import MaintenanceGuard from "@/components/MaintenanceGuard";
 import UmamiAnalytics from "@/components/UmamiAnalytics";
+import { ComparisonBar } from "@/components/ComparisonBar";
 import Index from "./pages/Index";
 import ArticlePage from "./pages/ArticlePage";
 import ArticlesPage from "./pages/ArticlesPage";
@@ -21,6 +22,7 @@ import OverviewPage from "./pages/OverviewPage";
 import BookmarksPage from "./pages/BookmarksPage";
 import AnnexesPage from "./pages/AnnexesPage";
 import AnnexDetailPage from "./pages/AnnexDetailPage";
+import ComparePage from "./pages/ComparePage";
 import AdminAuthPage from "./pages/AdminAuthPage";
 import AdminSetPasswordPage from "./pages/AdminSetPasswordPage";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -87,6 +89,7 @@ const App = () => (
           <BrowserRouter>
             <UmamiAnalytics />
             <CookieConsentBanner />
+            <ComparisonBar />
             <MaintenanceGuard>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -103,6 +106,7 @@ const App = () => (
             <Route path="/annexes" element={<AnnexesPage />} />
             <Route path="/annex/:id" element={<AnnexDetailPage />} />
             <Route path="/bookmarks" element={<BookmarksPage />} />
+            <Route path="/compare" element={<ComparePage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="/cookies-policy" element={<CookiesPolicyPage />} />
             <Route path="/terms-of-service" element={<TermsOfServicePage />} />

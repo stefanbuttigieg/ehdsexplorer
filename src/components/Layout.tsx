@@ -22,7 +22,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import AIAssistant from "@/components/AIAssistant";
 import { LanguageSelector } from "@/components/LanguageSelector";
-import { SignupCTA } from "@/components/SignupCTA";
+import { UserMenu } from "@/components/UserMenu";
 
 interface LayoutProps {
   children: ReactNode;
@@ -82,14 +82,6 @@ const Layout = ({ children }: LayoutProps) => {
         </Button>
         <Link to="/" className="font-serif font-bold text-lg">EHDS Explorer</Link>
         <div className="flex items-center gap-1" data-tour="accessibility">
-          {!authLoading && user && isEditor && (
-            <Link to="/admin">
-              <Button variant="ghost" size="icon" className="h-8 w-8" title="Admin Dashboard">
-                <Settings className="h-4 w-4" />
-              </Button>
-            </Link>
-          )}
-          <SignupCTA />
           <LanguageSelector variant="compact" />
           <TourButton onClick={startTour} />
           <ReportIssueButton />
@@ -97,6 +89,7 @@ const Layout = ({ children }: LayoutProps) => {
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSearchOpen(true)}>
             <Search className="h-4 w-4" />
           </Button>
+          <UserMenu />
         </div>
       </header>
 
@@ -135,19 +128,14 @@ const Layout = ({ children }: LayoutProps) => {
 
         {/* Toolbar Row - Only when expanded */}
         {!sidebarCollapsed && (
-          <div className="hidden md:flex items-center justify-center gap-1 px-2 py-2 border-b border-sidebar-border" data-tour="accessibility">
-            {!authLoading && user && isEditor && (
-              <Link to="/admin">
-                <Button variant="ghost" size="icon" className="h-8 w-8" title="Admin Dashboard">
-                  <Settings className="h-4 w-4" />
-                </Button>
-              </Link>
-            )}
-            <SignupCTA />
-            <LanguageSelector variant="compact" />
-            <TourButton onClick={startTour} />
-            <ReportIssueButton />
-            <AccessibilityControls />
+          <div className="hidden md:flex items-center justify-between gap-1 px-2 py-2 border-b border-sidebar-border" data-tour="accessibility">
+            <div className="flex items-center gap-1">
+              <LanguageSelector variant="compact" />
+              <TourButton onClick={startTour} />
+              <ReportIssueButton />
+              <AccessibilityControls />
+            </div>
+            <UserMenu />
           </div>
         )}
         

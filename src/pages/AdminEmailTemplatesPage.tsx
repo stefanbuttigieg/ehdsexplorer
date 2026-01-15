@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import DOMPurify from "dompurify";
 import { useEmailTemplates, useUpdateEmailTemplate, EmailTemplate } from "@/hooks/useEmailTemplates";
 import { useAuth } from "@/hooks/useAuth";
 import Layout from "@/components/Layout";
@@ -77,7 +78,12 @@ const AdminEmailTemplatesPage = () => {
       html = html.replace(regex, sampleValues[variable] || `[${variable}]`);
     });
     
-    return html;
+    // Sanitize HTML to prevent XSS attacks
+    return DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'a', 'div', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'img', 'table', 'tr', 'td', 'th', 'thead', 'tbody', 'ul', 'ol', 'li', 'b', 'i', 'u', 'hr', 'blockquote', 'pre', 'code'],
+      ALLOWED_ATTR: ['href', 'style', 'class', 'src', 'alt', 'target', 'width', 'height', 'border', 'cellpadding', 'cellspacing', 'align', 'valign', 'bgcolor'],
+      ALLOW_DATA_ATTR: false
+    });
   };
 
   if (loading || isLoading) {

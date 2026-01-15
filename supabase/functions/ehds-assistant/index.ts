@@ -4,9 +4,83 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Expose-Headers": "X-Remaining-Uses, X-Daily-Limit, X-RateLimit-Remaining",
 };
 
 const DAILY_LIMIT = 30;
+const IP_RATE_LIMIT_PER_HOUR = 5; // 5 requests per hour per IP
+const IP_RATE_LIMIT_WINDOW_MS = 3600000; // 1 hour
+
+function getClientIp(req: Request): string {
+  // Check various headers for client IP (handles proxies like Cloudflare)
+  const cfConnectingIp = req.headers.get("cf-connecting-ip");
+  if (cfConnectingIp) return cfConnectingIp;
+
+  const xRealIp = req.headers.get("x-real-ip");
+  if (xRealIp) return xRealIp;
+
+  const xForwardedFor = req.headers.get("x-forwarded-for");
+  if (xForwardedFor) {
+    const ips = xForwardedFor.split(",").map((ip) => ip.trim());
+    return ips[0];
+  }
+
+  return "unknown";
+}
+
+async function checkIpRateLimit(
+  supabase: any,
+  ipAddress: string
+): Promise<{ allowed: boolean; remaining: number }> {
+  const windowStart = new Date(Date.now() - IP_RATE_LIMIT_WINDOW_MS).toISOString();
+  const identifier = `ai-assistant:${ipAddress}`;
+
+  // Get current count for this IP
+  const { data: existing, error: selectError } = await supabase
+    .from("api_rate_limits")
+    .select("*")
+    .eq("ip_address", identifier)
+    .gte("window_start", windowStart)
+    .order("window_start", { ascending: false })
+    .limit(1)
+    .single();
+
+  if (selectError && selectError.code !== "PGRST116") {
+    console.error("IP rate limit check error:", selectError);
+    // Allow request on error to avoid blocking legitimate users
+    return { allowed: true, remaining: IP_RATE_LIMIT_PER_HOUR };
+  }
+
+  if (existing) {
+    if (existing.request_count >= IP_RATE_LIMIT_PER_HOUR) {
+      return { allowed: false, remaining: 0 };
+    }
+
+    // Increment counter
+    await supabase
+      .from("api_rate_limits")
+      .update({ request_count: existing.request_count + 1 })
+      .eq("id", existing.id);
+
+    return {
+      allowed: true,
+      remaining: IP_RATE_LIMIT_PER_HOUR - existing.request_count - 1,
+    };
+  }
+
+  // Create new rate limit record
+  const { error: insertError } = await supabase.from("api_rate_limits").insert({
+    ip_address: identifier,
+    request_count: 1,
+    window_start: new Date().toISOString(),
+  });
+
+  if (insertError) {
+    console.error("IP rate limit insert error:", insertError);
+  }
+
+  return { allowed: true, remaining: IP_RATE_LIMIT_PER_HOUR - 1 };
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -18,7 +92,29 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Check and update daily usage
+    // Get client IP for rate limiting
+    const clientIp = getClientIp(req);
+    console.log("Processing AI assistant request from IP:", clientIp);
+
+    // Check IP-based rate limit first
+    const ipRateLimit = await checkIpRateLimit(supabase, clientIp);
+    
+    if (!ipRateLimit.allowed) {
+      console.log("IP rate limit exceeded for:", clientIp);
+      return new Response(JSON.stringify({ 
+        error: "You've reached the hourly limit. Please try again later.",
+        remaining: 0
+      }), {
+        status: 429,
+        headers: { 
+          ...corsHeaders, 
+          "Content-Type": "application/json",
+          "X-RateLimit-Remaining": "0"
+        },
+      });
+    }
+
+    // Check and update daily usage (global limit)
     const today = new Date().toISOString().split('T')[0];
     
     // Get or create today's usage record

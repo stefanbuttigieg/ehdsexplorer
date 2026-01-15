@@ -22,16 +22,24 @@ export const usePlainLanguageFeedback = (translationId: string) => {
     
     setIsSubmitting(true);
     try {
-      const { error } = await supabase
-        .from("plain_language_feedback")
-        .insert({
+      // Use edge function for rate-limited feedback submission
+      const response = await supabase.functions.invoke("submit-feedback", {
+        body: {
           translation_id: translationId,
           feedback_type: type,
           session_id: getSessionId(),
           comment: comment?.trim() || null,
-        });
+        },
+      });
 
-      if (error) throw error;
+      if (response.error) {
+        throw new Error(response.error.message || "Failed to submit feedback");
+      }
+
+      // Check for rate limit response
+      if (response.data?.error) {
+        throw new Error(response.data.error);
+      }
       
       setFeedbackGiven(type);
       toast({
@@ -40,9 +48,10 @@ export const usePlainLanguageFeedback = (translationId: string) => {
       });
     } catch (error) {
       console.error("Failed to submit feedback:", error);
+      const errorMessage = error instanceof Error ? error.message : "Please try again later.";
       toast({
         title: "Failed to submit feedback",
-        description: "Please try again later.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

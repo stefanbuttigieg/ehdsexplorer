@@ -72,6 +72,8 @@ import UnsubscribePage from "./pages/UnsubscribePage";
 import VerifySubscriptionPage from "./pages/VerifySubscriptionPage";
 import ManageSubscriptionPage from "./pages/ManageSubscriptionPage";
 import AchievementsPage from "./pages/AchievementsPage";
+import HealthAuthoritiesPage from "./pages/HealthAuthoritiesPage";
+import AdminHealthAuthoritiesPage from "./pages/AdminHealthAuthoritiesPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -133,6 +135,7 @@ const App = () => (
             <Route path="/unsubscribe" element={<UnsubscribePage />} />
             <Route path="/verify-subscription" element={<VerifySubscriptionPage />} />
             <Route path="/manage-subscription" element={<ManageSubscriptionPage />} />
+            <Route path="/health-authorities" element={<HealthAuthoritiesPage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin/set-password" element={<AdminSetPasswordPage />} />
             <Route path="/profile" element={<ProfilePage />} />
@@ -162,6 +165,7 @@ const App = () => (
             <Route path="/admin/languages" element={<AdminLanguagesPage />} />
             <Route path="/admin/help-center-faqs" element={<AdminHelpCenterFaqPage />} />
             <Route path="/admin/onboarding" element={<AdminOnboardingPage />} />
+            <Route path="/admin/health-authorities" element={<AdminHealthAuthoritiesPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </MaintenanceGuard>

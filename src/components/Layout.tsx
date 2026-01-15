@@ -1,6 +1,6 @@
 import { ReactNode, useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText, Accessibility, Code, Newspaper, Settings, HelpCircle, StickyNote, Users, GitCompare, PanelLeftClose, PanelLeft, Trophy } from "lucide-react";
+import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText, Accessibility, Code, Newspaper, Settings, HelpCircle, StickyNote, Users, GitCompare, PanelLeftClose, PanelLeft, Trophy, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toRoman } from "@/lib/romanNumerals";
@@ -65,6 +65,7 @@ const Layout = ({ children }: LayoutProps) => {
     { path: "/recitals", icon: Scale, label: "Recitals" },
     { path: "/annexes", icon: Files, label: "Annexes" },
     { path: "/implementing-acts", icon: ListChecks, label: "Implementing Acts" },
+    { path: "/health-authorities", icon: MapPin, label: "Health Authorities" },
     { path: "/news", icon: Newspaper, label: "News" },
     { path: "/bookmarks", icon: Bookmark, label: "Bookmarks" },
     { path: "/notes", icon: StickyNote, label: "Notes" },

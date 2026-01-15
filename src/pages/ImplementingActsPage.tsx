@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { ChevronRight, Globe, Clock } from "lucide-react";
+import { ChevronRight, Globe, Clock, ExternalLink, CalendarClock, CalendarX } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,13 +40,16 @@ const ImplementingActsPage = () => {
 
   const filteredActs = implementingActs.filter(act => {
     if (filterStatus !== 'all' && act.status !== filterStatus) return false;
-    if (filterTheme !== 'all' && act.theme !== filterTheme) return false;
+    // For multi-theme filtering, check if any of the act's themes match
+    if (filterTheme !== 'all' && !act.themes.includes(filterTheme)) return false;
     return true;
   });
 
+  // Group by primary theme (first theme in array)
   const groupedByTheme = filteredActs.reduce((acc, act) => {
-    if (!acc[act.theme]) acc[act.theme] = [];
-    acc[act.theme].push(act);
+    const primaryTheme = act.themes[0] || act.theme;
+    if (!acc[primaryTheme]) acc[primaryTheme] = [];
+    acc[primaryTheme].push(act);
     return acc;
   }, {} as Record<ActTheme, typeof implementingActs>);
 
@@ -55,8 +58,8 @@ const ImplementingActsPage = () => {
       <Layout>
         <div className="max-w-5xl mx-auto p-6">
           <Skeleton className="h-8 w-48 mb-4" />
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            {[1, 2, 3, 4].map(i => (
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+            {[1, 2, 3, 4, 5].map(i => (
               <Skeleton key={i} className="h-24" />
             ))}
           </div>
@@ -78,11 +81,33 @@ const ImplementingActsPage = () => {
           <h1 className="text-3xl font-bold font-serif">Implementing Acts Tracker</h1>
           <SubscribeAlertButton implementingActId="" implementingActTitle="All Implementing Acts" />
         </div>
-        <p className="text-muted-foreground mb-8">Track the progress of delegated and implementing acts required by the EHDS Regulation</p>
+        <p className="text-muted-foreground mb-4">Track the progress of delegated and implementing acts required by the EHDS Regulation</p>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {(['pending', 'feedback', 'progress', 'adopted'] as ActStatus[]).map(status => (
+        {/* Comitology Register Link */}
+        <Card className="mb-6 border-primary/20 bg-primary/5">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <ExternalLink className="h-5 w-5 text-primary" />
+                <span className="font-medium">Follow developments on the EU Comitology Register</span>
+              </div>
+              <a 
+                href="https://ec.europa.eu/transparency/comitology-register/screen/committees/C131500" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <Button variant="outline" size="sm">
+                  View C131500 Register
+                  <ExternalLink className="h-4 w-4 ml-2" />
+                </Button>
+              </a>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Stats - now with 5 columns including feedback-closed */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+          {(['pending', 'feedback', 'feedback-closed', 'progress', 'adopted'] as ActStatus[]).map(status => (
             <Card key={status} className={`cursor-pointer ${filterStatus === status ? 'border-primary' : ''}`} onClick={() => setFilterStatus(filterStatus === status ? 'all' : status)}>
               <CardContent className="p-4 text-center">
                 <div className={`text-3xl font-bold status-${status}`}>{stats[status] || 0}</div>
@@ -117,6 +142,20 @@ const ImplementingActsPage = () => {
                             <Badge variant="outline">{act.articleReference}</Badge>
                             <Badge variant={act.type === 'delegated' ? 'secondary' : 'outline'}>{act.type}</Badge>
                             <span className={`status-badge status-${act.status}`}>{statusLabels[act.status]}</span>
+                            
+                            {/* With/Without Deadline Tag */}
+                            {act.feedbackDeadline ? (
+                              <Badge variant="outline" className="text-primary border-primary/50">
+                                <CalendarClock className="h-3 w-3 mr-1" />
+                                With Deadline
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-muted-foreground">
+                                <CalendarX className="h-3 w-3 mr-1" />
+                                No Deadline
+                              </Badge>
+                            )}
+                            
                             {act.deliverableLink && (
                               <Badge variant="outline" className="text-primary border-primary/50">
                                 <Globe className="h-3 w-3 mr-1" />
@@ -138,6 +177,16 @@ const ImplementingActsPage = () => {
                           </div>
                           <h3 className="font-medium">{act.title}</h3>
                           <p className="text-sm text-muted-foreground line-clamp-1">{act.description}</p>
+                          {/* Display multiple themes */}
+                          {act.themes.length > 1 && (
+                            <div className="flex gap-1 mt-2 flex-wrap">
+                              {act.themes.map(t => (
+                                <Badge key={t} variant="secondary" className="text-xs">
+                                  {themeLabels[t]}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
                         </div>
                         <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                       </div>

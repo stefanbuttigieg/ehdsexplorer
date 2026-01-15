@@ -1009,6 +1009,7 @@ export type Database = {
           related_articles: number[] | null
           status: string
           theme: string
+          themes: string[] | null
           title: string
           type: string
           updated_at: string
@@ -1025,6 +1026,7 @@ export type Database = {
           related_articles?: number[] | null
           status: string
           theme: string
+          themes?: string[] | null
           title: string
           type: string
           updated_at?: string
@@ -1041,6 +1043,7 @@ export type Database = {
           related_articles?: number[] | null
           status?: string
           theme?: string
+          themes?: string[] | null
           title?: string
           type?: string
           updated_at?: string

@@ -17,6 +17,7 @@ import { JsonLdMetadata } from "@/components/JsonLdMetadata";
 import { EliReference } from "@/components/EliReference";
 import PlainLanguageView from "@/components/PlainLanguageView";
 import { AnnotatedContent } from "@/components/AnnotatedContent";
+import { CompareButton } from "@/components/CompareButton";
 
 const RecitalPage = () => {
   const { id } = useParams();
@@ -82,6 +83,14 @@ const RecitalPage = () => {
             </div>
           </div>
           <div className="flex gap-2">
+            <CompareButton
+              item={{
+                id: recitalNumber.toString(),
+                type: "recital",
+                title: `Recital ${recital.recital_number}`,
+                number: recital.recital_number,
+              }}
+            />
             <PrintButton />
             <Button
               variant={isBookmarked('recital', recitalNumber) ? "default" : "outline"}

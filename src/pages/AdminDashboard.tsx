@@ -134,6 +134,12 @@ const AdminDashboard = () => {
       href: '/admin/footnotes',
     },
     {
+      title: 'Help Center FAQs',
+      description: 'Manage FAQ content for the public help page',
+      icon: HelpCircle,
+      href: '/admin/help-center-faqs',
+    },
+    {
       title: 'News Summaries',
       description: 'AI-generated weekly EHDS news summaries',
       icon: Newspaper,

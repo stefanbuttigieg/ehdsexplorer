@@ -63,6 +63,7 @@ import AdminSubscriptionsPage from "./pages/AdminSubscriptionsPage";
 import AdminAIFeedbackPage from "./pages/AdminAIFeedbackPage";
 import AdminTranslationsPage from "./pages/AdminTranslationsPage";
 import AdminLanguagesPage from "./pages/AdminLanguagesPage";
+import AdminHelpCenterFaqPage from "./pages/AdminHelpCenterFaqPage";
 import NotesPage from "./pages/NotesPage";
 import TeamsPage from "./pages/TeamsPage";
 import UnsubscribePage from "./pages/UnsubscribePage";
@@ -151,6 +152,7 @@ const App = () => (
             <Route path="/admin/ai-feedback" element={<AdminAIFeedbackPage />} />
             <Route path="/admin/translations" element={<AdminTranslationsPage />} />
             <Route path="/admin/languages" element={<AdminLanguagesPage />} />
+            <Route path="/admin/help-center-faqs" element={<AdminHelpCenterFaqPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </MaintenanceGuard>

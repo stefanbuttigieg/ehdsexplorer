@@ -47,3 +47,6 @@ verify_jwt = true
 
 [functions.ehds-assistant]
 verify_jwt = false
+
+[functions.submit-feedback]
+verify_jwt = false

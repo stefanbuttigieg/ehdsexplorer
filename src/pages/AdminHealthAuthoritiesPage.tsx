@@ -331,14 +331,14 @@ const AdminHealthAuthoritiesPage = () => {
       <div className="max-w-6xl mx-auto p-4 md:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold font-serif">Health Authorities</h1>
+            <h1 className="text-2xl md:text-3xl font-bold font-serif">National EHDS Entities</h1>
             <p className="text-muted-foreground">
-              Manage Digital Health Authorities and Health Data Access Bodies
+              Manage Digital Health Authorities (DHAs) and Health Data Access Bodies (HDABs)
             </p>
           </div>
           <Button onClick={() => { resetForm(); setIsCreateDialogOpen(true); }}>
             <Plus className="h-4 w-4 mr-2" />
-            Add Authority
+            Add Entity
           </Button>
         </div>
 
@@ -358,9 +358,9 @@ const AdminHealthAuthoritiesPage = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>All Authorities ({filteredAuthorities.length})</CardTitle>
+            <CardTitle>All Entities ({filteredAuthorities.length})</CardTitle>
             <CardDescription>
-              Click on an authority to edit its details
+              Click on an entity to edit its details
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -373,14 +373,14 @@ const AdminHealthAuthoritiesPage = () => {
             ) : filteredAuthorities.length === 0 ? (
               <div className="text-center py-12">
                 <Globe className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">No health authorities found</p>
+                <p className="text-muted-foreground">No national entities found</p>
                 <Button 
                   variant="outline" 
                   className="mt-4"
                   onClick={() => { resetForm(); setIsCreateDialogOpen(true); }}
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Add First Authority
+                  Add First Entity
                 </Button>
               </div>
             ) : (
@@ -465,9 +465,9 @@ const AdminHealthAuthoritiesPage = () => {
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Add Health Authority</DialogTitle>
+              <DialogTitle>Add National EHDS Entity</DialogTitle>
               <DialogDescription>
-                Add a new Digital Health Authority or Health Data Access Body
+                Add a new Digital Health Authority (DHA) or Health Data Access Body (HDAB)
               </DialogDescription>
             </DialogHeader>
             <AuthorityForm />
@@ -476,7 +476,7 @@ const AdminHealthAuthoritiesPage = () => {
                 Cancel
               </Button>
               <Button onClick={handleCreate} disabled={createAuthority.isPending}>
-                {createAuthority.isPending ? 'Creating...' : 'Create Authority'}
+                {createAuthority.isPending ? 'Creating...' : 'Create Entity'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -486,9 +486,9 @@ const AdminHealthAuthoritiesPage = () => {
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Edit Health Authority</DialogTitle>
+              <DialogTitle>Edit National EHDS Entity</DialogTitle>
               <DialogDescription>
-                Update the details of this authority
+                Update the details of this entity
               </DialogDescription>
             </DialogHeader>
             <AuthorityForm />
@@ -507,7 +507,7 @@ const AdminHealthAuthoritiesPage = () => {
         <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete Authority</AlertDialogTitle>
+              <AlertDialogTitle>Delete Entity</AlertDialogTitle>
               <AlertDialogDescription>
                 Are you sure you want to delete "{selectedAuthority?.name}"? This action cannot be undone.
               </AlertDialogDescription>

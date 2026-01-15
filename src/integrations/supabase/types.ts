@@ -711,6 +711,75 @@ export type Database = {
           },
         ]
       }
+      health_authorities: {
+        Row: {
+          address: string | null
+          authority_type: Database["public"]["Enums"]["authority_type"]
+          country_code: string
+          country_name: string
+          created_at: string
+          description: string | null
+          ehds_role: string | null
+          email: string | null
+          id: string
+          key_contacts: Json | null
+          latitude: number | null
+          logo_url: string | null
+          longitude: number | null
+          name: string
+          news_updates: Json | null
+          phone: string | null
+          related_legislation: string[] | null
+          status: Database["public"]["Enums"]["authority_status"]
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          authority_type: Database["public"]["Enums"]["authority_type"]
+          country_code: string
+          country_name: string
+          created_at?: string
+          description?: string | null
+          ehds_role?: string | null
+          email?: string | null
+          id?: string
+          key_contacts?: Json | null
+          latitude?: number | null
+          logo_url?: string | null
+          longitude?: number | null
+          name: string
+          news_updates?: Json | null
+          phone?: string | null
+          related_legislation?: string[] | null
+          status?: Database["public"]["Enums"]["authority_status"]
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          authority_type?: Database["public"]["Enums"]["authority_type"]
+          country_code?: string
+          country_name?: string
+          created_at?: string
+          description?: string | null
+          ehds_role?: string | null
+          email?: string | null
+          id?: string
+          key_contacts?: Json | null
+          latitude?: number | null
+          logo_url?: string | null
+          longitude?: number | null
+          name?: string
+          news_updates?: Json | null
+          phone?: string | null
+          related_legislation?: string[] | null
+          status?: Database["public"]["Enums"]["authority_status"]
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       help_center_faq: {
         Row: {
           answer: string
@@ -2236,6 +2305,8 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "editor" | "super_admin"
+      authority_status: "active" | "pending" | "planned" | "inactive"
+      authority_type: "digital_health_authority" | "health_data_access_body"
       team_role: "owner" | "admin" | "member" | "viewer"
     }
     CompositeTypes: {
@@ -2365,6 +2436,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "editor", "super_admin"],
+      authority_status: ["active", "pending", "planned", "inactive"],
+      authority_type: ["digital_health_authority", "health_data_access_body"],
       team_role: ["owner", "admin", "member", "viewer"],
     },
   },

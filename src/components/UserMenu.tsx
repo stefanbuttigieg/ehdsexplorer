@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -9,12 +8,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { User, LogOut, Trophy, Settings, UserPlus, LogIn } from "lucide-react";
-import { SignupCTA } from "./SignupCTA";
+import { User, LogOut, Trophy, Settings } from "lucide-react";
 
 export function UserMenu() {
   const { user, loading, isEditor } = useAuth();
@@ -44,14 +41,17 @@ export function UserMenu() {
 
   if (!user) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         <Link to="/admin/auth">
-          <Button variant="ghost" size="sm" className="gap-1.5">
-            <LogIn className="h-4 w-4" />
-            <span className="hidden sm:inline">Sign In</span>
+          <Button variant="ghost" size="sm" className="text-sm font-medium">
+            Sign In
           </Button>
         </Link>
-        <SignupCTA />
+        <Link to="/admin/auth">
+          <Button size="sm" className="text-sm font-medium">
+            Sign Up
+          </Button>
+        </Link>
       </div>
     );
   }
@@ -63,9 +63,9 @@ export function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full">
+        <Button variant="ghost" size="icon" className="rounded-full h-9 w-9">
           <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-primary/10 text-primary text-sm">
+            <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
               {initials}
             </AvatarFallback>
           </Avatar>

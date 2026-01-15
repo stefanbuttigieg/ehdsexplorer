@@ -16,6 +16,7 @@ import { useReadingProgress } from "@/hooks/useReadingProgress";
 import { RecitalsQuickExplorer } from "@/components/RecitalsQuickExplorer";
 import { ArticlesQuickExplorer } from "@/components/ArticlesQuickExplorer";
 import { ContinueReading } from "@/components/ContinueReading";
+import { SignupCTA } from "@/components/SignupCTA";
 import { differenceInDays, parse, isAfter, isBefore, format } from "date-fns";
 
 const getFeedbackStatus = (deadline: string) => {
@@ -83,6 +84,9 @@ const Index = () => {
             <SearchCommand open={searchOpen} onOpenChange={setSearchOpen} />
           </div>
         </section>
+
+        {/* Signup CTA for non-logged-in users */}
+        <SignupCTA />
 
         {/* Continue Reading */}
         <ContinueReading />

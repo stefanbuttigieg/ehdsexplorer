@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Trash2, Loader2, Bot, User, AlertCircle, ThumbsUp, ThumbsDown, History, Plus, ChevronLeft } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { MessageCircle, X, Send, Trash2, Loader2, Bot, User, AlertCircle, ThumbsUp, ThumbsDown, History, Plus, ChevronLeft, Mic, MicOff, Volume2, VolumeX, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -9,6 +9,7 @@ import ReactMarkdown from 'react-markdown';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { Link } from 'react-router-dom';
 
 interface AIAssistantProps {
   className?: string;
@@ -19,6 +20,12 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
   const [showHistory, setShowHistory] = useState(false);
   const [input, setInput] = useState('');
   const [feedbackGiven, setFeedbackGiven] = useState<Record<number, 'positive' | 'negative'>>({});
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   const { 
     messages, 
     isLoading, 
@@ -138,6 +145,158 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
   const handleDeleteConversation = async (e: React.MouseEvent, conversationId: string) => {
     e.stopPropagation();
     await deleteConversation(conversationId);
+  };
+
+  // Voice recording functions
+  const startRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        stream.getTracks().forEach(track => track.stop());
+        
+        if (audioChunksRef.current.length === 0) return;
+        
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        await transcribeAudio(audioBlob);
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      console.error('Error starting recording:', err);
+      toast({
+        title: "Microphone access denied",
+        description: "Please allow microphone access to use voice input.",
+        variant: "destructive",
+      });
+    }
+  }, []);
+
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  }, [isRecording]);
+
+  const transcribeAudio = async (audioBlob: Blob) => {
+    setIsTranscribing(true);
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.webm');
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-stt`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Transcription failed');
+      }
+
+      const data = await response.json();
+      if (data.text) {
+        setInput(prev => prev ? `${prev} ${data.text}` : data.text);
+        inputRef.current?.focus();
+      }
+    } catch (err) {
+      console.error('Transcription error:', err);
+      toast({
+        title: "Transcription failed",
+        description: "Could not convert speech to text. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsTranscribing(false);
+    }
+  };
+
+  const speakText = async (text: string) => {
+    // Stop any current audio
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      setCurrentAudio(null);
+    }
+
+    setIsSpeaking(true);
+    try {
+      // Strip markdown formatting for better speech
+      const cleanText = text
+        .replace(/\*\*/g, '')
+        .replace(/\*/g, '')
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        .replace(/#{1,6}\s/g, '')
+        .replace(/`[^`]+`/g, '')
+        .replace(/\n+/g, ' ');
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ text: cleanText }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('TTS failed');
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      
+      audio.onended = () => {
+        setIsSpeaking(false);
+        setCurrentAudio(null);
+        URL.revokeObjectURL(audioUrl);
+      };
+
+      audio.onerror = () => {
+        setIsSpeaking(false);
+        setCurrentAudio(null);
+      };
+
+      setCurrentAudio(audio);
+      await audio.play();
+    } catch (err) {
+      console.error('TTS error:', err);
+      setIsSpeaking(false);
+      toast({
+        title: "Speech failed",
+        description: "Could not convert text to speech. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const stopSpeaking = () => {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      setCurrentAudio(null);
+      setIsSpeaking(false);
+    }
   };
 
   return (
@@ -313,16 +472,52 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
                             )}
                           >
                             {message.role === 'assistant' ? (
-                              <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2">
-                                <ReactMarkdown>{message.content || '...'}</ReactMarkdown>
+                              <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:mb-2 [&>ul]:mb-2 [&>ol]:mb-2 [&_a]:text-primary [&_a]:underline">
+                                <ReactMarkdown
+                                  components={{
+                                    a: ({ href, children }) => {
+                                      // Check if it's an internal link
+                                      if (href?.startsWith('/')) {
+                                        return (
+                                          <Link to={href} className="text-primary underline hover:text-primary/80">
+                                            {children}
+                                          </Link>
+                                        );
+                                      }
+                                      return (
+                                        <a href={href} target="_blank" rel="noopener noreferrer" className="text-primary underline hover:text-primary/80">
+                                          {children}
+                                        </a>
+                                      );
+                                    }
+                                  }}
+                                >
+                                  {message.content || '...'}
+                                </ReactMarkdown>
                               </div>
                             ) : (
                               message.content
                             )}
                           </div>
-                          {/* Feedback buttons for assistant messages */}
+                          {/* Action buttons for assistant messages */}
                           {message.role === 'assistant' && message.content && !isLoading && (
                             <div className="flex items-center gap-1 pl-1">
+                              {/* Speak button */}
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 text-muted-foreground hover:text-primary"
+                                onClick={() => isSpeaking ? stopSpeaking() : speakText(message.content)}
+                                title={isSpeaking ? "Stop speaking" : "Listen to response"}
+                              >
+                                {isSpeaking ? (
+                                  <Square className="h-3.5 w-3.5" />
+                                ) : (
+                                  <Volume2 className="h-3.5 w-3.5" />
+                                )}
+                              </Button>
+                              
+                              {/* Feedback buttons */}
                               {feedbackGiven[index] ? (
                                 <span className="text-xs text-muted-foreground">
                                   {feedbackGiven[index] === 'positive' ? '👍 Thanks!' : '👎 Noted'}
@@ -386,15 +581,34 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
               {/* Input */}
               <form onSubmit={handleSubmit} className="border-t bg-background">
                 <div className="flex gap-2 p-4 pb-2">
+                  {/* Mic button */}
+                  <Button
+                    type="button"
+                    variant={isRecording ? "destructive" : "outline"}
+                    size="icon"
+                    className="h-[44px] w-[44px] flex-shrink-0"
+                    onClick={isRecording ? stopRecording : startRecording}
+                    disabled={isLoading || isTranscribing}
+                    title={isRecording ? "Stop recording" : "Voice input"}
+                  >
+                    {isTranscribing ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : isRecording ? (
+                      <MicOff className="h-4 w-4" />
+                    ) : (
+                      <Mic className="h-4 w-4" />
+                    )}
+                  </Button>
+                  
                   <Textarea
                     ref={inputRef}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Ask about EHDS..."
+                    placeholder={isRecording ? "Recording..." : "Ask about EHDS..."}
                     className="min-h-[44px] max-h-[120px] resize-none text-sm"
                     rows={1}
-                    disabled={isLoading}
+                    disabled={isLoading || isRecording}
                   />
                   <Button
                     type="submit"

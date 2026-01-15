@@ -438,10 +438,29 @@ const AdminHelpCenterPage = () => {
             <Badge>Admin Only</Badge>
           </h2>
 
+          <Card className="mb-4">
+            <CardHeader>
+              <CardTitle>Public User Registration</CardTitle>
+              <CardDescription>Users can sign up publicly with read-only access</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">
+                The EHDS Explorer allows public user registration. New users who sign up get read-only access 
+                by default, which includes the ability to save bookmarks, take notes, and join teams.
+              </p>
+              <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+                <p className="text-sm flex items-start gap-2">
+                  <Info className="h-4 w-4 mt-0.5 text-primary" />
+                  <span>Administrators can upgrade public users to <strong>Editor</strong>, <strong>Admin</strong>, or <strong>Super Admin</strong> roles through the User Management page.</span>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
-              <CardTitle>Inviting New Users</CardTitle>
-              <CardDescription>Only administrators can invite new editors and admins</CardDescription>
+              <CardTitle>Inviting Users with Elevated Roles</CardTitle>
+              <CardDescription>Directly invite users as editors or admins</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-3">
@@ -450,22 +469,23 @@ const AdminHelpCenterPage = () => {
                   <li>Go to <strong>Admin Dashboard → User Management</strong></li>
                   <li>Click <strong>Invite User</strong></li>
                   <li>Enter the user&apos;s email address</li>
-                  <li>Select the role (Admin or Editor)</li>
+                  <li>Select the role (Editor or Admin)</li>
                   <li>Click <strong>Send Invitation</strong></li>
                 </ol>
               </div>
               <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
                 <p className="text-sm flex items-start gap-2">
                   <Info className="h-4 w-4 mt-0.5 text-primary" />
-                  <span>The invited user will receive an email with a link to set their password. Public signups are disabled for security.</span>
+                  <span>The invited user will receive an email with a link to set their password and will immediately have the assigned role.</span>
                 </p>
               </div>
               <div className="space-y-3">
                 <h4 className="font-semibold">Managing Existing Users</h4>
                 <ul className="list-disc list-inside text-muted-foreground ml-4">
                   <li>View all users and their roles</li>
-                  <li>Change user roles (upgrade editor to admin or vice versa)</li>
+                  <li>Change user roles (upgrade read-only users to editor/admin)</li>
                   <li>Remove user access by deleting their role</li>
+                  <li>Resend confirmation emails for unverified users</li>
                 </ul>
               </div>
             </CardContent>

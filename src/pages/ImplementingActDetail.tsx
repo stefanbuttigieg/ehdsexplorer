@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { ExternalLink, Calendar, Bookmark, Globe, Clock } from "lucide-react";
+import { ExternalLink, Calendar, Bookmark, Globe, Clock, CalendarClock, CalendarX } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -86,10 +86,22 @@ const ImplementingActDetail = () => {
 
         <div className="flex items-start justify-between gap-4 mb-6">
           <div>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
               <Badge variant="outline">{act.articleReference}</Badge>
               <Badge variant={act.type === 'delegated' ? 'secondary' : 'outline'}>{act.type} act</Badge>
               <span className={`status-badge status-${act.status}`}>{statusLabels[act.status]}</span>
+              {/* With/Without Deadline Tag */}
+              {act.feedbackDeadline ? (
+                <Badge variant="outline" className="text-primary border-primary/50">
+                  <CalendarClock className="h-3 w-3 mr-1" />
+                  With Deadline
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="text-muted-foreground">
+                  <CalendarX className="h-3 w-3 mr-1" />
+                  No Deadline
+                </Badge>
+              )}
             </div>
             <h1 className="text-3xl font-bold font-serif">{act.title}</h1>
           </div>
@@ -117,7 +129,14 @@ const ImplementingActDetail = () => {
 
         <Card className="mb-6">
           <CardContent className="p-6">
-            <p className="text-muted-foreground mb-4">{themeLabels[act.theme]}</p>
+            {/* Display all themes */}
+            <div className="flex gap-2 mb-4 flex-wrap">
+              {act.themes.map(t => (
+                <Badge key={t} variant="secondary">
+                  {themeLabels[t]}
+                </Badge>
+              ))}
+            </div>
             <p className="legal-text">{act.description}</p>
 
             {act.deliverableLink && (
@@ -133,7 +152,7 @@ const ImplementingActDetail = () => {
               </div>
             )}
 
-            {act.status === 'feedback' && act.feedbackDeadline && (() => {
+            {(act.status === 'feedback' || act.status === 'feedback-closed') && act.feedbackDeadline && (() => {
               const feedbackStatus = getFeedbackStatus(act.feedbackDeadline);
               return (
                 <div className="mt-6 p-4 rounded-lg bg-accent border border-accent-foreground/20">

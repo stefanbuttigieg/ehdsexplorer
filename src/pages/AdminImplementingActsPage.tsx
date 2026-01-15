@@ -44,6 +44,7 @@ interface DbImplementingAct {
   article_reference: string;
   type: string;
   theme: string;
+  themes: string[] | null;
   status: string;
   official_link: string | null;
   deliverable_link: string | null;
@@ -66,7 +67,7 @@ const AdminImplementingActsPage = () => {
   const [editedDescription, setEditedDescription] = useState('');
   const [editedArticleReference, setEditedArticleReference] = useState('');
   const [editedType, setEditedType] = useState('');
-  const [editedTheme, setEditedTheme] = useState('');
+  const [editedThemes, setEditedThemes] = useState<string[]>([]);
   const [editedStatus, setEditedStatus] = useState('');
   const [editedOfficialLink, setEditedOfficialLink] = useState('');
   const [editedDeliverableLink, setEditedDeliverableLink] = useState('');
@@ -75,6 +76,15 @@ const AdminImplementingActsPage = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [deletingAct, setDeletingAct] = useState<DbImplementingAct | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  const themeOptions = [
+    { value: 'primary-use', label: 'Primary Use' },
+    { value: 'ehr-systems', label: 'EHR Systems' },
+    { value: 'secondary-use', label: 'Secondary Use' },
+    { value: 'health-data-access', label: 'Health Data Access Bodies' },
+    { value: 'cross-border', label: 'Cross-Border' },
+    { value: 'ehds-board', label: 'EHDS Board' },
+  ];
 
   const { data: implementingActs, isLoading } = useQuery({
     queryKey: ['admin-implementing-acts'],
@@ -112,7 +122,7 @@ const AdminImplementingActsPage = () => {
     setEditedDescription('');
     setEditedArticleReference('');
     setEditedType('implementing');
-    setEditedTheme('primary-use');
+    setEditedThemes(['primary-use']);
     setEditedStatus('pending');
     setEditedOfficialLink('');
     setEditedDeliverableLink('');
@@ -133,7 +143,8 @@ const AdminImplementingActsPage = () => {
     setEditedDescription(act.description);
     setEditedArticleReference(act.article_reference);
     setEditedType(act.type);
-    setEditedTheme(act.theme);
+    // Use themes array if available, otherwise fallback to single theme
+    setEditedThemes(act.themes && act.themes.length > 0 ? act.themes : [act.theme]);
     setEditedStatus(act.status);
     setEditedOfficialLink(act.official_link || '');
     setEditedDeliverableLink(act.deliverable_link || '');
@@ -177,7 +188,8 @@ const AdminImplementingActsPage = () => {
           description: editedDescription,
           article_reference: editedArticleReference,
           type: editedType,
-          theme: editedTheme,
+          theme: editedThemes[0] || 'primary-use', // Keep primary theme for backward compatibility
+          themes: editedThemes,
           status: editedStatus,
           official_link: editedOfficialLink || null,
           deliverable_link: editedDeliverableLink || null,
@@ -226,7 +238,8 @@ const AdminImplementingActsPage = () => {
           description: editedDescription,
           article_reference: editedArticleReference,
           type: editedType,
-          theme: editedTheme,
+          theme: editedThemes[0] || 'primary-use', // Keep primary theme for backward compatibility
+          themes: editedThemes,
           status: editedStatus,
           official_link: editedOfficialLink || null,
           deliverable_link: editedDeliverableLink || null,
@@ -480,37 +493,45 @@ const AdminImplementingActsPage = () => {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Theme</Label>
-                  <Select value={editedTheme} onValueChange={setEditedTheme}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="primary-use">Primary Use</SelectItem>
-                      <SelectItem value="ehr-systems">EHR Systems</SelectItem>
-                      <SelectItem value="secondary-use">Secondary Use</SelectItem>
-                      <SelectItem value="health-data-access">Health Data Access Bodies</SelectItem>
-                      <SelectItem value="cross-border">Cross-Border</SelectItem>
-                      <SelectItem value="ehds-board">EHDS Board</SelectItem>
-                    </SelectContent>
-                  </Select>
+              <div className="space-y-2">
+                <Label>Themes (select multiple)</Label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3 border rounded-md">
+                  {themeOptions.map(option => (
+                    <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={editedThemes.includes(option.value)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setEditedThemes([...editedThemes, option.value]);
+                          } else {
+                            setEditedThemes(editedThemes.filter(t => t !== option.value));
+                          }
+                        }}
+                        className="rounded border-gray-300"
+                      />
+                      <span className="text-sm">{option.label}</span>
+                    </label>
+                  ))}
                 </div>
-                <div className="space-y-2">
-                  <Label>Status</Label>
-                  <Select value={editedStatus} onValueChange={setEditedStatus}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="feedback">Open for Feedback</SelectItem>
-                      <SelectItem value="progress">In Progress</SelectItem>
-                      <SelectItem value="adopted">Adopted</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                {editedThemes.length === 0 && (
+                  <p className="text-sm text-destructive">Please select at least one theme</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={editedStatus} onValueChange={setEditedStatus}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="feedback">Open for Feedback</SelectItem>
+                    <SelectItem value="feedback-closed">Feedback Closed</SelectItem>
+                    <SelectItem value="progress">In Progress</SelectItem>
+                    <SelectItem value="adopted">Adopted</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <Label>Official Link (optional)</Label>

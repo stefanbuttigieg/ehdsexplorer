@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export type ActStatus = 'pending' | 'feedback' | 'progress' | 'adopted';
+export type ActStatus = 'pending' | 'feedback' | 'progress' | 'adopted' | 'feedback-closed';
 
 export type ActTheme = 
   | 'primary-use'
@@ -18,6 +18,7 @@ export interface ImplementingAct {
   description: string;
   type: 'implementing' | 'delegated';
   theme: ActTheme;
+  themes: ActTheme[];
   status: ActStatus;
   feedbackDeadline?: string | null;
   adoptionDate?: string | null;
@@ -39,23 +40,32 @@ export const themeLabels: Record<ActTheme, string> = {
 export const statusLabels: Record<ActStatus, string> = {
   pending: 'Pending',
   feedback: 'Open for Feedback',
+  'feedback-closed': 'Feedback Closed',
   progress: 'In Progress',
   adopted: 'Adopted',
 };
 
-const mapDbToAct = (row: any): ImplementingAct => ({
-  id: row.id,
-  articleReference: row.article_reference,
-  title: row.title,
-  description: row.description,
-  type: row.type as 'implementing' | 'delegated',
-  theme: row.theme as ActTheme,
-  status: row.status as ActStatus,
-  feedbackDeadline: row.feedback_deadline,
-  officialLink: row.official_link,
-  deliverableLink: row.deliverable_link,
-  relatedArticles: row.related_articles || [],
-});
+const mapDbToAct = (row: any): ImplementingAct => {
+  // Handle themes array - use themes if available, otherwise fallback to single theme
+  const themesArray: ActTheme[] = row.themes && Array.isArray(row.themes) && row.themes.length > 0
+    ? row.themes as ActTheme[]
+    : row.theme ? [row.theme as ActTheme] : [];
+  
+  return {
+    id: row.id,
+    articleReference: row.article_reference,
+    title: row.title,
+    description: row.description,
+    type: row.type as 'implementing' | 'delegated',
+    theme: themesArray[0] || row.theme as ActTheme, // Keep for backward compatibility
+    themes: themesArray,
+    status: row.status as ActStatus,
+    feedbackDeadline: row.feedback_deadline,
+    officialLink: row.official_link,
+    deliverableLink: row.deliverable_link,
+    relatedArticles: row.related_articles || [],
+  };
+};
 
 export const useImplementingActs = () => {
   return useQuery({

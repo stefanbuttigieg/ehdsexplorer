@@ -182,9 +182,15 @@
     @apply bg-muted text-muted-foreground;
   }
 
-  .status-consultation {
+  .status-consultation,
+  .status-feedback {
     background-color: hsl(var(--status-consultation) / 0.15);
     color: hsl(var(--status-consultation));
+  }
+
+  .status-feedback-closed {
+    background-color: hsl(217 91% 60% / 0.15);
+    color: hsl(217 91% 50%);
   }
 
   .status-progress {

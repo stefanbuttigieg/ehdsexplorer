@@ -68,7 +68,7 @@ const Layout = ({ children }: LayoutProps) => {
     { path: "/news", icon: Newspaper, label: "News" },
     { path: "/bookmarks", icon: Bookmark, label: "Bookmarks" },
     { path: "/notes", icon: StickyNote, label: "Notes" },
-    { path: "/achievements", icon: Trophy, label: "Achievements" },
+    { path: "/profile?tab=achievements", icon: Trophy, label: "Achievements" },
     { path: "/teams", icon: Users, label: "Teams" },
     { path: "/compare", icon: GitCompare, label: "Compare" },
   ];

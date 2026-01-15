@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/Layout";
@@ -8,14 +8,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, User, Lock, Mail, Calendar, Shield } from "lucide-react";
+import { Loader2, User, Lock, Mail, Calendar, Shield, Trophy, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AchievementsGrid } from "@/components/achievements/AchievementsGrid";
+import { AchievementProgress } from "@/components/achievements/AchievementProgress";
+import { AchievementBadge } from "@/components/achievements/AchievementBadge";
+import { useAchievements } from "@/hooks/useAchievements";
+import { AchievementTier } from "@/data/achievements";
 
 const ProfilePage = () => {
   const { user, session, loading, isAdmin, isEditor } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
+  const { userAchievements, definitions, isLoggedIn } = useAchievements();
+
+  const activeTab = searchParams.get("tab") || "profile";
 
   const [displayName, setDisplayName] = useState("");
   const [newEmail, setNewEmail] = useState("");
@@ -207,17 +218,43 @@ const ProfilePage = () => {
 
   const createdAt = user.created_at ? new Date(user.created_at).toLocaleDateString() : "Unknown";
 
+  // Get recent unlocks (last 5)
+  const recentUnlocks = [...userAchievements]
+    .sort((a, b) => new Date(b.unlocked_at).getTime() - new Date(a.unlocked_at).getTime())
+    .slice(0, 5)
+    .map(ua => {
+      const def = definitions.find(d => d.id === ua.achievement_id);
+      return def ? { ...def, unlockedAt: ua.unlocked_at } : null;
+    })
+    .filter(Boolean);
+
+  const handleTabChange = (value: string) => {
+    setSearchParams({ tab: value });
+  };
+
   return (
     <Layout>
-      <div className="container max-w-2xl py-8">
+      <div className="container max-w-4xl py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">My Profile</h1>
           <p className="text-muted-foreground mt-2">
-            Manage your account settings and preferences
+            Manage your account settings and track your achievements
           </p>
         </div>
 
-        <div className="space-y-6">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="profile" className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              Profile Settings
+            </TabsTrigger>
+            <TabsTrigger value="achievements" className="flex items-center gap-2">
+              <Trophy className="h-4 w-4" />
+              Achievements
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="profile" className="space-y-6">
           {/* Account Info Card */}
           <Card>
             <CardHeader>
@@ -361,7 +398,71 @@ const ProfilePage = () => {
               </form>
             </CardContent>
           </Card>
-        </div>
+          </TabsContent>
+
+          <TabsContent value="achievements" className="space-y-6">
+            {!isLoggedIn && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Your achievements are saved locally. Sign in to sync your progress across devices!
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <div className="grid gap-6 lg:grid-cols-3">
+              {/* Progress Card */}
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle>Your Progress</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <AchievementProgress />
+                </CardContent>
+              </Card>
+
+              {/* Recent Unlocks */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Unlocks</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {recentUnlocks.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {recentUnlocks.map((achievement) => (
+                        achievement && (
+                          <AchievementBadge
+                            key={achievement.id}
+                            name={achievement.name}
+                            description={achievement.description}
+                            icon={achievement.icon}
+                            tier={achievement.tier as AchievementTier}
+                            isUnlocked={true}
+                            size="md"
+                          />
+                        )
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Start reading articles to unlock your first achievement!
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* All Achievements */}
+            <Card>
+              <CardHeader>
+                <CardTitle>All Achievements</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AchievementsGrid showFilters={true} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );

@@ -197,6 +197,10 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 
 ### Near-term - Q1 and Q2 2026
 - [ ] Update Help Centres content (Public-facing and Admin)
+- [ ] Add link and integration to Comitology Register in the Implementing Acts Pages
+- [ ] Add links to existing regulatory-focused portals
+- [ ] Help Centre Content Manager
+- [ ] Website Layout Manager
 - [ ] Complete content updates - Implementing Acts
 - [ ] Complete content updates - Annexes
 - [ ] Complete content updates - Language Translations
@@ -204,13 +208,14 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [ ] Complete content updates - Footnotes
 - [ ] Complete content updates - Published Works
 - [ ] Map of officially designated Digital Health Authorities and Health Data Access Bodies
+- [ ] Add links to relevant national legislations
 
 ### Medium-term - Q2 to Q4 2026
 - [ ] Integration with national implementation trackers
 - [ ] Mobile apps (iOS/Android)
 - [ ] Linkages with other EU Acts and Regulations such as AI Act, MDR, Data Act, Data Governance Act, GDPR and more
 
-## Long-term - Q1 to Q4 2027
+### Long-term - Q1 to Q4 2027
 - [ ] Funding and Support for Project
 - [ ] Set up EHDS Explorer Team for long-term project sustainability
 

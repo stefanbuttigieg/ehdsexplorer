@@ -196,8 +196,8 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 ## 🚀 Planned Features and Actions
 
 ### Near-term - Q1 and Q2 2026
-- [ ] Update Help Centres content (Public-facing and Admin)
-- [ ] Add link and integration to Comitology Register in the Implementing Acts Pages
+- [X] Update Help Centres content (Public-facing and Admin)
+- [X] Add link and integration to Comitology Register in the Implementing Acts Pages
 - [ ] Add links to existing regulatory-focused portals
 - [ ] Help Centre Content Manager
 - [ ] Website Layout Manager

@@ -6,12 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useHealthAuthorities, AuthorityType, AuthorityStatus, HealthAuthority } from '@/hooks/useHealthAuthorities';
-import { Search, MapPin, Globe, Mail, Phone, Building2, Shield, ExternalLink, Filter, Map as MapIcon, List } from 'lucide-react';
+import { useCountryLegislation, CountryLegislation } from '@/hooks/useCountryLegislation';
+import { CountryLegislationCard } from '@/components/CountryLegislationCard';
+import { LEGISLATION_STATUSES, LEGISLATION_TYPES, LegislationStatus, LegislationType } from '@/data/legislationConstants';
+import { Search, MapPin, Globe, Mail, Phone, Building2, Shield, ExternalLink, Map as MapIcon, List, FileText, Gavel } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
-
 // EU country data with coordinates for map
 const EU_COUNTRIES = [
   { code: 'AT', name: 'Austria', x: 53, y: 45 },
@@ -136,10 +138,18 @@ function AuthorityCard({ authority }: { authority: HealthAuthority }) {
   );
 }
 
-function MapView({ authorities, selectedCountry, onCountryClick }: {
+function MapView({ 
+  authorities, 
+  legislation,
+  selectedCountry, 
+  onCountryClick,
+  activeTab 
+}: {
   authorities: HealthAuthority[];
+  legislation: CountryLegislation[];
   selectedCountry: string | null;
   onCountryClick: (code: string | null) => void;
+  activeTab: 'entities' | 'legislation';
 }) {
   const countryAuthorities = useMemo(() => {
     const map: Record<string, HealthAuthority[]> = {};
@@ -150,13 +160,28 @@ function MapView({ authorities, selectedCountry, onCountryClick }: {
     return map;
   }, [authorities]);
 
+  const countryLegislation = useMemo(() => {
+    const map: Record<string, CountryLegislation[]> = {};
+    legislation.forEach(l => {
+      if (!map[l.country_code]) map[l.country_code] = [];
+      map[l.country_code].push(l);
+    });
+    return map;
+  }, [legislation]);
+
+  const isLegislationView = activeTab === 'legislation';
+
   return (
     <div className="relative w-full aspect-[4/3] bg-muted/30 rounded-lg border overflow-hidden">
       <div className="absolute inset-4">
         {EU_COUNTRIES.map(country => {
-          const hasAuthorities = countryAuthorities[country.code]?.length > 0;
+          const hasData = isLegislationView 
+            ? countryLegislation[country.code]?.length > 0
+            : countryAuthorities[country.code]?.length > 0;
           const isSelected = selectedCountry === country.code;
-          const authorityCount = countryAuthorities[country.code]?.length || 0;
+          const count = isLegislationView
+            ? countryLegislation[country.code]?.length || 0
+            : countryAuthorities[country.code]?.length || 0;
           
           return (
             <button
@@ -165,16 +190,19 @@ function MapView({ authorities, selectedCountry, onCountryClick }: {
               className={cn(
                 "absolute transform -translate-x-1/2 -translate-y-1/2 transition-all",
                 "rounded-full flex items-center justify-center text-xs font-medium",
-                hasAuthorities 
-                  ? "bg-primary text-primary-foreground hover:scale-110 cursor-pointer shadow-md"
+                hasData 
+                  ? isLegislationView
+                    ? "bg-emerald-600 text-white hover:scale-110 cursor-pointer shadow-md"
+                    : "bg-primary text-primary-foreground hover:scale-110 cursor-pointer shadow-md"
                   : "bg-muted text-muted-foreground hover:bg-muted/80 cursor-pointer",
-                isSelected && "ring-2 ring-primary ring-offset-2 ring-offset-background scale-110",
-                hasAuthorities ? "h-8 w-8" : "h-6 w-6"
+                isSelected && "ring-2 ring-offset-2 ring-offset-background scale-110",
+                isSelected && (isLegislationView ? "ring-emerald-600" : "ring-primary"),
+                hasData ? "h-8 w-8" : "h-6 w-6"
               )}
               style={{ left: `${country.x}%`, top: `${country.y}%` }}
-              title={`${country.name}${hasAuthorities ? ` (${authorityCount})` : ''}`}
+              title={`${country.name}${hasData ? ` (${count})` : ''}`}
             >
-              {hasAuthorities ? authorityCount : ''}
+              {hasData ? count : ''}
             </button>
           );
         })}
@@ -183,8 +211,8 @@ function MapView({ authorities, selectedCountry, onCountryClick }: {
       {/* Legend */}
       <div className="absolute bottom-2 left-2 bg-background/90 backdrop-blur-sm rounded-md p-2 text-xs space-y-1">
         <div className="flex items-center gap-2">
-          <div className="h-4 w-4 rounded-full bg-primary" />
-          <span>Has entities</span>
+          <div className={cn("h-4 w-4 rounded-full", isLegislationView ? "bg-emerald-600" : "bg-primary")} />
+          <span>Has {isLegislationView ? 'legislation' : 'entities'}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="h-4 w-4 rounded-full bg-muted" />
@@ -196,18 +224,23 @@ function MapView({ authorities, selectedCountry, onCountryClick }: {
 }
 
 export default function HealthAuthoritiesPage() {
-  const { authorities, isLoading } = useHealthAuthorities();
+  const { authorities, isLoading: authoritiesLoading } = useHealthAuthorities();
+  const { data: legislation, isLoading: legislationLoading } = useCountryLegislation();
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<AuthorityType | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<AuthorityStatus | 'all'>('all');
+  const [legStatusFilter, setLegStatusFilter] = useState<LegislationStatus | 'all'>('all');
+  const [legTypeFilter, setLegTypeFilter] = useState<LegislationType | 'all'>('all');
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [view, setView] = useState<'map' | 'list'>('map');
+  const [activeTab, setActiveTab] = useState<'entities' | 'legislation'>('entities');
+
+  const isLoading = authoritiesLoading || legislationLoading;
 
   const filteredAuthorities = useMemo(() => {
     if (!authorities) return [];
     
     return authorities.filter(authority => {
-      // Search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const matchesSearch = 
@@ -217,17 +250,14 @@ export default function HealthAuthoritiesPage() {
         if (!matchesSearch) return false;
       }
       
-      // Type filter
       if (typeFilter !== 'all' && authority.authority_type !== typeFilter) {
         return false;
       }
       
-      // Status filter
       if (statusFilter !== 'all' && authority.status !== statusFilter) {
         return false;
       }
       
-      // Country filter (from map)
       if (selectedCountry && authority.country_code !== selectedCountry) {
         return false;
       }
@@ -235,6 +265,36 @@ export default function HealthAuthoritiesPage() {
       return true;
     });
   }, [authorities, searchQuery, typeFilter, statusFilter, selectedCountry]);
+
+  const filteredLegislation = useMemo(() => {
+    if (!legislation) return [];
+    
+    return legislation.filter(leg => {
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesSearch = 
+          leg.title.toLowerCase().includes(query) ||
+          leg.country_name.toLowerCase().includes(query) ||
+          leg.summary?.toLowerCase().includes(query) ||
+          leg.official_title?.toLowerCase().includes(query);
+        if (!matchesSearch) return false;
+      }
+      
+      if (legStatusFilter !== 'all' && leg.status !== legStatusFilter) {
+        return false;
+      }
+      
+      if (legTypeFilter !== 'all' && leg.legislation_type !== legTypeFilter) {
+        return false;
+      }
+      
+      if (selectedCountry && leg.country_code !== selectedCountry) {
+        return false;
+      }
+      
+      return true;
+    });
+  }, [legislation, searchQuery, legStatusFilter, legTypeFilter, selectedCountry]);
 
   const selectedCountryName = selectedCountry 
     ? EU_COUNTRIES.find(c => c.code === selectedCountry)?.name 
@@ -286,6 +346,20 @@ export default function HealthAuthoritiesPage() {
           </Card>
         </div>
 
+        {/* Tab Selection: Entities vs Legislation */}
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'entities' | 'legislation')} className="w-full">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="entities" className="gap-2">
+              <Building2 className="h-4 w-4" />
+              Entities ({authorities?.length || 0})
+            </TabsTrigger>
+            <TabsTrigger value="legislation" className="gap-2">
+              <Gavel className="h-4 w-4" />
+              Legislation ({legislation?.length || 0})
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         {/* View Toggle & Filters */}
         <div className="flex flex-col sm:flex-row gap-4">
           <Tabs value={view} onValueChange={(v) => setView(v as 'map' | 'list')} className="w-full sm:w-auto">
@@ -305,36 +379,66 @@ export default function HealthAuthoritiesPage() {
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search authorities..."
+                placeholder={activeTab === 'entities' ? "Search entities..." : "Search legislation..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
               />
             </div>
             
-            <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as AuthorityType | 'all')}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="All types" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All types</SelectItem>
-                <SelectItem value="digital_health_authority">Digital Health Authority</SelectItem>
-                <SelectItem value="health_data_access_body">Health Data Access Body</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as AuthorityStatus | 'all')}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="All status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="planned">Planned</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
+            {activeTab === 'entities' ? (
+              <>
+                <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as AuthorityType | 'all')}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="All types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All types</SelectItem>
+                    <SelectItem value="digital_health_authority">Digital Health Authority</SelectItem>
+                    <SelectItem value="health_data_access_body">Health Data Access Body</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as AuthorityStatus | 'all')}>
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="All status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All status</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="planned">Planned</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </>
+            ) : (
+              <>
+                <Select value={legTypeFilter} onValueChange={(v) => setLegTypeFilter(v as LegislationType | 'all')}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="All types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All types</SelectItem>
+                    {Object.entries(LEGISLATION_TYPES).map(([key, config]) => (
+                      <SelectItem key={key} value={key}>{config.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Select value={legStatusFilter} onValueChange={(v) => setLegStatusFilter(v as LegislationStatus | 'all')}>
+                  <SelectTrigger className="w-[160px]">
+                    <SelectValue placeholder="All status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All status</SelectItem>
+                    {Object.entries(LEGISLATION_STATUSES).map(([key, config]) => (
+                      <SelectItem key={key} value={key}>{config.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </>
+            )}
           </div>
         </div>
 
@@ -372,37 +476,64 @@ export default function HealthAuthoritiesPage() {
             {view === 'map' && (
               <MapView 
                 authorities={authorities || []} 
+                legislation={legislation || []}
                 selectedCountry={selectedCountry}
                 onCountryClick={setSelectedCountry}
+                activeTab={activeTab}
               />
             )}
 
             {/* Results count */}
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                {filteredAuthorities.length} {filteredAuthorities.length === 1 ? 'entity' : 'entities'} found
+                {activeTab === 'entities' 
+                  ? `${filteredAuthorities.length} ${filteredAuthorities.length === 1 ? 'entity' : 'entities'} found`
+                  : `${filteredLegislation.length} ${filteredLegislation.length === 1 ? 'law' : 'laws'} found`
+                }
               </p>
             </div>
 
-            {/* Authority cards */}
-            {filteredAuthorities.length > 0 ? (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {filteredAuthorities.map(authority => (
-                  <AuthorityCard key={authority.id} authority={authority} />
-                ))}
-              </div>
+            {/* Content based on active tab */}
+            {activeTab === 'entities' ? (
+              filteredAuthorities.length > 0 ? (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredAuthorities.map(authority => (
+                    <AuthorityCard key={authority.id} authority={authority} />
+                  ))}
+                </div>
+              ) : (
+                <Card className="text-center py-12">
+                  <CardContent>
+                    <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="font-semibold mb-2">No entities found</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {authorities?.length === 0 
+                        ? "No national entities have been added yet. Check back later as member states designate their DHAs and HDABs."
+                        : "Try adjusting your filters or search query."}
+                    </p>
+                  </CardContent>
+                </Card>
+              )
             ) : (
-              <Card className="text-center py-12">
-                <CardContent>
-                  <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="font-semibold mb-2">No entities found</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {authorities?.length === 0 
-                      ? "No national entities have been added yet. Check back later as member states designate their DHAs and HDABs."
-                      : "Try adjusting your filters or search query."}
-                  </p>
-                </CardContent>
-              </Card>
+              filteredLegislation.length > 0 ? (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {filteredLegislation.map(leg => (
+                    <CountryLegislationCard key={leg.id} legislation={leg} />
+                  ))}
+                </div>
+              ) : (
+                <Card className="text-center py-12">
+                  <CardContent>
+                    <Gavel className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="font-semibold mb-2">No legislation found</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {legislation?.length === 0 
+                        ? "No national legislation has been tracked yet. Check back as member states transpose the EHDS regulation."
+                        : "Try adjusting your filters or search query."}
+                    </p>
+                  </CardContent>
+                </Card>
+              )
             )}
           </>
         )}

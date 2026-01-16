@@ -5,6 +5,7 @@ import { AnnotationPopover } from './AnnotationPopover';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
+import { parseAndLinkReferences } from './LegalReferenceLink';
 
 interface AnnotatedContentProps {
   content: string;
@@ -21,7 +22,7 @@ const HIGHLIGHT_COLOR_MAP: Record<string, string> = {
   orange: 'bg-orange-200/70 dark:bg-orange-300/40',
 };
 
-// Component to render text with highlights
+// Component to render text with highlights and legal reference links
 const HighlightedText = ({ 
   text, 
   annotations, 
@@ -32,7 +33,8 @@ const HighlightedText = ({
   onAnnotationClick: (annotation: Annotation, event: React.MouseEvent) => void;
 }) => {
   if (!annotations.length) {
-    return <>{text}</>;
+    // No annotations, just parse for legal references
+    return <>{parseAndLinkReferences(text)}</>;
   }
 
   // Find all annotations that match text in this segment
@@ -68,12 +70,13 @@ const HighlightedText = ({
   });
 
   for (const match of nonOverlapping) {
-    // Add text before the match
+    // Add text before the match (with legal reference linking)
     if (match.start > lastIndex) {
-      elements.push(text.slice(lastIndex, match.start));
+      const beforeText = text.slice(lastIndex, match.start);
+      elements.push(...parseAndLinkReferences(beforeText));
     }
     
-    // Add highlighted text
+    // Add highlighted text (don't parse for links inside highlights to avoid nesting issues)
     elements.push(
       <mark
         key={`${match.annotation.id}-${match.start}`}
@@ -91,9 +94,10 @@ const HighlightedText = ({
     lastIndex = match.end;
   }
 
-  // Add remaining text
+  // Add remaining text (with legal reference linking)
   if (lastIndex < text.length) {
-    elements.push(text.slice(lastIndex));
+    const remainingText = text.slice(lastIndex);
+    elements.push(...parseAndLinkReferences(remainingText));
   }
 
   return <>{elements}</>;

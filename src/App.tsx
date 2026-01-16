@@ -75,6 +75,7 @@ import ManageSubscriptionPage from "./pages/ManageSubscriptionPage";
 import AchievementsPage from "./pages/AchievementsPage";
 import HealthAuthoritiesPage from "./pages/HealthAuthoritiesPage";
 import AdminHealthAuthoritiesPage from "./pages/AdminHealthAuthoritiesPage";
+import AdminLegalPagesPage from "./pages/AdminLegalPagesPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -169,6 +170,7 @@ const App = () => (
             <Route path="/admin/help-center-faqs" element={<AdminHelpCenterFaqPage />} />
             <Route path="/admin/onboarding" element={<AdminOnboardingPage />} />
             <Route path="/admin/health-authorities" element={<AdminHealthAuthoritiesPage />} />
+            <Route path="/admin/legal-pages" element={<AdminLegalPagesPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </MaintenanceGuard>

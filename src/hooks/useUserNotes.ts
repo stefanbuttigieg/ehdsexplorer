@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { useAchievements } from './useAchievements';
 import { useState } from 'react';
 
 export interface UserNote {
@@ -55,6 +56,7 @@ const setLocalNotes = (notes: UserNote[]) => {
 export const useUserNotes = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { checkAndUnlock } = useAchievements();
   const [localNotes, setLocalNotesState] = useState<UserNote[]>(getLocalNotes);
 
   const { data: dbNotes = [], isLoading } = useQuery({
@@ -128,6 +130,9 @@ export const useUserNotes = () => {
       if (user) {
         queryClient.invalidateQueries({ queryKey: ['user-notes'] });
       }
+      // Check for notes achievements
+      const noteCount = user ? dbNotes.length + 1 : localNotes.length + 1;
+      checkAndUnlock('notes', noteCount);
     },
   });
 

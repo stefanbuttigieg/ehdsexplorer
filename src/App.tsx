@@ -10,6 +10,7 @@ import MaintenanceGuard from "@/components/MaintenanceGuard";
 import UmamiAnalytics from "@/components/UmamiAnalytics";
 import { ComparisonBar } from "@/components/ComparisonBar";
 import { AchievementUnlockedToast } from "@/components/achievements/AchievementUnlockedToast";
+import { LevelUpModal } from "@/components/achievements/LevelUpModal";
 import Index from "./pages/Index";
 import ArticlePage from "./pages/ArticlePage";
 import ArticlesPage from "./pages/ArticlesPage";
@@ -86,8 +87,9 @@ const queryClient = new QueryClient({
   },
 });
 
-// Wrapper to use achievements hook within providers
+// Wrappers to use achievements hooks within providers
 const AchievementToastWrapper = () => <AchievementUnlockedToast />;
+const LevelUpModalWrapper = () => <LevelUpModal />;
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -102,6 +104,7 @@ const App = () => (
               <CookieConsentBanner />
               <ComparisonBar />
               <AchievementToastWrapper />
+              <LevelUpModalWrapper />
               <MaintenanceGuard>
           <Routes>
             <Route path="/" element={<Index />} />

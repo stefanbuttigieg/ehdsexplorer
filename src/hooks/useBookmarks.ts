@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useAchievements } from "./useAchievements";
 
 type BookmarkType = 'article' | 'recital' | 'act' | 'annex';
 
@@ -10,6 +11,7 @@ interface Bookmark {
 
 export function useBookmarks() {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
+  const { checkAndUnlock } = useAchievements();
 
   useEffect(() => {
     const stored = localStorage.getItem('ehds-bookmarks');
@@ -31,9 +33,13 @@ export function useBookmarks() {
     if (isBookmarked(type, id)) {
       saveBookmarks(bookmarks.filter(b => !(b.type === type && b.id === id)));
     } else {
-      saveBookmarks([...bookmarks, { type, id, addedAt: new Date().toISOString() }]);
+      const newBookmarks = [...bookmarks, { type, id, addedAt: new Date().toISOString() }];
+      saveBookmarks(newBookmarks);
+      
+      // Check for bookmark achievements
+      checkAndUnlock('bookmarks', newBookmarks.length);
     }
-  }, [bookmarks, isBookmarked, saveBookmarks]);
+  }, [bookmarks, isBookmarked, saveBookmarks, checkAndUnlock]);
 
   const getBookmarksByType = useCallback((type: BookmarkType) => {
     return bookmarks.filter(b => b.type === type);

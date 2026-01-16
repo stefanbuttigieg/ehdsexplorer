@@ -564,6 +564,81 @@ export type Database = {
         }
         Relationships: []
       }
+      country_legislation: {
+        Row: {
+          adoption_date: string | null
+          country_code: string
+          country_name: string
+          created_at: string | null
+          draft_date: string | null
+          effective_date: string | null
+          ehds_articles_referenced: number[] | null
+          enforcement_details: Json | null
+          enforcement_measures: string[] | null
+          id: string
+          implementing_act_ids: string[] | null
+          language: string | null
+          legislation_type: string | null
+          official_title: string | null
+          publication_date: string | null
+          status: string | null
+          status_notes: string | null
+          summary: string | null
+          tabled_date: string | null
+          title: string
+          updated_at: string | null
+          url: string | null
+        }
+        Insert: {
+          adoption_date?: string | null
+          country_code: string
+          country_name: string
+          created_at?: string | null
+          draft_date?: string | null
+          effective_date?: string | null
+          ehds_articles_referenced?: number[] | null
+          enforcement_details?: Json | null
+          enforcement_measures?: string[] | null
+          id?: string
+          implementing_act_ids?: string[] | null
+          language?: string | null
+          legislation_type?: string | null
+          official_title?: string | null
+          publication_date?: string | null
+          status?: string | null
+          status_notes?: string | null
+          summary?: string | null
+          tabled_date?: string | null
+          title: string
+          updated_at?: string | null
+          url?: string | null
+        }
+        Update: {
+          adoption_date?: string | null
+          country_code?: string
+          country_name?: string
+          created_at?: string | null
+          draft_date?: string | null
+          effective_date?: string | null
+          ehds_articles_referenced?: number[] | null
+          enforcement_details?: Json | null
+          enforcement_measures?: string[] | null
+          id?: string
+          implementing_act_ids?: string[] | null
+          language?: string | null
+          legislation_type?: string | null
+          official_title?: string | null
+          publication_date?: string | null
+          status?: string | null
+          status_notes?: string | null
+          summary?: string | null
+          tabled_date?: string | null
+          title?: string
+          updated_at?: string | null
+          url?: string | null
+        }
+        Relationships: []
+      }
       definition_translations: {
         Row: {
           created_at: string | null

@@ -1,15 +1,20 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { MessageCircle, X, Send, Trash2, Loader2, Bot, User, AlertCircle, ThumbsUp, ThumbsDown, History, Plus, ChevronLeft, Mic, MicOff, Volume2, VolumeX, Square } from 'lucide-react';
+import { MessageCircle, X, Send, Trash2, Loader2, Bot, User, AlertCircle, ThumbsUp, ThumbsDown, History, Plus, ChevronLeft, Mic, MicOff, Volume2, Square, Settings2, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useEHDSAssistant } from '@/hooks/useEHDSAssistant';
+import { useAIPreferences } from '@/hooks/useAIPreferences';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
+import AIRoleSelector from './AIRoleSelector';
+import AIContextSuggestions from './AIContextSuggestions';
+import AIConversationActions from './AIConversationActions';
 
 interface AIAssistantProps {
   className?: string;
@@ -18,6 +23,7 @@ interface AIAssistantProps {
 const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [input, setInput] = useState('');
   const [feedbackGiven, setFeedbackGiven] = useState<Record<number, 'positive' | 'negative'>>({});
   const [isRecording, setIsRecording] = useState(false);
@@ -26,6 +32,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  
   const { 
     messages, 
     isLoading, 
@@ -39,7 +46,20 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
     startNewConversation,
     deleteConversation,
     usageInfo,
+    isFavorite,
+    toggleFavorite,
   } = useEHDSAssistant();
+
+  const {
+    role,
+    explainLevel,
+    simplifyMode,
+    isLoggedIn,
+    setRole,
+    setExplainLevel,
+    setSimplifyMode,
+  } = useAIPreferences();
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -52,10 +72,10 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
 
   // Focus input when panel opens
   useEffect(() => {
-    if (isOpen && inputRef.current && !showHistory) {
+    if (isOpen && inputRef.current && !showHistory && !showSettings) {
       inputRef.current.focus();
     }
-  }, [isOpen, showHistory]);
+  }, [isOpen, showHistory, showSettings]);
 
   // Reset feedback when messages change
   useEffect(() => {
@@ -67,8 +87,18 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
-    sendMessage(input.trim());
+    sendMessage(input.trim(), { 
+      role, 
+      explainLevel: simplifyMode ? explainLevel : 'professional' 
+    });
     setInput('');
+  };
+
+  const handleQuickSend = (message: string) => {
+    sendMessage(message, { 
+      role, 
+      explainLevel: simplifyMode ? explainLevel : 'professional' 
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -228,7 +258,6 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
   };
 
   const speakText = async (text: string) => {
-    // Stop any current audio
     if (currentAudio) {
       currentAudio.pause();
       currentAudio.currentTime = 0;
@@ -237,7 +266,6 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
 
     setIsSpeaking(true);
     try {
-      // Strip markdown formatting for better speech
       const cleanText = text
         .replace(/\*\*/g, '')
         .replace(/\*/g, '')
@@ -299,20 +327,24 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
     }
   };
 
+  // Separate favorite and regular conversations
+  const favoriteConversations = conversations?.filter(c => c.is_favorite) || [];
+  const regularConversations = conversations?.filter(c => !c.is_favorite) || [];
+
   return (
     <div className={cn("fixed bottom-4 right-4 z-50", className)}>
       {/* Chat Panel */}
       {isOpen && (
-        <div className="absolute bottom-16 right-0 w-[380px] max-w-[calc(100vw-2rem)] h-[500px] max-h-[calc(100vh-8rem)] bg-background border rounded-lg shadow-xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-2 fade-in duration-200">
+        <div className="absolute bottom-16 right-0 w-[380px] max-w-[calc(100vw-2rem)] h-[550px] max-h-[calc(100vh-8rem)] bg-background border rounded-lg shadow-xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-2 fade-in duration-200">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b bg-muted/50">
+          <div className="flex items-center justify-between p-3 border-b bg-muted/50">
             <div className="flex items-center gap-2">
-              {showHistory ? (
+              {(showHistory || showSettings) ? (
                 <Button
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8"
-                  onClick={() => setShowHistory(false)}
+                  onClick={() => { setShowHistory(false); setShowSettings(false); }}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
@@ -321,16 +353,25 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
               )}
               <div>
                 <h3 className="font-semibold text-sm">
-                  {showHistory ? 'Chat History' : 'EHDS Assistant'}
+                  {showHistory ? 'Chat History' : showSettings ? 'Settings' : 'EHDS Assistant'}
                 </h3>
                 <p className="text-xs text-muted-foreground">
-                  {showHistory ? 'Select a conversation' : 'Ask about the regulation'}
+                  {showHistory ? 'Select a conversation' : showSettings ? 'Customize responses' : 'Ask about the regulation'}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-1">
-              {!showHistory && (
+              {!showHistory && !showSettings && (
                 <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setShowSettings(true)}
+                    title="Settings"
+                  >
+                    <Settings2 className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -349,6 +390,13 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
+                  <AIConversationActions
+                    conversationId={currentConversationId}
+                    messages={messages}
+                    isFavorite={isFavorite}
+                    onToggleFavorite={toggleFavorite}
+                    isLoggedIn={isLoggedIn}
+                  />
                 </>
               )}
               <Button
@@ -362,8 +410,25 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
             </div>
           </div>
 
-          {/* History View */}
-          {showHistory ? (
+          {/* Settings View */}
+          {showSettings ? (
+            <div className="flex-1 p-4 overflow-auto">
+              <AIRoleSelector
+                selectedRole={role}
+                onRoleChange={setRole}
+                selectedLevel={explainLevel}
+                onLevelChange={setExplainLevel}
+                simplifyMode={simplifyMode}
+                onSimplifyModeChange={setSimplifyMode}
+              />
+              <p className="mt-4 text-xs text-muted-foreground">
+                These settings customize how the AI responds to your questions. 
+                {isLoggedIn 
+                  ? ' Your preferences are saved to your account.' 
+                  : ' Log in to save your preferences.'}
+              </p>
+            </div>
+          ) : showHistory ? (
             <ScrollArea className="flex-1">
               <div className="p-2">
                 {conversationsLoading ? (
@@ -372,7 +437,50 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
                   </div>
                 ) : conversations && conversations.length > 0 ? (
                   <div className="space-y-1">
-                    {conversations.map((conv) => (
+                    {/* Favorites Section */}
+                    {favoriteConversations.length > 0 && (
+                      <>
+                        <div className="flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground font-medium">
+                          <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                          Favorites
+                        </div>
+                        {favoriteConversations.map((conv) => (
+                          <div
+                            key={conv.id}
+                            className={cn(
+                              "flex items-center gap-2 p-3 rounded-lg cursor-pointer hover:bg-muted transition-colors group",
+                              currentConversationId === conv.id && "bg-muted"
+                            )}
+                            onClick={() => handleSelectConversation(conv.id)}
+                          >
+                            <Star className="h-4 w-4 text-amber-400 fill-amber-400 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{conv.title}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {format(new Date(conv.updated_at), 'MMM d, h:mm a')}
+                              </p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={(e) => handleDeleteConversation(e, conv.id)}
+                              title="Delete conversation"
+                            >
+                              <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
+                            </Button>
+                          </div>
+                        ))}
+                        {regularConversations.length > 0 && (
+                          <div className="flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground font-medium mt-2">
+                            <MessageCircle className="h-3 w-3" />
+                            Recent
+                          </div>
+                        )}
+                      </>
+                    )}
+                    {/* Regular conversations */}
+                    {regularConversations.map((conv) => (
                       <div
                         key={conv.id}
                         className={cn(
@@ -424,19 +532,19 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
                       <p className="font-medium text-foreground">Try asking:</p>
                       <button 
                         className="block w-full text-left p-2 rounded bg-muted hover:bg-muted/80 transition-colors"
-                        onClick={() => sendMessage("What is the EHDS regulation about?")}
+                        onClick={() => handleQuickSend("What is the EHDS regulation about?")}
                       >
                         "What is the EHDS regulation about?"
                       </button>
                       <button 
                         className="block w-full text-left p-2 rounded bg-muted hover:bg-muted/80 transition-colors"
-                        onClick={() => sendMessage("What are the key definitions in Article 2?")}
+                        onClick={() => handleQuickSend("What are the key definitions in Article 2?")}
                       >
                         "What are the key definitions in Article 2?"
                       </button>
                       <button 
                         className="block w-full text-left p-2 rounded bg-muted hover:bg-muted/80 transition-colors"
-                        onClick={() => sendMessage("Which articles cover secondary use of health data?")}
+                        onClick={() => handleQuickSend("Which articles cover secondary use of health data?")}
                       >
                         "Which articles cover secondary use?"
                       </button>
@@ -476,7 +584,6 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
                                 <ReactMarkdown
                                   components={{
                                     a: ({ href, children }) => {
-                                      // Check if it's an internal link
                                       if (href?.startsWith('/')) {
                                         return (
                                           <Link to={href} className="text-primary underline hover:text-primary/80">
@@ -567,6 +674,14 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
                   </div>
                 )}
               </ScrollArea>
+
+              {/* Context Suggestions */}
+              {messages.length === 0 && (
+                <AIContextSuggestions 
+                  onSendMessage={handleQuickSend} 
+                  isLoading={isLoading} 
+                />
+              )}
 
               {/* Error */}
               {error && (

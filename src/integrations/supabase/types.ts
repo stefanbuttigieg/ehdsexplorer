@@ -59,21 +59,36 @@ export type Database = {
       ai_assistant_conversations: {
         Row: {
           created_at: string
+          explain_level_used: string | null
           id: string
+          is_favorite: boolean | null
+          role_used: string | null
+          share_id: string | null
+          tags: string[] | null
           title: string
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          explain_level_used?: string | null
           id?: string
+          is_favorite?: boolean | null
+          role_used?: string | null
+          share_id?: string | null
+          tags?: string[] | null
           title?: string
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          explain_level_used?: string | null
           id?: string
+          is_favorite?: boolean | null
+          role_used?: string | null
+          share_id?: string | null
+          tags?: string[] | null
           title?: string
           updated_at?: string
           user_id?: string
@@ -1526,6 +1541,8 @@ export type Database = {
           display_name: string | null
           email: string | null
           id: string
+          preferred_ai_role: string | null
+          preferred_explain_level: string | null
           updated_at: string
           user_id: string
         }
@@ -1534,6 +1551,8 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
+          preferred_ai_role?: string | null
+          preferred_explain_level?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1542,6 +1561,8 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
+          preferred_ai_role?: string | null
+          preferred_explain_level?: string | null
           updated_at?: string
           user_id?: string
         }

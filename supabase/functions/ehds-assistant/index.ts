@@ -8,11 +8,90 @@ const corsHeaders = {
 };
 
 const DAILY_LIMIT = 30;
-const IP_RATE_LIMIT_PER_HOUR = 5; // 5 requests per hour per IP
-const IP_RATE_LIMIT_WINDOW_MS = 3600000; // 1 hour
+const IP_RATE_LIMIT_PER_HOUR = 5;
+const IP_RATE_LIMIT_WINDOW_MS = 3600000;
+
+// Role-specific prompt additions
+const ROLE_PROMPTS: Record<string, string> = {
+  general: `
+USER ROLE: General User
+Focus on providing balanced, accessible explanations that cover the key points without assuming specialized knowledge. Use everyday language while maintaining accuracy. Provide practical examples when helpful.`,
+  healthcare: `
+USER ROLE: Healthcare Professional
+Focus on clinical implications, patient rights under EHDS, and how the regulation affects healthcare delivery. Emphasize:
+- Primary use of health data (Articles 3-14)
+- Patient access rights and control mechanisms
+- EHR system requirements and interoperability
+- MyHealth@EU cross-border data exchange
+- Data quality requirements for clinical use
+- Obligations for healthcare providers and data holders
+Use medical/clinical terminology where appropriate.`,
+  legal: `
+USER ROLE: Legal/Compliance Officer
+Focus on legal obligations, compliance requirements, and regulatory framework. Emphasize:
+- Specific obligations for different actors (manufacturers, data holders, data users)
+- Penalties and enforcement mechanisms
+- Relationship with GDPR and other EU regulations
+- Data governance and accountability requirements
+- Contractual and procedural requirements
+- Timeline for compliance and transitional provisions
+- Legal basis for data processing under primary and secondary use
+Cite specific articles and legal provisions precisely.`,
+  researcher: `
+USER ROLE: Researcher
+Focus on secondary use of health data for research purposes. Emphasize:
+- Chapter IV provisions on secondary use (Articles 33-50)
+- Health data access body procedures and requirements
+- Data permit application process
+- Eligible purposes for secondary use (Article 34)
+- Data minimization and secure processing environments
+- Cross-border research collaboration through HealthData@EU
+- Publication and result sharing requirements
+- Fees and access timelines
+Explain processes in practical, actionable terms.`,
+  developer: `
+USER ROLE: Health Tech Developer
+Focus on technical implementation requirements. Emphasize:
+- EHR system essential requirements (Article 6, Annex II)
+- EU self-declaration and conformity assessment procedures
+- Interoperability requirements and European EHR exchange format
+- API and data exchange standards
+- Certification and market surveillance
+- Cybersecurity and logging requirements
+- Wellness application voluntary labeling
+- Integration with existing health IT infrastructure
+Use technical terminology and reference specific technical annexes.`,
+  policy: `
+USER ROLE: Policy Maker
+Focus on governance structures and implementation strategy. Emphasize:
+- EHDS Board composition and responsibilities
+- National digital health authority roles
+- Cross-border cooperation mechanisms (MyHealth@EU, HealthData@EU)
+- Implementation timeline and key milestones
+- Member State obligations and flexibility
+- Relationship with national health systems
+- Funding and resource requirements
+- Monitoring and evaluation frameworks
+- Delegated and implementing acts timeline
+Provide strategic, high-level perspective while connecting to specific provisions.`
+};
+
+const EXPLAIN_LEVEL_PROMPTS: Record<string, string> = {
+  expert: `
+EXPLANATION LEVEL: Expert
+Use precise legal and technical terminology without simplification. Assume deep familiarity with EU regulatory framework, health data governance, and legal concepts. Reference specific articles, recitals, and annexes with minimal context. Focus on nuances, exceptions, and edge cases.`,
+  professional: `
+EXPLANATION LEVEL: Professional
+Use clear professional language with appropriate technical terms. Provide context for legal references. Balance detail with accessibility. Include practical implications alongside regulatory text. Assume working knowledge of the healthcare or legal sector.`,
+  student: `
+EXPLANATION LEVEL: Student
+Use an educational tone that builds understanding step by step. Define technical and legal terms when first introduced. Include concrete examples to illustrate abstract concepts. Explain the "why" behind provisions, not just the "what". Connect concepts to real-world scenarios students might encounter.`,
+  beginner: `
+EXPLANATION LEVEL: Complete Beginner
+Use simple, everyday language. Avoid jargon or define all terms clearly. Use analogies and relatable examples extensively. Break complex concepts into small, digestible pieces. Focus on the big picture before details. Use phrases like "In simple terms..." or "Think of it like...". Make no assumptions about prior knowledge of EU law or health data governance.`
+};
 
 function getClientIp(req: Request): string {
-  // Check various headers for client IP (handles proxies like Cloudflare)
   const cfConnectingIp = req.headers.get("cf-connecting-ip");
   if (cfConnectingIp) return cfConnectingIp;
 
@@ -35,7 +114,6 @@ async function checkIpRateLimit(
   const windowStart = new Date(Date.now() - IP_RATE_LIMIT_WINDOW_MS).toISOString();
   const identifier = `ai-assistant:${ipAddress}`;
 
-  // Get current count for this IP
   const { data: existing, error: selectError } = await supabase
     .from("api_rate_limits")
     .select("*")
@@ -47,7 +125,6 @@ async function checkIpRateLimit(
 
   if (selectError && selectError.code !== "PGRST116") {
     console.error("IP rate limit check error:", selectError);
-    // Allow request on error to avoid blocking legitimate users
     return { allowed: true, remaining: IP_RATE_LIMIT_PER_HOUR };
   }
 
@@ -56,7 +133,6 @@ async function checkIpRateLimit(
       return { allowed: false, remaining: 0 };
     }
 
-    // Increment counter
     await supabase
       .from("api_rate_limits")
       .update({ request_count: existing.request_count + 1 })
@@ -68,7 +144,6 @@ async function checkIpRateLimit(
     };
   }
 
-  // Create new rate limit record
   const { error: insertError } = await supabase.from("api_rate_limits").insert({
     ip_address: identifier,
     request_count: 1,
@@ -92,11 +167,9 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get client IP for rate limiting
     const clientIp = getClientIp(req);
     console.log("Processing AI assistant request from IP:", clientIp);
 
-    // Check IP-based rate limit first
     const ipRateLimit = await checkIpRateLimit(supabase, clientIp);
     
     if (!ipRateLimit.allowed) {
@@ -114,10 +187,8 @@ serve(async (req) => {
       });
     }
 
-    // Check and update daily usage (global limit)
     const today = new Date().toISOString().split('T')[0];
     
-    // Get or create today's usage record
     let { data: usageData, error: usageError } = await supabase
       .from("ai_daily_usage")
       .select("*")
@@ -125,7 +196,6 @@ serve(async (req) => {
       .single();
 
     if (usageError && usageError.code === 'PGRST116') {
-      // No record for today, create one
       const { data: newUsage, error: insertError } = await supabase
         .from("ai_daily_usage")
         .insert({ usage_date: today, request_count: 0, daily_limit: DAILY_LIMIT })
@@ -142,7 +212,6 @@ serve(async (req) => {
       throw new Error("Failed to check usage limits");
     }
 
-    // Check if limit exceeded
     if (usageData.request_count >= usageData.daily_limit) {
       console.log("Daily limit exceeded:", usageData.request_count, "/", usageData.daily_limit);
       return new Response(JSON.stringify({ 
@@ -155,15 +224,14 @@ serve(async (req) => {
       });
     }
 
-    const { messages } = await req.json();
+    const { messages, role = 'general', explainLevel = 'professional' } = await req.json();
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Fetch relevant content for context
-    console.log("Fetching EHDS content for context...");
+    console.log("Fetching EHDS content for context... Role:", role, "Level:", explainLevel);
     
     const [articlesRes, recitalsRes, definitionsRes, chaptersRes, implementingActsRes] = await Promise.all([
       supabase.from("articles").select("article_number, title, content").order("article_number"),
@@ -173,14 +241,12 @@ serve(async (req) => {
       supabase.from("implementing_acts").select("id, title, description, status, article_reference, type, theme"),
     ]);
 
-    // Build context from database content
     const articles = articlesRes.data || [];
     const recitals = recitalsRes.data || [];
     const definitions = definitionsRes.data || [];
     const chapters = chaptersRes.data || [];
     const implementingActs = implementingActsRes.data || [];
 
-    // Create a comprehensive but concise context
     const articlesSummary = articles.map(a => 
       `Article ${a.article_number}: ${a.title}\n${a.content.substring(0, 500)}${a.content.length > 500 ? '...' : ''}`
     ).join("\n\n");
@@ -201,7 +267,14 @@ serve(async (req) => {
       `Recital (${r.recital_number}): ${r.content.substring(0, 300)}${r.content.length > 300 ? '...' : ''}`
     ).join("\n\n");
 
+    // Get role and level specific prompts
+    const rolePrompt = ROLE_PROMPTS[role] || ROLE_PROMPTS.general;
+    const levelPrompt = EXPLAIN_LEVEL_PROMPTS[explainLevel] || EXPLAIN_LEVEL_PROMPTS.professional;
+
     const systemPrompt = `You are an expert AI assistant EXCLUSIVELY for the European Health Data Space (EHDS) Regulation (EU) 2025/327. Your ONLY purpose is to help users understand and navigate this specific regulation.
+
+${rolePrompt}
+${levelPrompt}
 
 STRICT TOPIC BOUNDARIES:
 - You MUST ONLY answer questions directly related to the EHDS Regulation, its articles, recitals, definitions, chapters, annexes, and implementing acts.
@@ -217,6 +290,7 @@ RESPONSE GUIDELINES:
 6. For navigation requests, guide users to the relevant articles or sections
 7. Keep answers concise but comprehensive
 8. Use plain language while maintaining legal accuracy
+9. Adapt your language complexity based on the explanation level setting
 
 CITATION FORMAT:
 - For articles: [Article X](/articles/X)
@@ -283,7 +357,6 @@ When users ask about specific topics, reference the most relevant articles and e
       });
     }
 
-    // Increment usage count after successful request
     const { error: updateError } = await supabase
       .from("ai_daily_usage")
       .update({ request_count: usageData.request_count + 1 })

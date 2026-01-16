@@ -35,12 +35,14 @@ const ArticlePage = () => {
   const { data: jointActionDeliverables = [] } = useJointActionDeliverables();
   const { data: publishedWorks = [] } = usePublishedWorks();
   const { data: footnotes = [] } = useFootnotesByArticle(article?.id ?? null);
+  const { data: nationalLegislation = [] } = useLegislationByArticle(articleId);
   const chapter = getChapterByArticle(articleId);
   const relatedRecitals = getRecitalsByArticle(articleId);
   const relatedActs = getActsByArticle(implementingActs, articleId);
   const relatedDeliverables = getDeliverablesByArticle(jointActionDeliverables, articleId);
   const relatedPublishedWorks = getPublishedWorksByArticle(publishedWorks, articleId);
   const { isBookmarked, toggleBookmark } = useBookmarks();
+  const { markAsRead } = useReadingProgress();
   const { markAsRead } = useReadingProgress();
 
   useKeyboardShortcuts({
@@ -240,6 +242,37 @@ const ArticlePage = () => {
                   </div>
                 </a>
               ))}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* National Implementation */}
+        {nationalLegislation.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Scale className="h-5 w-5" />
+                National Implementation
+              </CardTitle>
+              <CardDescription>
+                Member State legislation implementing or relating to this article ({nationalLegislation.length} {nationalLegislation.length === 1 ? 'country' : 'countries'})
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {nationalLegislation.slice(0, 5).map((leg) => (
+                <CountryLegislationCard 
+                  key={leg.id} 
+                  legislation={leg} 
+                  compact 
+                />
+              ))}
+              {nationalLegislation.length > 5 && (
+                <Link to="/health-authorities" className="block">
+                  <Button variant="outline" size="sm" className="w-full">
+                    View all {nationalLegislation.length} entries
+                  </Button>
+                </Link>
+              )}
             </CardContent>
           </Card>
         )}

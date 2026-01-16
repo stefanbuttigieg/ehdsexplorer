@@ -77,6 +77,7 @@ import AchievementsPage from "./pages/AchievementsPage";
 import HealthAuthoritiesPage from "./pages/HealthAuthoritiesPage";
 import AdminHealthAuthoritiesPage from "./pages/AdminHealthAuthoritiesPage";
 import AdminLegalPagesPage from "./pages/AdminLegalPagesPage";
+import AdminCountryLegislationPage from "./pages/AdminCountryLegislationPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -173,6 +174,7 @@ const App = () => (
             <Route path="/admin/onboarding" element={<AdminOnboardingPage />} />
             <Route path="/admin/health-authorities" element={<AdminHealthAuthoritiesPage />} />
             <Route path="/admin/legal-pages" element={<AdminLegalPagesPage />} />
+            <Route path="/admin/country-legislation" element={<AdminCountryLegislationPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </MaintenanceGuard>

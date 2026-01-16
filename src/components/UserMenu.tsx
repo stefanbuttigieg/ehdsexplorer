@@ -11,11 +11,13 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { User, LogOut, Trophy, Settings } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { User, LogOut, Trophy, Settings, LogIn } from "lucide-react";
 
 export function UserMenu() {
   const { user, loading, isEditor } = useAuth();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
@@ -40,15 +42,28 @@ export function UserMenu() {
   }
 
   if (!user) {
+    // Mobile: Single compact icon button
+    if (isMobile) {
+      return (
+        <Link to="/admin/auth">
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <LogIn className="h-4 w-4" />
+            <span className="sr-only">Sign In</span>
+          </Button>
+        </Link>
+      );
+    }
+    
+    // Desktop: Full sign in/up buttons
     return (
-      <div className="flex items-center gap-2 w-full">
-        <Link to="/admin/auth" className="flex-1">
-          <Button variant="outline" size="sm" className="w-full text-sm font-medium">
+      <div className="flex items-center gap-2">
+        <Link to="/admin/auth">
+          <Button variant="outline" size="sm" className="text-sm font-medium">
             Sign In
           </Button>
         </Link>
-        <Link to="/admin/auth" className="flex-1">
-          <Button size="sm" className="w-full text-sm font-medium">
+        <Link to="/admin/auth">
+          <Button size="sm" className="text-sm font-medium">
             Sign Up
           </Button>
         </Link>

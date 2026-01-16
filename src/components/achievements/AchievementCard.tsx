@@ -55,21 +55,13 @@ export const AchievementCard = ({
           showTooltip={false}
         />
         
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
-            <h3 className={cn(
-              'font-semibold truncate',
-              isUnlocked ? tierColors.text : 'text-foreground'
-            )}>
-              {name}
-            </h3>
-            <span className={cn(
-              'text-sm font-bold whitespace-nowrap',
-              isUnlocked ? tierColors.text : 'text-muted-foreground'
-            )}>
-              +{points} pts
-            </span>
-          </div>
+        <div className="flex-1 min-w-0 pr-16">
+          <h3 className={cn(
+            'font-semibold',
+            isUnlocked ? tierColors.text : 'text-foreground'
+          )}>
+            {name}
+          </h3>
           
           <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
             {description}
@@ -93,14 +85,22 @@ export const AchievementCard = ({
         </div>
       </div>
       
-      {/* Tier badge */}
-      <div className={cn(
-        'absolute top-2 right-2 px-2 py-0.5 rounded-full text-xs font-medium capitalize',
-        tierColors.bg,
-        tierColors.text,
-        !isUnlocked && 'opacity-50'
-      )}>
-        {tier}
+      {/* Points and Tier badge container */}
+      <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
+        <div className={cn(
+          'px-2 py-0.5 rounded-full text-xs font-medium capitalize',
+          tierColors.bg,
+          tierColors.text,
+          !isUnlocked && 'opacity-50'
+        )}>
+          {tier}
+        </div>
+        <span className={cn(
+          'text-sm font-bold',
+          isUnlocked ? tierColors.text : 'text-muted-foreground'
+        )}>
+          +{points} pts
+        </span>
       </div>
     </div>
   );

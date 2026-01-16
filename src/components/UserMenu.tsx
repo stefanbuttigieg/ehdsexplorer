@@ -42,7 +42,7 @@ export function UserMenu() {
   }
 
   if (!user) {
-    // Mobile: Single compact icon button
+    // Mobile & Tablet: Single compact icon button
     if (isMobile) {
       return (
         <Link to="/admin/auth">
@@ -54,20 +54,14 @@ export function UserMenu() {
       );
     }
     
-    // Desktop: Full sign in/up buttons
+    // Desktop: Single compact sign in button (cleaner for all screen sizes)
     return (
-      <div className="flex items-center gap-2">
-        <Link to="/admin/auth">
-          <Button variant="outline" size="sm" className="text-sm font-medium">
-            Sign In
-          </Button>
-        </Link>
-        <Link to="/admin/auth">
-          <Button size="sm" className="text-sm font-medium">
-            Sign Up
-          </Button>
-        </Link>
-      </div>
+      <Link to="/admin/auth">
+        <Button variant="outline" size="sm" className="text-sm font-medium gap-2">
+          <LogIn className="h-4 w-4" />
+          <span className="hidden lg:inline">Sign In</span>
+        </Button>
+      </Link>
     );
   }
 

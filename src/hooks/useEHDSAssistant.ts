@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { AIRole, ExplainLevel } from '@/data/aiRolePrompts';
 
 type Message = {
   id?: string;
@@ -13,6 +14,11 @@ type Conversation = {
   title: string;
   created_at: string;
   updated_at: string;
+  is_favorite?: boolean;
+  share_id?: string | null;
+  tags?: string[];
+  role_used?: string;
+  explain_level_used?: string;
 };
 
 type UsageInfo = {
@@ -20,15 +26,20 @@ type UsageInfo = {
   limit: number;
 };
 
+interface SendMessageOptions {
+  role?: AIRole;
+  explainLevel?: ExplainLevel;
+}
+
 export const useEHDSAssistant = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [usageInfo, setUsageInfo] = useState<UsageInfo | null>(null);
+  const [currentConversationFavorite, setCurrentConversationFavorite] = useState(false);
   const queryClient = useQueryClient();
 
-  // Fetch current usage on mount
   useEffect(() => {
     fetchUsage();
   }, []);
@@ -53,7 +64,6 @@ export const useEHDSAssistant = () => {
           limit: data.daily_limit
         });
       } else {
-        // No record for today yet, use default
         setUsageInfo({ remaining: 30, limit: 30 });
       }
     } catch (e) {
@@ -61,7 +71,6 @@ export const useEHDSAssistant = () => {
     }
   };
 
-  // Fetch user's conversations
   const { data: conversations, isLoading: conversationsLoading } = useQuery({
     queryKey: ['ai-conversations'],
     queryFn: async () => {
@@ -80,12 +89,14 @@ export const useEHDSAssistant = () => {
     },
   });
 
-  // Load messages when conversation changes
   useEffect(() => {
     if (currentConversationId) {
       loadConversationMessages(currentConversationId);
+      // Load favorite status
+      const conv = conversations?.find(c => c.id === currentConversationId);
+      setCurrentConversationFavorite(conv?.is_favorite || false);
     }
-  }, [currentConversationId]);
+  }, [currentConversationId, conversations]);
 
   const loadConversationMessages = async (conversationId: string) => {
     try {
@@ -107,19 +118,27 @@ export const useEHDSAssistant = () => {
     }
   };
 
-  const createConversation = async (firstMessage: string): Promise<string | null> => {
+  const createConversation = async (
+    firstMessage: string, 
+    role: AIRole = 'general', 
+    explainLevel: ExplainLevel = 'professional'
+  ): Promise<string | null> => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
 
-      // Generate title from first message (first 50 chars)
       const title = firstMessage.length > 50 
         ? firstMessage.substring(0, 50) + '...' 
         : firstMessage;
 
       const { data, error } = await supabase
         .from('ai_assistant_conversations')
-        .insert({ user_id: user.id, title })
+        .insert({ 
+          user_id: user.id, 
+          title,
+          role_used: role,
+          explain_level_used: explainLevel
+        })
         .select()
         .single();
       
@@ -141,7 +160,6 @@ export const useEHDSAssistant = () => {
       
       if (error) throw error;
 
-      // Update conversation timestamp
       await supabase
         .from('ai_assistant_conversations')
         .update({ updated_at: new Date().toISOString() })
@@ -153,8 +171,30 @@ export const useEHDSAssistant = () => {
     }
   };
 
-  const sendMessage = useCallback(async (input: string) => {
-    // Check if limit is exceeded before sending
+  const toggleFavorite = useCallback(async () => {
+    if (!currentConversationId) return;
+    
+    const newFavoriteStatus = !currentConversationFavorite;
+    setCurrentConversationFavorite(newFavoriteStatus);
+    
+    try {
+      const { error } = await supabase
+        .from('ai_assistant_conversations')
+        .update({ is_favorite: newFavoriteStatus })
+        .eq('id', currentConversationId);
+      
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ['ai-conversations'] });
+    } catch (e) {
+      console.error('Error toggling favorite:', e);
+      setCurrentConversationFavorite(!newFavoriteStatus); // Revert on error
+    }
+  }, [currentConversationId, currentConversationFavorite, queryClient]);
+
+  const sendMessage = useCallback(async (input: string, options?: SendMessageOptions) => {
+    const role = options?.role || 'general';
+    const explainLevel = options?.explainLevel || 'professional';
+
     if (usageInfo && usageInfo.remaining <= 0) {
       setError("Daily limit reached. The AI assistant will be available again tomorrow.");
       return;
@@ -168,18 +208,15 @@ export const useEHDSAssistant = () => {
     let assistantContent = '';
     let convId = currentConversationId;
 
-    // Get user for authenticated features (optional)
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Create new conversation if user is logged in
     if (user && !convId) {
-      convId = await createConversation(input);
+      convId = await createConversation(input, role, explainLevel);
       if (convId) {
         setCurrentConversationId(convId);
       }
     }
 
-    // Save user message if logged in
     if (user && convId) {
       await saveMessage(convId, 'user', input);
     }
@@ -198,7 +235,6 @@ export const useEHDSAssistant = () => {
     };
 
     try {
-      // Use anon key for public access
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ehds-assistant`,
         {
@@ -211,7 +247,9 @@ export const useEHDSAssistant = () => {
             messages: [...messages, userMsg].map(m => ({
               role: m.role,
               content: m.content
-            }))
+            })),
+            role,
+            explainLevel
           }),
         }
       );
@@ -219,7 +257,6 @@ export const useEHDSAssistant = () => {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         
-        // Update usage info if we got remaining info
         if (errorData.remaining !== undefined) {
           setUsageInfo({
             remaining: errorData.remaining,
@@ -230,7 +267,6 @@ export const useEHDSAssistant = () => {
         throw new Error(errorData.error || `Request failed with status ${response.status}`);
       }
 
-      // Update usage from headers if available
       const remainingHeader = response.headers.get('X-Remaining-Uses');
       const limitHeader = response.headers.get('X-Daily-Limit');
       if (remainingHeader !== null) {
@@ -277,7 +313,6 @@ export const useEHDSAssistant = () => {
         }
       }
 
-      // Flush remaining buffer
       if (buffer.trim()) {
         for (let raw of buffer.split('\n')) {
           if (!raw) continue;
@@ -294,7 +329,6 @@ export const useEHDSAssistant = () => {
         }
       }
 
-      // Save assistant response if logged in
       if (user && convId && assistantContent) {
         await saveMessage(convId, 'assistant', assistantContent);
       }
@@ -322,6 +356,7 @@ export const useEHDSAssistant = () => {
     setCurrentConversationId(null);
     setMessages([]);
     setError(null);
+    setCurrentConversationFavorite(false);
   }, []);
 
   const deleteConversation = useCallback(async (conversationId: string) => {
@@ -360,5 +395,7 @@ export const useEHDSAssistant = () => {
     startNewConversation,
     deleteConversation,
     usageInfo,
+    isFavorite: currentConversationFavorite,
+    toggleFavorite,
   };
 };

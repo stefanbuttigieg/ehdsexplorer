@@ -191,8 +191,11 @@ export default function AdminCountryLegislationPage() {
     if (!country) return;
 
     const input: CreateLegislationInput = {
-      ...data,
+      country_code: data.country_code,
       country_name: country.name,
+      title: data.title,
+      legislation_type: data.legislation_type,
+      status: data.status,
       url: data.url || undefined,
       official_title: data.official_title || undefined,
       summary: data.summary || undefined,

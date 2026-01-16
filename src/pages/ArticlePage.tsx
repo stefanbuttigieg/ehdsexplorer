@@ -1,8 +1,8 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect } from "react";
-import { ChevronLeft, ChevronRight, Bookmark, ExternalLink } from "lucide-react";
+import { ChevronLeft, ChevronRight, Bookmark, ExternalLink, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useArticle, useArticles } from "@/hooks/useArticles";
@@ -25,6 +25,8 @@ import { EliReference } from "@/components/EliReference";
 import PlainLanguageView from "@/components/PlainLanguageView";
 import { AnnotatedContent } from "@/components/AnnotatedContent";
 import { CompareButton } from "@/components/CompareButton";
+import { useLegislationByArticle } from "@/hooks/useCountryLegislation";
+import { CountryLegislationCard } from "@/components/CountryLegislationCard";
 
 const ArticlePage = () => {
   const { id } = useParams();
@@ -42,7 +44,6 @@ const ArticlePage = () => {
   const relatedDeliverables = getDeliverablesByArticle(jointActionDeliverables, articleId);
   const relatedPublishedWorks = getPublishedWorksByArticle(publishedWorks, articleId);
   const { isBookmarked, toggleBookmark } = useBookmarks();
-  const { markAsRead } = useReadingProgress();
   const { markAsRead } = useReadingProgress();
 
   useKeyboardShortcuts({

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ComparisonProvider } from "@/contexts/ComparisonContext";
+import { AchievementProvider } from "@/contexts/AchievementContext";
 import MaintenanceGuard from "@/components/MaintenanceGuard";
 import UmamiAnalytics from "@/components/UmamiAnalytics";
 import { ComparisonBar } from "@/components/ComparisonBar";
@@ -97,16 +98,17 @@ const App = () => (
     <ThemeProvider defaultTheme="system" storageKey="ehds-theme">
       <LanguageProvider>
         <ComparisonProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <UmamiAnalytics />
-              <CookieConsentBanner />
-              <ComparisonBar />
-              <AchievementToastWrapper />
-              <LevelUpModalWrapper />
-              <MaintenanceGuard>
+          <AchievementProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <UmamiAnalytics />
+                <CookieConsentBanner />
+                <ComparisonBar />
+                <AchievementToastWrapper />
+                <LevelUpModalWrapper />
+                <MaintenanceGuard>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/overview" element={<OverviewPage />} />
@@ -175,7 +177,8 @@ const App = () => (
           </Routes>
           </MaintenanceGuard>
           </BrowserRouter>
-        </TooltipProvider>
+          </TooltipProvider>
+          </AchievementProvider>
         </ComparisonProvider>
       </LanguageProvider>
     </ThemeProvider>

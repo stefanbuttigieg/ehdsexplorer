@@ -129,7 +129,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
   - Export to ICS (calendar), CSV (spreadsheet), and JSON formats
   - Hover interactions with milestone highlighting
 
-### 🎮 Learning Tools
+### 🎮 Learning Tools & Gamification
 - **Match Game** - Card-matching game to learn EHDS terminology by pairing terms with definitions
   - Selectable difficulty levels (4, 6, or 8 pairs)
   - Timer tracking and accuracy metrics
@@ -138,6 +138,13 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
   - Flip cards to reveal definitions
   - Self-assessment marking (knew it / didn't know)
   - Progress tracking and shuffle functionality
+- **Achievement System** - Gamified progress tracking for logged-in users
+  - Unlock achievements for bookmarking, note-taking, and game completion
+  - Level-up modals with celebratory animations (Newcomer to EHDS Master)
+  - Confetti effects and toast notifications when achievements unlock
+  - Points-based leveling system with 5 tiers
+  - Achievements page accessible from user profile
+
 ### 📝 Footnotes System
 - **Inline footnote markers** in article and recital content (e.g., [^1], *, †)
 - **Clickable markers** that smooth-scroll to footnote with highlight effect

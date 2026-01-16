@@ -13,6 +13,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.8.1] - 2026-01-16
+
+### Added
+
+#### Gamification Enhancements
+- Level-up modal with celebratory animations when users advance to a new level
+- Confetti effects in achievement unlock toasts for enhanced celebration
+- "View All Achievements" link in achievement notifications
+- Achievement triggers integrated with bookmarks and notes workflows
+- Persistent level tracking via localStorage for level-up detection
+
+#### Mobile UX Improvements
+- Compact sign-in button for mobile navigation (icon-only for cleaner UI)
+- Responsive authentication controls in header
+
+---
+
 ## [1.8.0] - 2026-01-15
 
 ### Added

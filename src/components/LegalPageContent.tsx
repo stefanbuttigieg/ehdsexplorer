@@ -1,6 +1,7 @@
 import { usePageContent } from '@/hooks/usePageContent';
 import { Skeleton } from '@/components/ui/skeleton';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
 
 interface LegalSection {
@@ -55,7 +56,7 @@ export const LegalPageContent = ({ pageId, fallbackTitle, children }: LegalPageC
             <h2 className="text-xl font-semibold mb-3">{section.title}</h2>
             <div className="text-foreground/80 leading-relaxed legal-content">
               <ReactMarkdown 
-                remarkPlugins={[remarkBreaks]}
+                remarkPlugins={[remarkGfm, remarkBreaks]}
                 components={{
                   h3: ({ children }) => (
                     <h3 className="text-lg font-medium mb-2 mt-4">{children}</h3>

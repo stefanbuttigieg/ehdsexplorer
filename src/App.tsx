@@ -53,6 +53,7 @@ import CookieConsentBanner from "./components/CookieConsentBanner";
 import NotFound from "./pages/NotFound";
 import MatchGamePage from "./pages/MatchGamePage";
 import FlashcardGamePage from "./pages/FlashcardGamePage";
+import QuizGamePage from "./pages/QuizGamePage";
 import ApiDocsPage from "./pages/ApiDocsPage";
 import NewsPage from "./pages/NewsPage";
 import NewsDetailPage from "./pages/NewsDetailPage";
@@ -132,6 +133,7 @@ const App = () => (
             <Route path="/accessibility" element={<AccessibilityStatementPage />} />
             <Route path="/match-game" element={<MatchGamePage />} />
             <Route path="/flashcards" element={<FlashcardGamePage />} />
+            <Route path="/quiz" element={<QuizGamePage />} />
             <Route path="/api" element={<ApiDocsPage />} />
             <Route path="/news" element={<NewsPage />} />
             <Route path="/news/:id" element={<NewsDetailPage />} />

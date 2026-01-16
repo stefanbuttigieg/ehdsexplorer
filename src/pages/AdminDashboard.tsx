@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote, HelpCircle, BookOpenCheck, Mail, Newspaper, UserCircle, Languages, ClipboardCheck, Bot, Globe, Sparkles, MapPin } from 'lucide-react';
+import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote, HelpCircle, BookOpenCheck, Mail, Newspaper, UserCircle, Languages, ClipboardCheck, Bot, Globe, Sparkles, MapPin, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -174,6 +174,12 @@ const AdminDashboard = () => {
       description: 'Manage Digital Health Authorities (DHAs) and Health Data Access Bodies (HDABs)',
       icon: MapPin,
       href: '/admin/health-authorities',
+    },
+    {
+      title: 'Legal Pages',
+      description: 'Edit Privacy Policy, Terms of Service, Cookies Policy, Accessibility Statement',
+      icon: Shield,
+      href: '/admin/legal-pages',
     },
   ];
 

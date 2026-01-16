@@ -8,7 +8,7 @@ A comprehensive digital platform for exploring **Regulation (EU) 2025/327** - th
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?logo=tailwindcss)
 ![Supabase](https://img.shields.io/badge/Supabase-Backend-3FCF8E?logo=supabase)
 [![BuyMeACoffee](https://raw.githubusercontent.com/pachadotdev/buymeacoffee-badges/main/bmc-yellow.svg)](https://buymeacoffee.com/stefanbuttigieg)
-![Lovable Credits](https://img.shields.io/badge/Lovable%20Credits-400%20credits%20used-blue)
+![Lovable Credits](https://img.shields.io/badge/Lovable%20Credits-500%20credits%20used-blue)
 ![Analytics](https://img.shields.io/badge/Analytics-Umami-brightgreen)
 
 
@@ -217,8 +217,8 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [X] Update Help Centres content (Public-facing and Admin)
 - [X] Add link and integration to Comitology Register in the Implementing Acts Pages
 - [X] Map of officially designated Digital Health Authorities and Health Data Access Bodies
-- [ ] Add links to existing regulatory-focused portals
-- [ ] Help Centre Content Manager
+- [X] Add links to existing regulatory-focused portals
+- [X] Help Centre Content Manager
 - [ ] Website Layout Manager
 - [ ] Complete content updates - Implementing Acts
 - [ ] Complete content updates - Annexes
@@ -226,7 +226,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [ ] Complete content updates - Joint Action Deliverables
 - [ ] Complete content updates - Footnotes
 - [ ] Complete content updates - Published Works
-- [ ] Add links to relevant national legislations
+- [X] Add links to relevant national legislations
 
 ### Medium-term - Q2 to Q4 2026
 - [ ] Integration with national implementation trackers

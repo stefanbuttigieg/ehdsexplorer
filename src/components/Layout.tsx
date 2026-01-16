@@ -129,14 +129,12 @@ const Layout = ({ children }: LayoutProps) => {
 
         {/* Toolbar Row - Only when expanded */}
         {!sidebarCollapsed && (
-          <div className="hidden md:flex items-center justify-between gap-2 px-3 py-2 border-b border-sidebar-border" data-tour="accessibility">
+          <div className="hidden md:flex items-center gap-1 px-3 py-2 border-b border-sidebar-border" data-tour="accessibility">
             <UserMenu />
-            <div className="flex items-center gap-1">
-              <LanguageSelector variant="compact" />
-              <TourButton onClick={startTour} />
-              <ReportIssueButton />
-              <AccessibilityControls />
-            </div>
+            <LanguageSelector variant="compact" />
+            <TourButton onClick={startTour} />
+            <ReportIssueButton />
+            <AccessibilityControls />
           </div>
         )}
         

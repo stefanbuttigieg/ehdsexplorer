@@ -172,7 +172,50 @@ function MapView({
   const isLegislationView = activeTab === 'legislation';
 
   return (
-    <div className="relative w-full aspect-[4/3] bg-muted/30 rounded-lg border overflow-hidden">
+    <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 rounded-lg border overflow-hidden">
+      {/* European map SVG background */}
+      <svg
+        viewBox="0 0 100 80"
+        className="absolute inset-0 w-full h-full opacity-20 dark:opacity-10"
+        preserveAspectRatio="xMidYMid meet"
+      >
+        {/* Simplified Europe outline */}
+        <path
+          d="M20,55 Q15,50 18,45 Q20,40 25,38 L28,32 Q32,28 28,25 Q25,22 30,20 
+             Q35,18 40,22 L45,20 Q50,15 55,12 Q60,10 65,8 Q70,10 72,15 
+             Q75,20 78,18 Q80,22 78,28 L75,32 Q72,35 75,40 Q78,45 75,50 
+             Q72,55 68,58 Q65,62 60,65 Q55,68 50,70 Q45,68 42,65 
+             Q38,62 35,58 Q30,55 25,58 Z"
+          fill="currentColor"
+          className="text-primary/30"
+        />
+        {/* Scandinavian peninsula */}
+        <path
+          d="M50,5 Q55,8 58,12 Q60,15 58,20 Q55,18 52,15 Q50,12 48,8 Z"
+          fill="currentColor"
+          className="text-primary/30"
+        />
+        {/* British Isles */}
+        <path
+          d="M25,30 Q28,28 30,32 Q28,35 25,33 Z M22,35 Q25,33 27,38 Q25,40 22,38 Z"
+          fill="currentColor"
+          className="text-primary/30"
+        />
+        {/* Italy */}
+        <path
+          d="M48,50 Q52,55 50,62 Q48,68 45,70 Q47,65 48,60 Q46,55 48,50 Z"
+          fill="currentColor"
+          className="text-primary/30"
+        />
+        {/* Greece */}
+        <path
+          d="M62,58 Q65,62 63,68 Q60,65 62,58 Z"
+          fill="currentColor"
+          className="text-primary/30"
+        />
+      </svg>
+
+      {/* Country dots */}
       <div className="absolute inset-4">
         {EU_COUNTRIES.map(country => {
           const hasData = isLegislationView 
@@ -188,36 +231,45 @@ function MapView({
               key={country.code}
               onClick={() => onCountryClick(isSelected ? null : country.code)}
               className={cn(
-                "absolute transform -translate-x-1/2 -translate-y-1/2 transition-all",
+                "absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200",
                 "rounded-full flex items-center justify-center text-xs font-medium",
+                "shadow-lg border-2 border-white dark:border-gray-800",
                 hasData 
                   ? isLegislationView
-                    ? "bg-emerald-600 text-white hover:scale-110 cursor-pointer shadow-md"
-                    : "bg-primary text-primary-foreground hover:scale-110 cursor-pointer shadow-md"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80 cursor-pointer",
-                isSelected && "ring-2 ring-offset-2 ring-offset-background scale-110",
-                isSelected && (isLegislationView ? "ring-emerald-600" : "ring-primary"),
-                hasData ? "h-8 w-8" : "h-6 w-6"
+                    ? "bg-emerald-600 text-white hover:scale-110 cursor-pointer"
+                    : "bg-primary text-primary-foreground hover:scale-110 cursor-pointer"
+                  : "bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-500 cursor-pointer",
+                isSelected && "ring-4 ring-offset-2 ring-offset-background scale-125",
+                isSelected && (isLegislationView ? "ring-emerald-400" : "ring-primary/50"),
+                hasData ? "h-9 w-9 min-w-[36px]" : "h-7 w-7 min-w-[28px]"
               )}
               style={{ left: `${country.x}%`, top: `${country.y}%` }}
-              title={`${country.name}${hasData ? ` (${count})` : ''}`}
+              title={`${country.name}${hasData ? ` (${count})` : ' - No data'}`}
             >
-              {hasData ? count : ''}
+              {hasData ? count : country.code.charAt(0)}
             </button>
           );
         })}
       </div>
       
       {/* Legend */}
-      <div className="absolute bottom-2 left-2 bg-background/90 backdrop-blur-sm rounded-md p-2 text-xs space-y-1">
+      <div className="absolute bottom-3 left-3 bg-background/95 backdrop-blur-sm rounded-lg p-3 text-xs space-y-2 shadow-md border">
+        <div className="font-medium text-foreground mb-1">Legend</div>
         <div className="flex items-center gap-2">
-          <div className={cn("h-4 w-4 rounded-full", isLegislationView ? "bg-emerald-600" : "bg-primary")} />
+          <div className={cn("h-5 w-5 rounded-full border-2 border-white shadow", isLegislationView ? "bg-emerald-600" : "bg-primary")} />
           <span>Has {isLegislationView ? 'legislation' : 'entities'}</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-4 w-4 rounded-full bg-muted" />
+          <div className="h-5 w-5 rounded-full bg-gray-300 dark:bg-gray-600 border-2 border-white shadow" />
           <span>No data yet</span>
         </div>
+      </div>
+
+      {/* Title overlay */}
+      <div className="absolute top-3 left-3 bg-background/95 backdrop-blur-sm rounded-lg px-3 py-2 shadow-md border">
+        <span className="text-sm font-medium">
+          {isLegislationView ? 'National EHDS Legislation' : 'National EHDS Entities'} Map
+        </span>
       </div>
     </div>
   );

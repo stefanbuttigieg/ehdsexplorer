@@ -11,38 +11,40 @@ import { useHealthAuthorities, AuthorityType, AuthorityStatus, HealthAuthority }
 import { useCountryLegislation, CountryLegislation } from '@/hooks/useCountryLegislation';
 import { CountryLegislationCard } from '@/components/CountryLegislationCard';
 import { LEGISLATION_STATUSES, LEGISLATION_TYPES, LegislationStatus, LegislationType } from '@/data/legislationConstants';
-import { Search, MapPin, Globe, Mail, Phone, Building2, Shield, ExternalLink, Map as MapIcon, List, FileText, Gavel } from 'lucide-react';
+import { EuropeMap } from '@/components/EuropeMap';
+import { Search, MapPin, Globe, Mail, Phone, Building2, Shield, ExternalLink, Map as MapIcon, List, Gavel } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
-// EU country data with coordinates for map
+
+// EU country names for display
 const EU_COUNTRIES = [
-  { code: 'AT', name: 'Austria', x: 53, y: 45 },
-  { code: 'BE', name: 'Belgium', x: 42, y: 38 },
-  { code: 'BG', name: 'Bulgaria', x: 68, y: 55 },
-  { code: 'HR', name: 'Croatia', x: 56, y: 52 },
-  { code: 'CY', name: 'Cyprus', x: 78, y: 68 },
-  { code: 'CZ', name: 'Czechia', x: 54, y: 40 },
-  { code: 'DK', name: 'Denmark', x: 48, y: 28 },
-  { code: 'EE', name: 'Estonia', x: 66, y: 22 },
-  { code: 'FI', name: 'Finland', x: 66, y: 12 },
-  { code: 'FR', name: 'France', x: 38, y: 48 },
-  { code: 'DE', name: 'Germany', x: 48, y: 40 },
-  { code: 'GR', name: 'Greece', x: 65, y: 62 },
-  { code: 'HU', name: 'Hungary', x: 58, y: 48 },
-  { code: 'IE', name: 'Ireland', x: 28, y: 35 },
-  { code: 'IT', name: 'Italy', x: 50, y: 55 },
-  { code: 'LV', name: 'Latvia', x: 66, y: 25 },
-  { code: 'LT', name: 'Lithuania', x: 66, y: 28 },
-  { code: 'LU', name: 'Luxembourg', x: 44, y: 42 },
-  { code: 'MT', name: 'Malta', x: 53, y: 70 },
-  { code: 'NL', name: 'Netherlands', x: 43, y: 35 },
-  { code: 'PL', name: 'Poland', x: 58, y: 38 },
-  { code: 'PT', name: 'Portugal', x: 22, y: 58 },
-  { code: 'RO', name: 'Romania', x: 66, y: 50 },
-  { code: 'SK', name: 'Slovakia', x: 58, y: 44 },
-  { code: 'SI', name: 'Slovenia', x: 53, y: 50 },
-  { code: 'ES', name: 'Spain', x: 28, y: 58 },
-  { code: 'SE', name: 'Sweden', x: 56, y: 18 },
+  { code: 'AT', name: 'Austria' },
+  { code: 'BE', name: 'Belgium' },
+  { code: 'BG', name: 'Bulgaria' },
+  { code: 'HR', name: 'Croatia' },
+  { code: 'CY', name: 'Cyprus' },
+  { code: 'CZ', name: 'Czechia' },
+  { code: 'DK', name: 'Denmark' },
+  { code: 'EE', name: 'Estonia' },
+  { code: 'FI', name: 'Finland' },
+  { code: 'FR', name: 'France' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'GR', name: 'Greece' },
+  { code: 'HU', name: 'Hungary' },
+  { code: 'IE', name: 'Ireland' },
+  { code: 'IT', name: 'Italy' },
+  { code: 'LV', name: 'Latvia' },
+  { code: 'LT', name: 'Lithuania' },
+  { code: 'LU', name: 'Luxembourg' },
+  { code: 'MT', name: 'Malta' },
+  { code: 'NL', name: 'Netherlands' },
+  { code: 'PL', name: 'Poland' },
+  { code: 'PT', name: 'Portugal' },
+  { code: 'RO', name: 'Romania' },
+  { code: 'SK', name: 'Slovakia' },
+  { code: 'SI', name: 'Slovenia' },
+  { code: 'ES', name: 'Spain' },
+  { code: 'SE', name: 'Sweden' },
 ];
 
 const statusColors: Record<AuthorityStatus, string> = {
@@ -138,142 +140,7 @@ function AuthorityCard({ authority }: { authority: HealthAuthority }) {
   );
 }
 
-function MapView({ 
-  authorities, 
-  legislation,
-  selectedCountry, 
-  onCountryClick,
-  activeTab 
-}: {
-  authorities: HealthAuthority[];
-  legislation: CountryLegislation[];
-  selectedCountry: string | null;
-  onCountryClick: (code: string | null) => void;
-  activeTab: 'entities' | 'legislation';
-}) {
-  const countryAuthorities = useMemo(() => {
-    const map: Record<string, HealthAuthority[]> = {};
-    authorities.forEach(a => {
-      if (!map[a.country_code]) map[a.country_code] = [];
-      map[a.country_code].push(a);
-    });
-    return map;
-  }, [authorities]);
 
-  const countryLegislation = useMemo(() => {
-    const map: Record<string, CountryLegislation[]> = {};
-    legislation.forEach(l => {
-      if (!map[l.country_code]) map[l.country_code] = [];
-      map[l.country_code].push(l);
-    });
-    return map;
-  }, [legislation]);
-
-  const isLegislationView = activeTab === 'legislation';
-
-  return (
-    <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 rounded-lg border overflow-hidden">
-      {/* European map SVG background */}
-      <svg
-        viewBox="0 0 100 80"
-        className="absolute inset-0 w-full h-full opacity-20 dark:opacity-10"
-        preserveAspectRatio="xMidYMid meet"
-      >
-        {/* Simplified Europe outline */}
-        <path
-          d="M20,55 Q15,50 18,45 Q20,40 25,38 L28,32 Q32,28 28,25 Q25,22 30,20 
-             Q35,18 40,22 L45,20 Q50,15 55,12 Q60,10 65,8 Q70,10 72,15 
-             Q75,20 78,18 Q80,22 78,28 L75,32 Q72,35 75,40 Q78,45 75,50 
-             Q72,55 68,58 Q65,62 60,65 Q55,68 50,70 Q45,68 42,65 
-             Q38,62 35,58 Q30,55 25,58 Z"
-          fill="currentColor"
-          className="text-primary/30"
-        />
-        {/* Scandinavian peninsula */}
-        <path
-          d="M50,5 Q55,8 58,12 Q60,15 58,20 Q55,18 52,15 Q50,12 48,8 Z"
-          fill="currentColor"
-          className="text-primary/30"
-        />
-        {/* British Isles */}
-        <path
-          d="M25,30 Q28,28 30,32 Q28,35 25,33 Z M22,35 Q25,33 27,38 Q25,40 22,38 Z"
-          fill="currentColor"
-          className="text-primary/30"
-        />
-        {/* Italy */}
-        <path
-          d="M48,50 Q52,55 50,62 Q48,68 45,70 Q47,65 48,60 Q46,55 48,50 Z"
-          fill="currentColor"
-          className="text-primary/30"
-        />
-        {/* Greece */}
-        <path
-          d="M62,58 Q65,62 63,68 Q60,65 62,58 Z"
-          fill="currentColor"
-          className="text-primary/30"
-        />
-      </svg>
-
-      {/* Country dots */}
-      <div className="absolute inset-4">
-        {EU_COUNTRIES.map(country => {
-          const hasData = isLegislationView 
-            ? countryLegislation[country.code]?.length > 0
-            : countryAuthorities[country.code]?.length > 0;
-          const isSelected = selectedCountry === country.code;
-          const count = isLegislationView
-            ? countryLegislation[country.code]?.length || 0
-            : countryAuthorities[country.code]?.length || 0;
-          
-          return (
-            <button
-              key={country.code}
-              onClick={() => onCountryClick(isSelected ? null : country.code)}
-              className={cn(
-                "absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200",
-                "rounded-full flex items-center justify-center text-xs font-medium",
-                "shadow-lg border-2 border-white dark:border-gray-800",
-                hasData 
-                  ? isLegislationView
-                    ? "bg-emerald-600 text-white hover:scale-110 cursor-pointer"
-                    : "bg-primary text-primary-foreground hover:scale-110 cursor-pointer"
-                  : "bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-500 cursor-pointer",
-                isSelected && "ring-4 ring-offset-2 ring-offset-background scale-125",
-                isSelected && (isLegislationView ? "ring-emerald-400" : "ring-primary/50"),
-                hasData ? "h-9 w-9 min-w-[36px]" : "h-7 w-7 min-w-[28px]"
-              )}
-              style={{ left: `${country.x}%`, top: `${country.y}%` }}
-              title={`${country.name}${hasData ? ` (${count})` : ' - No data'}`}
-            >
-              {hasData ? count : country.code.charAt(0)}
-            </button>
-          );
-        })}
-      </div>
-      
-      {/* Legend */}
-      <div className="absolute bottom-3 left-3 bg-background/95 backdrop-blur-sm rounded-lg p-3 text-xs space-y-2 shadow-md border">
-        <div className="font-medium text-foreground mb-1">Legend</div>
-        <div className="flex items-center gap-2">
-          <div className={cn("h-5 w-5 rounded-full border-2 border-white shadow", isLegislationView ? "bg-emerald-600" : "bg-primary")} />
-          <span>Has {isLegislationView ? 'legislation' : 'entities'}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-5 w-5 rounded-full bg-gray-300 dark:bg-gray-600 border-2 border-white shadow" />
-          <span>No data yet</span>
-        </div>
-      </div>
-
-      {/* Title overlay */}
-      <div className="absolute top-3 left-3 bg-background/95 backdrop-blur-sm rounded-lg px-3 py-2 shadow-md border">
-        <span className="text-sm font-medium">
-          {isLegislationView ? 'National EHDS Legislation' : 'National EHDS Entities'} Map
-        </span>
-      </div>
-    </div>
-  );
-}
 
 export default function HealthAuthoritiesPage() {
   const { authorities, isLoading: authoritiesLoading } = useHealthAuthorities();
@@ -347,6 +214,21 @@ export default function HealthAuthoritiesPage() {
       return true;
     });
   }, [legislation, searchQuery, legStatusFilter, legTypeFilter, selectedCountry]);
+
+  // Prepare country data for the map
+  const countryData = useMemo(() => {
+    const data: Record<string, number> = {};
+    if (activeTab === 'entities') {
+      filteredAuthorities.forEach(a => {
+        data[a.country_code] = (data[a.country_code] || 0) + 1;
+      });
+    } else {
+      filteredLegislation.forEach(l => {
+        data[l.country_code] = (data[l.country_code] || 0) + 1;
+      });
+    }
+    return data;
+  }, [activeTab, filteredAuthorities, filteredLegislation]);
 
   const selectedCountryName = selectedCountry 
     ? EU_COUNTRIES.find(c => c.code === selectedCountry)?.name 
@@ -526,12 +408,11 @@ export default function HealthAuthoritiesPage() {
         ) : (
           <>
             {view === 'map' && (
-              <MapView 
-                authorities={filteredAuthorities} 
-                legislation={filteredLegislation}
+              <EuropeMap
+                countryData={countryData}
                 selectedCountry={selectedCountry}
                 onCountryClick={setSelectedCountry}
-                activeTab={activeTab}
+                isLegislationView={activeTab === 'legislation'}
               />
             )}
 

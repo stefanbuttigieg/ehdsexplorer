@@ -1,5 +1,5 @@
-import { useEffect, useMemo } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
+import { useEffect, useRef, useMemo } from 'react';
+import L from 'leaflet';
 import { cn } from '@/lib/utils';
 import 'leaflet/dist/leaflet.css';
 
@@ -46,25 +46,6 @@ interface EuropeMapProps {
   className?: string;
 }
 
-// Component to handle map bounds/view updates
-function MapController({ selectedCountry }: { selectedCountry: string | null }) {
-  const map = useMap();
-  
-  useEffect(() => {
-    if (selectedCountry) {
-      const country = EU_COUNTRIES.find(c => c.code === selectedCountry);
-      if (country) {
-        map.setView([country.lat, country.lng], 6, { animate: true });
-      }
-    } else {
-      // Reset to Europe view
-      map.setView([54, 10], 4, { animate: true });
-    }
-  }, [selectedCountry, map]);
-  
-  return null;
-}
-
 export function EuropeMap({ 
   countryData, 
   selectedCountry, 
@@ -72,17 +53,21 @@ export function EuropeMap({
   isLegislationView,
   className 
 }: EuropeMapProps) {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.CircleMarker[]>([]);
+
   const getMarkerColor = (code: string) => {
     const hasData = countryData[code] > 0;
     const isSelected = selectedCountry === code;
     
     if (isSelected) {
-      return isLegislationView ? '#059669' : 'hsl(221, 83%, 53%)'; // emerald-600 or primary blue
+      return isLegislationView ? '#059669' : '#3b82f6';
     }
     if (hasData) {
-      return isLegislationView ? '#10b981' : 'hsl(221, 83%, 53%)'; // emerald-500 or primary
+      return isLegislationView ? '#10b981' : '#3b82f6';
     }
-    return '#9ca3af'; // gray-400
+    return '#9ca3af';
   };
 
   const getMarkerRadius = (code: string) => {
@@ -93,57 +78,94 @@ export function EuropeMap({
     return 8;
   };
 
+  // Initialize map
+  useEffect(() => {
+    if (!mapRef.current || mapInstanceRef.current) return;
+
+    const map = L.map(mapRef.current, {
+      center: [54, 10],
+      zoom: 4,
+      scrollWheelZoom: true,
+      zoomControl: true,
+    });
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 19,
+    }).addTo(map);
+
+    mapInstanceRef.current = map;
+
+    return () => {
+      map.remove();
+      mapInstanceRef.current = null;
+    };
+  }, []);
+
+  // Update markers when data changes
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    // Clear existing markers
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
+
+    // Add new markers
+    EU_COUNTRIES.forEach(country => {
+      const count = countryData[country.code] || 0;
+      const hasData = count > 0;
+      const isSelected = selectedCountry === country.code;
+
+      const marker = L.circleMarker([country.lat, country.lng], {
+        radius: getMarkerRadius(country.code),
+        fillColor: getMarkerColor(country.code),
+        fillOpacity: isSelected ? 1 : 0.8,
+        color: isSelected ? '#ffffff' : hasData ? '#ffffff' : '#6b7280',
+        weight: isSelected ? 3 : 2,
+      });
+
+      const popupContent = `
+        <div style="text-align: center;">
+          <strong style="display: block; font-size: 14px;">${country.name}</strong>
+          <span style="font-size: 12px; color: #666;">
+            ${hasData 
+              ? `${count} ${isLegislationView ? (count === 1 ? 'law' : 'laws') : (count === 1 ? 'entity' : 'entities')}`
+              : 'No data yet'
+            }
+          </span>
+        </div>
+      `;
+
+      marker.bindPopup(popupContent);
+      marker.on('click', () => {
+        onCountryClick(isSelected ? null : country.code);
+      });
+
+      marker.addTo(map);
+      markersRef.current.push(marker);
+    });
+  }, [countryData, selectedCountry, isLegislationView, onCountryClick]);
+
+  // Pan to selected country
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    if (selectedCountry) {
+      const country = EU_COUNTRIES.find(c => c.code === selectedCountry);
+      if (country) {
+        map.setView([country.lat, country.lng], 6, { animate: true });
+      }
+    } else {
+      map.setView([54, 10], 4, { animate: true });
+    }
+  }, [selectedCountry]);
+
   return (
     <div className={cn("relative w-full h-[500px] rounded-lg overflow-hidden border", className)}>
-      <MapContainer
-        center={[54, 10]}
-        zoom={4}
-        scrollWheelZoom={true}
-        className="h-full w-full z-0"
-        style={{ background: '#e5e7eb' }}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-        />
-        <MapController selectedCountry={selectedCountry} />
-        
-        {EU_COUNTRIES.map(country => {
-          const count = countryData[country.code] || 0;
-          const hasData = count > 0;
-          const isSelected = selectedCountry === country.code;
-          
-          return (
-            <CircleMarker
-              key={country.code}
-              center={[country.lat, country.lng]}
-              radius={getMarkerRadius(country.code)}
-              pathOptions={{
-                fillColor: getMarkerColor(country.code),
-                fillOpacity: isSelected ? 1 : 0.8,
-                color: isSelected ? '#ffffff' : hasData ? '#ffffff' : '#6b7280',
-                weight: isSelected ? 3 : 2,
-              }}
-              eventHandlers={{
-                click: () => onCountryClick(isSelected ? null : country.code),
-              }}
-            >
-              <Popup>
-                <div className="text-center">
-                  <strong className="block text-sm">{country.name}</strong>
-                  {hasData ? (
-                    <span className="text-xs text-muted-foreground">
-                      {count} {isLegislationView ? (count === 1 ? 'law' : 'laws') : (count === 1 ? 'entity' : 'entities')}
-                    </span>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">No data yet</span>
-                  )}
-                </div>
-              </Popup>
-            </CircleMarker>
-          );
-        })}
-      </MapContainer>
+      <div ref={mapRef} className="h-full w-full z-0" style={{ background: '#e5e7eb' }} />
 
       {/* Legend */}
       <div className="absolute bottom-4 left-4 bg-background/95 backdrop-blur-sm rounded-lg p-3 text-xs space-y-2 shadow-lg border z-[1000]">
@@ -151,7 +173,7 @@ export function EuropeMap({
         <div className="flex items-center gap-2">
           <div 
             className="h-4 w-4 rounded-full border-2 border-white shadow"
-            style={{ backgroundColor: isLegislationView ? '#10b981' : 'hsl(221, 83%, 53%)' }}
+            style={{ backgroundColor: isLegislationView ? '#10b981' : '#3b82f6' }}
           />
           <span>Has {isLegislationView ? 'legislation' : 'entities'}</span>
         </div>

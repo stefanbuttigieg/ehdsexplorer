@@ -475,8 +475,8 @@ export default function HealthAuthoritiesPage() {
           <>
             {view === 'map' && (
               <MapView 
-                authorities={authorities || []} 
-                legislation={legislation || []}
+                authorities={filteredAuthorities} 
+                legislation={filteredLegislation}
                 selectedCountry={selectedCountry}
                 onCountryClick={setSelectedCountry}
                 activeTab={activeTab}

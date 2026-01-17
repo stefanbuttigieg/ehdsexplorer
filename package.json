@@ -64,7 +64,7 @@
     "react-helmet-async": "^2.0.5",
     "react-hook-form": "^7.61.1",
     "react-joyride": "^2.9.3",
-    "react-leaflet": "^5.0.0",
+    "react-leaflet": "^4.2.1",
     "react-markdown": "^10.1.0",
     "react-resizable-panels": "^2.1.9",
     "react-router-dom": "^6.30.1",

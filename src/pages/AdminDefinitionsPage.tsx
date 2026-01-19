@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Search, Edit, Save, X, ArrowLeft } from 'lucide-react';
+import { useState } from 'react';
+import { Edit, Save, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,11 +13,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import Layout from '@/components/Layout';
-import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAdminGuard } from '@/hooks/useAdminGuard';
+import { AdminPageLayout, AdminPageLoading } from '@/components/admin/AdminPageLayout';
 
 interface DbDefinition {
   id: number;
@@ -30,8 +29,7 @@ interface DbDefinition {
 }
 
 const AdminDefinitionsPage = () => {
-  const { user, loading, isEditor } = useAuth();
-  const navigate = useNavigate();
+  const { shouldRender, user, isEditor } = useAdminGuard();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,14 +52,6 @@ const AdminDefinitionsPage = () => {
     },
     enabled: !!user && isEditor
   });
-
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/admin/auth');
-    } else if (!loading && user && !isEditor) {
-      navigate('/');
-    }
-  }, [user, loading, isEditor, navigate]);
 
   const filteredDefinitions = definitions?.filter(def =>
     def.term.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -111,136 +101,110 @@ const AdminDefinitionsPage = () => {
     }
   };
 
-  if (loading || !user || !isEditor) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <p>Loading...</p>
-        </div>
-      </Layout>
-    );
+  if (!shouldRender) {
+    return <AdminPageLoading />;
   }
 
   return (
-    <Layout>
-      <div className="max-w-6xl mx-auto p-4 sm:p-6 animate-fade-in">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-6">
-          <Link to="/admin">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold font-serif">Manage Definitions</h1>
-            <p className="text-sm sm:text-base text-muted-foreground">Edit terms and their definitions</p>
-          </div>
+    <AdminPageLayout
+      title="Manage Definitions"
+      description="Edit terms and their definitions"
+      searchQuery={searchQuery}
+      onSearchChange={setSearchQuery}
+      searchPlaceholder="Search definitions by term or content..."
+    >
+      {isLoading ? (
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Card key={i}>
+              <CardContent className="p-4">
+                <Skeleton className="h-6 w-32 mb-2" />
+                <Skeleton className="h-12 w-full" />
+              </CardContent>
+            </Card>
+          ))}
         </div>
-
-        <div className="mb-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search definitions by term or content..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
-
-        {isLoading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Card key={i}>
-                <CardContent className="p-4">
-                  <Skeleton className="h-6 w-32 mb-2" />
-                  <Skeleton className="h-12 w-full" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : filteredDefinitions.length === 0 ? (
-          <Card>
-            <CardContent className="p-8 text-center text-muted-foreground">
-              No definitions found. Use the bulk import feature to add definitions.
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-3">
-            {filteredDefinitions.map((definition) => (
-              <Card key={definition.id} className="hover:border-primary/50 transition-colors">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Badge variant="outline">{definition.term}</Badge>
-                        {definition.source_article && (
-                          <span className="text-xs text-muted-foreground">
-                            Source: Art. {definition.source_article}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {definition.definition.substring(0, 200)}...
-                      </p>
+      ) : filteredDefinitions.length === 0 ? (
+        <Card>
+          <CardContent className="p-8 text-center text-muted-foreground">
+            No definitions found. Use the bulk import feature to add definitions.
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {filteredDefinitions.map((definition) => (
+            <Card key={definition.id} className="hover:border-primary/50 transition-colors">
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="outline">{definition.term}</Badge>
+                      {definition.source_article && (
+                        <span className="text-xs text-muted-foreground">
+                          Source: Art. {definition.source_article}
+                        </span>
+                      )}
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(definition)}>
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {definition.definition.substring(0, 200)}...
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+                  <Button variant="outline" size="sm" onClick={() => handleEdit(definition)}>
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
-        <Dialog open={!!editingDefinition} onOpenChange={() => setEditingDefinition(null)}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Edit Definition</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <Label>Term</Label>
-                <Input
-                  value={editedTerm}
-                  onChange={(e) => setEditedTerm(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Definition</Label>
-                <Textarea
-                  value={editedDefinition}
-                  onChange={(e) => setEditedDefinition(e.target.value)}
-                  rows={10}
-                  className="font-mono text-sm"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Source Article (optional)</Label>
-                <Input
-                  type="number"
-                  value={editedSourceArticle}
-                  onChange={(e) => setEditedSourceArticle(e.target.value)}
-                  placeholder="e.g., 2"
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setEditingDefinition(null)}>
-                  <X className="h-4 w-4 mr-1" />
-                  Cancel
-                </Button>
-                <Button onClick={handleSave} disabled={isSaving}>
-                  <Save className="h-4 w-4 mr-1" />
-                  {isSaving ? 'Saving...' : 'Save Changes'}
-                </Button>
-              </div>
+      <Dialog open={!!editingDefinition} onOpenChange={() => setEditingDefinition(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Definition</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label>Term</Label>
+              <Input
+                value={editedTerm}
+                onChange={(e) => setEditedTerm(e.target.value)}
+              />
             </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-    </Layout>
+            <div className="space-y-2">
+              <Label>Definition</Label>
+              <Textarea
+                value={editedDefinition}
+                onChange={(e) => setEditedDefinition(e.target.value)}
+                rows={10}
+                className="font-mono text-sm"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Source Article (optional)</Label>
+              <Input
+                type="number"
+                value={editedSourceArticle}
+                onChange={(e) => setEditedSourceArticle(e.target.value)}
+                placeholder="e.g., 2"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setEditingDefinition(null)}>
+                <X className="h-4 w-4 mr-1" />
+                Cancel
+              </Button>
+              <Button onClick={handleSave} disabled={isSaving}>
+                <Save className="h-4 w-4 mr-1" />
+                {isSaving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </AdminPageLayout>
   );
 };
 

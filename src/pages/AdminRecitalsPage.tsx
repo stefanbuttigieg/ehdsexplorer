@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Search, Edit, Save, X, ArrowLeft, Plus, Trash2, StickyNote } from 'lucide-react';
+import { useState } from 'react';
+import { Edit, Save, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,19 +8,20 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import Layout from '@/components/Layout';
-import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useFootnotes, useCreateFootnote, useDeleteFootnote } from '@/hooks/useFootnotes';
+import { useFootnotes } from '@/hooks/useFootnotes';
+import { useAdminGuard } from '@/hooks/useAdminGuard';
+import { useBulkSelection } from '@/hooks/useBulkSelection';
+import { AdminPageLayout, AdminPageLoading } from '@/components/admin/AdminPageLayout';
+import { FootnoteManager } from '@/components/admin/FootnoteManager';
 
 interface DbRecital {
   id: number;
@@ -33,8 +33,7 @@ interface DbRecital {
 }
 
 const AdminRecitalsPage = () => {
-  const { user, loading, isEditor } = useAuth();
-  const navigate = useNavigate();
+  const { shouldRender, user, isEditor } = useAdminGuard();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
@@ -42,15 +41,10 @@ const AdminRecitalsPage = () => {
   const [editedContent, setEditedContent] = useState('');
   const [editedRelatedArticles, setEditedRelatedArticles] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [showBulkEdit, setShowBulkEdit] = useState(false);
   const [bulkRelatedArticles, setBulkRelatedArticles] = useState('');
-  const [newFootnoteMarker, setNewFootnoteMarker] = useState('');
-  const [newFootnoteContent, setNewFootnoteContent] = useState('');
 
   const { data: allFootnotes = [] } = useFootnotes();
-  const createFootnote = useCreateFootnote();
-  const deleteFootnote = useDeleteFootnote();
 
   const { data: recitals, isLoading } = useQuery({
     queryKey: ['admin-recitals'],
@@ -66,28 +60,27 @@ const AdminRecitalsPage = () => {
     enabled: !!user && isEditor
   });
 
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/admin/auth');
-    } else if (!loading && user && !isEditor) {
-      navigate('/');
-    }
-  }, [user, loading, isEditor, navigate]);
-
   const filteredRecitals = recitals?.filter(recital =>
     recital.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
     recital.recital_number.toString().includes(searchQuery)
   ) || [];
 
+  const {
+    selectedCount,
+    selectedArray,
+    isSelected,
+    isAllSelected,
+    toggle,
+    clearSelection,
+    toggleAll,
+  } = useBulkSelection(filteredRecitals.map((r) => r.id));
+
   const handleEdit = (recital: DbRecital) => {
     setEditingRecital(recital);
     setEditedContent(recital.content);
     setEditedRelatedArticles(recital.related_articles?.join(', ') || '');
-    setNewFootnoteMarker('');
-    setNewFootnoteContent('');
   };
 
-  // Get footnotes for the currently editing recital
   const recitalFootnotes = editingRecital 
     ? allFootnotes.filter(fn => fn.recital_id === editingRecital.id)
     : [];
@@ -130,55 +123,8 @@ const AdminRecitalsPage = () => {
     }
   };
 
-  const handleAddFootnote = async () => {
-    if (!editingRecital || !newFootnoteMarker || !newFootnoteContent) return;
-    try {
-      await createFootnote.mutateAsync({
-        marker: newFootnoteMarker,
-        content: newFootnoteContent,
-        article_id: null,
-        recital_id: editingRecital.id,
-      });
-      setNewFootnoteMarker('');
-      setNewFootnoteContent('');
-      toast({ title: 'Footnote added' });
-    } catch {
-      toast({ title: 'Error', description: 'Failed to add footnote', variant: 'destructive' });
-    }
-  };
-
-  const handleDeleteFootnote = async (id: string) => {
-    if (!confirm('Delete this footnote?')) return;
-    try {
-      await deleteFootnote.mutateAsync(id);
-      toast({ title: 'Footnote deleted' });
-    } catch {
-      toast({ title: 'Error', description: 'Failed to delete footnote', variant: 'destructive' });
-    }
-  };
-
-  const toggleSelect = (id: number) => {
-    setSelectedIds(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(id)) {
-        newSet.delete(id);
-      } else {
-        newSet.add(id);
-      }
-      return newSet;
-    });
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedIds.size === filteredRecitals.length) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(filteredRecitals.map(r => r.id)));
-    }
-  };
-
   const handleBulkSave = async () => {
-    if (selectedIds.size === 0) return;
+    if (selectedCount === 0) return;
     
     setIsSaving(true);
     try {
@@ -192,18 +138,18 @@ const AdminRecitalsPage = () => {
         .update({ 
           related_articles: relatedArticlesArray.length > 0 ? relatedArticlesArray : null
         })
-        .in('id', Array.from(selectedIds));
+        .in('id', selectedArray);
 
       if (error) throw error;
 
       toast({
         title: 'Bulk Update Complete',
-        description: `Updated related articles for ${selectedIds.size} recitals.`,
+        description: `Updated related articles for ${selectedCount} recitals.`,
       });
       
       queryClient.invalidateQueries({ queryKey: ['admin-recitals'] });
       setShowBulkEdit(false);
-      setSelectedIds(new Set());
+      clearSelection();
       setBulkRelatedArticles('');
     } catch (error: any) {
       toast({
@@ -216,240 +162,169 @@ const AdminRecitalsPage = () => {
     }
   };
 
-  if (loading || !user || !isEditor) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <p>Loading...</p>
-        </div>
-      </Layout>
-    );
+  if (!shouldRender) {
+    return <AdminPageLoading />;
   }
 
   return (
-    <Layout>
-      <div className="max-w-6xl mx-auto p-4 sm:p-6 animate-fade-in">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-6">
-          <Link to="/admin">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold font-serif">Manage Recitals</h1>
-            <p className="text-sm sm:text-base text-muted-foreground">Edit recital content and related articles</p>
-          </div>
+    <AdminPageLayout
+      title="Manage Recitals"
+      description="Edit recital content and related articles"
+      searchQuery={searchQuery}
+      onSearchChange={setSearchQuery}
+      searchPlaceholder="Search recitals by number or content..."
+    >
+      {/* Bulk Actions */}
+      {selectedCount > 0 && (
+        <div className="mb-4 flex flex-wrap gap-2">
+          <Button onClick={() => setShowBulkEdit(true)} size="sm" className="text-xs sm:text-sm">
+            <Edit className="h-4 w-4 mr-1" />
+            Bulk Edit ({selectedCount})
+          </Button>
+          <Button variant="outline" size="sm" onClick={clearSelection} className="text-xs sm:text-sm">
+            <X className="h-4 w-4 mr-1" />
+            Clear
+          </Button>
         </div>
+      )}
 
-        <div className="mb-6 flex flex-col gap-3 sm:gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search recitals by number or content..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          {selectedIds.size > 0 && (
-            <div className="flex flex-wrap gap-2">
-              <Button onClick={() => setShowBulkEdit(true)} size="sm" className="text-xs sm:text-sm">
-                <Edit className="h-4 w-4 mr-1" />
-                Bulk Edit ({selectedIds.size})
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => setSelectedIds(new Set())} className="text-xs sm:text-sm">
-                <X className="h-4 w-4 mr-1" />
-                Clear
-              </Button>
+      {isLoading ? (
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Card key={i}>
+              <CardContent className="p-4">
+                <Skeleton className="h-6 w-32 mb-2" />
+                <Skeleton className="h-12 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filteredRecitals.length > 0 && (
+            <div className="flex items-center gap-2 pb-2 border-b">
+              <Checkbox
+                checked={isAllSelected}
+                onCheckedChange={toggleAll}
+                aria-label="Select all recitals"
+              />
+              <span className="text-sm text-muted-foreground">
+                {isAllSelected ? 'Deselect all' : 'Select all'}
+              </span>
             </div>
           )}
-        </div>
-
-        {isLoading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Card key={i}>
-                <CardContent className="p-4">
-                  <Skeleton className="h-6 w-32 mb-2" />
-                  <Skeleton className="h-12 w-full" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {filteredRecitals.length > 0 && (
-              <div className="flex items-center gap-2 pb-2 border-b">
-                <Checkbox
-                  checked={selectedIds.size === filteredRecitals.length && filteredRecitals.length > 0}
-                  onCheckedChange={toggleSelectAll}
-                  aria-label="Select all recitals"
-                />
-                <span className="text-sm text-muted-foreground">
-                  {selectedIds.size === filteredRecitals.length ? 'Deselect all' : 'Select all'}
-                </span>
-              </div>
-            )}
-            {filteredRecitals.map((recital) => (
-              <Card 
-                key={recital.id} 
-                className={`hover:border-primary/50 transition-colors ${selectedIds.has(recital.id) ? 'border-primary bg-primary/5' : ''}`}
-              >
-                <CardContent className="p-3 sm:p-4">
-                  <div className="flex items-start gap-2 sm:gap-3">
-                    <Checkbox
-                      checked={selectedIds.has(recital.id)}
-                      onCheckedChange={() => toggleSelect(recital.id)}
-                      aria-label={`Select recital ${recital.recital_number}`}
-                      className="mt-1 shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <Badge variant="outline" className="text-xs">Recital {recital.recital_number}</Badge>
-                        {recital.related_articles && recital.related_articles.length > 0 && (
-                          <span className="text-xs text-muted-foreground hidden sm:inline">
-                            Related: Art. {recital.related_articles.slice(0, 3).join(', ')}{recital.related_articles.length > 3 ? '...' : ''}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
-                        {recital.content.substring(0, 200)}...
-                      </p>
+          {filteredRecitals.map((recital) => (
+            <Card 
+              key={recital.id} 
+              className={`hover:border-primary/50 transition-colors ${isSelected(recital.id) ? 'border-primary bg-primary/5' : ''}`}
+            >
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex items-start gap-2 sm:gap-3">
+                  <Checkbox
+                    checked={isSelected(recital.id)}
+                    onCheckedChange={() => toggle(recital.id)}
+                    aria-label={`Select recital ${recital.recital_number}`}
+                    className="mt-1 shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <Badge variant="outline" className="text-xs">Recital {recital.recital_number}</Badge>
+                      {recital.related_articles && recital.related_articles.length > 0 && (
+                        <span className="text-xs text-muted-foreground hidden sm:inline">
+                          Related: Art. {recital.related_articles.slice(0, 3).join(', ')}{recital.related_articles.length > 3 ? '...' : ''}
+                        </span>
+                      )}
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(recital)} className="shrink-0">
-                      <Edit className="h-4 w-4 sm:mr-1" />
-                      <span className="hidden sm:inline">Edit</span>
-                    </Button>
+                    <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
+                      {recital.content.substring(0, 200)}...
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-
-        <Dialog open={!!editingRecital} onOpenChange={() => setEditingRecital(null)}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Edit Recital {editingRecital?.recital_number}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <Label>Content</Label>
-                <MarkdownEditor
-                  value={editedContent}
-                  onChange={setEditedContent}
-                  rows={10}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Related Articles (comma-separated)</Label>
-                <Input
-                  value={editedRelatedArticles}
-                  onChange={(e) => setEditedRelatedArticles(e.target.value)}
-                  placeholder="e.g., 1, 2, 3"
-                />
-              </div>
-              
-              {/* Footnotes Section */}
-              <div className="space-y-3 pt-4 border-t">
-                <div className="flex items-center gap-2">
-                  <StickyNote className="h-4 w-4 text-muted-foreground" />
-                  <Label className="text-base font-medium">Footnotes ({recitalFootnotes.length})</Label>
-                </div>
-                
-                {recitalFootnotes.length > 0 && (
-                  <div className="space-y-2">
-                    {recitalFootnotes.map((fn) => (
-                      <div key={fn.id} className="flex items-start gap-2 p-2 bg-muted/50 rounded text-sm">
-                        <span className="font-mono text-primary shrink-0">{fn.marker}</span>
-                        <p className="flex-1 text-muted-foreground">{fn.content}</p>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => handleDeleteFootnote(fn.id)}
-                          className="shrink-0"
-                        >
-                          <Trash2 className="h-3 w-3 text-destructive" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                <div className="grid gap-2">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Marker (e.g. [^1])"
-                      value={newFootnoteMarker}
-                      onChange={(e) => setNewFootnoteMarker(e.target.value)}
-                      className="w-32"
-                    />
-                    <Textarea
-                      placeholder="Footnote content..."
-                      value={newFootnoteContent}
-                      onChange={(e) => setNewFootnoteContent(e.target.value)}
-                      rows={2}
-                      className="flex-1"
-                    />
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleAddFootnote}
-                    disabled={!newFootnoteMarker || !newFootnoteContent || createFootnote.isPending}
-                    className="w-fit"
-                  >
-                    <Plus className="h-3 w-3 mr-1" />
-                    Add Footnote
+                  <Button variant="outline" size="sm" onClick={() => handleEdit(recital)} className="shrink-0">
+                    <Edit className="h-4 w-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Edit</span>
                   </Button>
                 </div>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setEditingRecital(null)}>
-                  <X className="h-4 w-4 mr-1" />
-                  Cancel
-                </Button>
-                <Button onClick={handleSave} disabled={isSaving}>
-                  <Save className="h-4 w-4 mr-1" />
-                  {isSaving ? 'Saving...' : 'Save Changes'}
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
-        <Dialog open={showBulkEdit} onOpenChange={setShowBulkEdit}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Bulk Edit {selectedIds.size} Recitals</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <Label>Set Related Articles (comma-separated)</Label>
-                <Input
-                  value={bulkRelatedArticles}
-                  onChange={(e) => setBulkRelatedArticles(e.target.value)}
-                  placeholder="e.g., 1, 2, 3 (leave empty to clear)"
-                />
-                <p className="text-xs text-muted-foreground">
-                  This will replace the related articles for all selected recitals.
-                </p>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setShowBulkEdit(false)}>
-                  <X className="h-4 w-4 mr-1" />
-                  Cancel
-                </Button>
-                <Button onClick={handleBulkSave} disabled={isSaving}>
-                  <Save className="h-4 w-4 mr-1" />
-                  {isSaving ? 'Saving...' : 'Update All'}
-                </Button>
-              </div>
+      {/* Edit Recital Dialog */}
+      <Dialog open={!!editingRecital} onOpenChange={() => setEditingRecital(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Recital {editingRecital?.recital_number}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label>Content</Label>
+              <MarkdownEditor
+                value={editedContent}
+                onChange={setEditedContent}
+                rows={10}
+              />
             </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-    </Layout>
+            <div className="space-y-2">
+              <Label>Related Articles (comma-separated)</Label>
+              <Input
+                value={editedRelatedArticles}
+                onChange={(e) => setEditedRelatedArticles(e.target.value)}
+                placeholder="e.g., 1, 2, 3"
+              />
+            </div>
+            
+            <FootnoteManager
+              footnotes={recitalFootnotes}
+              recitalId={editingRecital?.id}
+            />
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setEditingRecital(null)}>
+                <X className="h-4 w-4 mr-1" />
+                Cancel
+              </Button>
+              <Button onClick={handleSave} disabled={isSaving}>
+                <Save className="h-4 w-4 mr-1" />
+                {isSaving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Edit Dialog */}
+      <Dialog open={showBulkEdit} onOpenChange={setShowBulkEdit}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Bulk Edit {selectedCount} Recitals</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label>Set Related Articles (comma-separated)</Label>
+              <Input
+                value={bulkRelatedArticles}
+                onChange={(e) => setBulkRelatedArticles(e.target.value)}
+                placeholder="e.g., 1, 2, 3 (leave empty to clear)"
+              />
+              <p className="text-xs text-muted-foreground">
+                This will replace the related articles for all selected recitals.
+              </p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowBulkEdit(false)}>
+                <X className="h-4 w-4 mr-1" />
+                Cancel
+              </Button>
+              <Button onClick={handleBulkSave} disabled={isSaving}>
+                <Save className="h-4 w-4 mr-1" />
+                {isSaving ? 'Saving...' : 'Update All'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </AdminPageLayout>
   );
 };
 

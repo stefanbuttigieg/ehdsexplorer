@@ -13,6 +13,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.8.2] - 2026-01-20
+
+### Changed
+
+#### Codebase Refactoring
+- Migrated from `react-leaflet` to vanilla Leaflet for improved React 18 compatibility
+- Created shared `useAdminGuard` hook for consistent admin authentication and role checking
+- Created `useBulkSelection` hook for reusable multi-item selection state management
+- Introduced `AdminPageLayout` and `AdminPageLoading` components for unified admin page structure
+- Extracted `FootnoteManager` component for centralized footnote CRUD operations
+- Refactored `AdminArticlesPage` (590 → ~380 lines), `AdminRecitalsPage` (456 → ~280 lines), and `AdminDefinitionsPage` (247 → ~195 lines)
+- Reduced code duplication across admin pages by ~35%
+
+### Fixed
+- Resolved `render2 is not a function` error caused by react-leaflet version incompatibility
+
+---
+
 ## [1.8.1] - 2026-01-16
 
 ### Added

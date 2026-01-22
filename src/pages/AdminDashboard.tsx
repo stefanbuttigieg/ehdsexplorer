@@ -182,6 +182,12 @@ const AdminDashboard = () => {
       href: '/admin/country-legislation',
     },
     {
+      title: 'Cross-Regulation Links',
+      description: 'Link EHDS articles to GDPR, AI Act, MDR, Data Act provisions',
+      icon: Link2,
+      href: '/admin/cross-regulation',
+    },
+    {
       title: 'Legal Pages',
       description: 'Edit Privacy Policy, Terms of Service, Cookies Policy, Accessibility Statement',
       icon: Shield,

@@ -27,6 +27,7 @@ import { AnnotatedContent } from "@/components/AnnotatedContent";
 import { CompareButton } from "@/components/CompareButton";
 import { useLegislationByArticle } from "@/hooks/useCountryLegislation";
 import { CountryLegislationCard } from "@/components/CountryLegislationCard";
+import { CrossRegulationSection } from "@/components/CrossRegulationSection";
 
 const ArticlePage = () => {
   const { id } = useParams();
@@ -246,6 +247,11 @@ const ArticlePage = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Cross-Regulation References */}
+        <div className="mb-8">
+          <CrossRegulationSection articleId={articleId} />
+        </div>
 
         {/* National Implementation */}
         {nationalLegislation.length > 0 && (

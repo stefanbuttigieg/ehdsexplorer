@@ -639,6 +639,51 @@ export type Database = {
         }
         Relationships: []
       }
+      cross_regulation_references: {
+        Row: {
+          article_id: number
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          provision_reference: string
+          provision_title: string | null
+          regulation_name: string
+          regulation_short_name: string
+          relationship_type: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          article_id: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          provision_reference: string
+          provision_title?: string | null
+          regulation_name: string
+          regulation_short_name: string
+          relationship_type?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          article_id?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          provision_reference?: string
+          provision_title?: string | null
+          regulation_name?: string
+          regulation_short_name?: string
+          relationship_type?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
       definition_translations: {
         Row: {
           created_at: string | null

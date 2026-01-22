@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import { cn } from '@/lib/utils';
 import 'leaflet/dist/leaflet.css';
@@ -34,6 +34,15 @@ const EU_COUNTRIES = [
   { code: 'SE', name: 'Sweden', lat: 59.3293, lng: 18.0686 },
 ];
 
+// Convert country code to flag emoji
+const getFlagEmoji = (countryCode: string) => {
+  const codePoints = countryCode
+    .toUpperCase()
+    .split('')
+    .map(char => 127397 + char.charCodeAt(0));
+  return String.fromCodePoint(...codePoints);
+};
+
 interface CountryData {
   [code: string]: number;
 }
@@ -55,9 +64,17 @@ export function EuropeMap({
 }: EuropeMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
-  const markersRef = useRef<L.CircleMarker[]>([]);
+  const markersRef = useRef<L.Marker[]>([]);
 
-  const getMarkerColor = (code: string) => {
+  const getMarkerSize = (code: string) => {
+    const count = countryData[code] || 0;
+    const isSelected = selectedCountry === code;
+    if (isSelected) return 40;
+    if (count > 0) return 32 + Math.min(count * 2, 8);
+    return 28;
+  };
+
+  const getBorderColor = (code: string) => {
     const hasData = countryData[code] > 0;
     const isSelected = selectedCountry === code;
     
@@ -68,14 +85,6 @@ export function EuropeMap({
       return isLegislationView ? '#10b981' : '#3b82f6';
     }
     return '#9ca3af';
-  };
-
-  const getMarkerRadius = (code: string) => {
-    const count = countryData[code] || 0;
-    const isSelected = selectedCountry === code;
-    if (isSelected) return 14;
-    if (count > 0) return 10 + Math.min(count * 2, 8);
-    return 8;
   };
 
   // Initialize map
@@ -117,18 +126,42 @@ export function EuropeMap({
       const count = countryData[country.code] || 0;
       const hasData = count > 0;
       const isSelected = selectedCountry === country.code;
+      const size = getMarkerSize(country.code);
+      const borderColor = getBorderColor(country.code);
+      const flag = getFlagEmoji(country.code);
 
-      const marker = L.circleMarker([country.lat, country.lng], {
-        radius: getMarkerRadius(country.code),
-        fillColor: getMarkerColor(country.code),
-        fillOpacity: isSelected ? 1 : 0.8,
-        color: isSelected ? '#ffffff' : hasData ? '#ffffff' : '#6b7280',
-        weight: isSelected ? 3 : 2,
+      // Create custom div icon with flag
+      const icon = L.divIcon({
+        className: 'custom-flag-marker',
+        html: `
+          <div style="
+            width: ${size}px;
+            height: ${size}px;
+            border-radius: 50%;
+            border: 3px solid ${borderColor};
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: ${size * 0.55}px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            ${isSelected ? 'transform: scale(1.1);' : ''}
+            ${!hasData ? 'opacity: 0.6;' : ''}
+          ">
+            ${flag}
+          </div>
+        `,
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2],
       });
+
+      const marker = L.marker([country.lat, country.lng], { icon });
 
       const popupContent = `
         <div style="text-align: center;">
-          <strong style="display: block; font-size: 14px;">${country.name}</strong>
+          <strong style="display: block; font-size: 14px;">${flag} ${country.name}</strong>
           <span style="font-size: 12px; color: #666;">
             ${hasData 
               ? `${count} ${isLegislationView ? (count === 1 ? 'law' : 'laws') : (count === 1 ? 'entity' : 'entities')}`

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Scale, Network, List } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Scale, Network, List, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -84,10 +85,18 @@ export const CrossRegulationSection = ({ articleId }: CrossRegulationSectionProp
         />
       )}
 
-      <p className="text-xs text-muted-foreground">
-        {references.length} cross-reference{references.length !== 1 ? "s" : ""} found across{" "}
-        {regulationGroups.length} regulation{regulationGroups.length !== 1 ? "s" : ""}
-      </p>
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-muted-foreground">
+          {references.length} cross-reference{references.length !== 1 ? "s" : ""} found across{" "}
+          {regulationGroups.length} regulation{regulationGroups.length !== 1 ? "s" : ""}
+        </p>
+        <Link to="/cross-regulation-map">
+          <Button variant="link" size="sm" className="text-xs h-auto p-0">
+            View full regulatory map
+            <ExternalLink className="h-3 w-3 ml-1" />
+          </Button>
+        </Link>
+      </div>
     </div>
   );
 };

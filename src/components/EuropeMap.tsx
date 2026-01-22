@@ -47,8 +47,16 @@ interface CountryData {
   [code: string]: number;
 }
 
+interface CountryDetails {
+  [code: string]: {
+    entities?: Array<{ name: string; type: string; status: string }>;
+    legislation?: Array<{ title: string; type: string; status: string }>;
+  };
+}
+
 interface EuropeMapProps {
   countryData: CountryData;
+  countryDetails?: CountryDetails;
   selectedCountry: string | null;
   onCountryClick: (code: string | null) => void;
   isLegislationView: boolean;
@@ -57,6 +65,7 @@ interface EuropeMapProps {
 
 export function EuropeMap({ 
   countryData, 
+  countryDetails,
   selectedCountry, 
   onCountryClick, 
   isLegislationView,
@@ -66,12 +75,13 @@ export function EuropeMap({
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
 
-  const getMarkerSize = (code: string) => {
+  const getMarkerSize = (code: string, isHovered = false) => {
     const count = countryData[code] || 0;
     const isSelected = selectedCountry === code;
-    if (isSelected) return 40;
-    if (count > 0) return 32 + Math.min(count * 2, 8);
-    return 28;
+    let size = 28;
+    if (isSelected) size = 40;
+    else if (count > 0) size = 32 + Math.min(count * 2, 8);
+    return isHovered ? size * 1.2 : size;
   };
 
   const getBorderColor = (code: string) => {
@@ -85,6 +95,107 @@ export function EuropeMap({
       return isLegislationView ? '#10b981' : '#3b82f6';
     }
     return '#9ca3af';
+  };
+
+  const createIcon = (country: typeof EU_COUNTRIES[0], isHovered = false) => {
+    const count = countryData[country.code] || 0;
+    const hasData = count > 0;
+    const isSelected = selectedCountry === country.code;
+    const size = getMarkerSize(country.code, isHovered);
+    const borderColor = getBorderColor(country.code);
+    const flag = getFlagEmoji(country.code);
+
+    return L.divIcon({
+      className: 'custom-flag-marker',
+      html: `
+        <div class="flag-marker-inner" style="
+          width: ${size}px;
+          height: ${size}px;
+          border-radius: 50%;
+          border: 3px solid ${borderColor};
+          background: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: ${size * 0.55}px;
+          box-shadow: ${isHovered ? '0 4px 16px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.2)'};
+          cursor: pointer;
+          transition: all 0.2s ease;
+          transform: scale(${isSelected ? 1.1 : 1});
+          ${!hasData ? 'opacity: 0.6;' : ''}
+        ">
+          ${flag}
+        </div>
+      `,
+      iconSize: [size, size],
+      iconAnchor: [size / 2, size / 2],
+    });
+  };
+
+  const createTooltipContent = (country: typeof EU_COUNTRIES[0]) => {
+    const count = countryData[country.code] || 0;
+    const hasData = count > 0;
+    const flag = getFlagEmoji(country.code);
+    const details = countryDetails?.[country.code];
+
+    let detailsHtml = '';
+    
+    if (hasData && details) {
+      if (isLegislationView && details.legislation?.length) {
+        const items = details.legislation.slice(0, 3);
+        detailsHtml = `
+          <div style="margin-top: 8px; border-top: 1px solid #e5e7eb; padding-top: 8px;">
+            ${items.map(leg => `
+              <div style="margin-bottom: 4px; font-size: 11px;">
+                <div style="font-weight: 500; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">
+                  ${leg.title}
+                </div>
+                <div style="color: #6b7280; display: flex; gap: 6px;">
+                  <span style="background: #f3f4f6; padding: 1px 4px; border-radius: 3px;">${leg.type}</span>
+                  <span style="background: ${leg.status === 'In Force' ? '#d1fae5' : '#fef3c7'}; padding: 1px 4px; border-radius: 3px;">${leg.status}</span>
+                </div>
+              </div>
+            `).join('')}
+            ${details.legislation.length > 3 ? `<div style="font-size: 10px; color: #9ca3af; margin-top: 4px;">+${details.legislation.length - 3} more</div>` : ''}
+          </div>
+        `;
+      } else if (!isLegislationView && details.entities?.length) {
+        const items = details.entities.slice(0, 3);
+        detailsHtml = `
+          <div style="margin-top: 8px; border-top: 1px solid #e5e7eb; padding-top: 8px;">
+            ${items.map(entity => `
+              <div style="margin-bottom: 4px; font-size: 11px;">
+                <div style="font-weight: 500; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">
+                  ${entity.name}
+                </div>
+                <div style="color: #6b7280; display: flex; gap: 6px;">
+                  <span style="background: ${entity.type === 'DHA' ? '#dbeafe' : '#fce7f3'}; padding: 1px 4px; border-radius: 3px;">${entity.type}</span>
+                  <span style="background: ${entity.status === 'Active' ? '#d1fae5' : '#fef3c7'}; padding: 1px 4px; border-radius: 3px;">${entity.status}</span>
+                </div>
+              </div>
+            `).join('')}
+            ${details.entities.length > 3 ? `<div style="font-size: 10px; color: #9ca3af; margin-top: 4px;">+${details.entities.length - 3} more</div>` : ''}
+          </div>
+        `;
+      }
+    }
+
+    return `
+      <div style="min-width: 160px; max-width: 220px;">
+        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+          <span style="font-size: 18px;">${flag}</span>
+          <strong style="font-size: 14px; color: #111827;">${country.name}</strong>
+        </div>
+        <div style="font-size: 12px; color: #6b7280;">
+          ${hasData 
+            ? `<span style="font-weight: 600; color: ${isLegislationView ? '#059669' : '#3b82f6'};">${count}</span> ${isLegislationView ? (count === 1 ? 'law' : 'laws') : (count === 1 ? 'entity' : 'entities')}`
+            : '<span style="color: #9ca3af;">No data yet</span>'
+          }
+        </div>
+        ${detailsHtml}
+        ${hasData ? '<div style="font-size: 10px; color: #9ca3af; margin-top: 6px; text-align: center;">Click to filter</div>' : ''}
+      </div>
+    `;
   };
 
   // Initialize map
@@ -123,55 +234,32 @@ export function EuropeMap({
 
     // Add new markers
     EU_COUNTRIES.forEach(country => {
-      const count = countryData[country.code] || 0;
-      const hasData = count > 0;
       const isSelected = selectedCountry === country.code;
-      const size = getMarkerSize(country.code);
-      const borderColor = getBorderColor(country.code);
-      const flag = getFlagEmoji(country.code);
 
-      // Create custom div icon with flag
-      const icon = L.divIcon({
-        className: 'custom-flag-marker',
-        html: `
-          <div style="
-            width: ${size}px;
-            height: ${size}px;
-            border-radius: 50%;
-            border: 3px solid ${borderColor};
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: ${size * 0.55}px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            ${isSelected ? 'transform: scale(1.1);' : ''}
-            ${!hasData ? 'opacity: 0.6;' : ''}
-          ">
-            ${flag}
-          </div>
-        `,
-        iconSize: [size, size],
-        iconAnchor: [size / 2, size / 2],
+      const marker = L.marker([country.lat, country.lng], { 
+        icon: createIcon(country, false),
+        zIndexOffset: isSelected ? 1000 : 0
       });
 
-      const marker = L.marker([country.lat, country.lng], { icon });
+      // Add tooltip with details
+      marker.bindTooltip(createTooltipContent(country), {
+        direction: 'top',
+        offset: [0, -15],
+        className: 'custom-leaflet-tooltip',
+        opacity: 1,
+      });
 
-      const popupContent = `
-        <div style="text-align: center;">
-          <strong style="display: block; font-size: 14px;">${flag} ${country.name}</strong>
-          <span style="font-size: 12px; color: #666;">
-            ${hasData 
-              ? `${count} ${isLegislationView ? (count === 1 ? 'law' : 'laws') : (count === 1 ? 'entity' : 'entities')}`
-              : 'No data yet'
-            }
-          </span>
-        </div>
-      `;
+      // Hover effects - enlarge marker
+      marker.on('mouseover', function() {
+        this.setIcon(createIcon(country, true));
+        this.setZIndexOffset(500);
+      });
 
-      marker.bindPopup(popupContent);
+      marker.on('mouseout', function() {
+        this.setIcon(createIcon(country, false));
+        this.setZIndexOffset(isSelected ? 1000 : 0);
+      });
+
       marker.on('click', () => {
         onCountryClick(isSelected ? null : country.code);
       });
@@ -179,7 +267,7 @@ export function EuropeMap({
       marker.addTo(map);
       markersRef.current.push(marker);
     });
-  }, [countryData, selectedCountry, isLegislationView, onCountryClick]);
+  }, [countryData, countryDetails, selectedCountry, isLegislationView, onCountryClick]);
 
   // Pan to selected country
   useEffect(() => {
@@ -198,6 +286,23 @@ export function EuropeMap({
 
   return (
     <div className={cn("relative w-full h-[500px] rounded-lg overflow-hidden border", className)}>
+      <style>{`
+        .custom-leaflet-tooltip {
+          background: white !important;
+          border: 1px solid #e5e7eb !important;
+          border-radius: 8px !important;
+          padding: 10px 12px !important;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+          font-family: inherit !important;
+        }
+        .custom-leaflet-tooltip::before {
+          border-top-color: white !important;
+        }
+        .custom-flag-marker {
+          background: transparent !important;
+          border: none !important;
+        }
+      `}</style>
       <div ref={mapRef} className="h-full w-full z-0" style={{ background: '#e5e7eb' }} />
 
       {/* Legend */}
@@ -211,7 +316,7 @@ export function EuropeMap({
           <span>Has {isLegislationView ? 'legislation' : 'entities'}</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-4 w-4 rounded-full bg-gray-400 border-2 border-white shadow" />
+          <div className="h-4 w-4 rounded-full bg-muted-foreground/40 border-2 border-white shadow" />
           <span>No data yet</span>
         </div>
       </div>

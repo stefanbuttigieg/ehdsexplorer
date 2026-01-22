@@ -230,6 +230,52 @@ export default function HealthAuthoritiesPage() {
     return data;
   }, [activeTab, filteredAuthorities, filteredLegislation]);
 
+  // Prepare country details for map tooltips
+  const countryDetails = useMemo(() => {
+    const details: Record<string, {
+      entities?: Array<{ name: string; type: string; status: string }>;
+      legislation?: Array<{ title: string; type: string; status: string }>;
+    }> = {};
+
+    // Group entities by country
+    if (authorities) {
+      authorities.forEach(a => {
+        if (!details[a.country_code]) {
+          details[a.country_code] = {};
+        }
+        if (!details[a.country_code].entities) {
+          details[a.country_code].entities = [];
+        }
+        details[a.country_code].entities!.push({
+          name: a.name,
+          type: a.authority_type === 'digital_health_authority' ? 'DHA' : 'HDAB',
+          status: a.status.charAt(0).toUpperCase() + a.status.slice(1),
+        });
+      });
+    }
+
+    // Group legislation by country
+    if (legislation) {
+      legislation.forEach(l => {
+        if (!details[l.country_code]) {
+          details[l.country_code] = {};
+        }
+        if (!details[l.country_code].legislation) {
+          details[l.country_code].legislation = [];
+        }
+        const statusLabel = LEGISLATION_STATUSES[l.status as LegislationStatus]?.label || l.status;
+        const typeLabel = LEGISLATION_TYPES[l.legislation_type as LegislationType]?.label || l.legislation_type;
+        details[l.country_code].legislation!.push({
+          title: l.title,
+          type: typeLabel,
+          status: statusLabel,
+        });
+      });
+    }
+
+    return details;
+  }, [authorities, legislation]);
+
   const selectedCountryName = selectedCountry 
     ? EU_COUNTRIES.find(c => c.code === selectedCountry)?.name 
     : null;
@@ -410,6 +456,7 @@ export default function HealthAuthoritiesPage() {
             {view === 'map' && (
               <EuropeMap
                 countryData={countryData}
+                countryDetails={countryDetails}
                 selectedCountry={selectedCountry}
                 onCountryClick={setSelectedCountry}
                 isLegislationView={activeTab === 'legislation'}

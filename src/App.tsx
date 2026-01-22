@@ -80,6 +80,7 @@ import AdminHealthAuthoritiesPage from "./pages/AdminHealthAuthoritiesPage";
 import AdminLegalPagesPage from "./pages/AdminLegalPagesPage";
 import AdminCountryLegislationPage from "./pages/AdminCountryLegislationPage";
 import AdminCrossRegulationPage from "./pages/AdminCrossRegulationPage";
+import CrossRegulationMapPage from "./pages/CrossRegulationMapPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -146,6 +147,7 @@ const App = () => (
             <Route path="/verify-subscription" element={<VerifySubscriptionPage />} />
             <Route path="/manage-subscription" element={<ManageSubscriptionPage />} />
             <Route path="/health-authorities" element={<HealthAuthoritiesPage />} />
+            <Route path="/cross-regulation-map" element={<CrossRegulationMapPage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin/set-password" element={<AdminSetPasswordPage />} />
             <Route path="/profile" element={<ProfilePage />} />

@@ -13,6 +13,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.8.4] - 2026-01-22
+
+### Added
+
+#### Native Mobile App Support
+- Capacitor configuration for iOS and Android native app builds
+- App ID and configuration for App Store/Play Store distribution
+- Development server URL for hot-reloading during mobile testing
+- Documentation for local build and deployment workflow
+
+---
+
 ## [1.8.3] - 2026-01-22
 
 ### Added

@@ -366,14 +366,43 @@ const CrossRegulationMapPage = () => {
                 transformOrigin: "center center",
               }}
             >
-              {/* Edges */}
+              {/* Edges from EHDS center to Articles */}
+              <g>
+                {nodes
+                  .filter((node) => node.type === "article")
+                  .map((articleNode) => {
+                    const centerNode = nodes.find((n) => n.id === "ehds-center");
+                    if (!centerNode) return null;
+
+                    const isArticleHovered = hoveredNode === articleNode.id;
+                    const isCenterHovered = hoveredNode === "ehds-center";
+                    const isHighlighted = !hoveredNode || isArticleHovered || isCenterHovered;
+
+                    return (
+                      <motion.line
+                        key={`ehds-to-${articleNode.id}`}
+                        x1={centerNode.x}
+                        y1={centerNode.y}
+                        x2={articleNode.x}
+                        y2={articleNode.y}
+                        stroke="hsl(var(--primary))"
+                        strokeWidth={isHighlighted ? 2 : 1}
+                        strokeOpacity={isHighlighted ? 0.4 : 0.15}
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ duration: 0.4 }}
+                      />
+                    );
+                  })}
+              </g>
+
+              {/* Edges from Articles to Regulations */}
               <g>
                 {edges.map((edge) => {
                   const source = nodes.find((n) => n.id === edge.source);
                   const target = nodes.find((n) => n.id === edge.target);
                   if (!source || !target) return null;
 
-                  const relInfo = getRelationshipInfo(edge.relationshipType);
                   const isHighlighted = highlightedEdges.has(edge.id) || highlightedEdges.size === 0;
 
                   return (

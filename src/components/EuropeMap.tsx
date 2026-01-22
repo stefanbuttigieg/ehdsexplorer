@@ -134,13 +134,19 @@ export function EuropeMap({
 
   const createTooltipContent = (country: typeof EU_COUNTRIES[0]) => {
     const count = countryData[country.code] || 0;
-    const hasData = count > 0;
     const flag = getFlagEmoji(country.code);
     const details = countryDetails?.[country.code];
+    
+    // Check if there's any data in countryDetails (unfiltered) for the current view
+    const hasDetailsData = isLegislationView 
+      ? (details?.legislation?.length ?? 0) > 0
+      : (details?.entities?.length ?? 0) > 0;
+    
+    const hasData = count > 0 || hasDetailsData;
 
     let detailsHtml = '';
     
-    if (hasData && details) {
+    if (details) {
       if (isLegislationView && details.legislation?.length) {
         const items = details.legislation.slice(0, 3);
         detailsHtml = `
@@ -180,6 +186,11 @@ export function EuropeMap({
       }
     }
 
+    // Get the count to display based on unfiltered data for the current view
+    const displayCount = isLegislationView 
+      ? (details?.legislation?.length ?? 0)
+      : (details?.entities?.length ?? 0);
+
     return `
       <div style="min-width: 160px; max-width: 220px;">
         <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
@@ -188,7 +199,7 @@ export function EuropeMap({
         </div>
         <div style="font-size: 12px; color: #6b7280;">
           ${hasData 
-            ? `<span style="font-weight: 600; color: ${isLegislationView ? '#059669' : '#3b82f6'};">${count}</span> ${isLegislationView ? (count === 1 ? 'law' : 'laws') : (count === 1 ? 'entity' : 'entities')}`
+            ? `<span style="font-weight: 600; color: ${isLegislationView ? '#059669' : '#3b82f6'};">${displayCount}</span> ${isLegislationView ? (displayCount === 1 ? 'law' : 'laws') : (displayCount === 1 ? 'entity' : 'entities')}`
             : '<span style="color: #9ca3af;">No data yet</span>'
           }
         </div>

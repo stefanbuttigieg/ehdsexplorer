@@ -8,6 +8,7 @@ A comprehensive digital platform for exploring **Regulation (EU) 2025/327** - th
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?logo=tailwindcss)
 ![Supabase](https://img.shields.io/badge/Supabase-Backend-3FCF8E?logo=supabase)
 ![Leaflet](https://img.shields.io/badge/Leaflet-1.9-199900?logo=leaflet)
+![Capacitor](https://img.shields.io/badge/Capacitor-8.0-119EFF?logo=capacitor)
 [![BuyMeACoffee](https://raw.githubusercontent.com/pachadotdev/buymeacoffee-badges/main/bmc-yellow.svg)](https://buymeacoffee.com/stefanbuttigieg)
 ![Lovable Credits](https://img.shields.io/badge/Lovable%20Credits-500%20credits%20used-blue)
 ![Analytics](https://img.shields.io/badge/Analytics-Umami-brightgreen)
@@ -231,7 +232,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 
 ### Medium-term - Q2 to Q4 2026
 - [ ] Integration with national implementation trackers
-- [ ] Mobile apps (iOS/Android)
+- [X] Mobile apps (iOS/Android) - Capacitor configured
 - [ ] Linkages with other EU Acts and Regulations such as AI Act, MDR, Data Act, Data Governance Act, GDPR and more
 
 ### Long-term - Q1 to Q4 2027
@@ -281,6 +282,35 @@ See the [API Documentation](/api) for full details.
 - **State**: React Query + Local Storage
 - **Icons**: Lucide React
 - **Email**: Resend for user invitations
+- **Mobile**: Capacitor for iOS/Android native apps
+
+## 📱 Mobile Apps
+
+The EHDS Explorer can be built as native iOS and Android apps using Capacitor.
+
+### Build Steps
+
+```bash
+# Clone and install dependencies
+git clone https://github.com/stefanbuttigieg/ehdsexplorer.git
+cd ehdsexplorer
+npm install
+
+# Add mobile platforms
+npx cap add ios      # Requires macOS with Xcode
+npx cap add android  # Requires Android Studio
+
+# Build web assets and sync to native projects
+npm run build
+npx cap sync
+
+# Run on device or emulator
+npx cap run ios
+npx cap run android
+```
+
+### Production Build
+For production releases, remove the `server` block from `capacitor.config.ts` to use bundled assets instead of the development server.
 
 ## 📦 Installation
 

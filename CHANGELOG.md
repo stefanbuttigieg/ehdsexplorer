@@ -13,6 +13,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.8.3] - 2026-01-22
+
+### Added
+
+#### Cross-Regulation Linking
+- Added cross-regulation references linking EHDS articles to GDPR, AI Act, MDR, Data Act, and Data Governance Act provisions
+- Visual relationship map with animated SVG showing connections between EHDS and related EU regulations
+- Color-coded regulation cards with relationship type badges (complements, specifies, implements, aligns, relates_to)
+- Direct links to EUR-Lex for each referenced provision
+- Toggle between list view and visual map view
+- Seed data with 14 cross-references across 5 regulations
+
+---
+
 ## [1.8.2] - 2026-01-20
 
 ### Changed

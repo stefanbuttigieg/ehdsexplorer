@@ -132,23 +132,28 @@ export function EuropeMap({
     });
   };
 
-  const createTooltipContent = (country: typeof EU_COUNTRIES[0]) => {
-    const count = countryData[country.code] || 0;
+  const createTooltipContent = (
+    country: typeof EU_COUNTRIES[0],
+    isLegView: boolean,
+    details: CountryDetails | undefined,
+    data: CountryData
+  ) => {
+    const count = data[country.code] || 0;
     const flag = getFlagEmoji(country.code);
-    const details = countryDetails?.[country.code];
+    const countryDetailsData = details?.[country.code];
     
     // Check if there's any data in countryDetails (unfiltered) for the current view
-    const hasDetailsData = isLegislationView 
-      ? (details?.legislation?.length ?? 0) > 0
-      : (details?.entities?.length ?? 0) > 0;
+    const hasDetailsData = isLegView 
+      ? (countryDetailsData?.legislation?.length ?? 0) > 0
+      : (countryDetailsData?.entities?.length ?? 0) > 0;
     
     const hasData = count > 0 || hasDetailsData;
 
     let detailsHtml = '';
     
-    if (details) {
-      if (isLegislationView && details.legislation?.length) {
-        const items = details.legislation.slice(0, 3);
+    if (countryDetailsData) {
+      if (isLegView && countryDetailsData.legislation?.length) {
+        const items = countryDetailsData.legislation.slice(0, 3);
         detailsHtml = `
           <div style="margin-top: 8px; border-top: 1px solid #e5e7eb; padding-top: 8px;">
             ${items.map(leg => `
@@ -162,11 +167,11 @@ export function EuropeMap({
                 </div>
               </div>
             `).join('')}
-            ${details.legislation.length > 3 ? `<div style="font-size: 10px; color: #9ca3af; margin-top: 4px;">+${details.legislation.length - 3} more</div>` : ''}
+            ${countryDetailsData.legislation.length > 3 ? `<div style="font-size: 10px; color: #9ca3af; margin-top: 4px;">+${countryDetailsData.legislation.length - 3} more</div>` : ''}
           </div>
         `;
-      } else if (!isLegislationView && details.entities?.length) {
-        const items = details.entities.slice(0, 3);
+      } else if (!isLegView && countryDetailsData.entities?.length) {
+        const items = countryDetailsData.entities.slice(0, 3);
         detailsHtml = `
           <div style="margin-top: 8px; border-top: 1px solid #e5e7eb; padding-top: 8px;">
             ${items.map(entity => `
@@ -180,16 +185,16 @@ export function EuropeMap({
                 </div>
               </div>
             `).join('')}
-            ${details.entities.length > 3 ? `<div style="font-size: 10px; color: #9ca3af; margin-top: 4px;">+${details.entities.length - 3} more</div>` : ''}
+            ${countryDetailsData.entities.length > 3 ? `<div style="font-size: 10px; color: #9ca3af; margin-top: 4px;">+${countryDetailsData.entities.length - 3} more</div>` : ''}
           </div>
         `;
       }
     }
 
     // Get the count to display based on unfiltered data for the current view
-    const displayCount = isLegislationView 
-      ? (details?.legislation?.length ?? 0)
-      : (details?.entities?.length ?? 0);
+    const displayCount = isLegView 
+      ? (countryDetailsData?.legislation?.length ?? 0)
+      : (countryDetailsData?.entities?.length ?? 0);
 
     return `
       <div style="min-width: 160px; max-width: 220px;">
@@ -199,7 +204,7 @@ export function EuropeMap({
         </div>
         <div style="font-size: 12px; color: #6b7280;">
           ${hasData 
-            ? `<span style="font-weight: 600; color: ${isLegislationView ? '#059669' : '#3b82f6'};">${displayCount}</span> ${isLegislationView ? (displayCount === 1 ? 'law' : 'laws') : (displayCount === 1 ? 'entity' : 'entities')}`
+            ? `<span style="font-weight: 600; color: ${isLegView ? '#059669' : '#3b82f6'};">${displayCount}</span> ${isLegView ? (displayCount === 1 ? 'law' : 'laws') : (displayCount === 1 ? 'entity' : 'entities')}`
             : '<span style="color: #9ca3af;">No data yet</span>'
           }
         </div>
@@ -252,8 +257,8 @@ export function EuropeMap({
         zIndexOffset: isSelected ? 1000 : 0
       });
 
-      // Add tooltip with details
-      marker.bindTooltip(createTooltipContent(country), {
+      // Add tooltip with details - pass all parameters explicitly to avoid closure issues
+      marker.bindTooltip(createTooltipContent(country, isLegislationView, countryDetails, countryData), {
         direction: 'top',
         offset: [0, -15],
         className: 'custom-leaflet-tooltip',

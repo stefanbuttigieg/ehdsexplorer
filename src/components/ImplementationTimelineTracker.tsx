@@ -37,8 +37,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useHealthAuthorities, type AuthorityStatus } from "@/hooks/useHealthAuthorities";
-import { useCountryLegislation, type CountryLegislation } from "@/hooks/useCountryLegislation";
+import { useCountryLegislation } from "@/hooks/useCountryLegislation";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Milestone types for filtering
 export type MilestoneType = 
@@ -147,6 +148,7 @@ export const ImplementationTimelineTracker = ({
   const [selectedCountry, setSelectedCountry] = useState<string>("all");
   const [zoomLevel, setZoomLevel] = useState(1);
   const [activeTab, setActiveTab] = useState<"timeline" | "progress" | "checklist">("timeline");
+  const isMobile = useIsMobile();
 
   const { authorities, isLoading: authoritiesLoading } = useHealthAuthorities();
   const { data: legislation, isLoading: legislationLoading } = useCountryLegislation();
@@ -378,48 +380,48 @@ END:VCALENDAR`;
   const avgProgress = Math.round(countryProgress.reduce((sum, c) => sum + c.progressPercent, 0) / totalCountries);
 
   return (
-    <div className="space-y-6">
-      {/* Summary Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="space-y-4 md:space-y-6">
+      {/* Summary Stats - More compact on mobile */}
+      <div className="grid grid-cols-2 gap-2 md:gap-4 md:grid-cols-4">
         <Card>
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold">{avgProgress}%</div>
-            <p className="text-sm text-muted-foreground">EU Average Progress</p>
+          <CardContent className="p-3 md:pt-4 md:p-4">
+            <div className="text-xl md:text-2xl font-bold">{avgProgress}%</div>
+            <p className="text-xs md:text-sm text-muted-foreground">EU Average</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold">{countriesWithDHA}/{totalCountries}</div>
-            <p className="text-sm text-muted-foreground">Active DHAs</p>
+          <CardContent className="p-3 md:pt-4 md:p-4">
+            <div className="text-xl md:text-2xl font-bold">{countriesWithDHA}/{totalCountries}</div>
+            <p className="text-xs md:text-sm text-muted-foreground">Active DHAs</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold">{countriesWithHDAB}/{totalCountries}</div>
-            <p className="text-sm text-muted-foreground">Active HDABs</p>
+          <CardContent className="p-3 md:pt-4 md:p-4">
+            <div className="text-xl md:text-2xl font-bold">{countriesWithHDAB}/{totalCountries}</div>
+            <p className="text-xs md:text-sm text-muted-foreground">Active HDABs</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-4">
-            <div className="text-2xl font-bold">{filteredMilestones.length}</div>
-            <p className="text-sm text-muted-foreground">Total Milestones</p>
+          <CardContent className="p-3 md:pt-4 md:p-4">
+            <div className="text-xl md:text-2xl font-bold">{filteredMilestones.length}</div>
+            <p className="text-xs md:text-sm text-muted-foreground">Milestones</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filters and Controls */}
-      <div className="flex flex-wrap gap-4 items-center justify-between">
-        <div className="flex flex-wrap gap-3">
+      {/* Filters and Controls - Stack on mobile */}
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">
           <Select value={selectedMilestoneType} onValueChange={(v) => setSelectedMilestoneType(v as MilestoneType)}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Filter by milestone type" />
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="Milestone type" />
             </SelectTrigger>
             <SelectContent>
               {Object.entries(milestoneTypeConfig).map(([key, config]) => (
                 <SelectItem key={key} value={key}>
                   <div className="flex items-center gap-2">
                     {config.icon}
-                    {config.label}
+                    <span className="truncate">{config.label}</span>
                   </div>
                 </SelectItem>
               ))}
@@ -427,8 +429,8 @@ END:VCALENDAR`;
           </Select>
 
           <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by country" />
+            <SelectTrigger className="w-full sm:w-[160px]">
+              <SelectValue placeholder="Country" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Countries</SelectItem>
@@ -441,43 +443,46 @@ END:VCALENDAR`;
           </Select>
         </div>
 
-        <div className="flex gap-2">
-          <div className="flex items-center gap-2 mr-4">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setZoomLevel(prev => Math.max(prev - 0.5, 1))}
-              disabled={zoomLevel <= 1}
-              className="h-8 w-8 p-0"
-            >
-              <ZoomOut className="h-4 w-4" />
-            </Button>
-            <span className="text-sm font-medium min-w-[3rem] text-center">{zoomLevel}x</span>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setZoomLevel(prev => Math.min(prev + 0.5, 4))}
-              disabled={zoomLevel >= 4}
-              className="h-8 w-8 p-0"
-            >
-              <ZoomIn className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => setZoomLevel(1)}
-              className="h-8 px-2 gap-1"
-            >
-              <RotateCcw className="h-3 w-3" />
-              Reset
-            </Button>
-          </div>
+        <div className="flex items-center justify-between gap-2 sm:justify-end">
+          {/* Hide zoom on mobile, show export */}
+          {!isMobile && (
+            <div className="hidden md:flex items-center gap-2 mr-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setZoomLevel(prev => Math.max(prev - 0.5, 1))}
+                disabled={zoomLevel <= 1}
+                className="h-8 w-8 p-0"
+              >
+                <ZoomOut className="h-4 w-4" />
+              </Button>
+              <span className="text-sm font-medium min-w-[2.5rem] text-center">{zoomLevel}x</span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setZoomLevel(prev => Math.min(prev + 0.5, 4))}
+                disabled={zoomLevel >= 4}
+                className="h-8 w-8 p-0"
+              >
+                <ZoomIn className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setZoomLevel(1)}
+                className="h-8 px-2 gap-1"
+              >
+                <RotateCcw className="h-3 w-3" />
+                <span className="hidden lg:inline">Reset</span>
+              </Button>
+            </div>
+          )}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="gap-2">
                 <Download className="h-4 w-4" />
-                Export
+                <span className="hidden sm:inline">Export</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -499,64 +504,64 @@ END:VCALENDAR`;
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Tabs - Responsive text */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="timeline">Timeline View</TabsTrigger>
-          <TabsTrigger value="progress">Country Progress</TabsTrigger>
-          <TabsTrigger value="checklist">Implementation Checklist</TabsTrigger>
+          <TabsTrigger value="timeline" className="text-xs sm:text-sm px-2">
+            <span className="hidden sm:inline">Timeline View</span>
+            <span className="sm:hidden">Timeline</span>
+          </TabsTrigger>
+          <TabsTrigger value="progress" className="text-xs sm:text-sm px-2">
+            <span className="hidden sm:inline">Country Progress</span>
+            <span className="sm:hidden">Progress</span>
+          </TabsTrigger>
+          <TabsTrigger value="checklist" className="text-xs sm:text-sm px-2">
+            <span className="hidden sm:inline">Checklist</span>
+            <span className="sm:hidden">Checklist</span>
+          </TabsTrigger>
         </TabsList>
 
         {/* Timeline View */}
-        <TabsContent value="timeline" className="mt-4">
+        <TabsContent value="timeline" className="mt-3 md:mt-4">
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className="p-3 md:pt-6 md:p-6">
               {filteredMilestones.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">
+                <p className="text-center text-muted-foreground py-6 md:py-8">
                   No milestones found for the selected filters.
                 </p>
               ) : (
-                <div className="overflow-x-auto">
-                  <div style={{ width: `${100 * zoomLevel}%`, minWidth: '100%' }}>
-                    {/* Milestone list */}
-                    <div className="space-y-3">
-                      {filteredMilestones.slice(0, 20).map((milestone, index) => (
-                        <Tooltip key={index}>
-                          <TooltipTrigger asChild>
-                            <div className="flex items-center gap-4 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer">
-                              <div className="flex-shrink-0 w-10 text-center">
-                                {getFlagEmoji(milestone.countryCode)}
-                              </div>
-                              <div className="flex-shrink-0">
-                                {getStatusIcon(milestone.status)}
-                              </div>
-                              <div className="flex-grow min-w-0">
-                                <div className="font-medium truncate">{milestone.label}</div>
-                                <div className="text-sm text-muted-foreground flex items-center gap-2">
-                                  <Badge variant="outline" className="text-xs">
-                                    {milestoneTypeConfig[milestone.type]?.label}
-                                  </Badge>
-                                  <span>{milestone.countryName}</span>
-                                </div>
-                              </div>
-                              <div className="flex-shrink-0 text-sm text-muted-foreground">
-                                {milestone.date?.toLocaleDateString() || "TBD"}
-                              </div>
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="font-semibold">{milestone.label}</p>
-                            <p>{milestone.countryName} • {milestone.status}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      ))}
-                      {filteredMilestones.length > 20 && (
-                        <p className="text-center text-muted-foreground py-2">
-                          ... and {filteredMilestones.length - 20} more milestones
-                        </p>
-                      )}
+                <div className="space-y-2 md:space-y-3">
+                  {filteredMilestones.slice(0, isMobile ? 10 : 20).map((milestone, index) => (
+                    <div 
+                      key={index}
+                      className="flex items-start md:items-center gap-2 md:gap-4 p-2 md:p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex-shrink-0 w-8 md:w-10 text-center text-lg md:text-xl">
+                        {getFlagEmoji(milestone.countryCode)}
+                      </div>
+                      <div className="flex-shrink-0">
+                        {getStatusIcon(milestone.status)}
+                      </div>
+                      <div className="flex-grow min-w-0 flex-1">
+                        <div className="font-medium text-sm md:text-base line-clamp-2 md:truncate">{milestone.label}</div>
+                        <div className="text-xs md:text-sm text-muted-foreground flex flex-wrap items-center gap-1 md:gap-2 mt-0.5">
+                          <Badge variant="outline" className="text-[10px] md:text-xs px-1 md:px-2">
+                            {isMobile ? milestoneTypeConfig[milestone.type]?.label.split(' ')[0] : milestoneTypeConfig[milestone.type]?.label}
+                          </Badge>
+                          <span className="hidden md:inline">{milestone.countryName}</span>
+                          <span className="md:hidden text-xs">{milestone.date?.toLocaleDateString() || "TBD"}</span>
+                        </div>
+                      </div>
+                      <div className="hidden md:block flex-shrink-0 text-sm text-muted-foreground">
+                        {milestone.date?.toLocaleDateString() || "TBD"}
+                      </div>
                     </div>
-                  </div>
+                  ))}
+                  {filteredMilestones.length > (isMobile ? 10 : 20) && (
+                    <p className="text-center text-muted-foreground py-2 text-sm">
+                      ... and {filteredMilestones.length - (isMobile ? 10 : 20)} more milestones
+                    </p>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -564,49 +569,43 @@ END:VCALENDAR`;
         </TabsContent>
 
         {/* Country Progress View */}
-        <TabsContent value="progress" className="mt-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <TabsContent value="progress" className="mt-3 md:mt-4">
+          <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {filteredCountryProgress.map(country => (
               <Card key={country.countryCode} className="overflow-hidden">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <span className="text-2xl">{getFlagEmoji(country.countryCode)}</span>
+                <CardHeader className="p-3 md:p-4 pb-2">
+                  <CardTitle className="text-base md:text-lg flex items-center gap-2">
+                    <span className="text-xl md:text-2xl">{getFlagEmoji(country.countryCode)}</span>
                     {country.countryName}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="p-3 md:p-4 pt-0 space-y-3 md:space-y-4">
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
+                    <div className="flex justify-between text-xs md:text-sm mb-1">
                       <span>Overall Progress</span>
                       <span className="font-medium">{country.progressPercent}%</span>
                     </div>
                     <Progress value={country.progressPercent} className="h-2" />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Building2 className="h-4 w-4 text-muted-foreground" />
-                      <span>DHA:</span>
-                      <Badge variant={country.dhaStatus === "active" ? "default" : "secondary"} className="text-xs">
-                        {country.dhaStatus || "None"}
+                  <div className="flex flex-wrap gap-2 text-xs md:text-sm">
+                    <div className="flex items-center gap-1">
+                      <span className="text-muted-foreground">DHA:</span>
+                      <Badge variant={country.dhaStatus === "active" ? "default" : "secondary"} className="text-[10px] md:text-xs">
+                        {country.dhaStatus || "—"}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Building2 className="h-4 w-4 text-muted-foreground" />
-                      <span>HDAB:</span>
-                      <Badge variant={country.hdabStatus === "active" ? "default" : "secondary"} className="text-xs">
-                        {country.hdabStatus || "None"}
+                    <div className="flex items-center gap-1">
+                      <span className="text-muted-foreground">HDAB:</span>
+                      <Badge variant={country.hdabStatus === "active" ? "default" : "secondary"} className="text-[10px] md:text-xs">
+                        {country.hdabStatus || "—"}
                       </Badge>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 text-sm">
-                    <Scale className="h-4 w-4 text-muted-foreground" />
-                    <span>Legislation: {country.adoptedLegislationCount}/{country.legislationCount} adopted</span>
-                  </div>
-
-                  <div className="text-xs text-muted-foreground">
-                    {country.milestones.length} total milestones tracked
+                  <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+                    <Scale className="h-3 w-3 md:h-4 md:w-4" />
+                    <span>Legislation: {country.adoptedLegislationCount}/{country.legislationCount}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -614,20 +613,55 @@ END:VCALENDAR`;
           </div>
         </TabsContent>
 
-        {/* Checklist View */}
-        <TabsContent value="checklist" className="mt-4">
+        {/* Checklist View - Card layout on mobile, table on desktop */}
+        <TabsContent value="checklist" className="mt-3 md:mt-4">
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Implementation Checklist</span>
+            <CardHeader className="p-3 md:p-6">
+              <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                <span className="text-base md:text-lg">Implementation Checklist</span>
                 <Button variant="outline" size="sm" onClick={exportChecklist} className="gap-2">
                   <Download className="h-4 w-4" />
-                  Export Checklist
+                  <span className="hidden sm:inline">Export</span>
                 </Button>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="border rounded-lg overflow-hidden">
+            <CardContent className="p-3 md:p-6 pt-0">
+              {/* Mobile: Card layout */}
+              <div className="md:hidden space-y-3">
+                {filteredCountryProgress.map(country => (
+                  <div key={country.countryCode} className="p-3 border rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span>{getFlagEmoji(country.countryCode)}</span>
+                        <span className="font-medium text-sm">{country.countryName}</span>
+                      </div>
+                      <span className="text-sm font-medium">{country.progressPercent}%</span>
+                    </div>
+                    <Progress value={country.progressPercent} className="h-1.5 mb-2" />
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <div className="flex items-center gap-1">
+                        <span className="text-muted-foreground">DHA:</span>
+                        <Badge variant={country.dhaStatus === "active" ? "default" : "secondary"} className="text-[10px]">
+                          {country.dhaStatus || "—"}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-muted-foreground">HDAB:</span>
+                        <Badge variant={country.hdabStatus === "active" ? "default" : "secondary"} className="text-[10px]">
+                          {country.hdabStatus || "—"}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-muted-foreground">Leg:</span>
+                        <span>{country.adoptedLegislationCount}/{country.legislationCount}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop: Table layout */}
+              <div className="hidden md:block border rounded-lg overflow-hidden">
                 <table className="w-full text-sm">
                   <thead className="bg-muted/50">
                     <tr>
@@ -676,12 +710,12 @@ END:VCALENDAR`;
         </TabsContent>
       </Tabs>
 
-      {/* Milestone Type Legend */}
-      <div className="flex flex-wrap gap-4">
+      {/* Milestone Type Legend - More compact on mobile */}
+      <div className="flex flex-wrap gap-2 md:gap-4">
         {Object.entries(milestoneTypeConfig).filter(([key]) => key !== "all").map(([key, config]) => (
-          <div key={key} className="flex items-center gap-2">
-            <div className={`w-3 h-3 rounded-full ${config.color}`} />
-            <span className="text-sm text-muted-foreground">{config.label}</span>
+          <div key={key} className="flex items-center gap-1 md:gap-2">
+            <div className={`w-2 h-2 md:w-3 md:h-3 rounded-full ${config.color}`} />
+            <span className="text-xs md:text-sm text-muted-foreground">{config.label}</span>
           </div>
         ))}
       </div>

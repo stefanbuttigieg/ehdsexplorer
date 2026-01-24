@@ -5,6 +5,8 @@ import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { usePageContent } from "@/hooks/usePageContent";
 import { KeyDatesGantt } from "@/components/KeyDatesGantt";
+import { ImplementationTimelineTracker } from "@/components/ImplementationTimelineTracker";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const OverviewPage = () => {
   const { data: page, isLoading } = usePageContent('overview');
@@ -12,7 +14,7 @@ const OverviewPage = () => {
   if (isLoading) {
     return (
       <Layout>
-        <div className="max-w-4xl mx-auto p-6 animate-fade-in">
+        <div className="max-w-5xl mx-auto p-6 animate-fade-in">
           <Skeleton className="h-8 w-48 mb-4" />
           <Skeleton className="h-12 w-full mb-8" />
           <Skeleton className="h-64 w-full" />
@@ -25,7 +27,7 @@ const OverviewPage = () => {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto p-6 animate-fade-in">
+      <div className="max-w-5xl mx-auto p-6 animate-fade-in">
         <Breadcrumbs items={[{ label: "Overview" }]} />
         <Badge variant="outline" className="mb-2">{content?.regulation_reference || 'Regulation (EU) 2025/327'}</Badge>
         <h1 className="text-3xl font-bold font-serif mb-4">{page?.title || 'European Health Data Space Regulation'}</h1>
@@ -55,14 +57,30 @@ const OverviewPage = () => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader><CardTitle>{content?.key_dates?.title || 'Key Dates'}</CardTitle></CardHeader>
+        <Card className="mb-6">
+          <CardHeader><CardTitle>{content?.key_dates?.title || 'Key Dates & Implementation Timeline'}</CardTitle></CardHeader>
           <CardContent>
-            {content?.key_dates?.dates && content.key_dates.dates.length > 0 ? (
-              <KeyDatesGantt dates={content.key_dates.dates} />
-            ) : (
-              <p className="text-muted-foreground">No key dates available.</p>
-            )}
+            <Tabs defaultValue="regulation" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="regulation">Regulation Milestones</TabsTrigger>
+                <TabsTrigger value="implementation">Member State Implementation</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="regulation">
+                {content?.key_dates?.dates && content.key_dates.dates.length > 0 ? (
+                  <KeyDatesGantt dates={content.key_dates.dates} />
+                ) : (
+                  <p className="text-muted-foreground">No key dates available.</p>
+                )}
+              </TabsContent>
+              
+              <TabsContent value="implementation">
+                <ImplementationTimelineTracker 
+                  showKeyDates={false}
+                  keyDates={content?.key_dates?.dates || []}
+                />
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </div>

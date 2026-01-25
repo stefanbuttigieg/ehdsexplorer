@@ -123,6 +123,7 @@ export const useCountryAssignments = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['country-assignments'] });
+      queryClient.invalidateQueries({ queryKey: ['my-country-assignments'] });
       toast.success('User assigned to country successfully');
     },
     onError: (error: Error) => {
@@ -146,6 +147,7 @@ export const useCountryAssignments = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['country-assignments'] });
+      queryClient.invalidateQueries({ queryKey: ['my-country-assignments'] });
       toast.success('Assignment removed');
     },
     onError: (error: Error) => {
@@ -174,6 +176,7 @@ export const useCountryAssignments = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['country-assignments'] });
+      queryClient.invalidateQueries({ queryKey: ['my-country-assignments'] });
       toast.success('Countries assigned successfully');
     },
     onError: (error: Error) => {

@@ -79,7 +79,7 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="min-h-screen flex w-full">
       {/* Mobile Header */}
-      <header className="fixed top-0 left-0 right-0 h-14 bg-card border-b border-border flex items-center justify-between px-4 md:hidden z-50">
+      <header className="fixed top-0 left-0 right-0 bg-card border-b border-border flex items-center justify-between px-4 md:hidden z-50" style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(3.5rem + env(safe-area-inset-top))' }}>
         <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)}>
           <Menu className="h-5 w-5" />
         </Button>
@@ -106,7 +106,7 @@ const Layout = ({ children }: LayoutProps) => {
         "fixed md:sticky top-0 left-0 h-screen bg-sidebar border-r border-sidebar-border z-50 transition-all duration-200 md:translate-x-0",
         sidebarOpen ? "translate-x-0" : "-translate-x-full",
         sidebarCollapsed ? "md:w-14" : "w-72"
-      )}>
+      )} style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="h-14 border-b border-sidebar-border flex items-center justify-between px-2">
           {/* Collapse Toggle Button - Desktop Only */}
           <Button 
@@ -358,7 +358,7 @@ const Layout = ({ children }: LayoutProps) => {
       <PublicTour run={isTourOpen} onComplete={completeTour} onClose={closeTour} />
 
       {/* Main Content */}
-      <main className="flex-1 pt-14 md:pt-0">
+      <main className="flex-1 md:pt-0" style={{ paddingTop: 'calc(3.5rem + env(safe-area-inset-top))' }}>
         <div className="min-h-screen">
           <div className="p-4">
             <NotificationsBanner />

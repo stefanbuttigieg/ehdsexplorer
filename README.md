@@ -103,7 +103,8 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
   - Arrow keys - Navigate articles
 - **Print-friendly stylesheet** for articles and chapters
 - **Breadcrumb navigation** on all pages
-- **Mobile responsive** design
+- **Mobile responsive** design with swipe gestures for country cards
+- **Touch-optimized dashboards** with responsive layouts
 
 ### ♿ Accessibility
 - **WCAG 2.1 Level AA** compliance efforts

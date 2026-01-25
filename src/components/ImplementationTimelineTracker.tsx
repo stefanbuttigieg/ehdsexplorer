@@ -38,6 +38,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useHealthAuthorities, type AuthorityStatus } from "@/hooks/useHealthAuthorities";
 import { useCountryLegislation } from "@/hooks/useCountryLegislation";
+import { useImplementationTrackerConfig } from "@/hooks/useImplementationTrackerConfig";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -110,12 +111,18 @@ const getFlagEmoji = (countryCode: string) => {
   return String.fromCodePoint(...codePoints);
 };
 
-const statusToProgress = (status: AuthorityStatus | null): number => {
+// Status to progress helper - now uses config values
+const createStatusToProgress = (config: {
+  active: number;
+  pending: number;
+  planned: number;
+  inactive: number;
+}) => (status: AuthorityStatus | null): number => {
   switch (status) {
-    case "active": return 100;
-    case "pending": return 50;
-    case "planned": return 25;
-    case "inactive": return 0;
+    case "active": return config.active;
+    case "pending": return config.pending;
+    case "planned": return config.planned;
+    case "inactive": return config.inactive;
     default: return 0;
   }
 };
@@ -152,8 +159,24 @@ export const ImplementationTimelineTracker = ({
 
   const { authorities, isLoading: authoritiesLoading } = useHealthAuthorities();
   const { data: legislation, isLoading: legislationLoading } = useCountryLegislation();
+  const { config, isLoading: configLoading } = useImplementationTrackerConfig();
 
-  const isLoading = authoritiesLoading || legislationLoading;
+  const isLoading = authoritiesLoading || legislationLoading || configLoading;
+
+  // Create status-to-progress functions using config
+  const dhaStatusToProgress = useMemo(() => createStatusToProgress({
+    active: config.dha_active_value,
+    pending: config.dha_pending_value,
+    planned: config.dha_planned_value,
+    inactive: config.dha_inactive_value,
+  }), [config]);
+
+  const hdabStatusToProgress = useMemo(() => createStatusToProgress({
+    active: config.hdab_active_value,
+    pending: config.hdab_pending_value,
+    planned: config.hdab_planned_value,
+    inactive: config.hdab_inactive_value,
+  }), [config]);
 
   // Calculate country progress data
   const countryProgress = useMemo((): CountryProgress[] => {
@@ -165,7 +188,7 @@ export const ImplementationTimelineTracker = ({
       const hdab = countryAuthorities.find(a => a.authority_type === "health_data_access_body");
       
       const adoptedLegislation = countryLegislation.filter(l => 
-        l.status === "adopted" || l.status === "in_force"
+        config.legislation_adopted_statuses.includes(l.status || '')
       );
 
       // Build milestones
@@ -210,14 +233,19 @@ export const ImplementationTimelineTracker = ({
         });
       });
 
-      // Calculate overall progress
-      const dhaProgress = statusToProgress(dha?.status || null);
-      const hdabProgress = statusToProgress(hdab?.status || null);
+      // Calculate overall progress using weighted formula
+      const dhaProgressValue = dhaStatusToProgress(dha?.status || null);
+      const hdabProgressValue = hdabStatusToProgress(hdab?.status || null);
       const legProgress = countryLegislation.length > 0 
         ? (adoptedLegislation.length / countryLegislation.length) * 100 
         : 0;
       
-      const overallProgress = Math.round((dhaProgress + hdabProgress + legProgress) / 3);
+      // Apply weights
+      const weightedDha = (dhaProgressValue * config.dha_weight) / 100;
+      const weightedHdab = (hdabProgressValue * config.hdab_weight) / 100;
+      const weightedLeg = (legProgress * config.legislation_weight) / 100;
+      
+      const overallProgress = Math.round(weightedDha + weightedHdab + weightedLeg);
 
       return {
         countryCode: country.code,
@@ -230,7 +258,7 @@ export const ImplementationTimelineTracker = ({
         milestones,
       };
     });
-  }, [authorities, legislation]);
+  }, [authorities, legislation, config, dhaStatusToProgress, hdabStatusToProgress]);
 
   // Filter milestones based on selection
   const filteredMilestones = useMemo(() => {
@@ -266,11 +294,11 @@ export const ImplementationTimelineTracker = ({
       overallProgress: `${country.progressPercent}%`,
       digitalHealthAuthority: {
         status: country.dhaStatus || "not_started",
-        progress: `${statusToProgress(country.dhaStatus)}%`
+        progress: `${dhaStatusToProgress(country.dhaStatus)}%`
       },
       healthDataAccessBody: {
         status: country.hdabStatus || "not_started",
-        progress: `${statusToProgress(country.hdabStatus)}%`
+        progress: `${hdabStatusToProgress(country.hdabStatus)}%`
       },
       legislation: {
         total: country.legislationCount,

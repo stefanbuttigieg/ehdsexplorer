@@ -948,6 +948,63 @@ export type Database = {
         }
         Relationships: []
       }
+      implementation_tracker_config: {
+        Row: {
+          created_at: string
+          dha_active_value: number
+          dha_inactive_value: number
+          dha_pending_value: number
+          dha_planned_value: number
+          dha_weight: number
+          hdab_active_value: number
+          hdab_inactive_value: number
+          hdab_pending_value: number
+          hdab_planned_value: number
+          hdab_weight: number
+          id: string
+          legislation_adopted_statuses: string[]
+          legislation_weight: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          dha_active_value?: number
+          dha_inactive_value?: number
+          dha_pending_value?: number
+          dha_planned_value?: number
+          dha_weight?: number
+          hdab_active_value?: number
+          hdab_inactive_value?: number
+          hdab_pending_value?: number
+          hdab_planned_value?: number
+          hdab_weight?: number
+          id?: string
+          legislation_adopted_statuses?: string[]
+          legislation_weight?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          dha_active_value?: number
+          dha_inactive_value?: number
+          dha_pending_value?: number
+          dha_planned_value?: number
+          dha_weight?: number
+          hdab_active_value?: number
+          hdab_inactive_value?: number
+          hdab_pending_value?: number
+          hdab_planned_value?: number
+          hdab_weight?: number
+          id?: string
+          legislation_adopted_statuses?: string[]
+          legislation_weight?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       implementing_act_article_translations: {
         Row: {
           article_id: string

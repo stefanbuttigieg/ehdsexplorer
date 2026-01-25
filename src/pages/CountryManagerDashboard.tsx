@@ -212,12 +212,12 @@ export default function CountryManagerDashboard() {
   if (isLoading) {
     return (
       <Layout>
-        <div className="container py-6 space-y-6">
-          <Skeleton className="h-10 w-64" />
-          <div className="grid gap-4 md:grid-cols-4">
-            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24" />)}
+        <div className="container px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
+          <Skeleton className="h-8 w-48" />
+          <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20 sm:h-24" />)}
           </div>
-          <Skeleton className="h-96" />
+          <Skeleton className="h-64 sm:h-96" />
         </div>
       </Layout>
     );
@@ -248,16 +248,16 @@ export default function CountryManagerDashboard() {
 
   return (
     <Layout>
-      <div className="container py-6 space-y-6">
+      <div className="container px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col gap-3">
           <div>
-            <h1 className="text-2xl font-bold">Country Manager Dashboard</h1>
-            <p className="text-muted-foreground">
-              Track implementation progress for your assigned countries
+            <h1 className="text-xl sm:text-2xl font-bold">My Countries</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Track implementation progress
             </p>
           </div>
-          <Button asChild>
+          <Button asChild className="w-full sm:w-auto self-start">
             <Link to="/admin/implementation-tracker">
               <Settings className="h-4 w-4 mr-2" />
               Manage Status
@@ -265,37 +265,37 @@ export default function CountryManagerDashboard() {
           </Button>
         </div>
 
-        {/* Overall Stats */}
-        <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Assigned Countries</CardDescription>
-              <CardTitle className="text-3xl">{overallStats.countries}</CardTitle>
+        {/* Overall Stats - 2x2 grid on mobile */}
+        <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+          <Card className="p-0">
+            <CardHeader className="p-3 sm:p-4 pb-2">
+              <CardDescription className="text-xs sm:text-sm">Countries</CardDescription>
+              <CardTitle className="text-2xl sm:text-3xl">{overallStats.countries}</CardTitle>
             </CardHeader>
           </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Overall Progress</CardDescription>
-              <CardTitle className="text-3xl text-green-600">{overallStats.progressPercent}%</CardTitle>
+          <Card className="p-0">
+            <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
+              <CardDescription className="text-xs sm:text-sm">Progress</CardDescription>
+              <CardTitle className="text-2xl sm:text-3xl text-green-600">{overallStats.progressPercent}%</CardTitle>
             </CardHeader>
-            <CardContent className="pt-0">
-              <Progress value={overallStats.progressPercent} className="h-2" />
+            <CardContent className="p-3 sm:p-4 pt-0">
+              <Progress value={overallStats.progressPercent} className="h-1.5 sm:h-2" />
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Completed</CardDescription>
-              <CardTitle className="text-3xl flex items-center gap-2">
-                <CheckCircle2 className="h-6 w-6 text-green-600" />
+          <Card className="p-0">
+            <CardHeader className="p-3 sm:p-4 pb-2">
+              <CardDescription className="text-xs sm:text-sm">Completed</CardDescription>
+              <CardTitle className="text-2xl sm:text-3xl flex items-center gap-1 sm:gap-2">
+                <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
                 {overallStats.completed}
               </CardTitle>
             </CardHeader>
           </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Needs Attention</CardDescription>
-              <CardTitle className="text-3xl flex items-center gap-2">
-                <AlertCircle className="h-6 w-6 text-amber-600" />
+          <Card className="p-0">
+            <CardHeader className="p-3 sm:p-4 pb-2">
+              <CardDescription className="text-xs sm:text-sm">Attention</CardDescription>
+              <CardTitle className="text-2xl sm:text-3xl flex items-center gap-1 sm:gap-2">
+                <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600" />
                 {overallStats.delayed + overallStats.blocked}
               </CardTitle>
             </CardHeader>
@@ -303,50 +303,52 @@ export default function CountryManagerDashboard() {
         </div>
 
         {/* Country Cards */}
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
           {countryStats.map(country => (
             <Card key={country.countryCode} className="flex flex-col">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <span className="text-2xl">{getFlagEmoji(country.countryCode)}</span>
-                    {country.countryName}
+              <CardHeader className="p-3 sm:p-6 pb-2 sm:pb-4">
+                <div className="flex items-center justify-between gap-2">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <span className="text-xl sm:text-2xl">{getFlagEmoji(country.countryCode)}</span>
+                    <span className="truncate">{country.countryName}</span>
                   </CardTitle>
-                  <Badge variant={country.progressPercent === 100 ? 'default' : 'secondary'}>
-                    {country.progressPercent}% Complete
+                  <Badge 
+                    variant={country.progressPercent === 100 ? 'default' : 'secondary'}
+                    className="shrink-0 text-xs"
+                  >
+                    {country.progressPercent}%
                   </Badge>
                 </div>
-                <Progress value={country.progressPercent} className="h-2 mt-2" />
+                <Progress value={country.progressPercent} className="h-1.5 sm:h-2 mt-2" />
               </CardHeader>
               
-              <CardContent className="flex-1 space-y-4">
-                {/* Status Summary */}
-                <div className="flex flex-wrap gap-2">
-                  <Badge className={STATUS_COLORS.completed}>
+              <CardContent className="flex-1 p-3 sm:p-6 pt-0 sm:pt-0 space-y-3 sm:space-y-4">
+                {/* Status Summary - Compact on mobile */}
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                  <Badge className={`text-xs ${STATUS_COLORS.completed}`}>
                     <CheckCircle2 className="h-3 w-3 mr-1" />
-                    {country.completed} Completed
+                    {country.completed}
                   </Badge>
                   {country.inProgress > 0 && (
-                    <Badge className={STATUS_COLORS.in_progress}>
+                    <Badge className={`text-xs ${STATUS_COLORS.in_progress}`}>
                       <Clock className="h-3 w-3 mr-1" />
-                      {country.inProgress} In Progress
+                      {country.inProgress}
                     </Badge>
                   )}
                   {country.delayed > 0 && (
-                    <Badge className={STATUS_COLORS.delayed}>
+                    <Badge className={`text-xs ${STATUS_COLORS.delayed}`}>
                       <AlertCircle className="h-3 w-3 mr-1" />
-                      {country.delayed} Delayed
+                      {country.delayed}
                     </Badge>
                   )}
                   {country.blocked > 0 && (
-                    <Badge className={STATUS_COLORS.blocked}>
-                      <AlertCircle className="h-3 w-3 mr-1" />
-                      {country.blocked} Blocked
+                    <Badge className={`text-xs ${STATUS_COLORS.blocked}`}>
+                      {country.blocked}
                     </Badge>
                   )}
                   {country.pending > 0 && (
-                    <Badge className={STATUS_COLORS.not_started}>
-                      {country.pending} Not Started
+                    <Badge className={`text-xs ${STATUS_COLORS.not_started}`}>
+                      {country.pending}
                     </Badge>
                   )}
                 </div>
@@ -354,65 +356,70 @@ export default function CountryManagerDashboard() {
                 {/* Pending Obligations */}
                 {country.pendingObligations.length > 0 && (
                   <div>
-                    <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      Pending Obligations ({country.pendingObligations.length})
+                    <h4 className="text-xs sm:text-sm font-medium mb-2 flex items-center gap-2">
+                      <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+                      Pending ({country.pendingObligations.length})
                     </h4>
-                    <ScrollArea className="h-[180px] pr-4">
-                      <div className="space-y-2">
-                        {country.pendingObligations.map(obligation => (
+                    <ScrollArea className="h-[140px] sm:h-[180px]">
+                      <div className="space-y-2 pr-2 sm:pr-4">
+                        {country.pendingObligations.slice(0, 5).map(obligation => (
                           <div 
                             key={obligation.id}
-                            className="p-3 bg-muted/50 rounded-lg border"
+                            className="p-2 sm:p-3 bg-muted/50 rounded-lg border"
                           >
                             <div className="flex items-start justify-between gap-2">
-                              <div className="flex items-start gap-2 min-w-0">
-                                <span className="mt-0.5 text-muted-foreground">
+                              <div className="flex items-start gap-1.5 sm:gap-2 min-w-0 flex-1">
+                                <span className="mt-0.5 text-muted-foreground hidden sm:block">
                                   {CATEGORY_ICONS[obligation.category]}
                                 </span>
-                                <div className="min-w-0">
-                                  <p className="text-sm font-medium truncate">
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-xs sm:text-sm font-medium line-clamp-2">
                                     {obligation.name}
                                   </p>
-                                  <p className="text-xs text-muted-foreground">
+                                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
                                     {CATEGORY_LABELS[obligation.category]}
                                   </p>
                                 </div>
                               </div>
                               <Badge 
                                 variant="outline" 
-                                className={`shrink-0 text-xs ${STATUS_COLORS[obligation.status]}`}
+                                className={`shrink-0 text-[10px] sm:text-xs px-1.5 sm:px-2 ${STATUS_COLORS[obligation.status]}`}
                               >
                                 {STATUS_LABELS[obligation.status]}
                               </Badge>
                             </div>
                             {obligation.notes && (
-                              <p className="text-xs text-muted-foreground mt-2 italic">
+                              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1.5 sm:mt-2 italic line-clamp-2">
                                 "{obligation.notes}"
                               </p>
                             )}
                           </div>
                         ))}
+                        {country.pendingObligations.length > 5 && (
+                          <p className="text-xs text-muted-foreground text-center py-2">
+                            +{country.pendingObligations.length - 5} more obligations
+                          </p>
+                        )}
                       </div>
                     </ScrollArea>
                   </div>
                 )}
 
                 {country.pendingObligations.length === 0 && (
-                  <div className="flex items-center justify-center h-[180px] text-muted-foreground">
+                  <div className="flex items-center justify-center h-[140px] sm:h-[180px] text-muted-foreground">
                     <div className="text-center">
-                      <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-green-600" />
-                      <p className="text-sm">All obligations completed!</p>
+                      <CheckCircle2 className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 text-green-600" />
+                      <p className="text-xs sm:text-sm">All done!</p>
                     </div>
                   </div>
                 )}
               </CardContent>
 
-              <div className="p-4 pt-0">
-                <Button variant="outline" className="w-full" asChild>
+              <div className="p-3 sm:p-4 pt-0">
+                <Button variant="outline" size="sm" className="w-full text-xs sm:text-sm" asChild>
                   <Link to={`/admin/implementation-tracker?country=${country.countryCode}`}>
-                    Manage {country.countryName}
-                    <ArrowRight className="h-4 w-4 ml-2" />
+                    Manage
+                    <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 ml-1 sm:ml-2" />
                   </Link>
                 </Button>
               </div>

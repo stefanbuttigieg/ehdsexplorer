@@ -86,6 +86,16 @@ export const KeyDatesGantt = ({ dates }: KeyDatesGanttProps) => {
     }
   }
 
+  // Filter year markers for mobile - show fewer labels to prevent overlap
+  const getVisibleYearMarkers = () => {
+    const totalYears = endYear - startYear;
+    // At zoom 1x with many years, show every 5th year; at 2x show every 2nd; at 3x+ show all
+    if (zoomLevel >= 3) return yearMarkers;
+    if (zoomLevel >= 2) return yearMarkers.filter(m => m.year % 2 === 0);
+    // At 1x zoom, show every 5th year to prevent overlap on mobile
+    return yearMarkers.filter(m => m.year % 5 === 0);
+  };
+
   const handleZoomIn = () => {
     setZoomLevel(prev => Math.min(prev + 0.5, 4));
   };
@@ -258,10 +268,10 @@ END:VCALENDAR`;
         <div style={{ width: `${100 * zoomLevel}%`, minWidth: '100%' }}>
           {/* Year markers */}
           <div className="relative h-8 border-b border-border mb-4">
-            {yearMarkers.map(({ year, position }) => (
+            {getVisibleYearMarkers().map(({ year, position }) => (
               <div 
                 key={year}
-                className="absolute text-xs font-medium text-muted-foreground"
+                className="absolute text-[10px] sm:text-xs font-medium text-muted-foreground"
                 style={{ left: `${position}%`, transform: 'translateX(-50%)' }}
               >
                 {year}
@@ -274,7 +284,7 @@ END:VCALENDAR`;
             {sortedDates.map((item, index) => (
               <div
                 key={index}
-                className={`absolute w-4 h-4 rounded-full -top-0.5 transform -translate-x-1/2 transition-all duration-200 cursor-pointer border-2 border-background ${getCategoryColor(item.category)} ${hoveredIndex === index ? 'scale-150 ring-2 ring-primary/50' : ''}`}
+                className={`absolute w-3 h-3 sm:w-4 sm:h-4 rounded-full -top-0 sm:-top-0.5 transform -translate-x-1/2 transition-all duration-200 cursor-pointer border-2 border-background ${getCategoryColor(item.category)} ${hoveredIndex === index ? 'scale-150 ring-2 ring-primary/50' : ''}`}
                 style={{ left: `${getPosition(item.parsed)}%` }}
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}

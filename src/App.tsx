@@ -82,6 +82,7 @@ import AdminCountryLegislationPage from "./pages/AdminCountryLegislationPage";
 import AdminCrossRegulationPage from "./pages/AdminCrossRegulationPage";
 import AdminImplementationTrackerPage from "./pages/AdminImplementationTrackerPage";
 import CrossRegulationMapPage from "./pages/CrossRegulationMapPage";
+import AdminCountryAssignmentsPage from "./pages/AdminCountryAssignmentsPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -183,6 +184,7 @@ const App = () => (
             <Route path="/admin/country-legislation" element={<AdminCountryLegislationPage />} />
             <Route path="/admin/cross-regulation" element={<AdminCrossRegulationPage />} />
             <Route path="/admin/implementation-tracker" element={<AdminImplementationTrackerPage />} />
+            <Route path="/admin/country-assignments" element={<AdminCountryAssignmentsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </MaintenanceGuard>

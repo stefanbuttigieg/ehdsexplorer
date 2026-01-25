@@ -80,6 +80,7 @@ import AdminHealthAuthoritiesPage from "./pages/AdminHealthAuthoritiesPage";
 import AdminLegalPagesPage from "./pages/AdminLegalPagesPage";
 import AdminCountryLegislationPage from "./pages/AdminCountryLegislationPage";
 import AdminCrossRegulationPage from "./pages/AdminCrossRegulationPage";
+import AdminImplementationTrackerPage from "./pages/AdminImplementationTrackerPage";
 import CrossRegulationMapPage from "./pages/CrossRegulationMapPage";
 
 const queryClient = new QueryClient({
@@ -181,6 +182,7 @@ const App = () => (
             <Route path="/admin/legal-pages" element={<AdminLegalPagesPage />} />
             <Route path="/admin/country-legislation" element={<AdminCountryLegislationPage />} />
             <Route path="/admin/cross-regulation" element={<AdminCrossRegulationPage />} />
+            <Route path="/admin/implementation-tracker" element={<AdminImplementationTrackerPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </MaintenanceGuard>

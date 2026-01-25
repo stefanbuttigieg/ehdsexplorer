@@ -275,15 +275,15 @@ const NotesPage = () => {
       </Helmet>
       
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-3xl font-bold font-serif">Notes</h1>
-            <p className="text-muted-foreground mt-1">
-              Your personal notes and annotations
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="flex items-center gap-1">
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold font-serif">Notes</h1>
+              <p className="text-muted-foreground mt-1 text-sm sm:text-base">
+                Your personal notes and annotations
+              </p>
+            </div>
+            <Badge variant="outline" className="flex items-center gap-1 w-fit">
               {isLoggedIn ? (
                 <>
                   <Cloud className="h-3 w-3" />
@@ -296,14 +296,17 @@ const NotesPage = () => {
                 </>
               )}
             </Badge>
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
-                  <Download className="h-4 w-4 mr-2" />
-                  Export
+                  <Download className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Export</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent align="end" className="w-56 z-50 bg-popover">
                 <DropdownMenuLabel>Export All</DropdownMenuLabel>
                 <DropdownMenuItem onClick={exportAllAsMarkdown}>
                   <FileText className="h-4 w-4 mr-2" />
@@ -338,8 +341,8 @@ const NotesPage = () => {
             <Dialog open={showTagManager} onOpenChange={setShowTagManager}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
-                  <Tag className="h-4 w-4 mr-2" />
-                  Manage Tags
+                  <Tag className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Manage Tags</span>
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -390,16 +393,16 @@ const NotesPage = () => {
                 </div>
               </DialogContent>
             </Dialog>
-            <Button onClick={handleCreateNote}>
-              <Plus className="h-4 w-4 mr-2" />
-              New Note
+            <Button onClick={handleCreateNote} size="sm">
+              <Plus className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">New Note</span>
             </Button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
           {/* Notes List */}
-          <div className="lg:col-span-1 space-y-4">
+          <div className="lg:col-span-1 space-y-4 order-2 lg:order-1">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -410,7 +413,7 @@ const NotesPage = () => {
               />
             </div>
 
-            <div className="space-y-2 max-h-[calc(100vh-300px)] overflow-y-auto">
+            <div className="space-y-2 max-h-[50vh] lg:max-h-[calc(100vh-300px)] overflow-y-auto">
               {isLoading ? (
                 Array.from({ length: 3 }).map((_, i) => (
                   <Skeleton key={i} className="h-24 w-full" />
@@ -531,9 +534,9 @@ const NotesPage = () => {
           </div>
 
           {/* Note Editor */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 order-1 lg:order-2">
             {editingNote ? (
-              <Card className="h-[calc(100vh-300px)]">
+              <Card className="min-h-[300px] lg:h-[calc(100vh-300px)]">
                 <CardContent className="p-4 h-full flex flex-col">
                   <div className="flex items-center gap-2 mb-4">
                     <Input
@@ -566,7 +569,7 @@ const NotesPage = () => {
                   <Textarea
                     value={editingNote.content}
                     onChange={(e) => setEditingNote({ ...editingNote, content: e.target.value })}
-                    className="flex-1 resize-none border-none focus-visible:ring-0"
+                    className="flex-1 resize-none border-none focus-visible:ring-0 min-h-[150px] lg:min-h-0"
                     placeholder="Start writing..."
                   />
                   
@@ -609,7 +612,7 @@ const NotesPage = () => {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="h-[calc(100vh-300px)] flex items-center justify-center">
+              <Card className="min-h-[200px] lg:h-[calc(100vh-300px)] flex items-center justify-center">
                 <CardContent className="text-center">
                   <StickyNote className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
                   <h3 className="text-lg font-medium mb-2">Select or create a note</h3>

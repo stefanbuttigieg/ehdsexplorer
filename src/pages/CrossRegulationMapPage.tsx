@@ -236,95 +236,100 @@ const CrossRegulationMapPage = () => {
       </Helmet>
 
       <div className="relative h-[calc(100vh-4rem)] overflow-hidden bg-background">
-        {/* Header */}
-        <div className="absolute top-4 left-4 z-20 flex items-center gap-4">
-          <Link to="/">
-            <Button variant="outline" size="icon">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-xl font-bold font-serif flex items-center gap-2">
-              <Network className="h-5 w-5 text-primary" />
-              Cross-Regulation Map
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {filteredReferences.length} connections across {nodes.filter(n => n.type === "regulation").length} regulations
-            </p>
-          </div>
-        </div>
-
-        {/* Controls */}
-        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Filter className="h-4 w-4 mr-2" />
-                Filters
-              </Button>
-            </SheetTrigger>
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle>Filter Connections</SheetTitle>
-              </SheetHeader>
-              <div className="mt-6 space-y-6">
-                <div>
-                  <h3 className="font-medium mb-3">Regulations</h3>
-                  <div className="space-y-2">
-                    {Object.entries(regulationConfig).map(([key, config]) => (
-                      <div key={key} className="flex items-center gap-2">
-                        <Checkbox
-                          id={`reg-${key}`}
-                          checked={filterRegulations.includes(key)}
-                          onCheckedChange={() => toggleRegulation(key)}
-                        />
-                        <Label htmlFor={`reg-${key}`} className="flex items-center gap-2 cursor-pointer">
-                          <span
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: config.color }}
-                          />
-                          {key}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                <div>
-                  <h3 className="font-medium mb-3">Relationship Types</h3>
-                  <div className="space-y-2">
-                    {relationshipTypes.map((type) => {
-                      const info = getRelationshipInfo(type);
-                      return (
-                        <div key={type} className="flex items-center gap-2">
-                          <Checkbox
-                            id={`rel-${type}`}
-                            checked={filterRelationships.includes(type)}
-                            onCheckedChange={() => toggleRelationship(type)}
-                          />
-                          <Label htmlFor={`rel-${type}`} className="cursor-pointer">
-                            {info.label}
-                          </Label>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+        {/* Header - stacked layout on mobile */}
+        <div className="absolute top-2 sm:top-4 left-2 sm:left-4 right-2 sm:right-4 z-20">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
+            {/* Title section */}
+            <div className="flex items-center gap-2 sm:gap-4">
+              <Link to="/">
+                <Button variant="outline" size="icon" className="h-8 w-8 sm:h-10 sm:w-10 shrink-0">
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              </Link>
+              <div className="min-w-0">
+                <h1 className="text-base sm:text-xl font-bold font-serif flex items-center gap-2">
+                  <Network className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
+                  <span className="truncate">Cross-Regulation Map</span>
+                </h1>
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                  {filteredReferences.length} connections across {nodes.filter(n => n.type === "regulation").length} regulations
+                </p>
               </div>
-            </SheetContent>
-          </Sheet>
+            </div>
 
-          <div className="flex items-center gap-1 bg-background/80 backdrop-blur rounded-lg border p-1">
-            <Button variant="ghost" size="icon" onClick={handleZoomOut} title="Zoom Out">
-              <ZoomOut className="h-4 w-4" />
-            </Button>
-            <span className="text-xs w-12 text-center">{Math.round(zoom * 100)}%</span>
-            <Button variant="ghost" size="icon" onClick={handleZoomIn} title="Zoom In">
-              <ZoomIn className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={handleReset} title="Reset View">
-              <RotateCcw className="h-4 w-4" />
-            </Button>
+            {/* Controls section */}
+            <div className="flex items-center gap-2 self-end sm:self-auto">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-8 px-2 sm:px-3">
+                    <Filter className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Filters</span>
+                  </Button>
+                </SheetTrigger>
+                <SheetContent>
+                  <SheetHeader>
+                    <SheetTitle>Filter Connections</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6 space-y-6">
+                    <div>
+                      <h3 className="font-medium mb-3">Regulations</h3>
+                      <div className="space-y-2">
+                        {Object.entries(regulationConfig).map(([key, config]) => (
+                          <div key={key} className="flex items-center gap-2">
+                            <Checkbox
+                              id={`reg-${key}`}
+                              checked={filterRegulations.includes(key)}
+                              onCheckedChange={() => toggleRegulation(key)}
+                            />
+                            <Label htmlFor={`reg-${key}`} className="flex items-center gap-2 cursor-pointer">
+                              <span
+                                className="w-3 h-3 rounded-full"
+                                style={{ backgroundColor: config.color }}
+                              />
+                              {key}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 className="font-medium mb-3">Relationship Types</h3>
+                      <div className="space-y-2">
+                        {relationshipTypes.map((type) => {
+                          const info = getRelationshipInfo(type);
+                          return (
+                            <div key={type} className="flex items-center gap-2">
+                              <Checkbox
+                                id={`rel-${type}`}
+                                checked={filterRelationships.includes(type)}
+                                onCheckedChange={() => toggleRelationship(type)}
+                              />
+                              <Label htmlFor={`rel-${type}`} className="cursor-pointer">
+                                {info.label}
+                              </Label>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+
+              <div className="flex items-center gap-0.5 sm:gap-1 bg-background/80 backdrop-blur rounded-lg border p-0.5 sm:p-1">
+                <Button variant="ghost" size="icon" onClick={handleZoomOut} title="Zoom Out" className="h-7 w-7 sm:h-8 sm:w-8">
+                  <ZoomOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                </Button>
+                <span className="text-[10px] sm:text-xs w-8 sm:w-12 text-center">{Math.round(zoom * 100)}%</span>
+                <Button variant="ghost" size="icon" onClick={handleZoomIn} title="Zoom In" className="h-7 w-7 sm:h-8 sm:w-8">
+                  <ZoomIn className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={handleReset} title="Reset View" className="h-7 w-7 sm:h-8 sm:w-8">
+                  <RotateCcw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
 

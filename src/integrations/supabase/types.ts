@@ -639,6 +639,50 @@ export type Database = {
         }
         Relationships: []
       }
+      country_obligation_status: {
+        Row: {
+          country_code: string
+          created_at: string
+          evidence_url: string | null
+          id: string
+          last_verified_at: string | null
+          obligation_id: string
+          status: Database["public"]["Enums"]["obligation_status"]
+          status_notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          country_code: string
+          created_at?: string
+          evidence_url?: string | null
+          id?: string
+          last_verified_at?: string | null
+          obligation_id: string
+          status?: Database["public"]["Enums"]["obligation_status"]
+          status_notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          evidence_url?: string | null
+          id?: string
+          last_verified_at?: string | null
+          obligation_id?: string
+          status?: Database["public"]["Enums"]["obligation_status"]
+          status_notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "country_obligation_status_obligation_id_fkey"
+            columns: ["obligation_id"]
+            isOneToOne: false
+            referencedRelation: "ehds_obligations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cross_regulation_references: {
         Row: {
           article_id: number
@@ -764,6 +808,42 @@ export type Database = {
           id?: number
           source_article?: number | null
           term?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ehds_obligations: {
+        Row: {
+          article_references: string[]
+          category: Database["public"]["Enums"]["obligation_category"]
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          article_references?: string[]
+          category: Database["public"]["Enums"]["obligation_category"]
+          created_at?: string
+          description?: string | null
+          id: string
+          is_active?: boolean
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          article_references?: string[]
+          category?: Database["public"]["Enums"]["obligation_category"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          sort_order?: number
           updated_at?: string
         }
         Relationships: []
@@ -956,6 +1036,7 @@ export type Database = {
           dha_pending_value: number
           dha_planned_value: number
           dha_weight: number
+          general_weight: number
           hdab_active_value: number
           hdab_inactive_value: number
           hdab_pending_value: number
@@ -964,6 +1045,12 @@ export type Database = {
           id: string
           legislation_adopted_statuses: string[]
           legislation_weight: number
+          primary_use_weight: number
+          secondary_use_weight: number
+          status_completed_value: number
+          status_in_progress_value: number
+          status_not_started_value: number
+          status_partial_value: number
           updated_at: string
           updated_by: string | null
         }
@@ -974,6 +1061,7 @@ export type Database = {
           dha_pending_value?: number
           dha_planned_value?: number
           dha_weight?: number
+          general_weight?: number
           hdab_active_value?: number
           hdab_inactive_value?: number
           hdab_pending_value?: number
@@ -982,6 +1070,12 @@ export type Database = {
           id?: string
           legislation_adopted_statuses?: string[]
           legislation_weight?: number
+          primary_use_weight?: number
+          secondary_use_weight?: number
+          status_completed_value?: number
+          status_in_progress_value?: number
+          status_not_started_value?: number
+          status_partial_value?: number
           updated_at?: string
           updated_by?: string | null
         }
@@ -992,6 +1086,7 @@ export type Database = {
           dha_pending_value?: number
           dha_planned_value?: number
           dha_weight?: number
+          general_weight?: number
           hdab_active_value?: number
           hdab_inactive_value?: number
           hdab_pending_value?: number
@@ -1000,6 +1095,12 @@ export type Database = {
           id?: string
           legislation_adopted_statuses?: string[]
           legislation_weight?: number
+          primary_use_weight?: number
+          secondary_use_weight?: number
+          status_completed_value?: number
+          status_in_progress_value?: number
+          status_not_started_value?: number
+          status_partial_value?: number
           updated_at?: string
           updated_by?: string | null
         }
@@ -2505,6 +2606,8 @@ export type Database = {
       app_role: "admin" | "editor" | "super_admin"
       authority_status: "active" | "pending" | "planned" | "inactive"
       authority_type: "digital_health_authority" | "health_data_access_body"
+      obligation_category: "primary_use" | "secondary_use" | "general"
+      obligation_status: "not_started" | "in_progress" | "partial" | "completed"
       team_role: "owner" | "admin" | "member" | "viewer"
     }
     CompositeTypes: {
@@ -2636,6 +2739,8 @@ export const Constants = {
       app_role: ["admin", "editor", "super_admin"],
       authority_status: ["active", "pending", "planned", "inactive"],
       authority_type: ["digital_health_authority", "health_data_access_body"],
+      obligation_category: ["primary_use", "secondary_use", "general"],
+      obligation_status: ["not_started", "in_progress", "partial", "completed"],
       team_role: ["owner", "admin", "member", "viewer"],
     },
   },

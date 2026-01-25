@@ -24,6 +24,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optimized pending obligations list with line clamping and responsive heights
 - Touch-friendly card navigation with visual indicators
 
+#### Cross-Regulation Map Mobile Improvements
+- Stacked header layout preventing title/controls overlap on mobile
+- Compact filter button (icon-only on mobile, text on desktop)
+- Smaller zoom controls with touch-friendly sizing
+- Responsive text and icon sizing throughout
+
+#### Gantt Chart Mobile Improvements
+- Adaptive year label display (every 5th year at 1x zoom, every 2nd at 2x, all at 3x+)
+- Smaller year markers and timeline dots on mobile
+- Prevents label overlap on narrow screens
+
 ---
 
 ## [1.8.4] - 2026-01-22

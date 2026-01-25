@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 
 export interface ImplementationTrackerConfig {
   id: string;
+  // Legacy fields (kept for backwards compatibility)
   dha_weight: number;
   hdab_weight: number;
   legislation_weight: number;
@@ -16,6 +17,14 @@ export interface ImplementationTrackerConfig {
   hdab_planned_value: number;
   hdab_inactive_value: number;
   legislation_adopted_statuses: string[];
+  // New obligation-based fields
+  primary_use_weight: number;
+  secondary_use_weight: number;
+  general_weight: number;
+  status_not_started_value: number;
+  status_in_progress_value: number;
+  status_partial_value: number;
+  status_completed_value: number;
   updated_by: string | null;
   created_at: string;
   updated_at: string;
@@ -25,6 +34,7 @@ export type ImplementationTrackerConfigUpdate = Partial<Omit<ImplementationTrack
 
 const DEFAULT_CONFIG: ImplementationTrackerConfig = {
   id: 'default',
+  // Legacy
   dha_weight: 33,
   hdab_weight: 33,
   legislation_weight: 34,
@@ -37,6 +47,14 @@ const DEFAULT_CONFIG: ImplementationTrackerConfig = {
   hdab_planned_value: 25,
   hdab_inactive_value: 0,
   legislation_adopted_statuses: ['adopted', 'in_force'],
+  // New obligation-based
+  primary_use_weight: 50,
+  secondary_use_weight: 35,
+  general_weight: 15,
+  status_not_started_value: 0,
+  status_in_progress_value: 33,
+  status_partial_value: 66,
+  status_completed_value: 100,
   updated_by: null,
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
@@ -59,7 +77,8 @@ export function useImplementationTrackerConfig() {
       // Return default config if none exists
       if (!data) return DEFAULT_CONFIG;
       
-      return data as ImplementationTrackerConfig;
+      // Merge with defaults for any missing new fields
+      return { ...DEFAULT_CONFIG, ...data } as ImplementationTrackerConfig;
     },
   });
 

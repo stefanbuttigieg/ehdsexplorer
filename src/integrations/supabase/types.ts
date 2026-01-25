@@ -2429,6 +2429,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_country_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          country_code: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          country_code: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          country_code?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_invitations: {
         Row: {
           created_at: string
@@ -2596,6 +2620,10 @@ export type Database = {
         Returns: boolean
       }
       is_admin_or_editor: { Args: { _user_id: string }; Returns: boolean }
+      is_assigned_to_country: {
+        Args: { _country_code: string; _user_id: string }
+        Returns: boolean
+      }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       is_team_member: {
         Args: { _team_id: string; _user_id: string }

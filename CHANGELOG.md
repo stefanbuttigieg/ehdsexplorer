@@ -13,6 +13,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.8.5] - 2026-01-25
+
+### Added
+
+#### Country Manager Dashboard Mobile Improvements
+- Swipe gestures to navigate between country cards on mobile devices
+- Responsive layout with 2x2 stats grid on mobile, 4-column on desktop
+- Condensed status badges with icons for better mobile readability
+- Optimized pending obligations list with line clamping and responsive heights
+- Touch-friendly card navigation with visual indicators
+
+---
+
 ## [1.8.4] - 2026-01-22
 
 ### Added

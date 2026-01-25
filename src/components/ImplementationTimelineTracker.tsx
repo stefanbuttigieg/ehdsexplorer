@@ -210,7 +210,7 @@ export const ImplementationTimelineTracker = ({
   }, [countryProgress, selectedCountry]);
 
   // Export functions
-  const exportChecklist = () => {
+  const exportChecklistJSON = () => {
     const checklist = countryProgress.map(country => ({
       country: country.countryName,
       countryCode: country.countryCode,
@@ -224,6 +224,7 @@ export const ImplementationTimelineTracker = ({
         id: ob.id,
         name: ob.name,
         category: ob.category,
+        articleReferences: ob.article_references,
         status: country.obligationStatuses[ob.id] || 'not_started'
       }))
     }));
@@ -237,10 +238,59 @@ export const ImplementationTimelineTracker = ({
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    toast.success("Implementation checklist exported!");
+    toast.success("Checklist exported as JSON!");
   };
 
-  const exportToCSV = () => {
+  const exportChecklistCSV = () => {
+    if (!obligations) return;
+    
+    // Create headers: Country, Code, Overall, then each obligation name
+    const obligationNames = obligations.map(ob => ob.name);
+    const headers = ["Country", "Country Code", "Overall Progress (%)", "Primary Use (%)", "Secondary Use (%)", "General (%)", ...obligationNames];
+    
+    const rows = countryProgress.map(country => {
+      const baseData = [
+        country.countryName,
+        country.countryCode,
+        country.overallProgress,
+        Math.round(country.primaryUseProgress),
+        Math.round(country.secondaryUseProgress),
+        Math.round(country.generalProgress),
+      ];
+      
+      const obligationStatuses = obligations.map(ob => 
+        STATUS_LABELS[country.obligationStatuses[ob.id] || 'not_started']
+      );
+      
+      return [...baseData, ...obligationStatuses];
+    });
+    
+    const escapeCSV = (value: string | number) => {
+      const str = String(value);
+      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+
+    const csvContent = [
+      headers.map(escapeCSV).join(','),
+      ...rows.map(row => row.map(escapeCSV).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'ehds-implementation-checklist.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success("Checklist exported as CSV!");
+  };
+
+  const exportSummaryCSV = () => {
     const headers = ["Country", "Country Code", "Overall Progress", "Primary Use", "Secondary Use", "General", "Completed", "Total"];
     const rows = countryProgress.map(c => [
       c.countryName,
@@ -262,12 +312,12 @@ export const ImplementationTimelineTracker = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'ehds-implementation-progress.csv';
+    link.download = 'ehds-implementation-summary.csv';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    toast.success("Progress exported to CSV!");
+    toast.success("Summary exported to CSV!");
   };
 
   if (isLoading) {
@@ -396,13 +446,17 @@ export const ImplementationTimelineTracker = ({
                 <span className="hidden sm:inline">Export</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={exportToCSV} className="gap-2 cursor-pointer">
+            <DropdownMenuContent align="end" className="w-56 z-50 bg-popover">
+              <DropdownMenuItem onClick={exportSummaryCSV} className="gap-2 cursor-pointer">
                 <FileSpreadsheet className="h-4 w-4" />
-                Progress Summary (.csv)
+                Summary (.csv)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={exportChecklistCSV} className="gap-2 cursor-pointer">
+                <FileSpreadsheet className="h-4 w-4" />
+                Full Checklist (.csv)
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={exportChecklist} className="gap-2 cursor-pointer">
+              <DropdownMenuItem onClick={exportChecklistJSON} className="gap-2 cursor-pointer">
                 <Calendar className="h-4 w-4" />
                 Full Checklist (.json)
               </DropdownMenuItem>
@@ -529,10 +583,24 @@ export const ImplementationTimelineTracker = ({
             <CardHeader className="p-3 md:p-6">
               <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                 <span className="text-base md:text-lg">Implementation Checklist</span>
-                <Button variant="outline" size="sm" onClick={exportChecklist} className="gap-2">
-                  <Download className="h-4 w-4" />
-                  <span className="hidden sm:inline">Export</span>
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Download className="h-4 w-4" />
+                      <span className="hidden sm:inline">Export</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="z-50 bg-popover">
+                    <DropdownMenuItem onClick={exportChecklistCSV} className="gap-2 cursor-pointer">
+                      <FileSpreadsheet className="h-4 w-4" />
+                      CSV (.csv)
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={exportChecklistJSON} className="gap-2 cursor-pointer">
+                      <Calendar className="h-4 w-4" />
+                      JSON (.json)
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-3 md:p-6 pt-0">

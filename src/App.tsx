@@ -83,6 +83,7 @@ import AdminCrossRegulationPage from "./pages/AdminCrossRegulationPage";
 import AdminImplementationTrackerPage from "./pages/AdminImplementationTrackerPage";
 import CrossRegulationMapPage from "./pages/CrossRegulationMapPage";
 import AdminCountryAssignmentsPage from "./pages/AdminCountryAssignmentsPage";
+import CountryManagerDashboard from "./pages/CountryManagerDashboard";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -153,6 +154,7 @@ const App = () => (
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin/set-password" element={<AdminSetPasswordPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/my-countries" element={<CountryManagerDashboard />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/articles" element={<AdminArticlesPage />} />
             <Route path="/admin/recitals" element={<AdminRecitalsPage />} />

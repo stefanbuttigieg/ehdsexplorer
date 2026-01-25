@@ -12,10 +12,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { User, LogOut, Trophy, Settings, LogIn } from "lucide-react";
+import { User, LogOut, Trophy, Settings, LogIn, MapPin } from "lucide-react";
+import { useCountryAssignments } from "@/hooks/useCountryAssignments";
 
 export function UserMenu() {
   const { user, loading, isEditor } = useAuth();
+  const { myAssignedCountries } = useCountryAssignments();
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -97,6 +99,14 @@ export function UserMenu() {
             Achievements
           </Link>
         </DropdownMenuItem>
+        {myAssignedCountries.length > 0 && (
+          <DropdownMenuItem asChild>
+            <Link to="/my-countries" className="cursor-pointer">
+              <MapPin className="mr-2 h-4 w-4" />
+              My Countries
+            </Link>
+          </DropdownMenuItem>
+        )}
         {isEditor && (
           <DropdownMenuItem asChild>
             <Link to="/admin" className="cursor-pointer">

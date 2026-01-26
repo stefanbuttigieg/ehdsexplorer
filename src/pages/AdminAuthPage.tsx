@@ -50,11 +50,9 @@ const AdminAuthPage = () => {
       if (isEditor) {
         navigate('/admin');
       } else {
-        // Regular user - redirect to home with a message
-        toast({
-          title: 'Welcome!',
-          description: 'You have read-only access. An admin can grant you editor permissions.',
-        });
+        // Regular user - redirect to home silently
+        // Don't show read-only message as it can be confusing for users with roles
+        // that just haven't loaded yet, or for users who don't need admin access
         navigate('/');
       }
     }

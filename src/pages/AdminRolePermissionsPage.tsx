@@ -144,12 +144,12 @@ export default function AdminRolePermissionsPage() {
       actions={
         <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
           <DialogTrigger asChild>
-            <Button size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Add Permission</span>
+            <Button size="sm" className="h-8 px-2 sm:px-3">
+              <Plus className="h-4 w-4 sm:mr-1.5" />
+              <span className="hidden sm:inline text-xs">Add</span>
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-[95vw] sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>Add New Permission</DialogTitle>
               <DialogDescription>

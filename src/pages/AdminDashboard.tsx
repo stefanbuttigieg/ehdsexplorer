@@ -15,7 +15,7 @@ import { AdminTour, useAdminTour } from '@/components/AdminTour';
 import AnalyticsWidget from '@/components/AnalyticsWidget';
 
 const AdminDashboard = () => {
-  const { user, loading, isEditor, isAdmin, signOut } = useAuth();
+  const { user, loading, isEditor, isAdmin, isSuperAdmin, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { data: settings } = useSiteSettings();
@@ -320,6 +320,20 @@ const AdminDashboard = () => {
                   </CardHeader>
                 </Card>
               </Link>
+              {isSuperAdmin && (
+                <Link to="/admin/role-permissions">
+                  <Card className="hover:border-primary transition-colors h-full border-dashed border-primary/50">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <Gavel className="h-8 w-8 text-primary" />
+                        <Badge variant="destructive">Super Admin</Badge>
+                      </div>
+                      <CardTitle className="mt-4">Role Permissions</CardTitle>
+                      <CardDescription>Configure granular permissions for each role</CardDescription>
+                    </CardHeader>
+                  </Card>
+                </Link>
+              )}
             </>
           )}
         </div>

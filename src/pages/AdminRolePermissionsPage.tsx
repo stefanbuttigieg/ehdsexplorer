@@ -256,8 +256,8 @@ export default function AdminRolePermissionsPage() {
         </Dialog>
       }
     >
-      {/* Role Overview Cards */}
-      <div className="grid gap-4 md:grid-cols-3 mb-6">
+      {/* Role Overview Cards - Horizontal scroll on mobile */}
+      <div className="flex gap-3 overflow-x-auto pb-2 mb-6 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:overflow-visible">
         {ROLES.map((role) => {
           const rolePerms = permissionsByRole[role.id] || [];
           const totalPerms = rolePerms.length;
@@ -268,38 +268,38 @@ export default function AdminRolePermissionsPage() {
           return (
             <Card 
               key={role.id}
-              className={`cursor-pointer transition-all ${
+              className={`cursor-pointer transition-all flex-shrink-0 w-[200px] sm:w-auto ${
                 selectedRole === role.id 
                   ? 'ring-2 ring-primary' 
                   : 'hover:border-primary/50'
               }`}
               onClick={() => setSelectedRole(role.id)}
             >
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Shield className="h-4 w-4" />
-                    {role.label}
+              <CardHeader className="p-3 sm:p-4 pb-2">
+                <div className="flex items-center justify-between gap-2">
+                  <CardTitle className="text-sm sm:text-base flex items-center gap-1.5">
+                    <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span className="truncate">{role.label}</span>
                   </CardTitle>
                   {role.id === 'super_admin' && (
-                    <Badge variant="secondary" className="text-xs">
+                    <span className="text-[10px] sm:text-xs bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded-md whitespace-nowrap">
                       Unrestricted
-                    </Badge>
+                    </span>
                   )}
                 </div>
-                <CardDescription className="text-xs">
+                <CardDescription className="text-[10px] sm:text-xs line-clamp-2">
                   {role.description}
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="flex gap-4 text-sm">
+              <CardContent className="p-3 sm:p-4 pt-0">
+                <div className="flex gap-3 text-xs sm:text-sm">
                   <div>
                     <span className="font-medium">{totalPerms}</span>
-                    <span className="text-muted-foreground ml-1">content types</span>
+                    <span className="text-muted-foreground ml-1">types</span>
                   </div>
                   <div>
                     <span className="font-medium">{fullAccessCount}</span>
-                    <span className="text-muted-foreground ml-1">full access</span>
+                    <span className="text-muted-foreground ml-1">full</span>
                   </div>
                 </div>
               </CardContent>
@@ -310,75 +310,75 @@ export default function AdminRolePermissionsPage() {
 
       {/* Permissions Table */}
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
+        <CardHeader className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
                 {ROLES.find(r => r.id === selectedRole)?.label} Permissions
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs sm:text-sm">
                 {selectedRole === 'super_admin' 
-                  ? 'Super Admin has unrestricted access to all content types'
+                  ? 'Super Admin has unrestricted access'
                   : 'Toggle permissions for each content type'
                 }
               </CardDescription>
             </div>
             {selectedRole === 'super_admin' && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Info className="h-4 w-4" />
-                <span className="hidden sm:inline">Super Admin permissions cannot be modified</span>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Info className="h-3.5 w-3.5 flex-shrink-0" />
+                <span>Cannot be modified</span>
               </div>
             )}
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0 sm:p-6 sm:pt-0">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="min-w-[150px]">Content Type</TableHead>
-                  <TableHead className="text-center w-24">Create</TableHead>
-                  <TableHead className="text-center w-24">Edit</TableHead>
-                  <TableHead className="text-center w-24">Delete</TableHead>
-                  <TableHead className="text-center w-24">Publish</TableHead>
+                  <TableHead className="min-w-[120px] sm:min-w-[150px] text-xs sm:text-sm pl-4 sm:pl-4">Content Type</TableHead>
+                  <TableHead className="text-center w-16 sm:w-24 text-xs sm:text-sm">Create</TableHead>
+                  <TableHead className="text-center w-16 sm:w-24 text-xs sm:text-sm">Edit</TableHead>
+                  <TableHead className="text-center w-16 sm:w-24 text-xs sm:text-sm">Delete</TableHead>
+                  <TableHead className="text-center w-16 sm:w-24 text-xs sm:text-sm pr-4 sm:pr-4">Publish</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {rolePermissions.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8 text-sm">
                       No permissions configured for this role
                     </TableCell>
                   </TableRow>
                 ) : (
                   rolePermissions.map((perm) => (
                     <TableRow key={perm.id}>
-                      <TableCell className="font-medium">
+                      <TableCell className="font-medium text-xs sm:text-sm pl-4 sm:pl-4">
                         {getContentTypeLabel(perm.content_type)}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="p-2 sm:p-4">
                         <PermissionCell
                           enabled={perm.can_create}
                           disabled={selectedRole === 'super_admin'}
                           onToggle={() => handleTogglePermission(perm.id, 'can_create', perm.can_create)}
                         />
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="p-2 sm:p-4">
                         <PermissionCell
                           enabled={perm.can_edit}
                           disabled={selectedRole === 'super_admin'}
                           onToggle={() => handleTogglePermission(perm.id, 'can_edit', perm.can_edit)}
                         />
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="p-2 sm:p-4">
                         <PermissionCell
                           enabled={perm.can_delete}
                           disabled={selectedRole === 'super_admin'}
                           onToggle={() => handleTogglePermission(perm.id, 'can_delete', perm.can_delete)}
                         />
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="p-2 sm:p-4 pr-4 sm:pr-4">
                         <PermissionCell
                           enabled={perm.can_publish}
                           disabled={selectedRole === 'super_admin'}
@@ -394,28 +394,28 @@ export default function AdminRolePermissionsPage() {
         </CardContent>
       </Card>
 
-      {/* Permission Legend */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="text-sm">Permission Types</CardTitle>
+      {/* Permission Legend - Hidden on mobile to save space */}
+      <Card className="mt-4 sm:mt-6 hidden sm:block">
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-xs sm:text-sm">Permission Types</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-sm">
-            <div className="flex items-start gap-2">
-              <Badge variant="outline" className="mt-0.5">Create</Badge>
-              <span className="text-muted-foreground">Add new items</span>
+        <CardContent className="p-4 sm:p-6 pt-0">
+          <div className="grid gap-2 sm:gap-3 grid-cols-2 lg:grid-cols-4 text-xs sm:text-sm">
+            <div className="flex items-center gap-1.5">
+              <span className="border rounded px-1.5 py-0.5 text-[10px] sm:text-xs">Create</span>
+              <span className="text-muted-foreground">Add new</span>
             </div>
-            <div className="flex items-start gap-2">
-              <Badge variant="outline" className="mt-0.5">Edit</Badge>
-              <span className="text-muted-foreground">Modify existing items</span>
+            <div className="flex items-center gap-1.5">
+              <span className="border rounded px-1.5 py-0.5 text-[10px] sm:text-xs">Edit</span>
+              <span className="text-muted-foreground">Modify</span>
             </div>
-            <div className="flex items-start gap-2">
-              <Badge variant="outline" className="mt-0.5">Delete</Badge>
-              <span className="text-muted-foreground">Remove items</span>
+            <div className="flex items-center gap-1.5">
+              <span className="border rounded px-1.5 py-0.5 text-[10px] sm:text-xs">Delete</span>
+              <span className="text-muted-foreground">Remove</span>
             </div>
-            <div className="flex items-start gap-2">
-              <Badge variant="outline" className="mt-0.5">Publish</Badge>
-              <span className="text-muted-foreground">Make items public</span>
+            <div className="flex items-center gap-1.5">
+              <span className="border rounded px-1.5 py-0.5 text-[10px] sm:text-xs">Publish</span>
+              <span className="text-muted-foreground">Make public</span>
             </div>
           </div>
         </CardContent>

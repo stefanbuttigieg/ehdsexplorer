@@ -881,6 +881,33 @@ export type Database = {
         }
         Relationships: []
       }
+      feature_flags: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_enabled: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id: string
+          is_enabled?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_enabled?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       footnotes: {
         Row: {
           article_id: number | null

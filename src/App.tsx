@@ -84,6 +84,7 @@ import AdminImplementationTrackerPage from "./pages/AdminImplementationTrackerPa
 import CrossRegulationMapPage from "./pages/CrossRegulationMapPage";
 import AdminCountryAssignmentsPage from "./pages/AdminCountryAssignmentsPage";
 import CountryManagerDashboard from "./pages/CountryManagerDashboard";
+import AdminRolePermissionsPage from "./pages/AdminRolePermissionsPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -187,6 +188,7 @@ const App = () => (
             <Route path="/admin/cross-regulation" element={<AdminCrossRegulationPage />} />
             <Route path="/admin/implementation-tracker" element={<AdminImplementationTrackerPage />} />
             <Route path="/admin/country-assignments" element={<AdminCountryAssignmentsPage />} />
+            <Route path="/admin/role-permissions" element={<AdminRolePermissionsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </MaintenanceGuard>

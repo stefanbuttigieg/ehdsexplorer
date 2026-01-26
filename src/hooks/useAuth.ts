@@ -9,6 +9,7 @@ export function useAuth() {
   const [rolesLoading, setRolesLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   const checkRoles = useCallback(async (userId: string) => {
     setRolesLoading(true);
@@ -22,17 +23,20 @@ export function useAuth() {
         console.error('Error checking roles:', error);
         setIsAdmin(false);
         setIsEditor(false);
+        setIsSuperAdmin(false);
         return;
       }
 
       const roles = data?.map(r => r.role) || [];
       console.log('User roles from DB:', roles);
+      setIsSuperAdmin(roles.includes('super_admin'));
       setIsAdmin(roles.includes('admin') || roles.includes('super_admin'));
       setIsEditor(roles.includes('editor') || roles.includes('admin') || roles.includes('super_admin'));
     } catch (err) {
       console.error('Error checking roles:', err);
       setIsAdmin(false);
       setIsEditor(false);
+      setIsSuperAdmin(false);
     } finally {
       setRolesLoading(false);
     }
@@ -53,6 +57,7 @@ export function useAuth() {
         } else {
           setIsAdmin(false);
           setIsEditor(false);
+          setIsSuperAdmin(false);
           setRolesLoading(false);
           setLoading(false);
         }
@@ -101,6 +106,7 @@ export function useAuth() {
     loading: loading || rolesLoading,
     isAdmin,
     isEditor,
+    isSuperAdmin,
     signIn,
     signUp,
     signOut,

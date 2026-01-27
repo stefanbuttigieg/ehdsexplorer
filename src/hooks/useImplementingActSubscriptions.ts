@@ -64,15 +64,15 @@ export const useImplementingActSubscriptions = () => {
     },
   });
 
-  // Unsubscribe using token
+  // Unsubscribe using token via edge function (secure)
   const unsubscribe = useMutation({
     mutationFn: async (unsubscribeToken: string) => {
-      const { error } = await supabase
-        .from("implementing_act_subscriptions")
-        .delete()
-        .eq("unsubscribe_token", unsubscribeToken);
+      const { data, error } = await supabase.functions.invoke("handle-unsubscribe", {
+        body: { token: unsubscribeToken, action: "unsubscribe" },
+      });
 
       if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "Failed to unsubscribe");
     },
     onSuccess: () => {
       toast.success("Successfully unsubscribed from alerts");
@@ -89,26 +89,14 @@ export const useImplementingActSubscriptions = () => {
   };
 };
 
-// Hook for checking if email is subscribed (for UI state)
-export const useCheckSubscription = (email: string, implementingActId?: string) => {
-  return useQuery({
-    queryKey: ["subscription-check", email, implementingActId],
-    queryFn: async () => {
-      if (!email) return null;
-
-      let query = supabase
-        .from("implementing_act_subscriptions")
-        .select("id, subscribe_all")
-        .eq("email", email);
-
-      if (implementingActId) {
-        query = query.or(`implementing_act_id.eq.${implementingActId},subscribe_all.eq.true`);
-      }
-
-      const { data, error } = await query.maybeSingle();
-      if (error) return null;
-      return data;
-    },
-    enabled: !!email,
-  });
+// Note: Subscription check removed for security - email lookup is only available to admins
+// The subscribe button should track state locally after subscription
+export const useCheckSubscription = (_email: string, _implementingActId?: string) => {
+  // Return null - subscription status cannot be checked by unauthenticated users
+  // This is intentional for security - prevents email enumeration attacks
+  return {
+    data: null,
+    isLoading: false,
+    error: null,
+  };
 };

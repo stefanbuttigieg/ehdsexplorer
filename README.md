@@ -178,6 +178,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
   - Save, load, and compare historical results
 - **User management** with email invitation system
 - **Resend confirmation emails** for users who haven't verified their email
+- **EHDS Obligations management** - Full CRUD for obligation definitions with category filtering
 - **Maintenance mode** with custom messaging
 - **Overview page** content management
 - **Plain language translations** with AI generation and batch processing

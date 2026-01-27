@@ -13,6 +13,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.8.6] - 2026-01-27
+
+### Added
+
+#### EHDS Obligations Admin Management
+- New admin page at `/admin/obligations` for managing EHDS obligation definitions
+- Full CRUD interface for creating, editing, and deleting obligations
+- Category filtering (Primary Use, Secondary Use, General)
+- Configurable fields: ID, name, description, article references, sort order, and active status
+- Toggle to activate/deactivate individual obligations
+- Integration with Implementation Timeline Tracker for per-country progress tracking
+
+---
+
 ## [1.8.5] - 2026-01-25
 
 ### Added

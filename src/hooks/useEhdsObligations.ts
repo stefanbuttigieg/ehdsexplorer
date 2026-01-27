@@ -114,6 +114,45 @@ export const useUpdateObligation = () => {
   });
 };
 
+export const useCreateObligation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (params: Omit<EhdsObligation, 'created_at' | 'updated_at'>) => {
+      const { data, error } = await supabase
+        .from('ehds_obligations')
+        .insert(params)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ehds-obligations'] });
+    },
+  });
+};
+
+export const useDeleteObligation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('ehds_obligations')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ehds-obligations'] });
+      queryClient.invalidateQueries({ queryKey: ['country-obligation-statuses'] });
+    },
+  });
+};
+
 export const CATEGORY_LABELS: Record<ObligationCategory, string> = {
   primary_use: 'Primary Use',
   secondary_use: 'Secondary Use',

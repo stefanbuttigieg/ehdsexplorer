@@ -224,7 +224,83 @@ serve(async (req) => {
       });
     }
 
-    const { messages, role = 'general', explainLevel = 'professional' } = await req.json();
+    const body = await req.json();
+    const { messages, role = 'general', explainLevel = 'professional' } = body;
+    
+    // Input validation
+    const VALID_ROLES = ['general', 'healthcare', 'legal', 'researcher', 'developer', 'policy'];
+    const VALID_LEVELS = ['expert', 'professional', 'student', 'beginner'];
+    const MAX_MESSAGES = 50;
+    const MAX_MESSAGE_LENGTH = 10000;
+    
+    // Validate messages array
+    if (!Array.isArray(messages)) {
+      return new Response(JSON.stringify({ 
+        error: "Invalid request: messages must be an array" 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    
+    if (messages.length === 0 || messages.length > MAX_MESSAGES) {
+      return new Response(JSON.stringify({ 
+        error: `Invalid request: messages array must have 1-${MAX_MESSAGES} items` 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    
+    // Validate each message format and length
+    for (const msg of messages) {
+      if (!msg || typeof msg !== 'object') {
+        return new Response(JSON.stringify({ 
+          error: "Invalid request: each message must be an object" 
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      
+      if (!msg.role || !['user', 'assistant', 'system'].includes(msg.role)) {
+        return new Response(JSON.stringify({ 
+          error: "Invalid request: message role must be 'user', 'assistant', or 'system'" 
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      
+      if (typeof msg.content !== 'string' || msg.content.length > MAX_MESSAGE_LENGTH) {
+        return new Response(JSON.stringify({ 
+          error: `Invalid request: message content must be a string with max ${MAX_MESSAGE_LENGTH} characters` 
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+    
+    // Validate role parameter
+    if (!VALID_ROLES.includes(role)) {
+      return new Response(JSON.stringify({ 
+        error: `Invalid role: must be one of ${VALID_ROLES.join(', ')}` 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    
+    // Validate explainLevel parameter
+    if (!VALID_LEVELS.includes(explainLevel)) {
+      return new Response(JSON.stringify({ 
+        error: `Invalid explainLevel: must be one of ${VALID_LEVELS.join(', ')}` 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {

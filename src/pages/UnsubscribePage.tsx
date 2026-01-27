@@ -19,42 +19,23 @@ const UnsubscribePage = () => {
       }
 
       try {
-        // First get the subscription details before deleting
-        const { data: subscription, error: fetchError } = await supabase
-          .from("implementing_act_subscriptions")
-          .select("email, subscribe_all, implementing_acts(title)")
-          .eq("unsubscribe_token", token)
-          .single();
-
-        if (fetchError || !subscription) {
-          setStatus("error");
-          return;
-        }
-
-        // Delete the subscription
-        const { error: deleteError } = await supabase
-          .from("implementing_act_subscriptions")
-          .delete()
-          .eq("unsubscribe_token", token);
-
-        if (deleteError) {
-          setStatus("error");
-          return;
-        }
-
-        // Send confirmation email
-        const unsubscribedFrom = subscription.subscribe_all 
-          ? "all" 
-          : (subscription.implementing_acts as any)?.[0]?.title || "an implementing act";
-
-        await supabase.functions.invoke("send-unsubscribe-confirmation", {
-          body: { 
-            email: subscription.email,
-            unsubscribed_from: unsubscribedFrom
-          },
+        // Use the secure edge function instead of direct database access
+        const { data, error } = await supabase.functions.invoke("handle-unsubscribe", {
+          body: { token, action: "unsubscribe" },
         });
 
-        setStatus("success");
+        if (error) {
+          console.error("Unsubscribe error:", error);
+          setStatus("error");
+          return;
+        }
+
+        if (data?.success) {
+          setStatus("success");
+        } else {
+          console.error("Unsubscribe failed:", data?.error);
+          setStatus("error");
+        }
       } catch (err) {
         console.error("Unsubscribe error:", err);
         setStatus("error");

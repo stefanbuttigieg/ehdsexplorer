@@ -71,9 +71,19 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { email, role, inviterEmail }: InviteRequest = await req.json();
 
+    // Validate required fields
     if (!email || !role) {
       return new Response(
         JSON.stringify({ error: "Email and role are required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate role against allowed values
+    const VALID_ROLES: Array<"admin" | "editor"> = ["admin", "editor"];
+    if (!VALID_ROLES.includes(role)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid role: must be 'admin' or 'editor'" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -86,12 +96,20 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Validate inviterEmail format if provided
-    if (inviterEmail && !isValidEmail(inviterEmail)) {
-      return new Response(
-        JSON.stringify({ error: "Invalid inviter email format" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    // Validate inviterEmail format and length if provided
+    if (inviterEmail) {
+      if (!isValidEmail(inviterEmail)) {
+        return new Response(
+          JSON.stringify({ error: "Invalid inviter email format" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (inviterEmail.length > 254) {
+        return new Response(
+          JSON.stringify({ error: "Inviter email too long" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
     }
 
     const siteUrl = Deno.env.get("SITE_URL") || "https://ehdsexplorer.eu";

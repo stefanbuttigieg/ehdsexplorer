@@ -28,7 +28,7 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.send-verification-email]
-verify_jwt = true
+verify_jwt = false
 
 [functions.send-invite]
 verify_jwt = true
@@ -55,4 +55,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.elevenlabs-stt]
+verify_jwt = false
+
+[functions.handle-unsubscribe]
 verify_jwt = false

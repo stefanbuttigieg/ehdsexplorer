@@ -7,9 +7,11 @@ import { usePageContent } from "@/hooks/usePageContent";
 import { KeyDatesGantt } from "@/components/KeyDatesGantt";
 import { ImplementationTimelineTracker } from "@/components/ImplementationTimelineTracker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useIsFeatureEnabled } from "@/hooks/useFeatureFlags";
 
 const OverviewPage = () => {
   const { data: page, isLoading } = usePageContent('overview');
+  const { isEnabled: isImplementationTrackerEnabled } = useIsFeatureEnabled('implementation_tracker');
 
   if (isLoading) {
     return (
@@ -66,33 +68,42 @@ const OverviewPage = () => {
             <CardTitle className="text-lg md:text-xl">{content?.key_dates?.title || 'Key Dates & Implementation Timeline'}</CardTitle>
           </CardHeader>
           <CardContent className="p-4 md:p-6 pt-0">
-            <Tabs defaultValue="regulation" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-3 md:mb-4 h-auto">
-                <TabsTrigger value="regulation" className="text-xs sm:text-sm py-2 px-2">
-                  <span className="hidden sm:inline">Regulation Milestones</span>
-                  <span className="sm:hidden">Milestones</span>
-                </TabsTrigger>
-                <TabsTrigger value="implementation" className="text-xs sm:text-sm py-2 px-2">
-                  <span className="hidden sm:inline">Member State Implementation</span>
-                  <span className="sm:hidden">Implementation</span>
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="regulation">
-                {content?.key_dates?.dates && content.key_dates.dates.length > 0 ? (
-                  <KeyDatesGantt dates={content.key_dates.dates} />
-                ) : (
-                  <p className="text-muted-foreground">No key dates available.</p>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="implementation">
-                <ImplementationTimelineTracker 
-                  showKeyDates={false}
-                  keyDates={content?.key_dates?.dates || []}
-                />
-              </TabsContent>
-            </Tabs>
+            {isImplementationTrackerEnabled ? (
+              <Tabs defaultValue="regulation" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-3 md:mb-4 h-auto">
+                  <TabsTrigger value="regulation" className="text-xs sm:text-sm py-2 px-2">
+                    <span className="hidden sm:inline">Regulation Milestones</span>
+                    <span className="sm:hidden">Milestones</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="implementation" className="text-xs sm:text-sm py-2 px-2">
+                    <span className="hidden sm:inline">Member State Implementation</span>
+                    <span className="sm:hidden">Implementation</span>
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="regulation">
+                  {content?.key_dates?.dates && content.key_dates.dates.length > 0 ? (
+                    <KeyDatesGantt dates={content.key_dates.dates} />
+                  ) : (
+                    <p className="text-muted-foreground">No key dates available.</p>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="implementation">
+                  <ImplementationTimelineTracker 
+                    showKeyDates={false}
+                    keyDates={content?.key_dates?.dates || []}
+                  />
+                </TabsContent>
+              </Tabs>
+            ) : (
+              // When implementation tracker is disabled, just show the key dates
+              content?.key_dates?.dates && content.key_dates.dates.length > 0 ? (
+                <KeyDatesGantt dates={content.key_dates.dates} />
+              ) : (
+                <p className="text-muted-foreground">No key dates available.</p>
+              )
+            )}
           </CardContent>
         </Card>
       </div>

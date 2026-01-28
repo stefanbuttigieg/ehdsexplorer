@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState, useEffect, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText, Accessibility, Code, Newspaper, Settings, HelpCircle, StickyNote, Users, GitCompare, PanelLeftClose, PanelLeft, Trophy, MapPin, Brain, Network } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import AIAssistant from "@/components/AIAssistant";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { UserMenu } from "@/components/UserMenu";
+import { useFeatureFlags } from "@/hooks/useFeatureFlags";
+
 interface LayoutProps {
   children: ReactNode;
 }
@@ -53,6 +55,7 @@ const Layout = ({
     isEditor,
     loading: authLoading
   } = useAuth();
+  const { isFeatureEnabled } = useFeatureFlags();
 
   // Initialize text highlight hook for URL-based highlighting
   useTextHighlight();
@@ -66,7 +69,9 @@ const Layout = ({
     onSearch: () => setSearchOpen(true)
   });
   const isActive = (path: string) => location.pathname === path;
-  const navItems = [{
+  
+  // Base nav items that are always visible
+  const baseNavItems = [{
     path: "/",
     icon: Home,
     label: "Home"
@@ -119,10 +124,6 @@ const Layout = ({
     icon: Trophy,
     label: "Achievements"
   }, {
-    path: "/teams",
-    icon: Users,
-    label: "Teams"
-  }, {
     path: "/compare",
     icon: GitCompare,
     label: "Compare"
@@ -131,6 +132,24 @@ const Layout = ({
     icon: Brain,
     label: "Quiz Challenge"
   }];
+  
+  // Filter nav items based on feature flags
+  const navItems = useMemo(() => {
+    const items = [...baseNavItems];
+    
+    // Add Teams only if enabled
+    if (isFeatureEnabled('teams')) {
+      // Insert Teams before Compare
+      const compareIndex = items.findIndex(item => item.path === '/compare');
+      items.splice(compareIndex, 0, {
+        path: "/teams",
+        icon: Users,
+        label: "Teams"
+      });
+    }
+    
+    return items;
+  }, [isFeatureEnabled]);
   return <div className="min-h-screen flex w-full">
       {/* Mobile Header */}
       <header className="fixed top-0 left-0 right-0 bg-card border-b border-border flex items-center justify-between px-4 md:hidden z-50" style={{
@@ -326,8 +345,8 @@ const Layout = ({
       {/* Share Text Button - appears when user selects text */}
       <ShareTextButton />
 
-      {/* AI Assistant - available to everyone */}
-      <AIAssistant />
+      {/* AI Assistant - conditionally rendered based on feature flag */}
+      {isFeatureEnabled('ai_assistant') && <AIAssistant />}
     </div>;
 };
 export default Layout;

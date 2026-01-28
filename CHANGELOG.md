@@ -13,6 +13,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.8.7] - 2026-01-28
+
+### Fixed
+
+#### Feature Flags Integration
+- Feature flags now properly control their associated features across the application
+- AI Assistant chat widget visibility controlled by `ai_assistant` flag
+- Teams sidebar navigation link visibility controlled by `teams` flag
+- Implementation Tracker tab in Overview page controlled by `implementation_tracker` flag
+- When flags are disabled, features are completely hidden from the UI
+
+---
+
 ## [1.8.6] - 2026-01-27
 
 ### Added

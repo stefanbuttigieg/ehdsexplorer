@@ -331,15 +331,20 @@ const Layout = ({
       <PublicTour run={isTourOpen} onComplete={completeTour} onClose={closeTour} />
 
       {/* Main Content */}
-      <main className="flex-1 md:pt-0" style={{
+      <main className="flex-1 md:pt-0 flex flex-col" style={{
       paddingTop: 'calc(3.5rem + env(safe-area-inset-top))'
     }}>
-        <div className="min-h-screen">
+        <div className="flex-1">
           <div className="p-4">
             <NotificationsBanner />
           </div>
           {children}
         </div>
+        
+        {/* Footer with Version */}
+        <footer className="border-t border-border py-4 px-6 text-center text-xs text-muted-foreground">
+          <p>EHDS Explorer v1.8.7</p>
+        </footer>
       </main>
 
       {/* Share Text Button - appears when user selects text */}

@@ -1,4 +1,5 @@
 import { ReactNode, useState, useEffect, useMemo } from "react";
+import { version } from '../../package.json';
 import { Link, useLocation } from "react-router-dom";
 import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText, Accessibility, Code, Newspaper, Settings, HelpCircle, StickyNote, Users, GitCompare, PanelLeftClose, PanelLeft, Trophy, MapPin, Brain, Network } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -316,7 +317,20 @@ const Layout = ({
                     <span className="truncate">Accessibility</span>
                   </Button>
                 </Link>
+                <p className="text-xs text-muted-foreground px-3 pt-4 pb-2">v{version}</p>
               </div>}
+            
+            {/* Version indicator - collapsed state */}
+            {sidebarCollapsed && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex justify-center py-2 text-xs text-muted-foreground cursor-default">
+                    v
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="right">v{version}</TooltipContent>
+              </Tooltip>
+            )}
           </div>
         </ScrollArea>
       </aside>
@@ -340,11 +354,6 @@ const Layout = ({
           </div>
           {children}
         </div>
-        
-        {/* Footer with Version */}
-        <footer className="border-t border-border py-4 px-6 text-center text-xs text-muted-foreground">
-          <p>EHDS Explorer v1.8.7</p>
-        </footer>
       </main>
 
       {/* Share Text Button - appears when user selects text */}

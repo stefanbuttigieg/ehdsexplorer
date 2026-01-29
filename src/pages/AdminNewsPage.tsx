@@ -93,14 +93,15 @@ const AdminNewsPage = () => {
 
   const handleGenerateProductUpdates = async () => {
     try {
-      // Fetch the changelog content from the repo
-      const changelogResponse = await fetch('/CHANGELOG.md');
-      let changelog = '';
-      if (changelogResponse.ok) {
-        changelog = await changelogResponse.text();
+      // Import the changelog content directly
+      const changelogModule = await import('/CHANGELOG.md?raw');
+      const changelog = changelogModule.default || '';
+      
+      if (!changelog) {
+        throw new Error("Could not load changelog content");
       }
       
-      const result = await generateProductUpdatesMutation.mutateAsync(changelog || undefined);
+      const result = await generateProductUpdatesMutation.mutateAsync(changelog);
       toast({
         title: "Product Updates Generated",
         description: result.message || "Product updates summary has been generated. Review and publish it.",

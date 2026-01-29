@@ -317,7 +317,7 @@ const Layout = ({
                     <span className="truncate">Accessibility</span>
                   </Button>
                 </Link>
-                <p className="text-xs text-muted-foreground px-3 pt-4 pb-2">v{version}</p>
+                <p className="text-xs text-muted-foreground px-3 pt-4 pb-2">v{version} ({__BUILD_DATE__})</p>
               </div>}
             
             {/* Version indicator - collapsed state */}
@@ -328,7 +328,7 @@ const Layout = ({
                     v
                   </div>
                 </TooltipTrigger>
-                <TooltipContent side="right">v{version}</TooltipContent>
+                <TooltipContent side="right">v{version} ({__BUILD_DATE__})</TooltipContent>
               </Tooltip>
             )}
           </div>

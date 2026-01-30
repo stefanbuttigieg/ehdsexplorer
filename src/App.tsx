@@ -87,6 +87,7 @@ import CountryManagerDashboard from "./pages/CountryManagerDashboard";
 import AdminRolePermissionsPage from "./pages/AdminRolePermissionsPage";
 import AdminFeatureFlagsPage from "./pages/AdminFeatureFlagsPage";
 import AdminObligationsPage from "./pages/AdminObligationsPage";
+import ForCitizensPage from "./pages/ForCitizensPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -154,6 +155,7 @@ const App = () => (
             <Route path="/manage-subscription" element={<ManageSubscriptionPage />} />
             <Route path="/health-authorities" element={<HealthAuthoritiesPage />} />
             <Route path="/cross-regulation-map" element={<CrossRegulationMapPage />} />
+            <Route path="/for/citizens" element={<ForCitizensPage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin/set-password" element={<AdminSetPasswordPage />} />
             <Route path="/profile" element={<ProfilePage />} />

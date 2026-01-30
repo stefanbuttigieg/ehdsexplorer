@@ -18,6 +18,7 @@ import {
 } from '@/data/aiRolePrompts';
 import { 
   User, 
+  Heart,
   Stethoscope, 
   Scale, 
   FlaskConical, 
@@ -39,6 +40,7 @@ interface AIRoleSelectorProps {
 
 const roleIcons: Record<string, React.ReactNode> = {
   User: <User className="h-3.5 w-3.5" />,
+  Heart: <Heart className="h-3.5 w-3.5" />,
   Stethoscope: <Stethoscope className="h-3.5 w-3.5" />,
   Scale: <Scale className="h-3.5 w-3.5" />,
   FlaskConical: <FlaskConical className="h-3.5 w-3.5" />,

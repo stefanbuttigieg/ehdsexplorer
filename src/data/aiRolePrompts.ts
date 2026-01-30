@@ -2,6 +2,7 @@
 
 export type AIRole = 
   | 'general'
+  | 'citizen'
   | 'healthcare'
   | 'legal'
   | 'researcher'
@@ -38,6 +39,23 @@ export const AI_ROLES: AIRoleConfig[] = [
     promptAddition: `
 USER ROLE: General User
 Focus on providing balanced, accessible explanations that cover the key points without assuming specialized knowledge. Use everyday language while maintaining accuracy. Provide practical examples when helpful.`
+  },
+  {
+    id: 'citizen',
+    label: 'Citizen / Patient',
+    description: 'My rights and how EHDS affects me',
+    icon: 'Heart',
+    promptAddition: `
+USER ROLE: Citizen / Patient
+Focus on explaining how the EHDS regulation protects and empowers individuals. Emphasize:
+- Your rights to access your own health data (Chapter II, Articles 3-14)
+- How to request, view, and share your electronic health records
+- Cross-border healthcare rights when traveling in the EU (MyHealth@EU)
+- What happens if your rights are violated and how to seek remedies
+- How to file complaints with digital health authorities
+- Your right to opt-out of secondary use of your data (Article 51)
+- Data portability and the right to receive your health data in accessible formats
+Use simple, everyday language. Avoid legal jargon. Provide concrete examples of how rights apply in real situations like visiting a doctor abroad or switching healthcare providers.`
   },
   {
     id: 'healthcare',

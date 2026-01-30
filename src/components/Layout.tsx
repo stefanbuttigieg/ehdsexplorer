@@ -25,6 +25,7 @@ import AIAssistant from "@/components/AIAssistant";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { UserMenu } from "@/components/UserMenu";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
+import ReloadPrompt from "@/components/ReloadPrompt";
 
 interface LayoutProps {
   children: ReactNode;
@@ -361,6 +362,9 @@ const Layout = ({
 
       {/* AI Assistant - conditionally rendered based on feature flag */}
       {isFeatureEnabled('ai_assistant') && <AIAssistant />}
+
+      {/* PWA Reload Prompt */}
+      <ReloadPrompt />
     </div>;
 };
 export default Layout;

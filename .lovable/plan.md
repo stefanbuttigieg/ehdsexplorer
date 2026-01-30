@@ -1,44 +1,90 @@
 
+# PWA Cache Refresh Solution
 
-# Dynamic Version Display in Sidebar
+## Problem
+The application is configured as a Progressive Web App (PWA) with `autoUpdate` mode. While this automatically updates the service worker in the background, users may still see cached content because:
+1. The old service worker continues serving cached files until the page is fully closed and reopened
+2. There's no user notification when a new version is available
+3. No cache-busting headers are set on the HTML entry point
 
-## Overview
-Move the version display from the main footer to the sidebar and make it dynamic by pulling the version from `package.json` instead of hardcoding it.
+## Solution Overview
+Implement a "Reload Prompt" system that detects when a new version is available and gives users the option to refresh immediately, plus add cache-control headers to ensure the browser always checks for updates.
 
 ## Changes
 
-### 1. Update package.json version
-Update the version field in `package.json` from `0.0.0` to `1.8.7` to match the current application version.
+### 1. Update PWA Configuration (vite.config.ts)
+Change `registerType` from `autoUpdate` to `prompt` so we can control when the update happens and notify users.
 
-### 2. Modify Layout.tsx
-
-**Remove the footer from main content:**
-- Delete the footer element that currently displays the hardcoded version (lines 344-347)
-
-**Add version to sidebar:**
-- Import the version from `package.json` using Vite's JSON import feature
-- Display the version at the bottom of the sidebar, styled appropriately for both expanded and collapsed states
-- When expanded: Show "v1.8.7" text below the legal links section
-- When collapsed: Show a tooltip with the version when hovering over a small "v" indicator
-
-### 3. Technical Details
-
-**Importing version from package.json:**
-```typescript
-import { version } from '../../package.json';
+### 2. Add Cache-Control Meta Tags (index.html)
+Add meta tags to prevent aggressive browser caching of the HTML file:
+```html
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
 ```
 
-**Version display placement:**
-- Add after the Legal Links section (after line 319)
-- Include styling that matches the sidebar's muted text aesthetic
-- Handle the collapsed state with a tooltip
+### 3. Create ReloadPrompt Component
+Create a new component (`src/components/ReloadPrompt.tsx`) that:
+- Uses the `useRegisterSW` hook from `virtual:pwa-register/react`
+- Detects when a new service worker is waiting
+- Shows a toast/banner prompting the user to reload
+- Handles the update and page refresh
 
-## Files to Modify
-1. `package.json` - Update version to "1.8.7"
-2. `src/components/Layout.tsx` - Remove footer, add version to sidebar with dynamic import
+### 4. Add PWA Virtual Module Types
+Create a type declaration file (`src/pwa.d.ts`) for the virtual PWA module to ensure TypeScript compatibility.
 
-## Visual Result
-- **Expanded sidebar**: Small muted text "v1.8.7" at the bottom of the sidebar
-- **Collapsed sidebar**: Icon or text "v" with tooltip showing full version
-- **Mobile**: Version visible at bottom of mobile sidebar when opened
+### 5. Integrate ReloadPrompt in Layout
+Add the `ReloadPrompt` component to the main Layout so it's always active.
 
+### 6. Configure Workbox for Faster Updates
+Add `skipWaiting` and `clientsClaim` options to the Workbox configuration to make the new service worker take control immediately after the user accepts the update.
+
+## Technical Implementation
+
+### ReloadPrompt Component Logic
+```text
+┌─────────────────────────────────────────┐
+│          Service Worker Check           │
+└─────────────────────────────────────────┘
+                    │
+                    ▼
+        ┌───────────────────────┐
+        │  New version found?   │
+        └───────────────────────┘
+           │              │
+          Yes             No
+           │              │
+           ▼              ▼
+┌─────────────────┐   (do nothing)
+│  Show toast:    │
+│  "New version   │
+│   available"    │
+└─────────────────┘
+           │
+           ▼
+    User clicks "Reload"
+           │
+           ▼
+┌─────────────────────────┐
+│  updateServiceWorker()  │
+│  → skipWaiting          │
+│  → page.reload()        │
+└─────────────────────────┘
+```
+
+## Files to Create/Modify
+1. **Create** `src/pwa.d.ts` - TypeScript declarations for virtual:pwa-register
+2. **Create** `src/components/ReloadPrompt.tsx` - Update notification component
+3. **Modify** `vite.config.ts` - Change registerType to "prompt", add skipWaiting
+4. **Modify** `index.html` - Add cache-control meta tags
+5. **Modify** `src/components/Layout.tsx` - Import and render ReloadPrompt
+
+## User Experience
+When a new version is deployed:
+1. User visits the site
+2. Service worker checks for updates in the background
+3. If a new version exists, a subtle toast appears: "A new version is available"
+4. User clicks "Reload" button
+5. Page refreshes with the latest version
+
+This ensures users are always aware of updates and can get the latest version with a single click, while still benefiting from PWA caching for performance.

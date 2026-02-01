@@ -91,6 +91,7 @@ import ForCitizensPage from "./pages/ForCitizensPage";
 import ForHealthTechPage from "./pages/ForHealthTechPage";
 import ForHealthcareProPage from "./pages/ForHealthcareProPage";
 import ScenarioFinderPage from "./pages/ScenarioFinderPage";
+import AdminLandingPagesPage from "./pages/AdminLandingPagesPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -201,6 +202,7 @@ const App = () => (
             <Route path="/admin/country-assignments" element={<AdminCountryAssignmentsPage />} />
             <Route path="/admin/role-permissions" element={<AdminRolePermissionsPage />} />
             <Route path="/admin/feature-flags" element={<AdminFeatureFlagsPage />} />
+            <Route path="/admin/landing-pages" element={<AdminLandingPagesPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </MaintenanceGuard>

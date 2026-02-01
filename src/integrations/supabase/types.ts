@@ -564,6 +564,45 @@ export type Database = {
         }
         Relationships: []
       }
+      citizen_rights: {
+        Row: {
+          article_numbers: number[]
+          category: string
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          is_active: boolean
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          article_numbers?: number[]
+          category: string
+          created_at?: string
+          description: string
+          icon?: string
+          id: string
+          is_active?: boolean
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          article_numbers?: number[]
+          category?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       country_legislation: {
         Row: {
           adoption_date: string | null
@@ -1021,6 +1060,205 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      healthcare_patient_rights: {
+        Row: {
+          article_number: number
+          created_at: string
+          description: string
+          id: string
+          is_active: boolean
+          practical_implication: string
+          right_name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          article_number: number
+          created_at?: string
+          description: string
+          id?: string
+          is_active?: boolean
+          practical_implication: string
+          right_name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          article_number?: number
+          created_at?: string
+          description?: string
+          id?: string
+          is_active?: boolean
+          practical_implication?: string
+          right_name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      healthcare_workflow_steps: {
+        Row: {
+          action: string
+          article_numbers: number[]
+          created_at: string
+          ehds_reference: string
+          id: string
+          step_number: number
+          updated_at: string
+          workflow_id: string
+        }
+        Insert: {
+          action: string
+          article_numbers?: number[]
+          created_at?: string
+          ehds_reference: string
+          id?: string
+          step_number: number
+          updated_at?: string
+          workflow_id: string
+        }
+        Update: {
+          action?: string
+          article_numbers?: number[]
+          created_at?: string
+          ehds_reference?: string
+          id?: string
+          step_number?: number
+          updated_at?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "healthcare_workflow_steps_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "healthcare_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      healthcare_workflows: {
+        Row: {
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          is_active: boolean
+          key_takeaway: string
+          scenario: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          icon?: string
+          id: string
+          is_active?: boolean
+          key_takeaway: string
+          scenario: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          key_takeaway?: string
+          scenario?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      healthtech_compliance_categories: {
+        Row: {
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          is_active: boolean
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          icon?: string
+          id: string
+          is_active?: boolean
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      healthtech_compliance_items: {
+        Row: {
+          article_references: number[]
+          category_id: string
+          created_at: string
+          description: string
+          evidence_hint: string
+          id: string
+          is_active: boolean
+          priority: string
+          requirement: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          article_references?: number[]
+          category_id: string
+          created_at?: string
+          description: string
+          evidence_hint: string
+          id: string
+          is_active?: boolean
+          priority?: string
+          requirement: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          article_references?: number[]
+          category_id?: string
+          created_at?: string
+          description?: string
+          evidence_hint?: string
+          id?: string
+          is_active?: boolean
+          priority?: string
+          requirement?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "healthtech_compliance_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "healthtech_compliance_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       help_center_faq: {
         Row: {

@@ -2,7 +2,8 @@ import { Link } from 'react-router-dom';
 import { 
   BookOpen, FileText, Scale, Files, ListChecks, Search, Bookmark,
   ArrowLeft, ChevronRight, Info, Keyboard, HelpCircle, ExternalLink,
-  Home, MessageCircle, Eye, Accessibility as AccessibilityIcon, UserPlus, Sparkles, Loader2
+  Home, MessageCircle, Eye, Accessibility as AccessibilityIcon, UserPlus, Sparkles, Loader2,
+  Bot, Users, StickyNote, Trophy, Globe, Highlighter, Map, Newspaper
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -41,7 +42,7 @@ const HelpCenterPage = () => {
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <Link to="/">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" aria-label="Go back">
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
@@ -63,7 +64,7 @@ const HelpCenterPage = () => {
             <CardDescription>Jump to a specific topic</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <a href="#getting-started" className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors">
                 <Info className="h-4 w-4 text-primary" />
                 <span className="text-sm font-medium">Getting Started</span>
@@ -75,6 +76,18 @@ const HelpCenterPage = () => {
               <a href="#features" className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors">
                 <Search className="h-4 w-4 text-primary" />
                 <span className="text-sm font-medium">Features</span>
+              </a>
+              <a href="#ai-assistant" className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors">
+                <Bot className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">AI Assistant</span>
+              </a>
+              <a href="#personalization" className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors">
+                <Eye className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Personalization</span>
+              </a>
+              <a href="#collaboration" className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors">
+                <Users className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Collaboration</span>
               </a>
               <a href="#accessibility" className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors">
                 <AccessibilityIcon className="h-4 w-4 text-primary" />
@@ -102,12 +115,12 @@ const HelpCenterPage = () => {
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
                 The EHDS Regulation Explorer is a comprehensive tool for navigating and understanding the 
-                European Health Data Space (EHDS) Regulation. It provides easy access to:
+                European Health Data Space (EHDS) Regulation (EU) 2025/327. It provides easy access to:
               </p>
               <ul className="space-y-2">
                 <li className="flex items-center gap-2">
                   <ChevronRight className="h-4 w-4 text-primary" />
-                  <strong>105 Articles</strong> organized by chapters and sections
+                  <strong>105 Articles</strong> organized by 10 chapters and sections
                 </li>
                 <li className="flex items-center gap-2">
                   <ChevronRight className="h-4 w-4 text-primary" />
@@ -119,11 +132,40 @@ const HelpCenterPage = () => {
                 </li>
                 <li className="flex items-center gap-2">
                   <ChevronRight className="h-4 w-4 text-primary" />
-                  <strong>Implementing Acts</strong> with feedback tracking
+                  <strong>Implementing Acts</strong> tracker with feedback period alerts
                 </li>
                 <li className="flex items-center gap-2">
                   <ChevronRight className="h-4 w-4 text-primary" />
                   <strong>4 Annexes</strong> with technical specifications
+                </li>
+                <li className="flex items-center gap-2">
+                  <ChevronRight className="h-4 w-4 text-primary" />
+                  <strong>AI Assistant</strong> for contextual help and explanations
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="mb-4">
+            <CardHeader>
+              <CardTitle>Stakeholder-Specific Guides</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">
+                The EHDS Explorer offers tailored landing pages for different stakeholders:
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-center gap-2">
+                  <ChevronRight className="h-4 w-4 text-primary" />
+                  <Link to="/for/citizens" className="text-primary hover:underline font-medium">For Citizens</Link> - Understand your health data rights
+                </li>
+                <li className="flex items-center gap-2">
+                  <ChevronRight className="h-4 w-4 text-primary" />
+                  <Link to="/for/healthtech" className="text-primary hover:underline font-medium">For Health Tech</Link> - Compliance checklists and requirements
+                </li>
+                <li className="flex items-center gap-2">
+                  <ChevronRight className="h-4 w-4 text-primary" />
+                  <Link to="/for/healthcare-professionals" className="text-primary hover:underline font-medium">For Healthcare Professionals</Link> - Workflow scenarios and patient rights
                 </li>
               </ul>
             </CardContent>
@@ -163,7 +205,7 @@ const HelpCenterPage = () => {
                   <h3 className="text-xl font-bold mb-2">Unlock More Features</h3>
                   <p className="text-muted-foreground mb-4">
                     Create a free account to save bookmarks across devices, take personal notes, 
-                    collaborate with teams, and receive alerts on implementing acts updates.
+                    highlight and annotate content, collaborate with teams, earn achievements, and receive alerts on implementing acts updates.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
                     <Link to="/admin/auth">
@@ -209,12 +251,13 @@ const HelpCenterPage = () => {
                   <li><strong>Home:</strong> Dashboard with quick links and latest updates</li>
                   <li><strong>Overview:</strong> Introduction to the EHDS Regulation</li>
                   <li><strong>Definitions:</strong> Search and browse all legal terms</li>
-                  <li><strong>Articles:</strong> Browse all 105 articles</li>
+                  <li><strong>Articles:</strong> Browse all 105 articles by chapter</li>
                   <li><strong>Recitals:</strong> Browse all 115 recitals</li>
                   <li><strong>Annexes:</strong> Technical specifications and requirements</li>
                   <li><strong>Implementing Acts:</strong> Track implementation progress</li>
                   <li><strong>News:</strong> Weekly updates and summaries</li>
                   <li><strong>Bookmarks:</strong> Your saved articles and recitals</li>
+                  <li><strong>Notes:</strong> Your personal notes (logged-in users)</li>
                 </ul>
               </AccordionContent>
             </AccordionItem>
@@ -235,6 +278,7 @@ const HelpCenterPage = () => {
                   <li>Chapter title and description</li>
                   <li>Sections within the chapter (if any)</li>
                   <li>All articles belonging to that chapter</li>
+                  <li>Key provisions marked with a star icon</li>
                 </ul>
               </AccordionContent>
             </AccordionItem>
@@ -254,7 +298,31 @@ const HelpCenterPage = () => {
                   <li><strong>Articles Quick Explorer:</strong> Click any number (1-105) to jump directly to that article</li>
                   <li><strong>Recitals Quick Explorer:</strong> Click any number (1-115) to jump to that recital</li>
                   <li>Hover over numbers to preview titles before clicking</li>
+                  <li>Key provisions are highlighted with a distinct color</li>
                 </ul>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="cross-regulation" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <Map className="h-5 w-5 text-primary" />
+                  <span className="font-semibold">Cross-Regulation Map</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-4">
+                <p className="text-muted-foreground">
+                  Explore how the EHDS connects to other EU regulations:
+                </p>
+                <ul className="space-y-2 text-muted-foreground ml-4">
+                  <li><strong>GDPR:</strong> Data protection requirements</li>
+                  <li><strong>AI Act:</strong> AI system compliance</li>
+                  <li><strong>MDR/IVDR:</strong> Medical device regulations</li>
+                  <li><strong>NIS2:</strong> Cybersecurity requirements</li>
+                </ul>
+                <p className="text-muted-foreground">
+                  Access the <Link to="/cross-regulation-map" className="text-primary hover:underline">Cross-Regulation Map</Link> from the sidebar.
+                </p>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -266,7 +334,7 @@ const HelpCenterPage = () => {
         <section id="features" className="mb-12">
           <h2 className="text-2xl font-bold font-serif mb-4 flex items-center gap-2">
             <Search className="h-6 w-6 text-primary" />
-            Features
+            Core Features
           </h2>
 
           <Accordion type="multiple" className="space-y-4">
@@ -286,6 +354,7 @@ const HelpCenterPage = () => {
                   <li>Search across articles, recitals, definitions, and annexes</li>
                   <li>Results show matching content with highlighted keywords</li>
                   <li>Filter by content type for focused searches</li>
+                  <li>Recently viewed items appear in suggestions</li>
                 </ul>
               </AccordionContent>
             </AccordionItem>
@@ -304,8 +373,9 @@ const HelpCenterPage = () => {
                 <ul className="space-y-2 text-muted-foreground ml-4">
                   <li>Click the bookmark icon on any article or recital page</li>
                   <li>Access all your bookmarks from the sidebar</li>
-                  <li>Bookmarks are saved in your browser (no account required)</li>
+                  <li>Bookmarks sync across devices for logged-in users</li>
                   <li>Remove bookmarks by clicking the icon again</li>
+                  <li>Share bookmarks with your team</li>
                 </ul>
               </AccordionContent>
             </AccordionItem>
@@ -326,6 +396,7 @@ const HelpCenterPage = () => {
                   <li>Definitions link to their source article</li>
                   <li>Implementing acts link to related articles</li>
                   <li>Footnotes provide additional context and references</li>
+                  <li>Links to external EU regulations (GDPR, AI Act, etc.)</li>
                 </ul>
               </AccordionContent>
             </AccordionItem>
@@ -348,7 +419,7 @@ const HelpCenterPage = () => {
                   <li><strong>Published:</strong> Published in the Official Journal</li>
                 </ul>
                 <p className="text-muted-foreground">
-                  The homepage highlights acts currently open for feedback with countdown timers.
+                  The homepage highlights acts currently open for feedback with countdown timers. Subscribe to receive email alerts when status changes.
                 </p>
               </AccordionContent>
             </AccordionItem>
@@ -372,6 +443,230 @@ const HelpCenterPage = () => {
                   <div><kbd className="bg-muted px-1.5 py-0.5 rounded">g</kbd> + <kbd className="bg-muted px-1.5 py-0.5 rounded">r</kbd> Go to recitals</div>
                   <div><kbd className="bg-muted px-1.5 py-0.5 rounded">g</kbd> + <kbd className="bg-muted px-1.5 py-0.5 rounded">d</kbd> Go to definitions</div>
                 </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="news" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <Newspaper className="h-5 w-5 text-primary" />
+                  <span className="font-semibold">Weekly News Summaries</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-4">
+                <p className="text-muted-foreground">
+                  Stay updated with EHDS-related developments:
+                </p>
+                <ul className="space-y-2 text-muted-foreground ml-4">
+                  <li>Weekly curated summaries of EHDS news</li>
+                  <li>Updates on implementing acts and regulatory changes</li>
+                  <li>Access from the News section in the sidebar</li>
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </section>
+
+        <Separator className="my-8" />
+
+        {/* AI Assistant */}
+        <section id="ai-assistant" className="mb-12">
+          <h2 className="text-2xl font-bold font-serif mb-4 flex items-center gap-2">
+            <Bot className="h-6 w-6 text-primary" />
+            EHDS AI Assistant
+          </h2>
+
+          <Card className="mb-4">
+            <CardHeader>
+              <CardTitle>Your AI-Powered Guide</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">
+                The EHDS Assistant helps you understand the regulation with contextual explanations. Access it via the floating button in the bottom-right corner.
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-center gap-2">
+                  <ChevronRight className="h-4 w-4 text-primary" />
+                  <strong>7 Role-Based Modes:</strong> Citizen, General, Healthcare Pro, Legal, Researcher, Health Tech, Policy Maker
+                </li>
+                <li className="flex items-center gap-2">
+                  <ChevronRight className="h-4 w-4 text-primary" />
+                  <strong>4 Explanation Levels:</strong> Expert, Professional, Student, Beginner
+                </li>
+                <li className="flex items-center gap-2">
+                  <ChevronRight className="h-4 w-4 text-primary" />
+                  <strong>Source Citations:</strong> All answers reference specific articles and recitals
+                </li>
+                <li className="flex items-center gap-2">
+                  <ChevronRight className="h-4 w-4 text-primary" />
+                  <strong>Conversation History:</strong> Logged-in users can save, favorite, and export conversations
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-8" />
+
+        {/* Personalization */}
+        <section id="personalization" className="mb-12">
+          <h2 className="text-2xl font-bold font-serif mb-4 flex items-center gap-2">
+            <Eye className="h-6 w-6 text-primary" />
+            Personalization
+          </h2>
+
+          <Accordion type="multiple" className="space-y-4">
+            <AccordionItem value="stakeholder-filter" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <Eye className="h-5 w-5 text-primary" />
+                  <span className="font-semibold">"View As" Stakeholder Filter</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-4">
+                <p className="text-muted-foreground">
+                  Customize your browsing experience based on your role:
+                </p>
+                <ul className="space-y-2 text-muted-foreground ml-4">
+                  <li>Use the "View as..." dropdown in the header to select your stakeholder type</li>
+                  <li>Content is filtered to show the most relevant articles and recitals</li>
+                  <li>Key provisions for your role are highlighted</li>
+                  <li>The AI Assistant automatically adjusts its persona to match</li>
+                  <li>Your preference is saved for future visits</li>
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="plain-language" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <Globe className="h-5 w-5 text-primary" />
+                  <span className="font-semibold">Plain Language Mode</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-4">
+                <p className="text-muted-foreground">
+                  Simplify legal text for easier understanding:
+                </p>
+                <ul className="space-y-2 text-muted-foreground ml-4">
+                  <li>Toggle "Plain Language" on article and recital pages</li>
+                  <li>AI-generated summaries in accessible language</li>
+                  <li>Side-by-side comparison with original text</li>
+                  <li>Provide feedback to improve translations</li>
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="translations" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <Globe className="h-5 w-5 text-primary" />
+                  <span className="font-semibold">Language Support</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-4">
+                <p className="text-muted-foreground">
+                  Access content in multiple EU languages:
+                </p>
+                <ul className="space-y-2 text-muted-foreground ml-4">
+                  <li>Use the language selector in the footer</li>
+                  <li>Translations are available for articles, recitals, and chapters</li>
+                  <li>Fallback notice shown when translations are unavailable</li>
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </section>
+
+        <Separator className="my-8" />
+
+        {/* Collaboration */}
+        <section id="collaboration" className="mb-12">
+          <h2 className="text-2xl font-bold font-serif mb-4 flex items-center gap-2">
+            <Users className="h-6 w-6 text-primary" />
+            Collaboration Features
+          </h2>
+
+          <Accordion type="multiple" className="space-y-4">
+            <AccordionItem value="notes" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <StickyNote className="h-5 w-5 text-primary" />
+                  <span className="font-semibold">Personal Notes</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-4">
+                <p className="text-muted-foreground">
+                  Take notes while studying the regulation:
+                </p>
+                <ul className="space-y-2 text-muted-foreground ml-4">
+                  <li>Create notes linked to specific articles or recitals</li>
+                  <li>Organize with tags for easy filtering</li>
+                  <li>Pin important notes to the top</li>
+                  <li>Sync across devices when logged in</li>
+                  <li>Share notes with your team</li>
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="annotations" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <Highlighter className="h-5 w-5 text-primary" />
+                  <span className="font-semibold">Highlighting & Annotations</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-4">
+                <p className="text-muted-foreground">
+                  Mark up content as you read:
+                </p>
+                <ul className="space-y-2 text-muted-foreground ml-4">
+                  <li>Select text to highlight with different colors</li>
+                  <li>Add comments to highlighted sections</li>
+                  <li>Tag annotations for organization</li>
+                  <li>View all annotations from the Notes page</li>
+                  <li>Export to Markdown, JSON, Notion, or Obsidian</li>
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="teams" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <Users className="h-5 w-5 text-primary" />
+                  <span className="font-semibold">Team Workspaces</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-4">
+                <p className="text-muted-foreground">
+                  Collaborate with colleagues:
+                </p>
+                <ul className="space-y-2 text-muted-foreground ml-4">
+                  <li>Create or join team workspaces</li>
+                  <li>Share annotations and notes with team members</li>
+                  <li>View team activity feed</li>
+                  <li>Role-based permissions (Owner, Admin, Member, Viewer)</li>
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="achievements" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <Trophy className="h-5 w-5 text-primary" />
+                  <span className="font-semibold">Achievements & Gamification</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-4">
+                <p className="text-muted-foreground">
+                  Track your learning progress:
+                </p>
+                <ul className="space-y-2 text-muted-foreground ml-4">
+                  <li>Earn badges for reading articles and recitals</li>
+                  <li>Unlock achievements for using features</li>
+                  <li>Track progress with visual indicators</li>
+                  <li>Play flashcard and quiz games to test knowledge</li>
+                </ul>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -414,6 +709,10 @@ const HelpCenterPage = () => {
                 <li className="flex items-center gap-2">
                   <ChevronRight className="h-4 w-4 text-primary" />
                   <strong>Mobile Responsive:</strong> Works on all device sizes
+                </li>
+                <li className="flex items-center gap-2">
+                  <ChevronRight className="h-4 w-4 text-primary" />
+                  <strong>Plain Language:</strong> Simplified versions of legal text
                 </li>
               </ul>
             </CardContent>
@@ -510,6 +809,10 @@ const HelpCenterPage = () => {
                 If you have questions or need assistance:
               </p>
               <ul className="space-y-2">
+                <li className="flex items-center gap-2">
+                  <ChevronRight className="h-4 w-4 text-primary" />
+                  Use the <strong>AI Assistant</strong> for instant answers about the EHDS
+                </li>
                 <li className="flex items-center gap-2">
                   <ChevronRight className="h-4 w-4 text-primary" />
                   Use the <strong>Report Issue</strong> button in the header to submit feedback

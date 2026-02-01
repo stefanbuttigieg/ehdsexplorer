@@ -154,7 +154,7 @@ const Index = () => {
                   <Card key={summary.id} className="border-secondary/20 bg-background">
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="outline" className="text-xs bg-secondary/20 text-secondary-foreground">
                           {format(new Date(summary.week_start), "MMM d")} - {format(new Date(summary.week_end), "MMM d, yyyy")}
                         </Badge>
                       </div>

@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import CitizenRightsCard from '@/components/CitizenRightsCard';
+import TopicIndexTable from '@/components/TopicIndexTable';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -81,6 +82,16 @@ const ForCitizensPage: React.FC = () => {
         {/* All Rights */}
         <section className="mb-12">
           <CitizenRightsCard showHeader={false} />
+        </section>
+
+        {/* Topic Index */}
+        <section className="mb-12">
+          <TopicIndexTable 
+            stakeholderType="citizen"
+            title="Find Articles by Topic"
+            description="Quickly locate the EHDS articles and recitals relevant to your rights"
+            showRecitals={true}
+          />
         </section>
 
         {/* Key Things to Know */}

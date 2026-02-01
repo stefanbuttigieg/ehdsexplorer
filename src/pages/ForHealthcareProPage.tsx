@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import Layout from "@/components/Layout";
+import TopicIndexTable from "@/components/TopicIndexTable";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -153,32 +154,14 @@ export default function ForHealthcareProPage() {
           </div>
         </div>
 
-        {/* Quick Reference */}
+        {/* Topic Index */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold mb-6">Quick Reference</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {QUICK_REFERENCES.map((ref) => (
-              <Card key={ref.topic} className="hover:border-primary/50 transition-colors">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">{ref.topic}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-2">{ref.description}</p>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {ref.articles.map((art) => (
-                      <Link 
-                        key={art}
-                        to={`/article/${art}`}
-                        className="text-xs text-primary hover:underline"
-                      >
-                        Article {art} →
-                      </Link>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <TopicIndexTable 
+            stakeholderType="healthcare_professional"
+            title="Find Articles by Topic"
+            description="Quick reference mapping clinical topics to relevant EHDS articles and recitals"
+            showRecitals={true}
+          />
         </div>
 
         {/* FAQ */}

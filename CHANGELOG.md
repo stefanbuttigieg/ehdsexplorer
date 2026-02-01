@@ -13,6 +13,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.8.9] - 2026-02-01
+
+### Added
+
+#### Topic Index System
+- New dedicated Topic Index page at `/topic-index` with tabbed interface by stakeholder type
+- Database-driven topic-to-article mappings stored in `topic_article_index` table
+- Grouped tables showing topics with direct links to related articles and recitals
+- Stakeholder categories: Citizens (10 topics), Health Tech (13 topics), Healthcare Professionals (10 topics)
+- Admin management page at `/admin/topic-index` for CRUD operations on topic mappings
+
+#### External Glossary Integration
+- Added prominent links to [Xt-EHR Glossary](https://www.xt-ehr.eu/glossary-list/) across all stakeholder landing pages
+- Glossary link included on Topic Index page for terminology reference
+
+#### Joint Action Deliverables Update
+- Scraped and added 10 new deliverables from Xt-EHR (Primary Use) and TEHDAS2 (Secondary Use)
+- Direct PDF links to deliverables with article mappings
+- Updated existing data containers with latest Joint Action content
+
+#### Stakeholder Landing Page Enhancements
+- Replaced static "Key Articles" sections with dynamic TopicIndexTable component
+- Topic-based navigation with category grouping on For Citizens, For Health Tech, and For Healthcare Pros pages
+
+---
+
 ## [1.8.8] - 2026-02-01
 
 ### Added

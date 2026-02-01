@@ -62,8 +62,11 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 
 ### 🔗 External Resources Linking
 - **Joint Action Deliverables** - Links to deliverables from EHDS-related joint actions
+  - **Xt-EHR deliverables** - Primary use focused resources
+  - **TEHDAS2 deliverables** - Secondary use focused resources
 - **Published Works** - Academic research and publications linked to articles and implementing acts
 - **Live Deliverables** - Direct links to EHDS acceptance data platform resources
+- **External Glossary** - Links to [Xt-EHR Glossary](https://www.xt-ehr.eu/glossary-list/) for terminology reference
 
 ### ✏️ Annotations & Notes
 - **Inline text highlighting** - Select text on articles, recitals, or implementing acts to highlight
@@ -139,6 +142,11 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
   - Article citations with direct links to content
   - Compliance guidance and documentation tips
   - Disclaimer about evolving implementing acts
+- **Topic Index** - Consolidated topic-to-article reference at `/topic-index`
+  - Database-driven mappings organized by stakeholder type
+  - Tabbed interface for Citizens, Health Tech, and Healthcare Professionals
+  - Direct links to related articles and recitals
+  - External glossary integration with [Xt-EHR Glossary](https://www.xt-ehr.eu/glossary-list/)
 - **For Citizens** page - Rights-based guide for personal health data access
 - **For Health Tech** page - Interactive compliance checklist with progress tracking
 - **For Healthcare Professionals** page - Workflow-oriented clinical scenarios

@@ -2641,6 +2641,48 @@ export type Database = {
         }
         Relationships: []
       }
+      topic_article_index: {
+        Row: {
+          article_numbers: number[]
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          recital_numbers: number[]
+          sort_order: number
+          stakeholder_type: string
+          topic: string
+          updated_at: string
+        }
+        Insert: {
+          article_numbers?: number[]
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          recital_numbers?: number[]
+          sort_order?: number
+          stakeholder_type: string
+          topic: string
+          updated_at?: string
+        }
+        Update: {
+          article_numbers?: number[]
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          recital_numbers?: number[]
+          sort_order?: number
+          stakeholder_type?: string
+          topic?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ui_translations: {
         Row: {
           context: string | null

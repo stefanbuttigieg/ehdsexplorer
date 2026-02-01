@@ -93,6 +93,7 @@ import ForHealthTechPage from "./pages/ForHealthTechPage";
 import ForHealthcareProPage from "./pages/ForHealthcareProPage";
 import ScenarioFinderPage from "./pages/ScenarioFinderPage";
 import AdminLandingPagesPage from "./pages/AdminLandingPagesPage";
+import AdminTopicIndexPage from "./pages/AdminTopicIndexPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -205,6 +206,7 @@ const App = () => (
             <Route path="/admin/role-permissions" element={<AdminRolePermissionsPage />} />
             <Route path="/admin/feature-flags" element={<AdminFeatureFlagsPage />} />
             <Route path="/admin/landing-pages" element={<AdminLandingPagesPage />} />
+            <Route path="/admin/topic-index" element={<AdminTopicIndexPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </MaintenanceGuard>

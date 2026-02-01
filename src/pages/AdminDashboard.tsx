@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote, HelpCircle, BookOpenCheck, Mail, Newspaper, UserCircle, Languages, ClipboardCheck, Bot, Globe, Sparkles, MapPin, Shield, Gavel, Settings2, UserCog, ToggleRight, ClipboardList } from 'lucide-react';
+import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote, HelpCircle, BookOpenCheck, Mail, Newspaper, UserCircle, Languages, ClipboardCheck, Bot, Globe, Sparkles, MapPin, Shield, Gavel, Settings2, UserCog, ToggleRight, ClipboardList, TableProperties } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -210,6 +210,12 @@ const AdminDashboard = () => {
       description: 'Manage stakeholder content for Citizens, Health Tech, and Healthcare pages',
       icon: Sparkles,
       href: '/admin/landing-pages',
+    },
+    {
+      title: 'Topic Index',
+      description: 'Map topics to EHDS articles for quick reference on landing pages',
+      icon: TableProperties,
+      href: '/admin/topic-index',
     },
   ];
 

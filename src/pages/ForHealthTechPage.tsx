@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import Layout from "@/components/Layout";
+import TopicIndexTable from "@/components/TopicIndexTable";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -258,37 +259,14 @@ export default function ForHealthTechPage() {
           ))}
         </div>
 
-        {/* Relevant Articles by Theme */}
+        {/* Topic Index */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold mb-6">Key Articles by Theme</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            {HEALTH_TECH_ARTICLE_GROUPS.map((group) => (
-              <Card key={group.title}>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">{group.title}</CardTitle>
-                  <CardDescription>{group.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {group.articles.map((article) => (
-                      <li key={article.number}>
-                        <Link
-                          to={`/article/${article.number}`}
-                          className="flex items-center gap-2 text-sm hover:text-primary transition-colors group"
-                        >
-                          <Badge variant="outline" className="shrink-0">
-                            Art. {article.number}
-                          </Badge>
-                          <span className="group-hover:underline">{article.title}</span>
-                          <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <TopicIndexTable 
+            stakeholderType="healthtech"
+            title="Find Articles by Topic"
+            description="Quick reference mapping compliance topics to relevant EHDS articles and recitals"
+            showRecitals={true}
+          />
         </div>
 
         {/* FAQ Accordion */}

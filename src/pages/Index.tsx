@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { SearchCommand } from "@/components/SearchCommand";
-import { Search, Book, FileText, Scale, ListChecks, Bookmark, Files, Clock, MessageSquare, ExternalLink, Gamepad2, Newspaper, StickyNote, GraduationCap, Brain, Heart, Laptop, Stethoscope, Sparkles } from "lucide-react";
+import { Search, Book, FileText, Scale, ListChecks, Bookmark, Files, Clock, MessageSquare, ExternalLink, Gamepad2, Newspaper, StickyNote, GraduationCap, Brain, Heart, Laptop, Stethoscope, Sparkles, Grid3X3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -329,6 +329,17 @@ const Index = () => {
                     <div>
                       <p className="font-semibold">Quiz Challenge</p>
                       <p className="text-sm text-muted-foreground">Test yourself</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link to="/word-search">
+                <Card className="hover:border-primary transition-colors cursor-pointer h-full">
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <Grid3X3 className="h-8 w-8 text-primary" />
+                    <div>
+                      <p className="font-semibold">Word Search</p>
+                      <p className="text-sm text-muted-foreground">Find terms</p>
                     </div>
                   </CardContent>
                 </Card>

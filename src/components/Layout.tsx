@@ -178,7 +178,9 @@ const Layout = ({
         <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)}>
           <Menu className="h-5 w-5" />
         </Button>
-        <Link to="/" className="font-serif font-bold text-lg">EHDS Explorer</Link>
+        <Link to="/" className="flex items-center justify-center w-8 h-8 bg-primary rounded-md">
+          <Book className="h-4 w-4 text-primary-foreground" />
+        </Link>
         <div className="flex items-center gap-1" data-tour="accessibility">
           <StakeholderFilter compact />
           <LanguageSelector variant="compact" />

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { SearchCommand } from "@/components/SearchCommand";
-import { Search, Book, FileText, Scale, ListChecks, Bookmark, Files, Clock, MessageSquare, ExternalLink, Gamepad2, Newspaper, StickyNote, GraduationCap, Brain } from "lucide-react";
+import { Search, Book, FileText, Scale, ListChecks, Bookmark, Files, Clock, MessageSquare, ExternalLink, Gamepad2, Newspaper, StickyNote, GraduationCap, Brain, Heart, Laptop, Stethoscope, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -174,6 +174,59 @@ const Index = () => {
                 </CardContent>
               </Card>
             )}
+          </div>
+        </section>
+
+        {/* Stakeholder Guides & Tools */}
+        <section className="py-8 px-4 border-b border-border bg-gradient-to-r from-primary/5 via-secondary/5 to-accent/5">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-xl font-bold mb-4 font-serif">Tailored Guidance</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Link to="/for/citizens">
+                <Card className="hover:border-primary transition-colors cursor-pointer h-full bg-gradient-to-br from-pink-500/10 to-transparent border-pink-500/30">
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <Heart className="h-8 w-8 text-pink-500" />
+                    <div>
+                      <p className="font-semibold">For Citizens</p>
+                      <p className="text-sm text-muted-foreground">Your data rights</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link to="/for/healthtech">
+                <Card className="hover:border-primary transition-colors cursor-pointer h-full bg-gradient-to-br from-blue-500/10 to-transparent border-blue-500/30">
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <Laptop className="h-8 w-8 text-blue-500" />
+                    <div>
+                      <p className="font-semibold">For Health Tech</p>
+                      <p className="text-sm text-muted-foreground">Compliance checklist</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link to="/for/healthcare-professionals">
+                <Card className="hover:border-primary transition-colors cursor-pointer h-full bg-gradient-to-br from-green-500/10 to-transparent border-green-500/30">
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <Stethoscope className="h-8 w-8 text-green-500" />
+                    <div>
+                      <p className="font-semibold">For Healthcare Pros</p>
+                      <p className="text-sm text-muted-foreground">Workflow guides</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link to="/scenario-finder">
+                <Card className="hover:border-primary transition-colors cursor-pointer h-full bg-gradient-to-br from-purple-500/10 to-transparent border-purple-500/30">
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <Sparkles className="h-8 w-8 text-purple-500" />
+                    <div>
+                      <p className="font-semibold">Scenario Finder</p>
+                      <p className="text-sm text-muted-foreground">AI-powered guidance</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            </div>
           </div>
         </section>
 

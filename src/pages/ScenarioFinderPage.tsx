@@ -352,6 +352,17 @@ const ScenarioFinderPage = () => {
           </div>
         )}
 
+        {/* Disclaimer */}
+        <Alert className="mt-8 border-amber-500/50 bg-amber-500/10">
+          <AlertCircle className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="text-sm">
+            <strong>Important:</strong> EHDS implementing acts are still under development by the European Commission. 
+            Compliance requirements and technical specifications will evolve as these acts are finalized. 
+            The guidance provided here reflects the current state of the regulation and should be reviewed 
+            as new implementing acts are adopted. Always consult official sources for the latest requirements.
+          </AlertDescription>
+        </Alert>
+
         {/* Info Section */}
         {!result && (
           <div className="mt-12 grid gap-6 md:grid-cols-3">

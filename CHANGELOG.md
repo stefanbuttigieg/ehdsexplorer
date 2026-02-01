@@ -13,6 +13,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.8.8] - 2026-02-01
+
+### Added
+
+#### Scenario-Driven Guidance System
+- New AI-powered Scenario Finder page at `/scenario-finder`
+- 18 predefined scenario templates organized by stakeholder type (Citizen, Health Tech, Research, etc.)
+- Custom scenario input with AI analysis via `ehds-assistant` edge function
+- Structured output with article citations (clickable links), compliance guidance, and documentation tips
+- Clear disclaimers about implementing acts still being under development
+
+#### Stakeholder Landing Pages
+- **For Citizens** (`/for/citizens`): Rights-based guide with access, correction, and portability information
+- **For Health Tech** (`/for/healthtech`): Interactive compliance checklist with progress tracking (persisted in localStorage)
+- **For Healthcare Professionals** (`/for/healthcare-professionals`): Workflow-oriented clinical scenarios with step-by-step EHDS obligations
+
+#### Navigation Improvements
+- Added "Tailored Guidance" section on home page with quick access cards for all stakeholder pages and Scenario Finder
+- Added sidebar navigation items for For Citizens, For Health Tech, For Healthcare Pros, and Scenario Finder
+
+---
+
 ## [1.8.7] - 2026-01-28
 
 ### Fixed

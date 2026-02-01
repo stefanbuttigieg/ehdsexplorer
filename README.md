@@ -132,6 +132,17 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
   - Export to ICS (calendar), CSV (spreadsheet), and JSON formats
   - Hover interactions with milestone highlighting
 
+### 🎯 Stakeholder Guidance
+- **Scenario Finder** - AI-powered situation analysis at `/scenario-finder`
+  - 18 predefined scenario templates by stakeholder type
+  - Custom scenario input with structured AI analysis
+  - Article citations with direct links to content
+  - Compliance guidance and documentation tips
+  - Disclaimer about evolving implementing acts
+- **For Citizens** page - Rights-based guide for personal health data access
+- **For Health Tech** page - Interactive compliance checklist with progress tracking
+- **For Healthcare Professionals** page - Workflow-oriented clinical scenarios
+
 ### 🎮 Learning Tools & Gamification
 - **Match Game** - Card-matching game to learn EHDS terminology by pairing terms with definitions
   - Selectable difficulty levels (4, 6, or 8 pairs)

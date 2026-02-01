@@ -7,10 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { useRecitals } from "@/hooks/useRecitals";
+import { useFilteredRecitals } from "@/hooks/useRecitals";
 import { DataExportButtons } from "@/components/DataExportButtons";
 import { EliReference } from "@/components/EliReference";
 import { HighlightedText } from "@/components/HighlightedText";
+import { StakeholderFilterBadge } from "@/components/StakeholderFilter";
+import { useStakeholder } from "@/contexts/StakeholderContext";
 import Fuse from "fuse.js";
 
 const RecitalsPage = () => {
@@ -18,7 +20,15 @@ const RecitalsPage = () => {
   const selectedId = id ? parseInt(id) : null;
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: recitals, isLoading } = useRecitals();
+  const { 
+    recitals, 
+    allRecitals, 
+    isLoading, 
+    isFiltered, 
+    totalCount, 
+    filteredCount 
+  } = useFilteredRecitals();
+  const { activeStakeholder, getStakeholderConfig } = useStakeholder();
 
   // Create searchable data with normalized content
   const searchableRecitals = useMemo(() => {
@@ -102,6 +112,7 @@ const RecitalsPage = () => {
     recital_number: r.recital_number,
     content: r.content,
     related_articles: r.related_articles,
+    stakeholder_tags: r.stakeholder_tags,
   })) || [];
 
   // Get context snippet around the match
@@ -126,6 +137,8 @@ const RecitalsPage = () => {
     return snippet;
   };
 
+  const stakeholderConfig = activeStakeholder ? getStakeholderConfig(activeStakeholder) : null;
+
   return (
     <Layout>
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
@@ -138,7 +151,9 @@ const RecitalsPage = () => {
             <p className="text-muted-foreground mb-2">
               {selectedId 
                 ? "Context and interpretation guidance" 
-                : `The ${recitals?.length || ''} recitals providing context and interpretation guidance`}
+                : isFiltered
+                  ? `Showing ${filteredCount} of ${totalCount} recitals relevant to ${stakeholderConfig?.label}`
+                  : `The ${totalCount || ''} recitals providing context and interpretation guidance`}
             </p>
             <EliReference type="regulation" />
           </div>
@@ -146,6 +161,13 @@ const RecitalsPage = () => {
             <DataExportButtons data={exportData} filename="ehds-recitals" />
           )}
         </div>
+
+        {/* Active filter badge */}
+        {isFiltered && !selectedId && (
+          <div className="mb-4">
+            <StakeholderFilterBadge />
+          </div>
+        )}
 
         {/* Search */}
         {!selectedId && (
@@ -225,7 +247,12 @@ const RecitalsPage = () => {
         ) : (
           <div className="text-center py-8">
             <p className="text-muted-foreground">
-              {searchQuery ? `No recitals found matching "${searchQuery}".` : "No recitals available."}
+              {searchQuery 
+                ? `No recitals found matching "${searchQuery}".` 
+                : isFiltered
+                  ? `No recitals tagged for ${stakeholderConfig?.label}. Try clearing the filter.`
+                  : "No recitals available."
+              }
             </p>
             {searchQuery && (
               <p className="text-sm text-muted-foreground mt-2">

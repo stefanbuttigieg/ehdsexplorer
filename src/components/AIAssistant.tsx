@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useEHDSAssistant } from '@/hooks/useEHDSAssistant';
 import { useAIPreferences } from '@/hooks/useAIPreferences';
+import { useStakeholder, useStakeholderAIRole } from '@/contexts/StakeholderContext';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import { supabase } from '@/integrations/supabase/client';
@@ -60,6 +61,12 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
     setSimplifyMode,
   } = useAIPreferences();
 
+  // Get stakeholder-derived AI role (if stakeholder filter is active)
+  const stakeholderAIRole = useStakeholderAIRole();
+  
+  // Use stakeholder role if active, otherwise use user's preferred role
+  const effectiveRole = stakeholderAIRole || role;
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -88,7 +95,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
     sendMessage(input.trim(), { 
-      role, 
+      role: effectiveRole, 
       explainLevel: simplifyMode ? explainLevel : 'professional' 
     });
     setInput('');
@@ -96,7 +103,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
 
   const handleQuickSend = (message: string) => {
     sendMessage(message, { 
-      role, 
+      role: effectiveRole, 
       explainLevel: simplifyMode ? explainLevel : 'professional' 
     });
   };

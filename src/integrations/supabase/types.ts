@@ -446,7 +446,9 @@ export type Database = {
           content: string
           created_at: string
           id: number
+          is_key_provision: boolean | null
           section_id: number | null
+          stakeholder_tags: string[] | null
           title: string
           updated_at: string
         }
@@ -456,7 +458,9 @@ export type Database = {
           content: string
           created_at?: string
           id?: number
+          is_key_provision?: boolean | null
           section_id?: number | null
+          stakeholder_tags?: string[] | null
           title: string
           updated_at?: string
         }
@@ -466,7 +470,9 @@ export type Database = {
           content?: string
           created_at?: string
           id?: number
+          is_key_provision?: boolean | null
           section_id?: number | null
+          stakeholder_tags?: string[] | null
           title?: string
           updated_at?: string
         }
@@ -2086,6 +2092,7 @@ export type Database = {
           id: string
           preferred_ai_role: string | null
           preferred_explain_level: string | null
+          stakeholder_filter: string | null
           updated_at: string
           user_id: string
         }
@@ -2096,6 +2103,7 @@ export type Database = {
           id?: string
           preferred_ai_role?: string | null
           preferred_explain_level?: string | null
+          stakeholder_filter?: string | null
           updated_at?: string
           user_id: string
         }
@@ -2106,6 +2114,7 @@ export type Database = {
           id?: string
           preferred_ai_role?: string | null
           preferred_explain_level?: string | null
+          stakeholder_filter?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -2241,6 +2250,7 @@ export type Database = {
           id: number
           recital_number: number
           related_articles: number[] | null
+          stakeholder_tags: string[] | null
           updated_at: string
         }
         Insert: {
@@ -2249,6 +2259,7 @@ export type Database = {
           id?: number
           recital_number: number
           related_articles?: number[] | null
+          stakeholder_tags?: string[] | null
           updated_at?: string
         }
         Update: {
@@ -2257,6 +2268,7 @@ export type Database = {
           id?: number
           recital_number?: number
           related_articles?: number[] | null
+          stakeholder_tags?: string[] | null
           updated_at?: string
         }
         Relationships: []

@@ -4,18 +4,30 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Search, Star, Filter } from "lucide-react";
 import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { useArticles } from "@/hooks/useArticles";
+import { useFilteredArticles } from "@/hooks/useArticles";
 import { DataExportButtons } from "@/components/DataExportButtons";
 import { EliReference } from "@/components/EliReference";
 import { HighlightedText } from "@/components/HighlightedText";
+import { StakeholderFilterBadge } from "@/components/StakeholderFilter";
+import { useStakeholder } from "@/contexts/StakeholderContext";
 import Fuse from "fuse.js";
 
 const ArticlesPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: articles, isLoading } = useArticles();
+  const { 
+    articles, 
+    allArticles, 
+    keyProvisions, 
+    isLoading, 
+    isFiltered, 
+    totalCount, 
+    filteredCount 
+  } = useFilteredArticles();
+  const { activeStakeholder, getStakeholderConfig } = useStakeholder();
 
   // Create searchable data with normalized content
   const searchableArticles = useMemo(() => {
@@ -75,6 +87,8 @@ const ArticlesPage = () => {
     title: a.title,
     content: a.content,
     chapter_id: a.chapter_id,
+    stakeholder_tags: a.stakeholder_tags,
+    is_key_provision: a.is_key_provision,
   })) || [];
 
   // Get context snippet around the match
@@ -99,6 +113,8 @@ const ArticlesPage = () => {
     return snippet;
   };
 
+  const stakeholderConfig = activeStakeholder ? getStakeholderConfig(activeStakeholder) : null;
+
   return (
     <Layout>
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
@@ -107,7 +123,11 @@ const ArticlesPage = () => {
           <div>
             <h1 className="text-3xl font-bold font-serif mb-2">Articles</h1>
             <p className="text-muted-foreground mb-2">
-              Browse all {articles?.length || ''} articles of the EHDS Regulation
+              {isFiltered ? (
+                <>Showing {filteredCount} of {totalCount} articles relevant to {stakeholderConfig?.label}</>
+              ) : (
+                <>Browse all {totalCount || ''} articles of the EHDS Regulation</>
+              )}
             </p>
             <EliReference type="regulation" />
           </div>
@@ -115,6 +135,32 @@ const ArticlesPage = () => {
             <DataExportButtons data={exportData} filename="ehds-articles" />
           )}
         </div>
+
+        {/* Active filter badge */}
+        {isFiltered && (
+          <div className="mb-4">
+            <StakeholderFilterBadge />
+          </div>
+        )}
+
+        {/* Key provisions highlight for filtered view */}
+        {isFiltered && keyProvisions.length > 0 && (
+          <Alert className="mb-4 border-primary/30 bg-primary/5">
+            <Star className="h-4 w-4 text-primary" />
+            <AlertDescription>
+              <span className="font-medium">Key provisions for {stakeholderConfig?.label}:</span>{" "}
+              {keyProvisions.slice(0, 5).map((a, idx) => (
+                <span key={a.article_number}>
+                  <Link to={`/article/${a.article_number}`} className="text-primary hover:underline">
+                    Art. {a.article_number}
+                  </Link>
+                  {idx < Math.min(keyProvisions.length, 5) - 1 && ", "}
+                </span>
+              ))}
+              {keyProvisions.length > 5 && ` and ${keyProvisions.length - 5} more`}
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Search */}
         <div className="relative mb-6 mt-4">
@@ -151,14 +197,19 @@ const ArticlesPage = () => {
         ) : filteredArticles && filteredArticles.length > 0 ? (
           <div className="space-y-4">
             {filteredArticles.map((article) => (
-              <Card key={article.id}>
+              <Card key={article.id} className={article.is_key_provision && isFiltered ? 'border-primary/50' : ''}>
                 <CardContent className="p-5">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
                     <Link to={`/article/${article.article_number}`}>
                       <Badge variant="outline" className="hover:bg-primary/10 cursor-pointer">
                         Article {article.article_number}
                       </Badge>
                     </Link>
+                    {article.is_key_provision && isFiltered && (
+                      <Badge variant="secondary" className="gap-1 text-xs">
+                        <Star className="h-3 w-3" /> Key
+                      </Badge>
+                    )}
                     {article.chapter_id && (
                       <Link to={`/chapter/${article.chapter_id}`}>
                         <span className="text-xs text-muted-foreground hover:underline">
@@ -186,7 +237,12 @@ const ArticlesPage = () => {
         ) : (
           <div className="text-center py-8">
             <p className="text-muted-foreground">
-              {searchQuery ? `No articles found matching "${searchQuery}".` : "No articles available."}
+              {searchQuery 
+                ? `No articles found matching "${searchQuery}".` 
+                : isFiltered 
+                  ? `No articles tagged for ${stakeholderConfig?.label}. Try clearing the filter.`
+                  : "No articles available."
+              }
             </p>
             {searchQuery && (
               <p className="text-sm text-muted-foreground mt-2">

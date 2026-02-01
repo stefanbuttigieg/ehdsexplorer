@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import {
   useCitizenRights,
   useCitizenRightMutations,
@@ -64,56 +65,67 @@ function CitizenRightsTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <p className="text-sm text-muted-foreground">Manage citizen rights displayed on the Citizens landing page</p>
-        <Button onClick={() => { setEditingRight({ id: '', title: '', description: '', article_numbers: [], icon: 'FileText', category: 'access', sort_order: (rights?.length || 0) + 1, is_active: true }); setIsDialogOpen(true); }}>
+        <Button 
+          className="w-full sm:w-auto" 
+          onClick={() => { 
+            setEditingRight({ id: '', title: '', description: '', article_numbers: [], icon: 'FileText', category: 'access', sort_order: (rights?.length || 0) + 1, is_active: true }); 
+            setIsDialogOpen(true); 
+          }}
+        >
           <Plus className="h-4 w-4 mr-2" /> Add Right
         </Button>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Title</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Articles</TableHead>
-            <TableHead>Active</TableHead>
-            <TableHead className="w-24">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {rights?.map((right) => (
-            <TableRow key={right.id}>
-              <TableCell className="font-medium">{right.title}</TableCell>
-              <TableCell>
-                <Badge className={categoryColors[right.category]}>{right.category}</Badge>
-              </TableCell>
-              <TableCell>{right.article_numbers.map(n => `Art. ${n}`).join(', ')}</TableCell>
-              <TableCell>
-                <Switch checked={right.is_active} onCheckedChange={() => handleToggleActive(right)} />
-              </TableCell>
-              <TableCell>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" onClick={() => { setEditingRight(right); setIsDialogOpen(true); }}>
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => remove.mutate(right.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <ScrollArea className="w-full">
+        <div className="min-w-[600px]">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Title</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Articles</TableHead>
+                <TableHead>Active</TableHead>
+                <TableHead className="w-24">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rights?.map((right) => (
+                <TableRow key={right.id}>
+                  <TableCell className="font-medium">{right.title}</TableCell>
+                  <TableCell>
+                    <Badge className={categoryColors[right.category]}>{right.category}</Badge>
+                  </TableCell>
+                  <TableCell>{right.article_numbers.map(n => `Art. ${n}`).join(', ')}</TableCell>
+                  <TableCell>
+                    <Switch checked={right.is_active} onCheckedChange={() => handleToggleActive(right)} />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => { setEditingRight(right); setIsDialogOpen(true); }}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => remove.mutate(right.id)}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingRight?.id ? 'Edit' : 'Add'} Citizen Right</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>ID (slug)</Label>
                 <Input value={editingRight?.id || ''} onChange={(e) => setEditingRight({ ...editingRight, id: e.target.value })} placeholder="access-data" />
@@ -131,7 +143,7 @@ function CitizenRightsTab() {
               <Label>Description</Label>
               <Textarea value={editingRight?.description || ''} onChange={(e) => setEditingRight({ ...editingRight, description: e.target.value })} />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Category</Label>
                 <Select value={editingRight?.category} onValueChange={(v) => setEditingRight({ ...editingRight, category: v as CitizenRight['category'] })}>
@@ -145,7 +157,7 @@ function CitizenRightsTab() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Article Numbers (comma-separated)</Label>
+                <Label>Article Numbers</Label>
                 <Input value={editingRight?.article_numbers?.join(', ') || ''} onChange={(e) => setEditingRight({ ...editingRight, article_numbers: e.target.value.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n)) })} placeholder="3, 7" />
               </div>
             </div>
@@ -154,9 +166,9 @@ function CitizenRightsTab() {
               <Input type="number" value={editingRight?.sort_order || 0} onChange={(e) => setEditingRight({ ...editingRight, sort_order: parseInt(e.target.value) })} />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave} disabled={upsert.isPending}>Save</Button>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="w-full sm:w-auto">Cancel</Button>
+            <Button onClick={handleSave} disabled={upsert.isPending} className="w-full sm:w-auto">Save</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -206,9 +218,15 @@ function HealthTechTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <p className="text-sm text-muted-foreground">Manage compliance categories and checklist items</p>
-        <Button onClick={() => { setEditingCat({ id: '', title: '', description: '', icon: 'Server', sort_order: (categories?.length || 0) + 1, is_active: true }); setIsCatDialogOpen(true); }}>
+        <Button 
+          className="w-full sm:w-auto"
+          onClick={() => { 
+            setEditingCat({ id: '', title: '', description: '', icon: 'Server', sort_order: (categories?.length || 0) + 1, is_active: true }); 
+            setIsCatDialogOpen(true); 
+          }}
+        >
           <Plus className="h-4 w-4 mr-2" /> Add Category
         </Button>
       </div>
@@ -222,21 +240,21 @@ function HealthTechTab() {
             <Collapsible key={cat.id} open={isExpanded} onOpenChange={() => setExpandedCat(isExpanded ? null : cat.id)}>
               <Card>
                 <CollapsibleTrigger asChild>
-                  <CardHeader className="cursor-pointer hover:bg-muted/50">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                        <div>
-                          <CardTitle className="text-base">{cat.title}</CardTitle>
+                  <CardHeader className="cursor-pointer hover:bg-muted/50 p-3 sm:p-6">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                        {isExpanded ? <ChevronDown className="h-4 w-4 flex-shrink-0" /> : <ChevronRight className="h-4 w-4 flex-shrink-0" />}
+                        <div className="min-w-0">
+                          <CardTitle className="text-sm sm:text-base truncate">{cat.title}</CardTitle>
                           <CardDescription className="text-xs">{catItems.length} items</CardDescription>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                         <Switch checked={cat.is_active} onCheckedChange={() => upsertCat.mutate({ ...cat, is_active: !cat.is_active })} />
-                        <Button variant="ghost" size="icon" onClick={() => { setEditingCat(cat); setIsCatDialogOpen(true); }}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditingCat(cat); setIsCatDialogOpen(true); }}>
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => removeCat.mutate(cat.id)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeCat.mutate(cat.id)}>
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </div>
@@ -244,47 +262,59 @@ function HealthTechTab() {
                   </CardHeader>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <CardContent className="pt-0">
+                  <CardContent className="pt-0 px-3 sm:px-6 pb-3 sm:pb-6">
                     <div className="flex justify-end mb-2">
-                      <Button size="sm" variant="outline" onClick={() => { setEditingItem({ id: '', category_id: cat.id, requirement: '', description: '', article_references: [], evidence_hint: '', priority: 'medium', sort_order: catItems.length + 1, is_active: true }); setIsItemDialogOpen(true); }}>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        onClick={() => { 
+                          setEditingItem({ id: '', category_id: cat.id, requirement: '', description: '', article_references: [], evidence_hint: '', priority: 'medium', sort_order: catItems.length + 1, is_active: true }); 
+                          setIsItemDialogOpen(true); 
+                        }}
+                      >
                         <Plus className="h-3 w-3 mr-1" /> Add Item
                       </Button>
                     </div>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Requirement</TableHead>
-                          <TableHead>Priority</TableHead>
-                          <TableHead>Articles</TableHead>
-                          <TableHead>Active</TableHead>
-                          <TableHead className="w-24">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {catItems.map((item) => (
-                          <TableRow key={item.id}>
-                            <TableCell className="font-medium">{item.requirement}</TableCell>
-                            <TableCell>
-                              <Badge className={priorityColors[item.priority]}>{item.priority}</Badge>
-                            </TableCell>
-                            <TableCell>{item.article_references.map(n => `Art. ${n}`).join(', ')}</TableCell>
-                            <TableCell>
-                              <Switch checked={item.is_active} onCheckedChange={() => upsertItem.mutate({ ...item, is_active: !item.is_active })} />
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex gap-1">
-                                <Button variant="ghost" size="icon" onClick={() => { setEditingItem(item); setIsItemDialogOpen(true); }}>
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                                <Button variant="ghost" size="icon" onClick={() => removeItem.mutate(item.id)}>
-                                  <Trash2 className="h-4 w-4 text-destructive" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                    <ScrollArea className="w-full">
+                      <div className="min-w-[500px]">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Requirement</TableHead>
+                              <TableHead>Priority</TableHead>
+                              <TableHead>Articles</TableHead>
+                              <TableHead>Active</TableHead>
+                              <TableHead className="w-24">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {catItems.map((item) => (
+                              <TableRow key={item.id}>
+                                <TableCell className="font-medium max-w-[200px] truncate">{item.requirement}</TableCell>
+                                <TableCell>
+                                  <Badge className={priorityColors[item.priority]}>{item.priority}</Badge>
+                                </TableCell>
+                                <TableCell>{item.article_references.map(n => `Art. ${n}`).join(', ')}</TableCell>
+                                <TableCell>
+                                  <Switch checked={item.is_active} onCheckedChange={() => upsertItem.mutate({ ...item, is_active: !item.is_active })} />
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex gap-1">
+                                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditingItem(item); setIsItemDialogOpen(true); }}>
+                                      <Pencil className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeItem.mutate(item.id)}>
+                                      <Trash2 className="h-4 w-4 text-destructive" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                      <ScrollBar orientation="horizontal" />
+                    </ScrollArea>
                   </CardContent>
                 </CollapsibleContent>
               </Card>
@@ -295,12 +325,12 @@ function HealthTechTab() {
 
       {/* Category Dialog */}
       <Dialog open={isCatDialogOpen} onOpenChange={setIsCatDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingCat?.id ? 'Edit' : 'Add'} Category</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>ID (slug)</Label>
                 <Input value={editingCat?.id || ''} onChange={(e) => setEditingCat({ ...editingCat, id: e.target.value })} />
@@ -319,21 +349,21 @@ function HealthTechTab() {
               <Textarea value={editingCat?.description || ''} onChange={(e) => setEditingCat({ ...editingCat, description: e.target.value })} />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCatDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveCat} disabled={upsertCat.isPending}>Save</Button>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setIsCatDialogOpen(false)} className="w-full sm:w-auto">Cancel</Button>
+            <Button onClick={handleSaveCat} disabled={upsertCat.isPending} className="w-full sm:w-auto">Save</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Item Dialog */}
       <Dialog open={isItemDialogOpen} onOpenChange={setIsItemDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingItem?.id ? 'Edit' : 'Add'} Compliance Item</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>ID (slug)</Label>
                 <Input value={editingItem?.id || ''} onChange={(e) => setEditingItem({ ...editingItem, id: e.target.value })} />
@@ -367,9 +397,9 @@ function HealthTechTab() {
               <Input value={editingItem?.article_references?.join(', ') || ''} onChange={(e) => setEditingItem({ ...editingItem, article_references: e.target.value.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n)) })} />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsItemDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveItem} disabled={upsertItem.isPending}>Save</Button>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setIsItemDialogOpen(false)} className="w-full sm:w-auto">Cancel</Button>
+            <Button onClick={handleSaveItem} disabled={upsertItem.isPending} className="w-full sm:w-auto">Save</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -413,103 +443,132 @@ function HealthcareTab() {
 
   return (
     <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
-      <TabsList className="mb-4">
-        <TabsTrigger value="workflows">Clinical Workflows</TabsTrigger>
-        <TabsTrigger value="patient-rights">Patient Rights</TabsTrigger>
-      </TabsList>
+      <ScrollArea className="w-full">
+        <TabsList className="mb-4 w-full sm:w-auto">
+          <TabsTrigger value="workflows" className="flex-1 sm:flex-initial text-xs sm:text-sm">
+            <span className="hidden sm:inline">Clinical </span>Workflows
+          </TabsTrigger>
+          <TabsTrigger value="patient-rights" className="flex-1 sm:flex-initial text-xs sm:text-sm">
+            <span className="hidden sm:inline">Patient </span>Rights
+          </TabsTrigger>
+        </TabsList>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
 
       <TabsContent value="workflows" className="space-y-4">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <p className="text-sm text-muted-foreground">Clinical workflow scenarios for healthcare professionals</p>
-          <Button onClick={() => { setEditingWorkflow({ id: '', title: '', description: '', icon: 'FileText', scenario: '', key_takeaway: '', sort_order: (workflows?.length || 0) + 1, is_active: true }); setIsWfDialogOpen(true); }}>
+          <Button 
+            className="w-full sm:w-auto"
+            onClick={() => { 
+              setEditingWorkflow({ id: '', title: '', description: '', icon: 'FileText', scenario: '', key_takeaway: '', sort_order: (workflows?.length || 0) + 1, is_active: true }); 
+              setIsWfDialogOpen(true); 
+            }}
+          >
             <Plus className="h-4 w-4 mr-2" /> Add Workflow
           </Button>
         </div>
 
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Active</TableHead>
-              <TableHead className="w-24">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {workflows?.map((wf) => (
-              <TableRow key={wf.id}>
-                <TableCell className="font-medium">{wf.title}</TableCell>
-                <TableCell className="max-w-xs truncate">{wf.description}</TableCell>
-                <TableCell>
-                  <Switch checked={wf.is_active} onCheckedChange={() => upsertWorkflow.mutate({ ...wf, is_active: !wf.is_active })} />
-                </TableCell>
-                <TableCell>
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => { setEditingWorkflow(wf); setIsWfDialogOpen(true); }}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => removeWorkflow.mutate(wf.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <ScrollArea className="w-full">
+          <div className="min-w-[500px]">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Title</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Active</TableHead>
+                  <TableHead className="w-24">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {workflows?.map((wf) => (
+                  <TableRow key={wf.id}>
+                    <TableCell className="font-medium">{wf.title}</TableCell>
+                    <TableCell className="max-w-[200px] truncate">{wf.description}</TableCell>
+                    <TableCell>
+                      <Switch checked={wf.is_active} onCheckedChange={() => upsertWorkflow.mutate({ ...wf, is_active: !wf.is_active })} />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditingWorkflow(wf); setIsWfDialogOpen(true); }}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeWorkflow.mutate(wf.id)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
       </TabsContent>
 
       <TabsContent value="patient-rights" className="space-y-4">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <p className="text-sm text-muted-foreground">Key patient rights for healthcare professionals to know</p>
-          <Button onClick={() => { setEditingRight({ right_name: '', description: '', article_number: 0, practical_implication: '', sort_order: (rights?.length || 0) + 1, is_active: true }); setIsRightDialogOpen(true); }}>
+          <Button 
+            className="w-full sm:w-auto"
+            onClick={() => { 
+              setEditingRight({ right_name: '', description: '', article_number: 0, practical_implication: '', sort_order: (rights?.length || 0) + 1, is_active: true }); 
+              setIsRightDialogOpen(true); 
+            }}
+          >
             <Plus className="h-4 w-4 mr-2" /> Add Right
           </Button>
         </div>
 
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Right</TableHead>
-              <TableHead>Article</TableHead>
-              <TableHead>Practical Implication</TableHead>
-              <TableHead>Active</TableHead>
-              <TableHead className="w-24">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rights?.map((right) => (
-              <TableRow key={right.id}>
-                <TableCell className="font-medium">{right.right_name}</TableCell>
-                <TableCell>Art. {right.article_number}</TableCell>
-                <TableCell className="max-w-xs truncate">{right.practical_implication}</TableCell>
-                <TableCell>
-                  <Switch checked={right.is_active} onCheckedChange={() => upsertRight.mutate({ ...right, is_active: !right.is_active })} />
-                </TableCell>
-                <TableCell>
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => { setEditingRight(right); setIsRightDialogOpen(true); }}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => removeRight.mutate(right.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <ScrollArea className="w-full">
+          <div className="min-w-[500px]">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Right</TableHead>
+                  <TableHead>Article</TableHead>
+                  <TableHead>Practical Implication</TableHead>
+                  <TableHead>Active</TableHead>
+                  <TableHead className="w-24">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rights?.map((right) => (
+                  <TableRow key={right.id}>
+                    <TableCell className="font-medium">{right.right_name}</TableCell>
+                    <TableCell>Art. {right.article_number}</TableCell>
+                    <TableCell className="max-w-[200px] truncate">{right.practical_implication}</TableCell>
+                    <TableCell>
+                      <Switch checked={right.is_active} onCheckedChange={() => upsertRight.mutate({ ...right, is_active: !right.is_active })} />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditingRight(right); setIsRightDialogOpen(true); }}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeRight.mutate(right.id)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
       </TabsContent>
 
       {/* Workflow Dialog */}
       <Dialog open={isWfDialogOpen} onOpenChange={setIsWfDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingWorkflow?.id ? 'Edit' : 'Add'} Clinical Workflow</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 max-h-[60vh] overflow-y-auto">
-            <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>ID (slug)</Label>
                 <Input value={editingWorkflow?.id || ''} onChange={(e) => setEditingWorkflow({ ...editingWorkflow, id: e.target.value })} />
@@ -536,16 +595,16 @@ function HealthcareTab() {
               <Textarea value={editingWorkflow?.key_takeaway || ''} onChange={(e) => setEditingWorkflow({ ...editingWorkflow, key_takeaway: e.target.value })} rows={2} />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsWfDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveWorkflow} disabled={upsertWorkflow.isPending}>Save</Button>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setIsWfDialogOpen(false)} className="w-full sm:w-auto">Cancel</Button>
+            <Button onClick={handleSaveWorkflow} disabled={upsertWorkflow.isPending} className="w-full sm:w-auto">Save</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Patient Right Dialog */}
       <Dialog open={isRightDialogOpen} onOpenChange={setIsRightDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingRight?.id ? 'Edit' : 'Add'} Patient Right</DialogTitle>
           </DialogHeader>
@@ -567,9 +626,9 @@ function HealthcareTab() {
               <Textarea value={editingRight?.practical_implication || ''} onChange={(e) => setEditingRight({ ...editingRight, practical_implication: e.target.value })} />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsRightDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveRight} disabled={upsertRight.isPending}>Save</Button>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setIsRightDialogOpen(false)} className="w-full sm:w-auto">Cancel</Button>
+            <Button onClick={handleSaveRight} disabled={upsertRight.isPending} className="w-full sm:w-auto">Save</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -591,25 +650,34 @@ export default function AdminLandingPagesPage() {
       description="Manage content for stakeholder-specific landing pages"
     >
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mb-6">
-          <TabsTrigger value="citizens" className="gap-2">
-            <Heart className="h-4 w-4" /> Citizens
-          </TabsTrigger>
-          <TabsTrigger value="healthtech" className="gap-2">
-            <Laptop className="h-4 w-4" /> Health Tech
-          </TabsTrigger>
-          <TabsTrigger value="healthcare" className="gap-2">
-            <Stethoscope className="h-4 w-4" /> Healthcare
-          </TabsTrigger>
-        </TabsList>
+        <ScrollArea className="w-full">
+          <TabsList className="mb-6 w-full sm:w-auto">
+            <TabsTrigger value="citizens" className="gap-1 sm:gap-2 flex-1 sm:flex-initial text-xs sm:text-sm px-2 sm:px-4">
+              <Heart className="h-3 w-3 sm:h-4 sm:w-4" /> 
+              <span className="hidden xs:inline">Citizens</span>
+              <span className="xs:hidden">Cit.</span>
+            </TabsTrigger>
+            <TabsTrigger value="healthtech" className="gap-1 sm:gap-2 flex-1 sm:flex-initial text-xs sm:text-sm px-2 sm:px-4">
+              <Laptop className="h-3 w-3 sm:h-4 sm:w-4" /> 
+              <span className="hidden xs:inline">Health Tech</span>
+              <span className="xs:hidden">Tech</span>
+            </TabsTrigger>
+            <TabsTrigger value="healthcare" className="gap-1 sm:gap-2 flex-1 sm:flex-initial text-xs sm:text-sm px-2 sm:px-4">
+              <Stethoscope className="h-3 w-3 sm:h-4 sm:w-4" /> 
+              <span className="hidden xs:inline">Healthcare</span>
+              <span className="xs:hidden">HC</span>
+            </TabsTrigger>
+          </TabsList>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
 
         <TabsContent value="citizens">
           <Card>
-            <CardHeader>
-              <CardTitle>Citizen Rights</CardTitle>
-              <CardDescription>Rights displayed on the For Citizens page</CardDescription>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-base sm:text-lg">Citizen Rights</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">Rights displayed on the For Citizens page</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
               <CitizenRightsTab />
             </CardContent>
           </Card>
@@ -617,11 +685,11 @@ export default function AdminLandingPagesPage() {
 
         <TabsContent value="healthtech">
           <Card>
-            <CardHeader>
-              <CardTitle>Health Tech Compliance</CardTitle>
-              <CardDescription>Compliance categories and checklist items for health tech companies</CardDescription>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-base sm:text-lg">Health Tech Compliance</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">Compliance categories and checklist items for health tech companies</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
               <HealthTechTab />
             </CardContent>
           </Card>
@@ -629,11 +697,11 @@ export default function AdminLandingPagesPage() {
 
         <TabsContent value="healthcare">
           <Card>
-            <CardHeader>
-              <CardTitle>Healthcare Professional Content</CardTitle>
-              <CardDescription>Clinical workflows and patient rights guidance</CardDescription>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-base sm:text-lg">Healthcare Professional Content</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">Clinical workflows and patient rights guidance</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
               <HealthcareTab />
             </CardContent>
           </Card>

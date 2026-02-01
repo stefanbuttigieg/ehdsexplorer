@@ -55,6 +55,7 @@ import NotFound from "./pages/NotFound";
 import MatchGamePage from "./pages/MatchGamePage";
 import FlashcardGamePage from "./pages/FlashcardGamePage";
 import QuizGamePage from "./pages/QuizGamePage";
+import WordSearchGamePage from "./pages/WordSearchGamePage";
 import ApiDocsPage from "./pages/ApiDocsPage";
 import NewsPage from "./pages/NewsPage";
 import NewsDetailPage from "./pages/NewsDetailPage";
@@ -151,6 +152,7 @@ const App = () => (
             <Route path="/match-game" element={<MatchGamePage />} />
             <Route path="/flashcards" element={<FlashcardGamePage />} />
             <Route path="/quiz" element={<QuizGamePage />} />
+            <Route path="/word-search" element={<WordSearchGamePage />} />
             <Route path="/api" element={<ApiDocsPage />} />
             <Route path="/news" element={<NewsPage />} />
             <Route path="/news/:id" element={<NewsDetailPage />} />

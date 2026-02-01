@@ -205,6 +205,12 @@ const AdminDashboard = () => {
       icon: Shield,
       href: '/admin/legal-pages',
     },
+    {
+      title: 'Landing Pages',
+      description: 'Manage stakeholder content for Citizens, Health Tech, and Healthcare pages',
+      icon: Sparkles,
+      href: '/admin/landing-pages',
+    },
   ];
 
   return (

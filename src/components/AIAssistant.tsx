@@ -771,6 +771,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
           "h-14 w-14 rounded-full shadow-lg transition-transform hover:scale-105",
           isOpen && "bg-muted text-muted-foreground hover:bg-muted/80"
         )}
+        aria-label={isOpen ? "Close AI Assistant" : "Open AI Assistant"}
       >
         {isOpen ? (
           <X className="h-6 w-6" />

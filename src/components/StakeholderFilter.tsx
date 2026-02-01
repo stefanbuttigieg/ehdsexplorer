@@ -51,6 +51,7 @@ export function StakeholderFilter({ compact = false, className }: StakeholderFil
             activeStakeholder && "bg-primary text-primary-foreground",
             className
           )}
+          aria-label={activeConfig ? `View as ${activeConfig.shortLabel}` : "Select stakeholder view"}
         >
           {activeConfig ? (
             <>

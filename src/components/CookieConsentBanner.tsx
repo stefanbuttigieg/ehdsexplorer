@@ -89,6 +89,7 @@ const CookieConsentBanner = () => {
                 size="icon"
                 className="h-8 w-8"
                 onClick={() => setShowPreferences(!showPreferences)}
+                aria-label={showPreferences ? "Close cookie preferences" : "Open cookie preferences"}
               >
                 {showPreferences ? <X className="h-4 w-4" /> : <Settings className="h-4 w-4" />}
               </Button>

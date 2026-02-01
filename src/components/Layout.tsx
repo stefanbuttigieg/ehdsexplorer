@@ -191,7 +191,7 @@ const Layout = ({
           <TourButton onClick={startTour} />
           <ReportIssueButton />
           <AccessibilityControls />
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSearchOpen(true)}>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSearchOpen(true)} aria-label="Open search">
             <Search className="h-4 w-4" />
           </Button>
           <UserMenu />

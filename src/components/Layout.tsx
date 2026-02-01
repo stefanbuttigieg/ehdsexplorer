@@ -26,6 +26,7 @@ import { LanguageSelector } from "@/components/LanguageSelector";
 import { UserMenu } from "@/components/UserMenu";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 import ReloadPrompt from "@/components/ReloadPrompt";
+import { StakeholderFilter } from "@/components/StakeholderFilter";
 
 interface LayoutProps {
   children: ReactNode;
@@ -179,6 +180,7 @@ const Layout = ({
         </Button>
         <Link to="/" className="font-serif font-bold text-lg">EHDS Explorer</Link>
         <div className="flex items-center gap-1" data-tour="accessibility">
+          <StakeholderFilter compact />
           <LanguageSelector variant="compact" />
           <TourButton onClick={startTour} />
           <ReportIssueButton />
@@ -212,7 +214,8 @@ const Layout = ({
         </div>
 
         {/* Toolbar Row - Only when expanded */}
-        {!sidebarCollapsed && <div className="hidden gap-1 px-3 py-2 border-b border-sidebar-border md:flex items-center justify-center" data-tour="accessibility">
+        {!sidebarCollapsed && <div className="hidden gap-1 px-3 py-2 border-b border-sidebar-border md:flex items-center justify-center flex-wrap" data-tour="accessibility">
+            <StakeholderFilter />
             <UserMenu />
             <LanguageSelector variant="compact" />
             <TourButton onClick={startTour} />

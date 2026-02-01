@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ComparisonProvider } from "@/contexts/ComparisonContext";
 import { AchievementProvider } from "@/contexts/AchievementContext";
+import { StakeholderProvider } from "@/contexts/StakeholderContext";
 import MaintenanceGuard from "@/components/MaintenanceGuard";
 import UmamiAnalytics from "@/components/UmamiAnalytics";
 import { ComparisonBar } from "@/components/ComparisonBar";
@@ -112,8 +113,9 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="system" storageKey="ehds-theme">
       <LanguageProvider>
-        <ComparisonProvider>
-          <AchievementProvider>
+        <StakeholderProvider>
+          <ComparisonProvider>
+            <AchievementProvider>
             <TooltipProvider>
               <Toaster />
               <Sonner />
@@ -207,9 +209,10 @@ const App = () => (
           </Routes>
           </MaintenanceGuard>
           </BrowserRouter>
-          </TooltipProvider>
-          </AchievementProvider>
-        </ComparisonProvider>
+            </TooltipProvider>
+            </AchievementProvider>
+          </ComparisonProvider>
+        </StakeholderProvider>
       </LanguageProvider>
     </ThemeProvider>
   </QueryClientProvider>

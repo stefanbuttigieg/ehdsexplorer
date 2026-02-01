@@ -260,7 +260,7 @@ export default function ForHealthTechPage() {
         </div>
 
         {/* Topic Index */}
-        <div className="mb-12">
+        <div className="mb-8">
           <TopicIndexTable 
             stakeholderType="healthtech"
             title="Find Articles by Topic"
@@ -268,6 +268,29 @@ export default function ForHealthTechPage() {
             showRecitals={true}
           />
         </div>
+
+        {/* Glossary Link */}
+        <Card className="mb-8 border-primary/20 bg-primary/5">
+          <CardContent className="py-4">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="flex items-center gap-3">
+                <BookOpen className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="font-medium">Looking for definitions?</p>
+                  <p className="text-sm text-muted-foreground">
+                    The Xt-EHR glossary covers EHR systems, interoperability, and EHDS terminology.
+                  </p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" className="gap-2" asChild>
+                <a href="https://www.xt-ehr.eu/glossary-list/" target="_blank" rel="noopener noreferrer">
+                  View Glossary
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* FAQ Accordion */}
         <div className="mb-12">

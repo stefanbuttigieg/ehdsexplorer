@@ -106,7 +106,6 @@ const TopicRow: React.FC<TopicRowProps> = ({ topic, showRecitals }) => {
             <Link
               key={num}
               to={`/article/${num}`}
-              className="inline-flex items-center"
             >
               <Badge 
                 variant="outline" 
@@ -125,7 +124,6 @@ const TopicRow: React.FC<TopicRowProps> = ({ topic, showRecitals }) => {
               <Link
                 key={num}
                 to={`/recital/${num}`}
-                className="inline-flex items-center"
               >
                 <Badge 
                   variant="secondary" 

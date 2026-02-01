@@ -7,6 +7,7 @@ import TopicIndexTable from '@/components/TopicIndexTable';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ExternalLink } from 'lucide-react';
 import { 
   Heart, 
   MessageCircle, 
@@ -197,7 +198,26 @@ const ForCitizensPage: React.FC = () => {
         {/* Related Resources */}
         <section className="mt-12">
           <h2 className="text-2xl font-bold text-foreground mb-6">Explore Further</h2>
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-4 gap-4">
+            <a 
+              href="https://www.xt-ehr.eu/glossary-list/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="group"
+            >
+              <Card className="h-full hover:border-primary/50 transition-colors">
+                <CardContent className="pt-6">
+                  <ExternalLink className="h-5 w-5 text-muted-foreground mb-3 group-hover:text-primary transition-colors" />
+                  <h3 className="font-medium text-foreground mb-1 group-hover:text-primary transition-colors">
+                    Xt-EHR Glossary
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Comprehensive glossary of EHDS and health data terms.
+                  </p>
+                </CardContent>
+              </Card>
+            </a>
+
             <Link to="/definitions" className="group">
               <Card className="h-full hover:border-primary/50 transition-colors">
                 <CardContent className="pt-6">

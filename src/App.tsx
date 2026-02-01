@@ -94,6 +94,7 @@ import ForHealthcareProPage from "./pages/ForHealthcareProPage";
 import ScenarioFinderPage from "./pages/ScenarioFinderPage";
 import AdminLandingPagesPage from "./pages/AdminLandingPagesPage";
 import AdminTopicIndexPage from "./pages/AdminTopicIndexPage";
+import TopicIndexPage from "./pages/TopicIndexPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -166,6 +167,7 @@ const App = () => (
             <Route path="/for/healthtech" element={<ForHealthTechPage />} />
             <Route path="/for/healthcare-professionals" element={<ForHealthcareProPage />} />
             <Route path="/scenario-finder" element={<ScenarioFinderPage />} />
+            <Route path="/topic-index" element={<TopicIndexPage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin/set-password" element={<AdminSetPasswordPage />} />
             <Route path="/profile" element={<ProfilePage />} />

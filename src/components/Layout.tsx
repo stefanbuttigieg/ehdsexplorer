@@ -126,11 +126,8 @@ const Layout = ({
     path: "/topic-index",
     icon: FileText,
     label: "Topic Index"
-  }, {
+}, {
     path: "/scenario-finder",
-    icon: Sparkles,
-    label: "Scenario Finder"
-  }, {
     icon: Sparkles,
     label: "Scenario Finder"
   }, {

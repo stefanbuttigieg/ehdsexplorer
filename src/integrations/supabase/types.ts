@@ -835,6 +835,7 @@ export type Database = {
           created_at: string
           definition: string
           id: number
+          source: string | null
           source_article: number | null
           term: string
           updated_at: string
@@ -843,6 +844,7 @@ export type Database = {
           created_at?: string
           definition: string
           id?: number
+          source?: string | null
           source_article?: number | null
           term: string
           updated_at?: string
@@ -851,6 +853,7 @@ export type Database = {
           created_at?: string
           definition?: string
           id?: number
+          source?: string | null
           source_article?: number | null
           term?: string
           updated_at?: string

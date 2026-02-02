@@ -38,6 +38,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { ArrowLeft, Plus, Pencil, Trash2, ExternalLink } from "lucide-react";
+import Layout from "@/components/Layout";
 import { useQueryClient } from "@tanstack/react-query";
 
 const AdminPublishedWorksPage = () => {
@@ -173,7 +174,7 @@ const AdminPublishedWorksPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <Layout>
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center gap-4 mb-8">
           <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
@@ -371,7 +372,7 @@ const AdminPublishedWorksPage = () => {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </div>
+    </Layout>
   );
 };
 

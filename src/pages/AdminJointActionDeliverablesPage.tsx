@@ -46,6 +46,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Plus, Pencil, Trash2, ExternalLink, Loader2 } from "lucide-react";
+import Layout from "@/components/Layout";
 
 const AdminJointActionDeliverablesPage = () => {
   const navigate = useNavigate();
@@ -205,7 +206,7 @@ const AdminJointActionDeliverablesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <Layout>
       <div className="container mx-auto py-8 px-4">
         <div className="flex items-center gap-4 mb-8">
           <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
@@ -459,7 +460,7 @@ const AdminJointActionDeliverablesPage = () => {
           </AlertDialogContent>
         </AlertDialog>
       </div>
-    </div>
+    </Layout>
   );
 };
 

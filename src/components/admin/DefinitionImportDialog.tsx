@@ -148,11 +148,31 @@ export function DefinitionImportDialog({
           source_article: null,
         }));
 
-      const { error } = await supabase
+      // Insert definitions
+      const { data: insertedDefs, error } = await supabase
         .from('definitions')
-        .insert(termsToImport);
+        .insert(termsToImport)
+        .select('id, term, definition');
 
       if (error) throw error;
+
+      // Also create entries in definition_sources table
+      if (insertedDefs && insertedDefs.length > 0) {
+        const sourceEntries = insertedDefs.map(def => ({
+          definition_id: def.id,
+          source: 'xt_ehr' as const,
+          source_text: def.definition,
+          source_article: null,
+        }));
+
+        const { error: sourceError } = await supabase
+          .from('definition_sources')
+          .insert(sourceEntries);
+
+        if (sourceError) {
+          console.error('Error creating source entries:', sourceError);
+        }
+      }
 
       setImportedCount(termsToImport.length);
       setImportComplete(true);
@@ -164,6 +184,7 @@ export function DefinitionImportDialog({
 
       queryClient.invalidateQueries({ queryKey: ['admin-definitions'] });
       queryClient.invalidateQueries({ queryKey: ['definitions'] });
+      queryClient.invalidateQueries({ queryKey: ['definition-sources'] });
     } catch (error: any) {
       toast({
         title: 'Import Failed',

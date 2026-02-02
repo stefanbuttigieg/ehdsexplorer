@@ -13,6 +13,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.3] - 2026-02-02
+
+### Added
+
+#### Multi-Source Definitions
+- Definitions can now have multiple sources (EHDS Regulation, EU EHR Glossary, Xt-EHR)
+- Each source stores its own version of the definition text
+- New `definition_sources` table stores source-specific texts with article references
+- Public definitions page shows expandable source-specific texts when a term has multiple sources
+- Click "Show other sources" to view how the same term is defined across different references
+
+#### Admin Definition Source Editor
+- New inline source editor in definition edit dialog
+- Add, edit, or remove source-specific texts for any definition
+- Color-coded source cards for visual distinction
+- Each source can have its own article reference
+
+#### Enhanced Import
+- Xt-EHR import now creates entries in both definitions and definition_sources tables
+- Existing definitions migrated to new multi-source structure
+
+---
+
 ## [1.9.2] - 2026-02-02
 
 ### Added

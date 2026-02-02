@@ -773,6 +773,44 @@ export type Database = {
         }
         Relationships: []
       }
+      definition_sources: {
+        Row: {
+          created_at: string
+          definition_id: number
+          id: string
+          source: string
+          source_article: number | null
+          source_text: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          definition_id: number
+          id?: string
+          source: string
+          source_article?: number | null
+          source_text: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          definition_id?: number
+          id?: string
+          source?: string
+          source_article?: number | null
+          source_text?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "definition_sources_definition_id_fkey"
+            columns: ["definition_id"]
+            isOneToOne: false
+            referencedRelation: "definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       definition_translations: {
         Row: {
           created_at: string | null

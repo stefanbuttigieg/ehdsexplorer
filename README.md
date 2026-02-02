@@ -27,7 +27,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **105 Articles** with full text, cross-references, related recitals, and implementing acts
 - **115 Recitals** with individual detail pages and related article links
 - **4 Annexes** with detailed technical requirements and specifications
-- **67+ Definitions** from Article 2 with quick reference and source links
+- **122+ Definitions** from Article 2 and EU EHR Glossary with source filtering
 
 ### 🔍 Advanced Search
 - **Fuzzy search** powered by Fuse.js across all content types
@@ -68,6 +68,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
   - **Automated discovery** - Weekly Firecrawl-powered search for new EHDS papers from academic and EU sources
   - **User flagging** - Community-driven quality control for auto-discovered content
 - **Live Deliverables** - Direct links to EHDS acceptance data platform resources
+- **EU EHR Glossary** - ~60 technical terms imported from [EU EHR Systems Glossary](https://acceptance.data.health.europa.eu/ehr-systems/glossary)
 - **External Glossary** - Links to [Xt-EHR Glossary](https://www.xt-ehr.eu/glossary-list/) for terminology reference
 
 ### ✏️ Annotations & Notes
@@ -144,9 +145,11 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
   - Article citations with direct links to content
   - Compliance guidance and documentation tips
   - Disclaimer about evolving implementing acts
-- **Topic Index** - Consolidated topic-to-article reference at `/topic-index`
-  - Database-driven mappings organized by stakeholder type
-  - Tabbed interface for Citizens, Health Tech, and Healthcare Professionals
+- **Topics & Glossary** - Consolidated reference at `/topic-index`
+  - Database-driven topic-to-article mappings organized by stakeholder type
+  - Tabbed interface for Citizens, Health Tech, Healthcare Professionals, and Glossary
+  - A-Z quick navigation for glossary terms
+  - Source filtering between EHDS Regulation and EU EHR Glossary
   - Direct links to related articles and recitals
   - External glossary integration with [Xt-EHR Glossary](https://www.xt-ehr.eu/glossary-list/)
 - **For Citizens** page - Rights-based guide for personal health data access

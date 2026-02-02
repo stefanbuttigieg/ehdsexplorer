@@ -43,6 +43,7 @@ interface JointActionDeliverableImport {
   joint_action_name: string;
   deliverable_name: string;
   deliverable_link: string;
+  project_type?: string;
   related_articles?: number[];
   related_implementing_acts?: string[];
 }
@@ -287,6 +288,7 @@ export default function AdminBulkImportPage() {
               joint_action_name: d.joint_action_name,
               deliverable_name: d.deliverable_name,
               deliverable_link: d.deliverable_link,
+              project_type: d.project_type || "joint_action",
               related_articles: d.related_articles || [],
               related_implementing_acts: d.related_implementing_acts || []
             }))
@@ -416,9 +418,10 @@ export default function AdminBulkImportPage() {
       case "joint_action_deliverables":
         return JSON.stringify([
           { 
-            joint_action_name: "TEHDAS", 
+            joint_action_name: "TEHDAS2", 
             deliverable_name: "Guidelines on Secondary Use", 
             deliverable_link: "https://example.com/guideline.pdf",
+            project_type: "joint_action",
             related_articles: [33, 34],
             related_implementing_acts: ["art-5-1"]
           }
@@ -511,7 +514,7 @@ export default function AdminBulkImportPage() {
                   <SelectItem value="articles">Articles</SelectItem>
                   <SelectItem value="definitions">Definitions</SelectItem>
                   <SelectItem value="annexes">Annexes</SelectItem>
-                  <SelectItem value="joint_action_deliverables">Joint Action Deliverables</SelectItem>
+                  <SelectItem value="joint_action_deliverables">EU Project Deliverables</SelectItem>
                   <SelectItem value="published_works">Published Works</SelectItem>
                   <SelectItem value="footnotes">Footnotes</SelectItem>
                   <SelectItem value="ia_recitals">IA Recitals</SelectItem>

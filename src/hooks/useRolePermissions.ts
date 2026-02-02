@@ -49,7 +49,7 @@ export const CONTENT_TYPES = [
   { id: 'country_legislation', label: 'Country Legislation' },
   { id: 'notifications', label: 'Notifications' },
   { id: 'users', label: 'Users' },
-  { id: 'joint_action_deliverables', label: 'Joint Action Deliverables' },
+  { id: 'joint_action_deliverables', label: 'EU Project Deliverables' },
   { id: 'published_works', label: 'Published Works' },
   { id: 'cross_regulation', label: 'Cross-Regulation References' },
   { id: 'plain_language', label: 'Plain Language Translations' },

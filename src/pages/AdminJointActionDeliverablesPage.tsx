@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useJointActionDeliverables, JointActionDeliverable } from "@/hooks/useJointActionDeliverables";
+import { useJointActionDeliverables, JointActionDeliverable, projectTypeLabels } from "@/hooks/useJointActionDeliverables";
 import { useArticles } from "@/hooks/useArticles";
 import { useImplementingActs } from "@/hooks/useImplementingActs";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +9,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -36,6 +43,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Plus, Pencil, Trash2, ExternalLink, Loader2 } from "lucide-react";
 
@@ -55,6 +63,7 @@ const AdminJointActionDeliverablesPage = () => {
     joint_action_name: "",
     deliverable_name: "",
     deliverable_link: "",
+    project_type: "joint_action",
     related_articles: [] as number[],
     related_implementing_acts: [] as string[],
   });
@@ -78,6 +87,7 @@ const AdminJointActionDeliverablesPage = () => {
       joint_action_name: "",
       deliverable_name: "",
       deliverable_link: "",
+      project_type: "joint_action",
       related_articles: [],
       related_implementing_acts: [],
     });
@@ -90,6 +100,7 @@ const AdminJointActionDeliverablesPage = () => {
       joint_action_name: deliverable.joint_action_name,
       deliverable_name: deliverable.deliverable_name,
       deliverable_link: deliverable.deliverable_link,
+      project_type: deliverable.project_type || "joint_action",
       related_articles: deliverable.related_articles || [],
       related_implementing_acts: deliverable.related_implementing_acts || [],
     });
@@ -115,6 +126,7 @@ const AdminJointActionDeliverablesPage = () => {
             joint_action_name: formData.joint_action_name,
             deliverable_name: formData.deliverable_name,
             deliverable_link: formData.deliverable_link,
+            project_type: formData.project_type,
             related_articles: formData.related_articles,
             related_implementing_acts: formData.related_implementing_acts,
           })
@@ -127,6 +139,7 @@ const AdminJointActionDeliverablesPage = () => {
           joint_action_name: formData.joint_action_name,
           deliverable_name: formData.deliverable_name,
           deliverable_link: formData.deliverable_link,
+          project_type: formData.project_type,
           related_articles: formData.related_articles,
           related_implementing_acts: formData.related_implementing_acts,
         });
@@ -199,9 +212,9 @@ const AdminJointActionDeliverablesPage = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Joint Action Deliverables</h1>
+            <h1 className="text-3xl font-bold">EU Project Deliverables</h1>
             <p className="text-muted-foreground">
-              Manage links between articles, implementing acts and joint action deliverables
+              Manage links between articles, implementing acts and EU project deliverables
             </p>
           </div>
         </div>
@@ -226,15 +239,36 @@ const AdminJointActionDeliverablesPage = () => {
               <ScrollArea className="flex-1 pr-4">
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                    <Label htmlFor="joint_action_name">Joint Action Name *</Label>
+                    <Label htmlFor="joint_action_name">EU Project Name *</Label>
                     <Input
                       id="joint_action_name"
                       value={formData.joint_action_name}
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, joint_action_name: e.target.value }))
                       }
-                      placeholder="e.g., TEHDAS2"
+                      placeholder="e.g., TEHDAS2, BeWell, Xt-EHR"
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="project_type">Project Type *</Label>
+                    <Select
+                      value={formData.project_type}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({ ...prev, project_type: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select project type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(projectTypeLabels).map(([value, label]) => (
+                          <SelectItem key={value} value={value}>
+                            {label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
@@ -331,7 +365,8 @@ const AdminJointActionDeliverablesPage = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Joint Action</TableHead>
+                  <TableHead>EU Project</TableHead>
+                  <TableHead>Type</TableHead>
                   <TableHead>Deliverable</TableHead>
                   <TableHead>Link</TableHead>
                   <TableHead>Related Articles</TableHead>
@@ -342,14 +377,19 @@ const AdminJointActionDeliverablesPage = () => {
               <TableBody>
                 {deliverables?.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                      No joint action deliverables yet. Click "Add Deliverable" to create one.
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      No EU project deliverables yet. Click "Add Deliverable" to create one.
                     </TableCell>
                   </TableRow>
                 ) : (
                   deliverables?.map((deliverable) => (
                     <TableRow key={deliverable.id}>
                       <TableCell className="font-medium">{deliverable.joint_action_name}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {projectTypeLabels[deliverable.project_type] || deliverable.project_type}
+                        </Badge>
+                      </TableCell>
                       <TableCell>{deliverable.deliverable_name}</TableCell>
                       <TableCell>
                         <a

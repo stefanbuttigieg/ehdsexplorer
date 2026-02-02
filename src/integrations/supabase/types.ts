@@ -1765,6 +1765,7 @@ export type Database = {
           deliverable_name: string
           id: string
           joint_action_name: string
+          project_type: string
           related_articles: number[] | null
           related_implementing_acts: string[] | null
           updated_at: string
@@ -1775,6 +1776,7 @@ export type Database = {
           deliverable_name: string
           id?: string
           joint_action_name: string
+          project_type?: string
           related_articles?: number[] | null
           related_implementing_acts?: string[] | null
           updated_at?: string
@@ -1785,6 +1787,7 @@ export type Database = {
           deliverable_name?: string
           id?: string
           joint_action_name?: string
+          project_type?: string
           related_articles?: number[] | null
           related_implementing_acts?: string[] | null
           updated_at?: string

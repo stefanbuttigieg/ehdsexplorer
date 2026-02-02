@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 
-const API_BASE = "https://lmjjghvrjgffmbidajih.supabase.co/functions/v1/api-data";
+const API_BASE = "https://api.ehdsexplorer.eu";
 
 const endpoints = [
   {

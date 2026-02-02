@@ -13,6 +13,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.2] - 2026-02-02
+
+### Added
+
+#### Xt-EHR Glossary Import
+- One-click import of ~48 technical terms from [Xt-EHR Glossary](https://www.xt-ehr.eu/glossary-list/)
+- Automatic duplicate detection during import with visual indicators
+- Selective import with checkboxes to choose which terms to add
+- All imported terms tagged with `source='xt_ehr'` for filtering
+
+#### Definition Merge Feature
+- New merge functionality in Admin Definitions page
+- Select a primary definition and merge content from a secondary one
+- Three merge strategies: append, prepend, or replace
+- Automatic deletion of secondary definition after merge
+- Useful for consolidating duplicate or related terms from different sources
+
+#### Admin UI Enhancements
+- Source filtering added to Admin Definitions page
+- Editable source field when editing definitions
+- Import Xt-EHR button in Admin Definitions header
+
+---
+
 ## [1.9.1] - 2026-02-02
 
 ### Added

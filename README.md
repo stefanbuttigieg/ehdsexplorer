@@ -69,7 +69,8 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
   - **User flagging** - Community-driven quality control for auto-discovered content
 - **Live Deliverables** - Direct links to EHDS acceptance data platform resources
 - **EU EHR Glossary** - ~60 technical terms imported from [EU EHR Systems Glossary](https://acceptance.data.health.europa.eu/ehr-systems/glossary)
-- **External Glossary** - Links to [Xt-EHR Glossary](https://www.xt-ehr.eu/glossary-list/) for terminology reference
+- **Xt-EHR Glossary** - ~48 technical terms imported from [Xt-EHR Glossary](https://www.xt-ehr.eu/glossary-list/) with one-click admin import
+- **Definition Merge Tool** - Admin feature to consolidate duplicate or related definitions from different sources
 
 ### ✏️ Annotations & Notes
 - **Inline text highlighting** - Select text on articles, recitals, or implementing acts to highlight

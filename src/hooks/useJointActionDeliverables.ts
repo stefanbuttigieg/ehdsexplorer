@@ -6,11 +6,21 @@ export interface JointActionDeliverable {
   joint_action_name: string;
   deliverable_name: string;
   deliverable_link: string;
+  project_type: string;
   related_articles: number[];
   related_implementing_acts: string[];
   created_at: string;
   updated_at: string;
 }
+
+// Project type labels for display
+export const projectTypeLabels: Record<string, string> = {
+  joint_action: "Joint Action",
+  erasmus_plus: "Erasmus+",
+  horizon: "Horizon Europe",
+  digital_europe: "Digital Europe",
+  other: "Other",
+};
 
 export const useJointActionDeliverables = () => {
   return useQuery({

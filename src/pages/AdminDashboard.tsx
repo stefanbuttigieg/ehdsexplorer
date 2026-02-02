@@ -110,8 +110,8 @@ const AdminDashboard = () => {
       count: 33,
     },
     {
-      title: 'Joint Action Deliverables',
-      description: 'Link articles and acts to joint action deliverables',
+      title: 'EU Project Deliverables',
+      description: 'Link articles and acts to EU project deliverables',
       icon: Link2,
       href: '/admin/joint-action-deliverables',
     },

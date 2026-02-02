@@ -206,11 +206,11 @@ const ImplementingActDetail = () => {
           </CardContent>
         </Card>
 
-        {/* Joint Action Deliverables */}
+        {/* EU Project Deliverables */}
         {relatedDeliverables.length > 0 && (
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle className="text-lg">Joint Action Deliverables</CardTitle>
+              <CardTitle className="text-lg">EU Project Deliverables</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {relatedDeliverables.map((deliverable) => (

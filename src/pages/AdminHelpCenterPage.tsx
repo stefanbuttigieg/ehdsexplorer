@@ -388,13 +388,14 @@ const AdminHelpCenterPage = () => {
               <AccordionContent className="pt-4 space-y-4">
                 <div className="space-y-3">
                   <h4 className="font-semibold flex items-center gap-2">
-                    <Link2 className="h-4 w-4" /> Joint Action Deliverables
+                    <Link2 className="h-4 w-4" /> EU Project Deliverables
                   </h4>
                   <p className="text-muted-foreground">
-                    Link articles and implementing acts to Joint Action deliverables. Each deliverable requires:
+                    Link articles and implementing acts to EU project deliverables. Each deliverable requires:
                   </p>
                   <ul className="list-disc list-inside text-muted-foreground ml-4">
-                    <li>Joint Action name</li>
+                    <li>EU Project name (e.g., TEHDAS2, Xt-EHR, BeWell)</li>
+                    <li>Project type (Joint Action, Erasmus+, Horizon Europe, etc.)</li>
                     <li>Deliverable name</li>
                     <li>URL link to the deliverable</li>
                     <li>Related articles and/or implementing acts</li>

@@ -65,6 +65,8 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
   - **Xt-EHR deliverables** - Primary use focused resources
   - **TEHDAS2 deliverables** - Secondary use focused resources
 - **Published Works** - Academic research and publications linked to articles and implementing acts
+  - **Automated discovery** - Weekly Firecrawl-powered search for new EHDS papers from academic and EU sources
+  - **User flagging** - Community-driven quality control for auto-discovered content
 - **Live Deliverables** - Direct links to EHDS acceptance data platform resources
 - **External Glossary** - Links to [Xt-EHR Glossary](https://www.xt-ehr.eu/glossary-list/) for terminology reference
 

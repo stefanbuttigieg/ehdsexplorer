@@ -86,6 +86,13 @@ const DefinitionsPage = () => {
             >
               EU EHR ({sourceCounts['eu_ehr_glossary'] || 0})
             </Badge>
+            <Badge 
+              variant={sourceFilter === 'xt_ehr' ? 'default' : 'outline'}
+              className="cursor-pointer"
+              onClick={() => setSourceFilter('xt_ehr')}
+            >
+              Xt-EHR ({sourceCounts['xt_ehr'] || 0})
+            </Badge>
           </div>
         </div>
 

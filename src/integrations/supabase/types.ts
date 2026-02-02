@@ -893,6 +893,156 @@ export type Database = {
         }
         Relationships: []
       }
+      ehdsi_kpi_data: {
+        Row: {
+          approved_at: string
+          approved_by: string | null
+          country_code: string
+          country_name: string
+          created_at: string
+          id: string
+          kpi_category: string
+          kpi_id: string
+          kpi_name: string
+          raw_data: Json | null
+          reference_date: string | null
+          source_url: string | null
+          unit: string | null
+          updated_at: string
+          value: number | null
+        }
+        Insert: {
+          approved_at?: string
+          approved_by?: string | null
+          country_code: string
+          country_name: string
+          created_at?: string
+          id?: string
+          kpi_category?: string
+          kpi_id: string
+          kpi_name: string
+          raw_data?: Json | null
+          reference_date?: string | null
+          source_url?: string | null
+          unit?: string | null
+          updated_at?: string
+          value?: number | null
+        }
+        Update: {
+          approved_at?: string
+          approved_by?: string | null
+          country_code?: string
+          country_name?: string
+          created_at?: string
+          id?: string
+          kpi_category?: string
+          kpi_id?: string
+          kpi_name?: string
+          raw_data?: Json | null
+          reference_date?: string | null
+          source_url?: string | null
+          unit?: string | null
+          updated_at?: string
+          value?: number | null
+        }
+        Relationships: []
+      }
+      ehdsi_kpi_staging: {
+        Row: {
+          country_code: string
+          country_name: string
+          created_at: string
+          fetched_at: string
+          id: string
+          kpi_category: string
+          kpi_id: string
+          kpi_name: string
+          raw_data: Json | null
+          reference_date: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_url: string | null
+          status: string
+          unit: string | null
+          updated_at: string
+          value: number | null
+        }
+        Insert: {
+          country_code: string
+          country_name: string
+          created_at?: string
+          fetched_at?: string
+          id?: string
+          kpi_category?: string
+          kpi_id: string
+          kpi_name: string
+          raw_data?: Json | null
+          reference_date?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_url?: string | null
+          status?: string
+          unit?: string | null
+          updated_at?: string
+          value?: number | null
+        }
+        Update: {
+          country_code?: string
+          country_name?: string
+          created_at?: string
+          fetched_at?: string
+          id?: string
+          kpi_category?: string
+          kpi_id?: string
+          kpi_name?: string
+          raw_data?: Json | null
+          reference_date?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_url?: string | null
+          status?: string
+          unit?: string | null
+          updated_at?: string
+          value?: number | null
+        }
+        Relationships: []
+      }
+      ehdsi_sync_history: {
+        Row: {
+          completed_at: string | null
+          error_message: string | null
+          id: string
+          records_fetched: number | null
+          records_new: number | null
+          started_at: string
+          status: string
+          triggered_by: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          error_message?: string | null
+          id?: string
+          records_fetched?: number | null
+          records_new?: number | null
+          started_at?: string
+          status?: string
+          triggered_by?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          error_message?: string | null
+          id?: string
+          records_fetched?: number | null
+          records_new?: number | null
+          started_at?: string
+          status?: string
+          triggered_by?: string | null
+        }
+        Relationships: []
+      }
       email_templates: {
         Row: {
           available_variables: string[]

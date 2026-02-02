@@ -62,3 +62,6 @@ verify_jwt = false
 
 [functions.search-ehds-papers]
 verify_jwt = false
+
+[functions.sync-ehdsi-kpis]
+verify_jwt = false

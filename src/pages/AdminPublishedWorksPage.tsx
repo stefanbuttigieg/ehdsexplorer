@@ -37,8 +37,9 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Pencil, Trash2, ExternalLink } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, ExternalLink, Bot, Flag, Loader2, Search } from "lucide-react";
 import Layout from "@/components/Layout";
+import { Badge } from "@/components/ui/badge";
 import { useQueryClient } from "@tanstack/react-query";
 
 const AdminPublishedWorksPage = () => {
@@ -53,6 +54,7 @@ const AdminPublishedWorksPage = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedWork, setSelectedWork] = useState<PublishedWork | null>(null);
   const [saving, setSaving] = useState(false);
+  const [searchingPapers, setSearchingPapers] = useState(false);
 
   const [name, setName] = useState("");
   const [link, setLink] = useState("");
@@ -165,6 +167,26 @@ const AdminPublishedWorksPage = () => {
     );
   };
 
+  const handleSearchPapers = async () => {
+    setSearchingPapers(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('search-ehds-papers');
+      
+      if (error) throw error;
+      
+      if (data.success) {
+        toast.success(`Found ${data.found} papers, added ${data.added} new entries`);
+        queryClient.invalidateQueries({ queryKey: ["published-works"] });
+      } else {
+        throw new Error(data.error || 'Search failed');
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to search for papers");
+    } finally {
+      setSearchingPapers(false);
+    }
+  };
+
   if (authLoading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -184,46 +206,76 @@ const AdminPublishedWorksPage = () => {
         </div>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
             <CardTitle>Published Works</CardTitle>
-            <Button
-              onClick={() => {
-                resetForm();
-                setDialogOpen(true);
-              }}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Published Work
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={handleSearchPapers}
+                disabled={searchingPapers}
+              >
+                {searchingPapers ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Search className="h-4 w-4 mr-2" />
+                )}
+                Search EHDS Papers
+              </Button>
+              <Button
+                onClick={() => {
+                  resetForm();
+                  setDialogOpen(true);
+                }}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Published Work
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
+                  <TableHead>Source</TableHead>
                   <TableHead>Affiliated Organisation</TableHead>
                   <TableHead>Related Articles</TableHead>
-                  <TableHead>Related Acts</TableHead>
                   <TableHead className="w-[150px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {publishedWorks?.map((work) => (
-                  <TableRow key={work.id}>
-                    <TableCell className="font-medium">{work.name}</TableCell>
-                    <TableCell>{work.affiliated_organization}</TableCell>
+                  <TableRow key={work.id} className={work.is_flagged ? "bg-destructive/10" : ""}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{work.name}</span>
+                        {work.is_auto_discovered && (
+                          <Badge variant="secondary" className="text-xs">
+                            <Bot className="h-3 w-3 mr-1" />
+                            Auto
+                          </Badge>
+                        )}
+                        {work.is_flagged && (
+                          <Badge variant="destructive" className="text-xs">
+                            <Flag className="h-3 w-3 mr-1" />
+                            Flagged
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm max-w-[200px] truncate">
+                      {work.affiliated_organization}
+                    </TableCell>
                     <TableCell>
                       {work.related_articles?.length || 0} articles
                     </TableCell>
                     <TableCell>
-                      {work.related_implementing_acts?.length || 0} acts
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => window.open(work.link, "_blank")}
+                          title="Open link"
                         >
                           <ExternalLink className="h-4 w-4" />
                         </Button>
@@ -231,6 +283,7 @@ const AdminPublishedWorksPage = () => {
                           variant="ghost"
                           size="icon"
                           onClick={() => openEditDialog(work)}
+                          title="Edit"
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -241,6 +294,7 @@ const AdminPublishedWorksPage = () => {
                             setSelectedWork(work);
                             setDeleteDialogOpen(true);
                           }}
+                          title="Delete"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

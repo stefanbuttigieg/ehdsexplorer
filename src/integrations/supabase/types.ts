@@ -2127,31 +2127,49 @@ export type Database = {
         Row: {
           affiliated_organization: string
           created_at: string
+          flag_reason: string | null
+          flagged_at: string | null
+          flagged_by: string | null
           id: string
+          is_auto_discovered: boolean | null
+          is_flagged: boolean | null
           link: string
           name: string
           related_articles: number[] | null
           related_implementing_acts: string[] | null
+          source_url: string | null
           updated_at: string
         }
         Insert: {
           affiliated_organization: string
           created_at?: string
+          flag_reason?: string | null
+          flagged_at?: string | null
+          flagged_by?: string | null
           id?: string
+          is_auto_discovered?: boolean | null
+          is_flagged?: boolean | null
           link: string
           name: string
           related_articles?: number[] | null
           related_implementing_acts?: string[] | null
+          source_url?: string | null
           updated_at?: string
         }
         Update: {
           affiliated_organization?: string
           created_at?: string
+          flag_reason?: string | null
+          flagged_at?: string | null
+          flagged_by?: string | null
           id?: string
+          is_auto_discovered?: boolean | null
+          is_flagged?: boolean | null
           link?: string
           name?: string
           related_articles?: number[] | null
           related_implementing_acts?: string[] | null
+          source_url?: string | null
           updated_at?: string
         }
         Relationships: []

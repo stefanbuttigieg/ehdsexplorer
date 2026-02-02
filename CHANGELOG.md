@@ -13,6 +13,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.1] - 2026-02-02
+
+### Added
+
+#### EU EHR Systems Glossary Integration
+- Imported ~60 technical terms from the official EU EHR Systems Glossary
+- Definitions now include source tracking (`ehds_regulation`, `eu_ehr_glossary`, `xt_ehr`)
+- Source filtering on Definitions page with visual badges
+- Total definitions expanded from ~67 to 122+ entries
+
+#### Topics & Glossary Page
+- Renamed Topic Index to "Topics & Glossary" at `/topic-index`
+- Added new Glossary tab with A-Z quick navigation
+- Source filtering between Regulation terms and EHR technical glossary
+- Links to external glossary sources (EU EHR Database, Xt-EHR)
+
+#### Admin Improvements
+- Added eHDSI KPI Data to admin dashboard navigation
+- Sync and review MyHealth@EU primary use KPIs from eHDSI dashboard
+
+---
+
 ## [1.9.0] - 2026-02-02
 
 ### Added

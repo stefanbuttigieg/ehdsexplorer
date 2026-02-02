@@ -13,6 +13,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.0] - 2026-02-02
+
+### Added
+
+#### Automated EHDS Paper Discovery
+- Weekly automated search for new EHDS-related publications using Firecrawl
+- Searches academic sources (PubMed) and EU sources (DG SANTE, HaDEA, project sites)
+- Auto-discovery runs every Monday at 8:00 AM UTC via scheduled cron job
+- Manual "Search EHDS Papers" button in admin for on-demand discovery
+- Auto-discovered papers marked with "Auto" badge in admin interface
+
+#### Published Works Flagging System
+- Users can flag issues with specific published works for admin review
+- Flagged works highlighted in admin interface with "Flagged" badge
+- Flag metadata includes reason, timestamp, and user who flagged
+- Enables community-driven quality control for auto-discovered content
+
+#### Admin UI Improvements
+- Fixed column alignment in Published Works admin table
+- Added Source column showing link hostname with clickable URL
+- Visual distinction between manually added and auto-discovered works
+
+---
+
 ## [1.8.9] - 2026-02-01
 
 ### Added

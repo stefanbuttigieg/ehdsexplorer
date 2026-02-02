@@ -27,7 +27,8 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **105 Articles** with full text, cross-references, related recitals, and implementing acts
 - **115 Recitals** with individual detail pages and related article links
 - **4 Annexes** with detailed technical requirements and specifications
-- **122+ Definitions** from Article 2 and EU EHR Glossary with source filtering
+- **170+ Definitions** from Article 2, EU EHR Glossary, and Xt-EHR with multi-source support
+- **Multi-source definitions** - See how the same term is defined across EHDS Regulation, EU EHR Glossary, and Xt-EHR
 
 ### 🔍 Advanced Search
 - **Fuzzy search** powered by Fuse.js across all content types

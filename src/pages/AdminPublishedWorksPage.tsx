@@ -264,6 +264,16 @@ const AdminPublishedWorksPage = () => {
                       </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm max-w-[200px] truncate">
+                      <a 
+                        href={work.link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="hover:underline"
+                      >
+                        {new URL(work.link).hostname}
+                      </a>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm max-w-[200px] truncate">
                       {work.affiliated_organization}
                     </TableCell>
                     <TableCell>

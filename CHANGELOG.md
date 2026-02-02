@@ -13,6 +13,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.9.4] - 2026-02-02
+
+### Fixed
+
+#### Umami Analytics Error Handling
+- Improved edge function error handling for Umami API calls
+- Added proper HTTP status code checking before parsing JSON responses
+- Better error logging to diagnose API failures (401, 500, etc.)
+- Graceful degradation when Umami API is unavailable
+
+---
+
 ## [1.9.3] - 2026-02-02
 
 ### Added

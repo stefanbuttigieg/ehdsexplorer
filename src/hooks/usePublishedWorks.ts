@@ -8,6 +8,12 @@ export interface PublishedWork {
   affiliated_organization: string;
   related_articles: number[];
   related_implementing_acts: string[];
+  is_auto_discovered?: boolean;
+  is_flagged?: boolean;
+  flag_reason?: string;
+  flagged_at?: string;
+  flagged_by?: string;
+  source_url?: string;
   created_at: string;
   updated_at: string;
 }

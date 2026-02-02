@@ -56,58 +56,51 @@ serve(async (req) => {
       };
     };
 
+    // Helper to safely fetch with error handling
+    const safeFetch = async (url: string, label: string) => {
+      try {
+        const response = await fetch(url, {
+          headers: { "Authorization": `Bearer ${apiToken}`, "Content-Type": "application/json" }
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`${label} failed with status ${response.status}: ${errorText}`);
+          return null;
+        }
+        
+        const text = await response.text();
+        if (!text) {
+          console.error(`${label} returned empty response`);
+          return null;
+        }
+        
+        return JSON.parse(text);
+      } catch (e) {
+        console.error(`Error fetching ${label}:`, e);
+        return null;
+      }
+    };
+
     // Get stats for different periods
     const [todayStats, weekStats, monthStats, activeVisitors] = await Promise.all([
-      // Today's stats
-      fetch(`https://api.umami.is/v1/websites/${websiteId}/stats?startAt=${startOfDay.getTime()}&endAt=${now.getTime()}`, {
-        headers: { "Authorization": `Bearer ${apiToken}`, "Content-Type": "application/json" }
-      }).then(r => r.json()).catch(e => {
-        console.error("Error fetching today stats:", e);
-        return null;
-      }),
-      
-      // Last 7 days stats
-      fetch(`https://api.umami.is/v1/websites/${websiteId}/stats?startAt=${startOfWeek.getTime()}&endAt=${now.getTime()}`, {
-        headers: { "Authorization": `Bearer ${apiToken}`, "Content-Type": "application/json" }
-      }).then(r => r.json()).catch(e => {
-        console.error("Error fetching week stats:", e);
-        return null;
-      }),
-      
-      // This month stats
-      fetch(`https://api.umami.is/v1/websites/${websiteId}/stats?startAt=${startOfMonth.getTime()}&endAt=${now.getTime()}`, {
-        headers: { "Authorization": `Bearer ${apiToken}`, "Content-Type": "application/json" }
-      }).then(r => r.json()).catch(e => {
-        console.error("Error fetching month stats:", e);
-        return null;
-      }),
-      
-      // Active visitors (real-time)
-      fetch(`https://api.umami.is/v1/websites/${websiteId}/active`, {
-        headers: { "Authorization": `Bearer ${apiToken}`, "Content-Type": "application/json" }
-      }).then(r => r.json()).catch(e => {
-        console.error("Error fetching active visitors:", e);
-        return null;
-      })
+      safeFetch(`https://api.umami.is/v1/websites/${websiteId}/stats?startAt=${startOfDay.getTime()}&endAt=${now.getTime()}`, "today stats"),
+      safeFetch(`https://api.umami.is/v1/websites/${websiteId}/stats?startAt=${startOfWeek.getTime()}&endAt=${now.getTime()}`, "week stats"),
+      safeFetch(`https://api.umami.is/v1/websites/${websiteId}/stats?startAt=${startOfMonth.getTime()}&endAt=${now.getTime()}`, "month stats"),
+      safeFetch(`https://api.umami.is/v1/websites/${websiteId}/active`, "active visitors")
     ]);
 
     // Get pageviews data for chart (last 7 days)
-    const pageviewsData = await fetch(
+    const pageviewsData = await safeFetch(
       `https://api.umami.is/v1/websites/${websiteId}/pageviews?startAt=${startOfWeek.getTime()}&endAt=${now.getTime()}&unit=day`,
-      { headers: { "Authorization": `Bearer ${apiToken}`, "Content-Type": "application/json" } }
-    ).then(r => r.json()).catch(e => {
-      console.error("Error fetching pageviews:", e);
-      return null;
-    });
+      "pageviews"
+    );
 
     // Get top pages
-    const topPages = await fetch(
+    const topPages = await safeFetch(
       `https://api.umami.is/v1/websites/${websiteId}/metrics?startAt=${startOfWeek.getTime()}&endAt=${now.getTime()}&type=url`,
-      { headers: { "Authorization": `Bearer ${apiToken}`, "Content-Type": "application/json" } }
-    ).then(r => r.json()).catch(e => {
-      console.error("Error fetching top pages:", e);
-      return null;
-    });
+      "top pages"
+    );
 
     console.log("Umami API raw responses:", JSON.stringify({ todayStats, weekStats, monthStats, activeVisitors }));
 

@@ -151,9 +151,9 @@ const Layout = ({
     icon: GitCompare,
     label: "Compare"
   }, {
-    path: "/quiz",
+    path: "/games",
     icon: Brain,
-    label: "Quiz Challenge"
+    label: "Games"
   }];
   
   // Filter nav items based on feature flags

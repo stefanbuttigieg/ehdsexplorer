@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 
-const API_BASE = "https://api.ehdsexplorer.eu";
+const API_BASE = "https://api.ehdsexplorer.eu/";
 
 const endpoints = [
   {
@@ -22,7 +22,12 @@ const endpoints = [
       "@type": "Dataset",
       name: "EHDS Regulation - articles",
       data: [
-        { article_number: 1, title: "Subject matter and scope", content: "1. This Regulation lays down...", chapter_id: 1 },
+        {
+          article_number: 1,
+          title: "Subject matter and scope",
+          content: "1. This Regulation lays down...",
+          chapter_id: 1,
+        },
         { article_number: 2, title: "Definitions", content: "For the purposes of this Regulation...", chapter_id: 1 },
       ],
       recordCount: 105,
@@ -39,56 +44,50 @@ const endpoints = [
       "@context": "https://schema.org",
       "@type": "Dataset",
       name: "EHDS Regulation - recitals",
-      data: [
-        { recital_number: 1, content: "The European Health Data Space...", related_articles: [1, 2] },
-      ],
+      data: [{ recital_number: 1, content: "The European Health Data Space...", related_articles: [1, 2] }],
       recordCount: 115,
     },
   },
   {
     resource: "definitions",
     description: "All defined terms from Article 2",
-    parameters: [
-      { name: "format", type: "string", description: "Response format: json (default) or csv" },
-    ],
+    parameters: [{ name: "format", type: "string", description: "Response format: json (default) or csv" }],
     exampleResponse: {
       "@context": "https://schema.org",
       "@type": "Dataset",
       name: "EHDS Regulation - definitions",
-      data: [
-        { term: "electronic health data", definition: "health data that is processed...", source_article: 2 },
-      ],
+      data: [{ term: "electronic health data", definition: "health data that is processed...", source_article: 2 }],
       recordCount: 62,
     },
   },
   {
     resource: "chapters",
     description: "Chapter structure of the regulation",
-    parameters: [
-      { name: "format", type: "string", description: "Response format: json (default) or csv" },
-    ],
+    parameters: [{ name: "format", type: "string", description: "Response format: json (default) or csv" }],
     exampleResponse: {
       "@context": "https://schema.org",
       "@type": "Dataset",
       name: "EHDS Regulation - chapters",
-      data: [
-        { chapter_number: 1, title: "General provisions", description: "Articles 1-2" },
-      ],
+      data: [{ chapter_number: 1, title: "General provisions", description: "Articles 1-2" }],
       recordCount: 10,
     },
   },
   {
     resource: "implementing-acts",
     description: "Implementing and delegated acts tracker",
-    parameters: [
-      { name: "format", type: "string", description: "Response format: json (default) or csv" },
-    ],
+    parameters: [{ name: "format", type: "string", description: "Response format: json (default) or csv" }],
     exampleResponse: {
       "@context": "https://schema.org",
       "@type": "Dataset",
       name: "EHDS Regulation - implementing-acts",
       data: [
-        { id: "art-6-ehr-categories", title: "EHR Categories", type: "implementing", status: "pending", theme: "Primary Use" },
+        {
+          id: "art-6-ehr-categories",
+          title: "EHR Categories",
+          type: "implementing",
+          status: "pending",
+          theme: "Primary Use",
+        },
       ],
       recordCount: 33,
     },
@@ -125,12 +124,7 @@ const CopyButton = ({ text, label }: { text: string; label?: string }) => {
 
   if (label) {
     return (
-      <Button 
-        variant="outline" 
-        size="sm" 
-        onClick={handleCopy}
-        className="gap-2"
-      >
+      <Button variant="outline" size="sm" onClick={handleCopy} className="gap-2">
         {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
         {copied ? "Copied!" : label}
       </Button>
@@ -145,17 +139,10 @@ const CopyButton = ({ text, label }: { text: string; label?: string }) => {
 };
 
 const TryItButton = ({ resource, id }: { resource: string; id?: number }) => {
-  const url = id 
-    ? `${API_BASE}?resource=${resource}&id=${id}` 
-    : `${API_BASE}?resource=${resource}`;
-  
+  const url = id ? `${API_BASE}?resource=${resource}&id=${id}` : `${API_BASE}?resource=${resource}`;
+
   return (
-    <Button 
-      variant="default" 
-      size="sm" 
-      onClick={() => window.open(url, '_blank')}
-      className="gap-2"
-    >
+    <Button variant="default" size="sm" onClick={() => window.open(url, "_blank")} className="gap-2">
       <ExternalLink className="h-4 w-4" />
       Try it
     </Button>
@@ -185,8 +172,8 @@ const ApiDocsPage = () => {
             <h1 className="text-2xl sm:text-3xl font-bold font-serif">API Documentation</h1>
           </div>
           <p className="text-muted-foreground text-base sm:text-lg">
-            Access EHDS Regulation data programmatically. This public API provides FAIR-compliant 
-            access to articles, recitals, definitions, and more.
+            Access EHDS Regulation data programmatically. This public API provides FAIR-compliant access to articles,
+            recitals, definitions, and more.
           </p>
         </div>
 
@@ -194,8 +181,12 @@ const ApiDocsPage = () => {
         <Card className="mb-6 sm:mb-8 border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
           <CardHeader className="p-4 sm:p-6">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary" className="text-xs">Public API</Badge>
-              <Badge variant="outline" className="text-xs">No Auth Required</Badge>
+              <Badge variant="secondary" className="text-xs">
+                Public API
+              </Badge>
+              <Badge variant="outline" className="text-xs">
+                No Auth Required
+              </Badge>
             </div>
             <CardTitle className="flex items-center gap-2 text-xl sm:text-2xl mt-2">
               <Database className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -221,21 +212,27 @@ const ApiDocsPage = () => {
             <div className="grid gap-3 sm:gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge variant="outline" className="text-xs font-mono">GET</Badge>
+                  <Badge variant="outline" className="text-xs font-mono">
+                    GET
+                  </Badge>
                   <p className="text-xs sm:text-sm font-medium">Fetch all articles</p>
                 </div>
                 <CodeBlock code={`curl "${API_BASE}?resource=articles"`} language="bash" />
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge variant="outline" className="text-xs font-mono">GET</Badge>
+                  <Badge variant="outline" className="text-xs font-mono">
+                    GET
+                  </Badge>
                   <p className="text-xs sm:text-sm font-medium">Fetch a specific article</p>
                 </div>
                 <CodeBlock code={`curl "${API_BASE}?resource=articles&id=42"`} language="bash" />
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge variant="outline" className="text-xs font-mono">GET</Badge>
+                  <Badge variant="outline" className="text-xs font-mono">
+                    GET
+                  </Badge>
                   <p className="text-xs sm:text-sm font-medium">Export as CSV</p>
                 </div>
                 <CodeBlock code={`curl "${API_BASE}?resource=definitions&format=csv"`} language="bash" />
@@ -246,11 +243,13 @@ const ApiDocsPage = () => {
             <div>
               <p className="text-sm font-medium mb-2">Available Resources</p>
               <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                {["articles", "recitals", "definitions", "chapters", "implementing-acts", "metadata"].map((resource) => (
-                  <Badge key={resource} variant="secondary" className="font-mono text-xs">
-                    {resource}
-                  </Badge>
-                ))}
+                {["articles", "recitals", "definitions", "chapters", "implementing-acts", "metadata"].map(
+                  (resource) => (
+                    <Badge key={resource} variant="secondary" className="font-mono text-xs">
+                      {resource}
+                    </Badge>
+                  ),
+                )}
               </div>
             </div>
           </CardContent>
@@ -284,7 +283,7 @@ const ApiDocsPage = () => {
                   recordCount: 0,
                 },
                 null,
-                2
+                2,
               )}
             />
           </CardContent>
@@ -296,7 +295,11 @@ const ApiDocsPage = () => {
         <Tabs defaultValue="articles" className="mb-6 sm:mb-8">
           <TabsList className="grid grid-cols-3 sm:grid-cols-6 h-auto gap-1 mb-3 sm:mb-4 w-full bg-muted/50 p-1">
             {endpoints.map((ep) => (
-              <TabsTrigger key={ep.resource} value={ep.resource} className="text-xs px-1.5 py-1.5 sm:px-3 sm:py-2 data-[state=active]:bg-background">
+              <TabsTrigger
+                key={ep.resource}
+                value={ep.resource}
+                className="text-xs px-1.5 py-1.5 sm:px-3 sm:py-2 data-[state=active]:bg-background"
+              >
                 {ep.resource}
               </TabsTrigger>
             ))}

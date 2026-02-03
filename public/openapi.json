@@ -1,0 +1,378 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "EHDS Explorer API",
+    "description": "Public API for accessing EHDS Regulation data. Provides FAIR-compliant access to articles, recitals, definitions, and more from Regulation (EU) 2025/327.",
+    "version": "2.0.0",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    },
+    "contact": {
+      "name": "EHDS Explorer",
+      "url": "https://ehdsexplorer.eu"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.ehdsexplorer.eu",
+      "description": "Production API"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Query EHDS data",
+        "description": "Retrieve data from various EHDS resources including articles, recitals, definitions, and more.",
+        "operationId": "getData",
+        "parameters": [
+          {
+            "name": "resource",
+            "in": "query",
+            "required": true,
+            "description": "The resource type to retrieve",
+            "schema": {
+              "type": "string",
+              "enum": ["articles", "recitals", "definitions", "chapters", "sections", "implementing-acts", "annexes", "health-authorities", "country-legislation", "metadata"]
+            }
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "description": "Specific item ID (number for articles/recitals, string for others)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "description": "Response format",
+            "schema": {
+              "type": "string",
+              "enum": ["json", "csv"],
+              "default": "json"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "description": "Language code for translations (ISO 639-1)",
+            "schema": {
+              "type": "string",
+              "default": "en",
+              "enum": ["en", "mt", "de", "fr", "it", "es", "pt", "nl", "pl", "cs", "sk", "hu", "ro", "bg", "el", "sv", "da", "fi", "et", "lv", "lt", "sl", "hr", "ga"]
+            }
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated list of fields to return (field selection)",
+            "schema": {
+              "type": "string"
+            },
+            "example": "title,content,article_number"
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "required": false,
+            "description": "Filter by country code (for health-authorities and country-legislation)",
+            "schema": {
+              "type": "string"
+            },
+            "example": "MT"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "Filter by authority type (for health-authorities: dha, hdab)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Filter by status (for country-legislation)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "description": "Maximum requests per hour",
+                "schema": { "type": "integer" }
+              },
+              "X-RateLimit-Remaining": {
+                "description": "Remaining requests in current window",
+                "schema": { "type": "integer" }
+              },
+              "X-RateLimit-Reset": {
+                "description": "ISO 8601 timestamp when the rate limit resets",
+                "schema": { "type": "string", "format": "date-time" }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetResponse"
+                }
+              },
+              "text/csv": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until rate limit resets",
+                "schema": { "type": "integer" }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DatasetResponse": {
+        "type": "object",
+        "properties": {
+          "@context": {
+            "type": "string",
+            "example": "https://schema.org"
+          },
+          "@type": {
+            "type": "string",
+            "example": "Dataset"
+          },
+          "name": {
+            "type": "string",
+            "example": "EHDS Regulation - articles"
+          },
+          "description": {
+            "type": "string"
+          },
+          "license": {
+            "type": "string",
+            "example": "https://opensource.org/licenses/MIT"
+          },
+          "identifier": {
+            "type": "string"
+          },
+          "dateModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "publisher": {
+            "$ref": "#/components/schemas/Organization"
+          },
+          "isPartOf": {
+            "$ref": "#/components/schemas/Legislation"
+          },
+          "data": {
+            "oneOf": [
+              { "type": "array", "items": { "type": "object" } },
+              { "type": "object" }
+            ]
+          },
+          "recordCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "Organization": {
+        "type": "object",
+        "properties": {
+          "@type": { "type": "string", "example": "Organization" },
+          "name": { "type": "string" },
+          "url": { "type": "string", "format": "uri" }
+        }
+      },
+      "Legislation": {
+        "type": "object",
+        "properties": {
+          "@type": { "type": "string", "example": "Legislation" },
+          "name": { "type": "string" },
+          "identifier": { "type": "string" }
+        }
+      },
+      "Article": {
+        "type": "object",
+        "properties": {
+          "article_number": { "type": "integer" },
+          "title": { "type": "string" },
+          "content": { "type": "string" },
+          "chapter_id": { "type": "integer" },
+          "section_id": { "type": "integer", "nullable": true },
+          "is_key_provision": { "type": "boolean" },
+          "stakeholder_tags": { "type": "array", "items": { "type": "string" } },
+          "language": { "type": "string" }
+        }
+      },
+      "Recital": {
+        "type": "object",
+        "properties": {
+          "recital_number": { "type": "integer" },
+          "content": { "type": "string" },
+          "related_articles": { "type": "array", "items": { "type": "integer" } },
+          "language": { "type": "string" }
+        }
+      },
+      "Definition": {
+        "type": "object",
+        "properties": {
+          "term": { "type": "string" },
+          "definition": { "type": "string" },
+          "source_article": { "type": "integer", "nullable": true },
+          "source": { "type": "string" },
+          "language": { "type": "string" }
+        }
+      },
+      "Chapter": {
+        "type": "object",
+        "properties": {
+          "chapter_number": { "type": "integer" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "language": { "type": "string" }
+        }
+      },
+      "Section": {
+        "type": "object",
+        "properties": {
+          "section_number": { "type": "integer" },
+          "title": { "type": "string" },
+          "chapter_id": { "type": "integer" },
+          "language": { "type": "string" }
+        }
+      },
+      "ImplementingAct": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "type": { "type": "string" },
+          "theme": { "type": "string" },
+          "themes": { "type": "array", "items": { "type": "string" } },
+          "status": { "type": "string" },
+          "article_reference": { "type": "string" },
+          "related_articles": { "type": "array", "items": { "type": "integer" } },
+          "feedback_deadline": { "type": "string" },
+          "official_link": { "type": "string" },
+          "language": { "type": "string" }
+        }
+      },
+      "Annex": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "content": { "type": "string" },
+          "language": { "type": "string" }
+        }
+      },
+      "HealthAuthority": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "country_code": { "type": "string" },
+          "country_name": { "type": "string" },
+          "authority_type": { "type": "string", "enum": ["dha", "hdab"] },
+          "status": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "phone": { "type": "string" },
+          "website": { "type": "string", "format": "uri" },
+          "address": { "type": "string" },
+          "description": { "type": "string" },
+          "ehds_role": { "type": "string" },
+          "latitude": { "type": "number" },
+          "longitude": { "type": "number" }
+        }
+      },
+      "CountryLegislation": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "country_code": { "type": "string" },
+          "country_name": { "type": "string" },
+          "title": { "type": "string" },
+          "official_title": { "type": "string" },
+          "legislation_type": { "type": "string" },
+          "status": { "type": "string" },
+          "status_notes": { "type": "string" },
+          "summary": { "type": "string" },
+          "url": { "type": "string", "format": "uri" },
+          "effective_date": { "type": "string", "format": "date" },
+          "adoption_date": { "type": "string", "format": "date" },
+          "publication_date": { "type": "string", "format": "date" },
+          "enforcement_measures": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" },
+          "allowedResources": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "RateLimitError": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" },
+          "message": { "type": "string" },
+          "retryAfter": { "type": "integer" }
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "EHDS Explorer Documentation",
+    "url": "https://ehdsexplorer.eu/api"
+  }
+}

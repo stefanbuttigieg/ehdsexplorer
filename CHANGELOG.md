@@ -13,6 +13,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.0] - 2026-02-03
+
+### Added
+
+#### Public API v2.0
+- **New Endpoints**: Added `sections`, `annexes`, `health-authorities`, and `country-legislation` resources
+- **Translation Support**: New `lang` parameter enables fetching content in 24 EU languages (en, de, fr, mt, etc.)
+- **Field Selection**: New `fields` parameter allows clients to request only specific fields, reducing payload size
+- **Filtering**: Country and status filtering for health-authorities and country-legislation endpoints
+- **OpenAPI 3.0 Specification**: Full machine-readable API spec available at `/openapi.json`
+
+#### API Documentation Enhancements
+- Updated docs page to reflect all new v2.0 features
+- Added feature cards for translations, field selection, and OpenAPI spec
+- Rate limiting documentation with header explanations
+- Available fields listed for each endpoint
+
+### Changed
+- API version bumped to 2.0 in metadata response
+- Improved code organization in edge function
+
+---
+
 ## [1.9.4] - 2026-02-02
 
 ### Fixed

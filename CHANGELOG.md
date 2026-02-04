@@ -13,6 +13,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.1] - 2026-02-04
+
+### Added
+
+#### Admin API Documentation Hub
+- New centralized API documentation page at `/admin/api-docs` for super admins
+- Comprehensive reference for all 11 GET endpoints and POST endpoints
+- Includes `articles`, `recitals`, `definitions`, `chapters`, `sections`, `annexes`, `implementing-acts`, `health-authorities`, `country-legislation`, `ehds-obligations`, and `metadata`
+- Full documentation for `POST /update-obligation-status` endpoint with authentication requirements
+- Base URL, authentication methods (API Key and Bearer token), query parameters, and field specifications
+- `curl` examples and response schemas for each endpoint
+- Rate limiting documentation (100 req/hour for public GET, 100 req/min for authenticated POST)
+- Accessible via Admin Dashboard under Super Admin section
+
+#### Implementation Tracker Evidence Panel
+- Integrated evidence management directly into Admin Implementation Tracker page
+- Expandable obligation rows with chevron indicators and evidence count badges
+- Click any obligation to reveal full evidence panel (links, documents, notes)
+- Streamlined workflow for country managers to add evidence without leaving the tracker
+
+---
+
 ## [2.0.0] - 2026-02-03
 
 ### Added

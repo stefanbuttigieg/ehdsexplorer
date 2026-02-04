@@ -3422,7 +3422,9 @@ export type Database = {
       user_mfa_preferences: {
         Row: {
           created_at: string
+          email_otp_code: string | null
           email_otp_enabled: boolean | null
+          email_otp_expires_at: string | null
           id: string
           preferred_method: string | null
           reminder_dismissed_at: string | null
@@ -3432,7 +3434,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          email_otp_code?: string | null
           email_otp_enabled?: boolean | null
+          email_otp_expires_at?: string | null
           id?: string
           preferred_method?: string | null
           reminder_dismissed_at?: string | null
@@ -3442,7 +3446,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          email_otp_code?: string | null
           email_otp_enabled?: boolean | null
+          email_otp_expires_at?: string | null
           id?: string
           preferred_method?: string | null
           reminder_dismissed_at?: string | null

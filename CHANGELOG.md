@@ -13,6 +13,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.2] - 2026-02-04
+
+### Added
+
+#### Two-Factor Authentication (2FA/MFA)
+- **Dual MFA Methods** - Support for both Authenticator Apps (TOTP) and Email OTP verification
+- **Admin Security Settings** - New admin page at `/admin/security` for super admins to manage MFA enforcement
+  - Toggle reminder banners for users without MFA enabled
+  - Enable/disable enforcement with configurable grace period
+  - Set grace period end date for 6-month transition period
+  - Choose allowed MFA methods (TOTP, Email, or both)
+- **User MFA Enrollment** - New Security tab in Profile page for users to set up 2FA
+  - QR code setup flow for authenticator apps (Google Authenticator, Authy, etc.)
+  - Email OTP enrollment with verification code confirmation
+  - View and manage enrolled MFA methods
+- **Gentle Reminder System** - Dismissable banner encouraging MFA setup during transition period
+- **MFA Verification Flow** - Challenge dialog during login when MFA is enrolled
+- **Database Tables** - `mfa_settings` for global config, `user_mfa_preferences` for per-user tracking
+
+---
+
 ## [2.0.1] - 2026-02-04
 
 ### Added

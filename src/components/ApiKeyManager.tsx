@@ -305,7 +305,7 @@ export const ApiKeyManager = () => {
             Use your API key to update obligation statuses programmatically:
           </p>
           <pre className="text-xs bg-background p-3 rounded border overflow-x-auto">
-{`curl -X POST https://lmjjghvrjgffmbidajih.supabase.co/functions/v1/update-obligation-status \\
+{`curl -X POST https://api.ehdsexplorer.eu/update-obligation-status \\
   -H "Content-Type: application/json" \\
   -H "X-API-Key: YOUR_API_KEY" \\
   -d '{

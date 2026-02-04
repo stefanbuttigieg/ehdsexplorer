@@ -12,6 +12,11 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { 
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger
+} from "@/components/ui/collapsible";
+import { 
   Download, 
   Calendar, 
   FileSpreadsheet, 
@@ -25,8 +30,14 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
-  Circle
+  Circle,
+  ChevronDown,
+  Paperclip
 } from "lucide-react";
+import { ObligationEvidenceManager } from "@/components/ObligationEvidenceManager";
+import { useObligationEvidence } from "@/hooks/useObligationEvidence";
+import { useAuth } from "@/hooks/useAuth";
+import { useCountryAssignments } from "@/hooks/useCountryAssignments";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -113,6 +124,76 @@ interface ImplementationTimelineTrackerProps {
   keyDates?: Array<{ label: string; date: string; category?: string }>;
 }
 
+// Obligation card with evidence support
+const ObligationCard = ({ 
+  obligation, 
+  selectedCountry,
+  canEdit 
+}: { 
+  obligation: EhdsObligation; 
+  selectedCountry: string;
+  canEdit: boolean;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const { evidence } = useObligationEvidence(
+    selectedCountry !== "all" ? selectedCountry : undefined, 
+    obligation.id
+  );
+  
+  const evidenceCount = evidence.length;
+
+  // Only show evidence panel when a specific country is selected
+  const showEvidencePanel = selectedCountry !== "all";
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <div className="rounded-lg border border-border hover:bg-muted/50 transition-colors overflow-hidden">
+        <CollapsibleTrigger asChild>
+          <button className="w-full p-3 text-left flex items-start justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <div className="font-medium text-sm flex items-center gap-2">
+                {obligation.name}
+                {showEvidencePanel && evidenceCount > 0 && (
+                  <Badge variant="outline" className="text-[10px] gap-1">
+                    <Paperclip className="h-2.5 w-2.5" />
+                    {evidenceCount}
+                  </Badge>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{obligation.description}</p>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex gap-1 flex-wrap justify-end">
+                {obligation.article_references.map(ref => (
+                  <Badge key={ref} variant="secondary" className="text-[10px]">{ref}</Badge>
+                ))}
+              </div>
+              {showEvidencePanel && (
+                <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+              )}
+            </div>
+          </button>
+        </CollapsibleTrigger>
+        
+        {showEvidencePanel && (
+          <CollapsibleContent>
+            <div className="px-3 pb-3 border-t bg-muted/30">
+              <div className="pt-3">
+                <ObligationEvidenceManager
+                  countryCode={selectedCountry}
+                  obligationId={obligation.id}
+                  obligationName={obligation.name}
+                  canEdit={canEdit}
+                />
+              </div>
+            </div>
+          </CollapsibleContent>
+        )}
+      </div>
+    </Collapsible>
+  );
+};
+
 export const ImplementationTimelineTracker = ({ 
   showKeyDates = true, 
   keyDates = [] 
@@ -122,6 +203,9 @@ export const ImplementationTimelineTracker = ({
   const [zoomLevel, setZoomLevel] = useState(1);
   const [activeTab, setActiveTab] = useState<"obligations" | "progress" | "checklist">("obligations");
   const isMobile = useIsMobile();
+  
+  const { user, isAdmin, isSuperAdmin } = useAuth();
+  const { myAssignedCountries } = useCountryAssignments();
 
   const { data: obligations, isLoading: obligationsLoading } = useEhdsObligations();
   const { data: countryStatuses, isLoading: statusesLoading } = useCountryObligationStatuses();
@@ -483,6 +567,14 @@ export const ImplementationTimelineTracker = ({
 
         {/* Obligations View */}
         <TabsContent value="obligations" className="mt-3 md:mt-4">
+          {selectedCountry !== "all" && (
+            <div className="mb-4 p-3 bg-muted/50 rounded-lg border flex items-center gap-2">
+              <Paperclip className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                Click an obligation to view or add evidence for <strong>{EU_COUNTRIES.find(c => c.code === selectedCountry)?.name}</strong>
+              </span>
+            </div>
+          )}
           <div className="space-y-4">
             {(['primary_use', 'secondary_use', 'general'] as ObligationCategory[])
               .filter(cat => selectedCategory === 'all' || selectedCategory === cat)
@@ -500,22 +592,12 @@ export const ImplementationTimelineTracker = ({
                   <CardContent className="p-3 md:p-4 pt-0">
                     <div className="space-y-2">
                       {obligationsByCategory[category]?.map(ob => (
-                        <div 
+                        <ObligationCard
                           key={ob.id}
-                          className="p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors"
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1 min-w-0">
-                              <div className="font-medium text-sm">{ob.name}</div>
-                              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{ob.description}</p>
-                            </div>
-                            <div className="flex gap-1 flex-shrink-0 flex-wrap justify-end">
-                              {ob.article_references.map(ref => (
-                                <Badge key={ref} variant="secondary" className="text-[10px]">{ref}</Badge>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
+                          obligation={ob}
+                          selectedCountry={selectedCountry}
+                          canEdit={isAdmin || isSuperAdmin || myAssignedCountries.includes(selectedCountry)}
+                        />
                       ))}
                     </div>
                   </CardContent>

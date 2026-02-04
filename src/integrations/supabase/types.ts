@@ -2245,6 +2245,65 @@ export type Database = {
         }
         Relationships: []
       }
+      obligation_evidence: {
+        Row: {
+          country_code: string
+          created_at: string
+          description: string | null
+          evidence_type: Database["public"]["Enums"]["evidence_type"]
+          file_name: string | null
+          file_path: string | null
+          file_size: number | null
+          file_type: string | null
+          id: string
+          obligation_id: string
+          title: string
+          updated_at: string
+          uploaded_by: string | null
+          url: string | null
+        }
+        Insert: {
+          country_code: string
+          created_at?: string
+          description?: string | null
+          evidence_type: Database["public"]["Enums"]["evidence_type"]
+          file_name?: string | null
+          file_path?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          obligation_id: string
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
+          url?: string | null
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          description?: string | null
+          evidence_type?: Database["public"]["Enums"]["evidence_type"]
+          file_name?: string | null
+          file_path?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          obligation_id?: string
+          title?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "obligation_evidence_obligation_id_fkey"
+            columns: ["obligation_id"]
+            isOneToOne: false
+            referencedRelation: "ehds_obligations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       onboarding_steps: {
         Row: {
           created_at: string
@@ -3267,6 +3326,7 @@ export type Database = {
       app_role: "admin" | "editor" | "super_admin"
       authority_status: "active" | "pending" | "planned" | "inactive"
       authority_type: "digital_health_authority" | "health_data_access_body"
+      evidence_type: "document" | "link" | "note"
       obligation_category: "primary_use" | "secondary_use" | "general"
       obligation_status: "not_started" | "in_progress" | "partial" | "completed"
       team_role: "owner" | "admin" | "member" | "viewer"
@@ -3400,6 +3460,7 @@ export const Constants = {
       app_role: ["admin", "editor", "super_admin"],
       authority_status: ["active", "pending", "planned", "inactive"],
       authority_type: ["digital_health_authority", "health_data_access_body"],
+      evidence_type: ["document", "link", "note"],
       obligation_category: ["primary_use", "secondary_use", "general"],
       obligation_status: ["not_started", "in_progress", "partial", "completed"],
       team_role: ["owner", "admin", "member", "viewer"],

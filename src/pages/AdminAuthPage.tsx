@@ -10,7 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import Layout from '@/components/Layout';
 import { supabase } from '@/integrations/supabase/client';
-import { Info, ArrowLeft, UserPlus, LogIn } from 'lucide-react';
+import { Info, ArrowLeft, UserPlus, LogIn, Shield } from 'lucide-react';
+import { MFAVerifyDialog } from '@/components/mfa/MFAVerifyDialog';
 
 const authSchema = z.object({
   email: z.string().email('Invalid email address').max(255),
@@ -29,6 +30,8 @@ const AdminAuthPage = () => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
+  const [showMFAVerify, setShowMFAVerify] = useState(false);
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
   const { user, loading, signIn, isEditor } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -88,20 +91,56 @@ const AdminAuthPage = () => {
     }
 
     setIsLoading(true);
-    const { error } = await signIn(email, password);
-    setIsLoading(false);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      
+      if (error) {
+        toast({
+          title: 'Sign In Failed',
+          description: error.message === 'Invalid login credentials' 
+            ? 'Invalid email or password' 
+            : error.message,
+          variant: 'destructive',
+        });
+        return;
+      }
 
-    if (error) {
+      // Check if MFA is required
+      if (data.session) {
+        const { data: factorsData } = await supabase.auth.mfa.listFactors();
+        const verifiedFactors = factorsData?.totp?.filter(f => f.status === 'verified') ?? [];
+        
+        if (verifiedFactors.length > 0) {
+          // User has MFA enabled - need to verify
+          setMfaFactorId(verifiedFactors[0].id);
+          setShowMFAVerify(true);
+          return;
+        }
+      }
+
+      toast({ title: 'Signed in successfully' });
+    } catch (err: any) {
       toast({
         title: 'Sign In Failed',
-        description: error.message === 'Invalid login credentials' 
-          ? 'Invalid email or password' 
-          : error.message,
+        description: err.message || 'An error occurred',
         variant: 'destructive',
       });
-    } else {
-      toast({ title: 'Signed in successfully' });
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const handleMFASuccess = () => {
+    setShowMFAVerify(false);
+    setMfaFactorId(null);
+    toast({ title: 'Signed in successfully' });
+  };
+
+  const handleMFACancel = async () => {
+    // Sign out if MFA verification is cancelled
+    await supabase.auth.signOut();
+    setShowMFAVerify(false);
+    setMfaFactorId(null);
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -370,6 +409,17 @@ const AdminAuthPage = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* MFA Verification Dialog */}
+        {mfaFactorId && (
+          <MFAVerifyDialog
+            open={showMFAVerify}
+            onOpenChange={setShowMFAVerify}
+            factorId={mfaFactorId}
+            onSuccess={handleMFASuccess}
+            onCancel={handleMFACancel}
+          />
+        )}
       </div>
     </Layout>
   );

@@ -28,6 +28,7 @@ import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 import ReloadPrompt from "@/components/ReloadPrompt";
 import { StakeholderFilter } from "@/components/StakeholderFilter";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import { MFAReminderBanner } from "@/components/mfa/MFAReminderBanner";
 
 interface LayoutProps {
   children: ReactNode;
@@ -371,6 +372,7 @@ const Layout = ({
       paddingTop: 'calc(3.5rem + env(safe-area-inset-top))'
     }}>
         <div className="flex-1">
+          <MFAReminderBanner />
           <div className="p-4">
             <NotificationsBanner />
           </div>

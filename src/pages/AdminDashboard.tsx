@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote, HelpCircle, BookOpenCheck, Mail, Newspaper, UserCircle, Languages, ClipboardCheck, Bot, Globe, Sparkles, MapPin, Shield, Gavel, Settings2, UserCog, ToggleRight, ClipboardList, TableProperties, Activity, Key, Code, Search } from 'lucide-react';
+import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote, HelpCircle, BookOpenCheck, Mail, Newspaper, UserCircle, Languages, ClipboardCheck, Bot, Globe, Sparkles, MapPin, Shield, ShieldCheck, Gavel, Settings2, UserCog, ToggleRight, ClipboardList, TableProperties, Activity, Key, Code, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -403,6 +403,18 @@ const AdminDashboard = () => {
                         </div>
                         <CardTitle className="mt-4">SEO Management</CardTitle>
                         <CardDescription>Manage meta tags, schemas, and search optimization</CardDescription>
+                      </CardHeader>
+                    </Card>
+                  </Link>
+                  <Link to="/admin/security">
+                    <Card className="hover:border-primary transition-colors h-full border-dashed border-primary/50">
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <ShieldCheck className="h-8 w-8 text-primary" />
+                          <Badge variant="destructive">Super Admin</Badge>
+                        </div>
+                        <CardTitle className="mt-4">Security Settings</CardTitle>
+                        <CardDescription>Configure two-factor authentication and enforcement policies</CardDescription>
                       </CardHeader>
                     </Card>
                   </Link>

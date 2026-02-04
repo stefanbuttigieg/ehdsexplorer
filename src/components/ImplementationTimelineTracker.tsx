@@ -146,10 +146,13 @@ const ObligationCard = ({
   const showEvidencePanel = selectedCountry !== "all";
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} disabled={!showEvidencePanel}>
       <div className="rounded-lg border border-border hover:bg-muted/50 transition-colors overflow-hidden">
         <CollapsibleTrigger asChild>
-          <button className="w-full p-3 text-left flex items-start justify-between gap-2">
+          <button 
+            className={`w-full p-3 text-left flex items-start justify-between gap-2 ${showEvidencePanel ? 'cursor-pointer' : 'cursor-default'}`}
+            type="button"
+          >
             <div className="flex-1 min-w-0">
               <div className="font-medium text-sm flex items-center gap-2">
                 {obligation.name}
@@ -567,7 +570,14 @@ export const ImplementationTimelineTracker = ({
 
         {/* Obligations View */}
         <TabsContent value="obligations" className="mt-3 md:mt-4">
-          {selectedCountry !== "all" && (
+          {selectedCountry === "all" ? (
+            <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800 flex items-center gap-2">
+              <Paperclip className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <span className="text-sm text-amber-700 dark:text-amber-300">
+                <strong>Select a specific country</strong> from the dropdown above to view or add evidence for each obligation.
+              </span>
+            </div>
+          ) : (
             <div className="mb-4 p-3 bg-muted/50 rounded-lg border flex items-center gap-2">
               <Paperclip className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">

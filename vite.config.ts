@@ -16,6 +16,8 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  publicDir: "public",
+  assetsInclude: ["**/*.json"],
   plugins: [
     react(),
     mode === "development" && componentTagger(),

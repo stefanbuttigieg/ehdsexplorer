@@ -135,15 +135,32 @@ serve(async (req: Request): Promise<Response> => {
         );
       }
 
-      // Get stored OTP
+      // Get stored OTP and current enabled status
       const { data: preferences, error: fetchError } = await supabaseAdmin
         .from("user_mfa_preferences")
-        .select("email_otp_code, email_otp_expires_at")
+        .select("email_otp_code, email_otp_expires_at, email_otp_enabled")
         .eq("user_id", user.id)
         .single();
 
       if (fetchError || !preferences) {
         console.error("Error fetching OTP:", fetchError);
+        return new Response(
+          JSON.stringify({ error: "No verification code found. Please request a new one." }),
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        );
+      }
+
+      // Check if email OTP is already enabled (code was already verified)
+      if (preferences.email_otp_enabled && !preferences.email_otp_code) {
+        console.log(`Email OTP already enabled for user ${user.id}`);
+        return new Response(
+          JSON.stringify({ success: true, message: "Email verification already enabled" }),
+          { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        );
+      }
+
+      // Check if no code exists
+      if (!preferences.email_otp_code || !preferences.email_otp_expires_at) {
         return new Response(
           JSON.stringify({ error: "No verification code found. Please request a new one." }),
           { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }

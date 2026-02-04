@@ -27,6 +27,7 @@ import { UserMenu } from "@/components/UserMenu";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 import ReloadPrompt from "@/components/ReloadPrompt";
 import { StakeholderFilter } from "@/components/StakeholderFilter";
+import MobileBottomNav from "@/components/MobileBottomNav";
 
 interface LayoutProps {
   children: ReactNode;
@@ -174,26 +175,21 @@ const Layout = ({
     return items;
   }, [isFeatureEnabled]);
   return <div className="min-h-screen flex w-full">
-      {/* Mobile Header */}
+      {/* Mobile Header - simplified, removed menu button since we have bottom nav */}
       <header className="fixed top-0 left-0 right-0 bg-card border-b border-border flex items-center justify-between px-4 md:hidden z-50" style={{
       paddingTop: 'env(safe-area-inset-top)',
       height: 'calc(3.5rem + env(safe-area-inset-top))'
     }}>
-        <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)}>
-          <Menu className="h-5 w-5" />
-        </Button>
-        <Link to="/" className="flex items-center justify-center w-8 h-8 bg-primary rounded-md">
-          <Book className="h-4 w-4 text-primary-foreground" />
+        <Link to="/" className="flex items-center gap-2">
+          <div className="flex items-center justify-center w-8 h-8 bg-primary rounded-md">
+            <Book className="h-4 w-4 text-primary-foreground" />
+          </div>
+          <span className="font-serif font-bold text-base">EHDS Explorer</span>
         </Link>
         <div className="flex items-center gap-1" data-tour="accessibility">
           <StakeholderFilter compact />
           <LanguageSelector variant="compact" />
-          <TourButton onClick={startTour} />
-          <ReportIssueButton />
           <AccessibilityControls />
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSearchOpen(true)} aria-label="Open search">
-            <Search className="h-4 w-4" />
-          </Button>
           <UserMenu />
         </div>
       </header>
@@ -370,8 +366,8 @@ const Layout = ({
       {/* Public Tour */}
       <PublicTour run={isTourOpen} onComplete={completeTour} onClose={closeTour} />
 
-      {/* Main Content */}
-      <main className="flex-1 md:pt-0 flex flex-col" style={{
+      {/* Main Content - add bottom padding for mobile nav */}
+      <main className="flex-1 md:pt-0 flex flex-col pb-14 md:pb-0" style={{
       paddingTop: 'calc(3.5rem + env(safe-area-inset-top))'
     }}>
         <div className="flex-1">
@@ -381,6 +377,12 @@ const Layout = ({
           {children}
         </div>
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav 
+        onMenuClick={() => setSidebarOpen(true)} 
+        onSearchClick={() => setSearchOpen(true)} 
+      />
 
       {/* Share Text Button - appears when user selects text */}
       <ShareTextButton />

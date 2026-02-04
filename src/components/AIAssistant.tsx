@@ -339,7 +339,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
   const regularConversations = conversations?.filter(c => !c.is_favorite) || [];
 
   return (
-    <div className={cn("fixed bottom-4 right-4 z-50", className)}>
+    <div className={cn("fixed bottom-20 md:bottom-4 right-4 z-50", className)}>
       {/* Chat Panel */}
       {isOpen && (
         <div className="absolute bottom-16 right-0 w-[380px] max-w-[calc(100vw-2rem)] h-[550px] max-h-[calc(100vh-8rem)] bg-background border rounded-lg shadow-xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-2 fade-in duration-200">

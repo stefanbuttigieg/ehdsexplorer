@@ -49,7 +49,7 @@ export function EmailOTPSetup() {
   };
 
   const handleVerify = async () => {
-    if (!user?.email || code.length !== 6) return;
+    if (!user?.email || code.length !== 6 || isVerifying) return;
 
     setIsVerifying(true);
     try {
@@ -61,21 +61,30 @@ export function EmailOTPSetup() {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
+      // Success - update UI immediately without reload
       setStep('verified');
       toast({
         title: 'Email OTP enabled',
         description: 'You can now use email verification for two-factor authentication.',
       });
       
-      // Refetch preferences to update the UI
-      window.location.reload();
+      // Wait a moment then reload to refresh preferences
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
     } catch (error: any) {
       console.error('Error verifying OTP:', error);
-      toast({
-        title: 'Verification failed',
-        description: error.message || 'Invalid verification code',
-        variant: 'destructive',
-      });
+      // Don't show error if already enabled
+      if (!error.message?.includes('already enabled')) {
+        toast({
+          title: 'Verification failed',
+          description: error.message || 'Invalid verification code',
+          variant: 'destructive',
+        });
+      } else {
+        // Already enabled, just reload
+        window.location.reload();
+      }
     } finally {
       setIsVerifying(false);
     }

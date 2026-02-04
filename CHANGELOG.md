@@ -17,6 +17,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### SEO & Growth Infrastructure
+- **Admin SEO Management** - New admin page at `/admin/seo` for managing page-level SEO settings
+  - Configure meta titles, descriptions, and keywords per page
+  - Open Graph and Twitter card customization
+  - Structured data type selection (Article, Legislation, FAQ, HowTo)
+  - Robots directives (noindex, nofollow) per page
+  - Quick setup tab for unconfigured common pages
+- **Schema Markup Components** - Rich snippets for Google search results
+  - ArticleSchema for 105 articles and 115 recitals
+  - BreadcrumbSchema for enhanced navigation display
+  - FAQSchema for Help Center page
+  - HowToSchema for procedural content
+  - WebsiteSchema with SearchAction for sitelinks
+- **Newsletter Subscription System** - Email capture for user acquisition
+  - Multiple variants: card, banner, and inline forms
+  - Secure edge function with email validation
+  - Source tracking (website, footer, resource downloads)
+  - Verification token flow for double opt-in
+
 #### Admin API Documentation Hub
 - New centralized API documentation page at `/admin/api-docs` for super admins
 - Comprehensive reference for all 11 GET endpoints and POST endpoints
@@ -32,6 +51,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Expandable obligation rows with chevron indicators and evidence count badges
 - Click any obligation to reveal full evidence panel (links, documents, notes)
 - Streamlined workflow for country managers to add evidence without leaving the tracker
+
+#### Database Tables
+- `seo_settings` - Page-level SEO configuration with structured data support
+- `newsletter_subscriptions` - Email subscriber management with verification flow
+- `downloadable_resources` - Lead magnet resource management
+- `resource_downloads` - Download tracking for email-gated resources
 
 ---
 

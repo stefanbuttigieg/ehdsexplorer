@@ -17,6 +17,7 @@ import {
 import Layout from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
 import { useHelpCenterFaqs, useFaqCategories } from '@/hooks/useHelpCenterFaq';
+import { SEOHead, FAQSchema, BreadcrumbSchema } from '@/components/seo';
 
 const HelpCenterPage = () => {
   const { user } = useAuth();
@@ -36,8 +37,29 @@ const HelpCenterPage = () => {
     return categories.find(c => c.value === value)?.label || value;
   };
 
+  // Prepare FAQ items for schema
+  const faqSchemaItems = dynamicFaqs?.map(faq => ({
+    question: faq.question,
+    answer: faq.answer,
+  })) || [];
+
   return (
     <Layout>
+      <SEOHead
+        title="Help Center | EHDS Explorer"
+        description="Learn how to navigate and use the EHDS Regulation Explorer. Find answers to frequently asked questions about the European Health Data Space."
+        url="/help"
+        keywords={['EHDS help', 'FAQ', 'European Health Data Space guide', 'regulation explorer help']}
+      />
+      {faqSchemaItems.length > 0 && (
+        <FAQSchema items={faqSchemaItems} pageUrl="/help" />
+      )}
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Help Center', url: '/help' },
+        ]}
+      />
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">

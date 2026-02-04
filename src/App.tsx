@@ -101,7 +101,7 @@ import TopicIndexPage from "./pages/TopicIndexPage";
 import AdminEhdsiKpisPage from "./pages/AdminEhdsiKpisPage";
 import AdminApiLogsPage from "./pages/AdminApiLogsPage";
 import AdminApiDocsPage from "./pages/AdminApiDocsPage";
-
+import AdminSEOPage from "./pages/AdminSEOPage";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -221,6 +221,7 @@ const App = () => (
             <Route path="/admin/ehdsi-kpis" element={<AdminEhdsiKpisPage />} />
             <Route path="/admin/api-logs" element={<AdminApiLogsPage />} />
             <Route path="/admin/api-docs" element={<AdminApiDocsPage />} />
+            <Route path="/admin/seo" element={<AdminSEOPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </MaintenanceGuard>

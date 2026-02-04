@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote, HelpCircle, BookOpenCheck, Mail, Newspaper, UserCircle, Languages, ClipboardCheck, Bot, Globe, Sparkles, MapPin, Shield, Gavel, Settings2, UserCog, ToggleRight, ClipboardList, TableProperties, Activity } from 'lucide-react';
+import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote, HelpCircle, BookOpenCheck, Mail, Newspaper, UserCircle, Languages, ClipboardCheck, Bot, Globe, Sparkles, MapPin, Shield, Gavel, Settings2, UserCog, ToggleRight, ClipboardList, TableProperties, Activity, Key } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -367,6 +367,18 @@ const AdminDashboard = () => {
                         </div>
                         <CardTitle className="mt-4">Feature Flags</CardTitle>
                         <CardDescription>Toggle features on/off across the site</CardDescription>
+                      </CardHeader>
+                    </Card>
+                  </Link>
+                  <Link to="/admin/api-logs">
+                    <Card className="hover:border-primary transition-colors h-full border-dashed border-primary/50">
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <Key className="h-8 w-8 text-primary" />
+                          <Badge variant="destructive">Super Admin</Badge>
+                        </div>
+                        <CardTitle className="mt-4">API Keys & Logs</CardTitle>
+                        <CardDescription>View API keys and request logs from country managers</CardDescription>
                       </CardHeader>
                     </Card>
                   </Link>

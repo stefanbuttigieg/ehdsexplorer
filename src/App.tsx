@@ -99,6 +99,7 @@ import AdminLandingPagesPage from "./pages/AdminLandingPagesPage";
 import AdminTopicIndexPage from "./pages/AdminTopicIndexPage";
 import TopicIndexPage from "./pages/TopicIndexPage";
 import AdminEhdsiKpisPage from "./pages/AdminEhdsiKpisPage";
+import AdminApiLogsPage from "./pages/AdminApiLogsPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -217,6 +218,7 @@ const App = () => (
             <Route path="/admin/landing-pages" element={<AdminLandingPagesPage />} />
             <Route path="/admin/topic-index" element={<AdminTopicIndexPage />} />
             <Route path="/admin/ehdsi-kpis" element={<AdminEhdsiKpisPage />} />
+            <Route path="/admin/api-logs" element={<AdminApiLogsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </MaintenanceGuard>

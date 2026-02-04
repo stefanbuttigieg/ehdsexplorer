@@ -15,6 +15,7 @@ export function EmailOTPSetup() {
   const { preferences, updatePreferences } = useMFAEnrollment();
   const [step, setStep] = useState<'idle' | 'sending' | 'verifying' | 'verified'>('idle');
   const [code, setCode] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const isEnabled = preferences?.email_otp_enabled ?? false;
 
@@ -23,26 +24,25 @@ export function EmailOTPSetup() {
 
     setStep('sending');
     try {
-      // Use Supabase's email OTP flow
-      const { error } = await supabase.auth.signInWithOtp({
-        email: user.email,
-        options: {
-          shouldCreateUser: false,
-        },
+      // Call our custom edge function to send a real OTP code
+      const { data, error } = await supabase.functions.invoke('send-email-otp', {
+        body: { action: 'send' },
       });
 
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
       setStep('verifying');
       toast({
         title: 'Code sent',
-        description: `A verification code has been sent to ${user.email}`,
+        description: `A 6-digit verification code has been sent to ${user.email}`,
       });
     } catch (error: any) {
+      console.error('Error sending OTP:', error);
       setStep('idle');
       toast({
         title: 'Error',
-        description: error.message,
+        description: error.message || 'Failed to send verification code',
         variant: 'destructive',
       });
     }
@@ -51,27 +51,33 @@ export function EmailOTPSetup() {
   const handleVerify = async () => {
     if (!user?.email || code.length !== 6) return;
 
+    setIsVerifying(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({
-        email: user.email,
-        token: code,
-        type: 'email',
+      // Call our custom edge function to verify the OTP code
+      const { data, error } = await supabase.functions.invoke('send-email-otp', {
+        body: { action: 'verify', code },
       });
 
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
-      await updatePreferences.mutateAsync({ email_otp_enabled: true });
       setStep('verified');
       toast({
         title: 'Email OTP enabled',
         description: 'You can now use email verification for two-factor authentication.',
       });
+      
+      // Refetch preferences to update the UI
+      window.location.reload();
     } catch (error: any) {
+      console.error('Error verifying OTP:', error);
       toast({
         title: 'Verification failed',
-        description: error.message,
+        description: error.message || 'Invalid verification code',
         variant: 'destructive',
       });
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -139,7 +145,7 @@ export function EmailOTPSetup() {
             {step === 'verifying' && (
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  We've sent a verification code to <strong>{user?.email}</strong>
+                  We've sent a 6-digit verification code to <strong>{user?.email}</strong>
                 </p>
                 <div className="space-y-2">
                   <Label htmlFor="email-otp-code">Verification Code</Label>
@@ -157,11 +163,18 @@ export function EmailOTPSetup() {
                   />
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => setStep('idle')}>
+                  <Button variant="outline" onClick={() => { setStep('idle'); setCode(''); }}>
                     Cancel
                   </Button>
-                  <Button onClick={handleVerify} disabled={code.length !== 6}>
-                    Verify & Enable
+                  <Button onClick={handleVerify} disabled={code.length !== 6 || isVerifying}>
+                    {isVerifying ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Verifying...
+                      </>
+                    ) : (
+                      'Verify & Enable'
+                    )}
                   </Button>
                 </div>
               </div>

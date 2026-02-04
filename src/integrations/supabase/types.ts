@@ -2158,6 +2158,39 @@ export type Database = {
         }
         Relationships: []
       }
+      mfa_settings: {
+        Row: {
+          allowed_methods: string[]
+          created_at: string
+          enforcement_enabled: boolean
+          enforcement_start_date: string | null
+          grace_period_end_date: string | null
+          id: string
+          reminder_enabled: boolean
+          updated_at: string
+        }
+        Insert: {
+          allowed_methods?: string[]
+          created_at?: string
+          enforcement_enabled?: boolean
+          enforcement_start_date?: string | null
+          grace_period_end_date?: string | null
+          id?: string
+          reminder_enabled?: boolean
+          updated_at?: string
+        }
+        Update: {
+          allowed_methods?: string[]
+          created_at?: string
+          enforcement_enabled?: boolean
+          enforcement_start_date?: string | null
+          grace_period_end_date?: string | null
+          id?: string
+          reminder_enabled?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       news_summaries: {
         Row: {
           created_at: string
@@ -3385,6 +3418,39 @@ export type Database = {
             referencedColumns: ["code"]
           },
         ]
+      }
+      user_mfa_preferences: {
+        Row: {
+          created_at: string
+          email_otp_enabled: boolean | null
+          id: string
+          preferred_method: string | null
+          reminder_dismissed_at: string | null
+          reminder_snooze_until: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_otp_enabled?: boolean | null
+          id?: string
+          preferred_method?: string | null
+          reminder_dismissed_at?: string | null
+          reminder_snooze_until?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_otp_enabled?: boolean | null
+          id?: string
+          preferred_method?: string | null
+          reminder_dismissed_at?: string | null
+          reminder_snooze_until?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_notes: {
         Row: {

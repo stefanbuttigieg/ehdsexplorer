@@ -18,6 +18,7 @@ import { AchievementProgress } from "@/components/achievements/AchievementProgre
 import { AchievementBadge } from "@/components/achievements/AchievementBadge";
 import { useAchievements } from "@/hooks/useAchievements";
 import { AchievementTier } from "@/data/achievements";
+import { MFASecuritySection } from "@/components/mfa/MFASecuritySection";
 
 const ProfilePage = () => {
   const { user, session, loading, isAdmin, isEditor } = useAuth();
@@ -243,14 +244,18 @@ const ProfilePage = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="h-4 w-4" />
-              Profile Settings
+              <span className="hidden sm:inline">Profile</span>
+            </TabsTrigger>
+            <TabsTrigger value="security" className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              <span className="hidden sm:inline">Security</span>
             </TabsTrigger>
             <TabsTrigger value="achievements" className="flex items-center gap-2">
               <Trophy className="h-4 w-4" />
-              Achievements
+              <span className="hidden sm:inline">Achievements</span>
             </TabsTrigger>
           </TabsList>
 
@@ -398,6 +403,10 @@ const ProfilePage = () => {
               </form>
             </CardContent>
           </Card>
+          </TabsContent>
+
+          <TabsContent value="security" className="space-y-6">
+            <MFASecuritySection />
           </TabsContent>
 
           <TabsContent value="achievements" className="space-y-6">

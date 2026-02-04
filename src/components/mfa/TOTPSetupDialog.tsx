@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { QrCode, Copy, Check, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
   DialogContent,
@@ -11,7 +12,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
 import { useMFAEnrollment, TOTPEnrollment } from '@/hooks/useMFAEnrollment';
 
 interface TOTPSetupDialogProps {
@@ -34,9 +34,21 @@ export function TOTPSetupDialog({ open, onOpenChange }: TOTPSetupDialogProps) {
       setCopied(false);
       try {
         const data = await startTOTPEnrollment();
-        setLocalEnrollment(data);
-        setStep('scan');
-      } catch {
+        console.log('TOTP enrollment data:', data);
+        if (data?.totp?.qr_code) {
+          setLocalEnrollment(data);
+          setStep('scan');
+        } else {
+          console.error('No QR code in enrollment response:', data);
+          toast({
+            title: 'Setup failed',
+            description: 'Could not generate QR code. Please try again.',
+            variant: 'destructive',
+          });
+          onOpenChange(false);
+        }
+      } catch (error) {
+        console.error('TOTP enrollment error:', error);
         onOpenChange(false);
       }
     } else {

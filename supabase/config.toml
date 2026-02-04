@@ -65,3 +65,6 @@ verify_jwt = false
 
 [functions.sync-ehdsi-kpis]
 verify_jwt = false
+
+[functions.update-obligation-status]
+verify_jwt = false

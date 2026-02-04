@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,95 +14,100 @@ import UmamiAnalytics from "@/components/UmamiAnalytics";
 import { ComparisonBar } from "@/components/ComparisonBar";
 import { AchievementUnlockedToast } from "@/components/achievements/AchievementUnlockedToast";
 import { LevelUpModal } from "@/components/achievements/LevelUpModal";
-import Index from "./pages/Index";
-import ArticlePage from "./pages/ArticlePage";
-import ArticlesPage from "./pages/ArticlesPage";
-import ChapterPage from "./pages/ChapterPage";
-import RecitalsPage from "./pages/RecitalsPage";
-import RecitalPage from "./pages/RecitalPage";
-import DefinitionsPage from "./pages/DefinitionsPage";
-import SearchPage from "./pages/SearchPage";
-import ImplementingActsPage from "./pages/ImplementingActsPage";
-import ImplementingActDetail from "./pages/ImplementingActDetail";
-import OverviewPage from "./pages/OverviewPage";
-import BookmarksPage from "./pages/BookmarksPage";
-import AnnexesPage from "./pages/AnnexesPage";
-import AnnexDetailPage from "./pages/AnnexDetailPage";
-import ComparePage from "./pages/ComparePage";
-import AdminAuthPage from "./pages/AdminAuthPage";
-import AdminSetPasswordPage from "./pages/AdminSetPasswordPage";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminArticlesPage from "./pages/AdminArticlesPage";
-import AdminRecitalsPage from "./pages/AdminRecitalsPage";
-import AdminDefinitionsPage from "./pages/AdminDefinitionsPage";
-import AdminAnnexesPage from "./pages/AdminAnnexesPage";
-import AdminImplementingActsPage from "./pages/AdminImplementingActsPage";
-import AdminBulkImportPage from "./pages/AdminBulkImportPage";
-import AdminChaptersPage from "./pages/AdminChaptersPage";
-import AdminOverviewPage from "./pages/AdminOverviewPage";
-import AdminJointActionDeliverablesPage from "./pages/AdminJointActionDeliverablesPage";
-import AdminPublishedWorksPage from "./pages/AdminPublishedWorksPage";
-import AdminNotificationsPage from "./pages/AdminNotificationsPage";
-import AdminUsersPage from "./pages/AdminUsersPage";
-import AdminFootnotesPage from "./pages/AdminFootnotesPage";
-import AdminHelpCenterPage from "./pages/AdminHelpCenterPage";
-import AdminEmailTemplatesPage from "./pages/AdminEmailTemplatesPage";
-import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
-import CookiesPolicyPage from "./pages/CookiesPolicyPage";
-import TermsOfServicePage from "./pages/TermsOfServicePage";
-import AccessibilityStatementPage from "./pages/AccessibilityStatementPage";
 import CookieConsentBanner from "./components/CookieConsentBanner";
-import NotFound from "./pages/NotFound";
-import MatchGamePage from "./pages/MatchGamePage";
-import FlashcardGamePage from "./pages/FlashcardGamePage";
-import QuizGamePage from "./pages/QuizGamePage";
-import WordSearchGamePage from "./pages/WordSearchGamePage";
-import TrueFalseGamePage from "./pages/TrueFalseGamePage";
-import GamesPage from "./pages/GamesPage";
-import ApiDocsPage from "./pages/ApiDocsPage";
-import NewsPage from "./pages/NewsPage";
-import NewsDetailPage from "./pages/NewsDetailPage";
-import AdminNewsPage from "./pages/AdminNewsPage";
-import AdminImplementingActContentPage from "./pages/AdminImplementingActContentPage";
-import ProfilePage from "./pages/ProfilePage";
-import HelpCenterPage from "./pages/HelpCenterPage";
-import AdminPlainLanguagePage from "./pages/AdminPlainLanguagePage";
-import AdminQAPage from "./pages/AdminQAPage";
-import AdminSubscriptionsPage from "./pages/AdminSubscriptionsPage";
-import AdminAIFeedbackPage from "./pages/AdminAIFeedbackPage";
-import AdminTranslationsPage from "./pages/AdminTranslationsPage";
-import AdminLanguagesPage from "./pages/AdminLanguagesPage";
-import AdminHelpCenterFaqPage from "./pages/AdminHelpCenterFaqPage";
-import AdminOnboardingPage from "./pages/AdminOnboardingPage";
-import NotesPage from "./pages/NotesPage";
-import TeamsPage from "./pages/TeamsPage";
-import UnsubscribePage from "./pages/UnsubscribePage";
-import VerifySubscriptionPage from "./pages/VerifySubscriptionPage";
-import ManageSubscriptionPage from "./pages/ManageSubscriptionPage";
-import AchievementsPage from "./pages/AchievementsPage";
-import HealthAuthoritiesPage from "./pages/HealthAuthoritiesPage";
-import AdminHealthAuthoritiesPage from "./pages/AdminHealthAuthoritiesPage";
-import AdminLegalPagesPage from "./pages/AdminLegalPagesPage";
-import AdminCountryLegislationPage from "./pages/AdminCountryLegislationPage";
-import AdminCrossRegulationPage from "./pages/AdminCrossRegulationPage";
-import AdminImplementationTrackerPage from "./pages/AdminImplementationTrackerPage";
-import CrossRegulationMapPage from "./pages/CrossRegulationMapPage";
-import AdminCountryAssignmentsPage from "./pages/AdminCountryAssignmentsPage";
-import CountryManagerDashboard from "./pages/CountryManagerDashboard";
-import AdminRolePermissionsPage from "./pages/AdminRolePermissionsPage";
-import AdminFeatureFlagsPage from "./pages/AdminFeatureFlagsPage";
-import AdminObligationsPage from "./pages/AdminObligationsPage";
-import ForCitizensPage from "./pages/ForCitizensPage";
-import ForHealthTechPage from "./pages/ForHealthTechPage";
-import ForHealthcareProPage from "./pages/ForHealthcareProPage";
-import ScenarioFinderPage from "./pages/ScenarioFinderPage";
-import AdminLandingPagesPage from "./pages/AdminLandingPagesPage";
-import AdminTopicIndexPage from "./pages/AdminTopicIndexPage";
-import TopicIndexPage from "./pages/TopicIndexPage";
-import AdminEhdsiKpisPage from "./pages/AdminEhdsiKpisPage";
-import AdminApiLogsPage from "./pages/AdminApiLogsPage";
-import AdminApiDocsPage from "./pages/AdminApiDocsPage";
-import AdminSEOPage from "./pages/AdminSEOPage";
+
+// Eagerly load Index for fastest FCP/LCP on homepage
+import Index from "./pages/Index";
+
+// Lazy load all other pages for code splitting
+const ArticlePage = lazy(() => import("./pages/ArticlePage"));
+const ArticlesPage = lazy(() => import("./pages/ArticlesPage"));
+const ChapterPage = lazy(() => import("./pages/ChapterPage"));
+const RecitalsPage = lazy(() => import("./pages/RecitalsPage"));
+const RecitalPage = lazy(() => import("./pages/RecitalPage"));
+const DefinitionsPage = lazy(() => import("./pages/DefinitionsPage"));
+const SearchPage = lazy(() => import("./pages/SearchPage"));
+const ImplementingActsPage = lazy(() => import("./pages/ImplementingActsPage"));
+const ImplementingActDetail = lazy(() => import("./pages/ImplementingActDetail"));
+const OverviewPage = lazy(() => import("./pages/OverviewPage"));
+const BookmarksPage = lazy(() => import("./pages/BookmarksPage"));
+const AnnexesPage = lazy(() => import("./pages/AnnexesPage"));
+const AnnexDetailPage = lazy(() => import("./pages/AnnexDetailPage"));
+const ComparePage = lazy(() => import("./pages/ComparePage"));
+const AdminAuthPage = lazy(() => import("./pages/AdminAuthPage"));
+const AdminSetPasswordPage = lazy(() => import("./pages/AdminSetPasswordPage"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AdminArticlesPage = lazy(() => import("./pages/AdminArticlesPage"));
+const AdminRecitalsPage = lazy(() => import("./pages/AdminRecitalsPage"));
+const AdminDefinitionsPage = lazy(() => import("./pages/AdminDefinitionsPage"));
+const AdminAnnexesPage = lazy(() => import("./pages/AdminAnnexesPage"));
+const AdminImplementingActsPage = lazy(() => import("./pages/AdminImplementingActsPage"));
+const AdminBulkImportPage = lazy(() => import("./pages/AdminBulkImportPage"));
+const AdminChaptersPage = lazy(() => import("./pages/AdminChaptersPage"));
+const AdminOverviewPage = lazy(() => import("./pages/AdminOverviewPage"));
+const AdminJointActionDeliverablesPage = lazy(() => import("./pages/AdminJointActionDeliverablesPage"));
+const AdminPublishedWorksPage = lazy(() => import("./pages/AdminPublishedWorksPage"));
+const AdminNotificationsPage = lazy(() => import("./pages/AdminNotificationsPage"));
+const AdminUsersPage = lazy(() => import("./pages/AdminUsersPage"));
+const AdminFootnotesPage = lazy(() => import("./pages/AdminFootnotesPage"));
+const AdminHelpCenterPage = lazy(() => import("./pages/AdminHelpCenterPage"));
+const AdminEmailTemplatesPage = lazy(() => import("./pages/AdminEmailTemplatesPage"));
+const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
+const CookiesPolicyPage = lazy(() => import("./pages/CookiesPolicyPage"));
+const TermsOfServicePage = lazy(() => import("./pages/TermsOfServicePage"));
+const AccessibilityStatementPage = lazy(() => import("./pages/AccessibilityStatementPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const MatchGamePage = lazy(() => import("./pages/MatchGamePage"));
+const FlashcardGamePage = lazy(() => import("./pages/FlashcardGamePage"));
+const QuizGamePage = lazy(() => import("./pages/QuizGamePage"));
+const WordSearchGamePage = lazy(() => import("./pages/WordSearchGamePage"));
+const TrueFalseGamePage = lazy(() => import("./pages/TrueFalseGamePage"));
+const GamesPage = lazy(() => import("./pages/GamesPage"));
+const ApiDocsPage = lazy(() => import("./pages/ApiDocsPage"));
+const NewsPage = lazy(() => import("./pages/NewsPage"));
+const NewsDetailPage = lazy(() => import("./pages/NewsDetailPage"));
+const AdminNewsPage = lazy(() => import("./pages/AdminNewsPage"));
+const AdminImplementingActContentPage = lazy(() => import("./pages/AdminImplementingActContentPage"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+const HelpCenterPage = lazy(() => import("./pages/HelpCenterPage"));
+const AdminPlainLanguagePage = lazy(() => import("./pages/AdminPlainLanguagePage"));
+const AdminQAPage = lazy(() => import("./pages/AdminQAPage"));
+const AdminSubscriptionsPage = lazy(() => import("./pages/AdminSubscriptionsPage"));
+const AdminAIFeedbackPage = lazy(() => import("./pages/AdminAIFeedbackPage"));
+const AdminTranslationsPage = lazy(() => import("./pages/AdminTranslationsPage"));
+const AdminLanguagesPage = lazy(() => import("./pages/AdminLanguagesPage"));
+const AdminHelpCenterFaqPage = lazy(() => import("./pages/AdminHelpCenterFaqPage"));
+const AdminOnboardingPage = lazy(() => import("./pages/AdminOnboardingPage"));
+const NotesPage = lazy(() => import("./pages/NotesPage"));
+const TeamsPage = lazy(() => import("./pages/TeamsPage"));
+const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
+const VerifySubscriptionPage = lazy(() => import("./pages/VerifySubscriptionPage"));
+const ManageSubscriptionPage = lazy(() => import("./pages/ManageSubscriptionPage"));
+const AchievementsPage = lazy(() => import("./pages/AchievementsPage"));
+const HealthAuthoritiesPage = lazy(() => import("./pages/HealthAuthoritiesPage"));
+const AdminHealthAuthoritiesPage = lazy(() => import("./pages/AdminHealthAuthoritiesPage"));
+const AdminLegalPagesPage = lazy(() => import("./pages/AdminLegalPagesPage"));
+const AdminCountryLegislationPage = lazy(() => import("./pages/AdminCountryLegislationPage"));
+const AdminCrossRegulationPage = lazy(() => import("./pages/AdminCrossRegulationPage"));
+const AdminImplementationTrackerPage = lazy(() => import("./pages/AdminImplementationTrackerPage"));
+const CrossRegulationMapPage = lazy(() => import("./pages/CrossRegulationMapPage"));
+const AdminCountryAssignmentsPage = lazy(() => import("./pages/AdminCountryAssignmentsPage"));
+const CountryManagerDashboard = lazy(() => import("./pages/CountryManagerDashboard"));
+const AdminRolePermissionsPage = lazy(() => import("./pages/AdminRolePermissionsPage"));
+const AdminFeatureFlagsPage = lazy(() => import("./pages/AdminFeatureFlagsPage"));
+const AdminObligationsPage = lazy(() => import("./pages/AdminObligationsPage"));
+const ForCitizensPage = lazy(() => import("./pages/ForCitizensPage"));
+const ForHealthTechPage = lazy(() => import("./pages/ForHealthTechPage"));
+const ForHealthcareProPage = lazy(() => import("./pages/ForHealthcareProPage"));
+const ScenarioFinderPage = lazy(() => import("./pages/ScenarioFinderPage"));
+const AdminLandingPagesPage = lazy(() => import("./pages/AdminLandingPagesPage"));
+const AdminTopicIndexPage = lazy(() => import("./pages/AdminTopicIndexPage"));
+const TopicIndexPage = lazy(() => import("./pages/TopicIndexPage"));
+const AdminEhdsiKpisPage = lazy(() => import("./pages/AdminEhdsiKpisPage"));
+const AdminApiLogsPage = lazy(() => import("./pages/AdminApiLogsPage"));
+const AdminApiDocsPage = lazy(() => import("./pages/AdminApiDocsPage"));
+const AdminSEOPage = lazy(() => import("./pages/AdminSEOPage"));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -112,6 +118,13 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+// Minimal loading fallback that matches the initial loader style
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-[50vh]">
+    <div className="w-8 h-8 border-2 border-muted border-t-primary rounded-full animate-spin" />
+  </div>
+);
 
 // Wrappers to use achievements hooks within providers
 const AchievementToastWrapper = () => <AchievementUnlockedToast />;
@@ -134,6 +147,7 @@ const App = () => (
                 <AchievementToastWrapper />
                 <LevelUpModalWrapper />
                 <MaintenanceGuard>
+          <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/overview" element={<OverviewPage />} />
@@ -224,6 +238,7 @@ const App = () => (
             <Route path="/admin/seo" element={<AdminSEOPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
           </MaintenanceGuard>
           </BrowserRouter>
             </TooltipProvider>

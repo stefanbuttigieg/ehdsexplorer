@@ -114,6 +114,14 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Mobile responsive** design with swipe gestures for country cards
 - **Touch-optimized dashboards** with responsive layouts
 
+### 🔍 SEO & Discoverability
+- **Structured data markup** for Google rich snippets (Article, FAQ, Breadcrumb, HowTo schemas)
+- **Dynamic meta tags** with keyword-rich titles and descriptions under 60/160 characters
+- **Open Graph and Twitter cards** for social sharing optimization
+- **Admin SEO Management** at `/admin/seo` for page-level configuration
+- **Newsletter signup** for email capture and user retention
+- **Downloadable resources** with email gating for lead generation
+
 ### ♿ Accessibility
 - **WCAG 2.1 Level AA** compliance efforts
 - **Semantic HTML** structure throughout

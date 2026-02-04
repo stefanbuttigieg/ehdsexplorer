@@ -996,6 +996,51 @@ export type Database = {
         }
         Relationships: []
       }
+      downloadable_resources: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          download_count: number | null
+          file_url: string
+          id: string
+          is_published: boolean | null
+          requires_email: boolean | null
+          resource_type: string
+          tags: string[] | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          download_count?: number | null
+          file_url: string
+          id?: string
+          is_published?: boolean | null
+          requires_email?: boolean | null
+          resource_type: string
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          download_count?: number | null
+          file_url?: string
+          id?: string
+          is_published?: boolean | null
+          requires_email?: boolean | null
+          resource_type?: string
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       ehds_obligations: {
         Row: {
           article_references: string[]
@@ -2209,6 +2254,45 @@ export type Database = {
           },
         ]
       }
+      newsletter_subscriptions: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          is_verified: boolean | null
+          name: string | null
+          source: string | null
+          unsubscribed_at: string | null
+          updated_at: string | null
+          verification_token: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          is_verified?: boolean | null
+          name?: string | null
+          source?: string | null
+          unsubscribed_at?: string | null
+          updated_at?: string | null
+          verification_token?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          is_verified?: boolean | null
+          name?: string | null
+          source?: string | null
+          unsubscribed_at?: string | null
+          updated_at?: string | null
+          verification_token?: string | null
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -2642,6 +2726,45 @@ export type Database = {
         }
         Relationships: []
       }
+      resource_downloads: {
+        Row: {
+          downloaded_at: string | null
+          email: string
+          id: string
+          resource_id: string | null
+          subscriber_id: string | null
+        }
+        Insert: {
+          downloaded_at?: string | null
+          email: string
+          id?: string
+          resource_id?: string | null
+          subscriber_id?: string | null
+        }
+        Update: {
+          downloaded_at?: string | null
+          email?: string
+          id?: string
+          resource_id?: string | null
+          subscriber_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resource_downloads_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "downloadable_resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resource_downloads_subscriber_id_fkey"
+            columns: ["subscriber_id"]
+            isOneToOne: false
+            referencedRelation: "newsletter_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_permissions: {
         Row: {
           can_create: boolean
@@ -2766,6 +2889,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      seo_settings: {
+        Row: {
+          canonical_url: string | null
+          created_at: string | null
+          custom_structured_data: Json | null
+          id: string
+          meta_description: string | null
+          meta_keywords: string[] | null
+          nofollow: boolean | null
+          noindex: boolean | null
+          og_description: string | null
+          og_image_url: string | null
+          og_title: string | null
+          page_path: string
+          page_title: string | null
+          structured_data_type: string | null
+          twitter_card_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          canonical_url?: string | null
+          created_at?: string | null
+          custom_structured_data?: Json | null
+          id?: string
+          meta_description?: string | null
+          meta_keywords?: string[] | null
+          nofollow?: boolean | null
+          noindex?: boolean | null
+          og_description?: string | null
+          og_image_url?: string | null
+          og_title?: string | null
+          page_path: string
+          page_title?: string | null
+          structured_data_type?: string | null
+          twitter_card_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          canonical_url?: string | null
+          created_at?: string | null
+          custom_structured_data?: Json | null
+          id?: string
+          meta_description?: string | null
+          meta_keywords?: string[] | null
+          nofollow?: boolean | null
+          noindex?: boolean | null
+          og_description?: string | null
+          og_image_url?: string | null
+          og_title?: string | null
+          page_path?: string
+          page_title?: string | null
+          structured_data_type?: string | null
+          twitter_card_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       shared_annotations: {
         Row: {

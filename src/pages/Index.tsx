@@ -16,6 +16,8 @@ import { RecitalsQuickExplorer } from "@/components/RecitalsQuickExplorer";
 import { ArticlesQuickExplorer } from "@/components/ArticlesQuickExplorer";
 import { ContinueReading } from "@/components/ContinueReading";
 import { differenceInDays, parse, isAfter, isBefore, format } from "date-fns";
+import { SEOHead, WebsiteSchema } from "@/components/seo";
+import { NewsletterSignup } from "@/components/NewsletterSignup";
 
 const getFeedbackStatus = (deadline: string) => {
   const parts = deadline.split(" - ");
@@ -49,6 +51,13 @@ const Index = () => {
 
   return (
     <Layout>
+      <SEOHead
+        title="EHDS Explorer - European Health Data Space Regulation Guide"
+        description="Comprehensive digital platform for exploring Regulation (EU) 2025/327. Navigate 105 articles, 115 recitals, and track 33 implementing acts of the European Health Data Space."
+        url="/"
+        keywords={['EHDS', 'European Health Data Space', 'EU regulation', 'health data', 'digital health', 'EU 2025/327', 'implementing acts', 'health data regulation']}
+      />
+      <WebsiteSchema searchUrl="/search" />
       <div className="animate-fade-in">
         {/* Hero Section */}
         <section className="text-center py-12 px-4 border-b border-border">
@@ -380,6 +389,17 @@ const Index = () => {
               </Link>
             </div>
             <RecitalsQuickExplorer />
+          </div>
+        </section>
+
+        {/* Newsletter Signup */}
+        <section className="py-12 px-4 border-t border-border bg-muted/30">
+          <div className="max-w-xl mx-auto">
+            <NewsletterSignup 
+              title="Stay Informed on EHDS Developments"
+              description="Get weekly updates on implementing acts, regulatory changes, and EHDS news."
+              source="footer"
+            />
           </div>
         </section>
       </div>

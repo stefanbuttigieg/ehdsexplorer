@@ -28,6 +28,7 @@ import { CompareButton } from "@/components/CompareButton";
 import { useLegislationByArticle } from "@/hooks/useCountryLegislation";
 import { CountryLegislationCard } from "@/components/CountryLegislationCard";
 import { CrossRegulationSection } from "@/components/CrossRegulationSection";
+import { SEOHead, ArticleSchema, BreadcrumbSchema } from "@/components/seo";
 
 const ArticlePage = () => {
   const { id } = useParams();
@@ -87,8 +88,32 @@ const ArticlePage = () => {
     ? [{ label: `Chapter ${chapter.id}`, href: `/chapter/${chapter.id}` }, { label: `Article ${article.article_number}` }]
     : [{ label: `Article ${article.article_number}` }];
 
+  const pageUrl = `/article/${articleId}`;
+  const metaDescription = `Article ${article.article_number}: ${article.title} - ${article.content.substring(0, 120)}...`;
+
   return (
     <Layout>
+      <SEOHead
+        title={`Article ${article.article_number}: ${article.title} | EHDS Explorer`}
+        description={metaDescription}
+        url={pageUrl}
+        keywords={['EHDS', 'Article ' + article.article_number, article.title, 'EU regulation', 'health data']}
+      />
+      <ArticleSchema
+        title={`Article ${article.article_number}: ${article.title}`}
+        description={metaDescription}
+        url={pageUrl}
+        articleNumber={article.article_number}
+        isLegislation={true}
+      />
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Articles', url: '/articles' },
+          ...(chapter ? [{ name: `Chapter ${chapter.id}`, url: `/chapter/${chapter.id}` }] : []),
+          { name: `Article ${article.article_number}`, url: pageUrl },
+        ]}
+      />
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
         <JsonLdMetadata
           type="article"

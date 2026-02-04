@@ -62,8 +62,17 @@ import {
   Globe,
   Shield,
   Info,
-  ExternalLink
+  ExternalLink,
+  ChevronDown,
+  Paperclip
 } from 'lucide-react';
+import { ObligationEvidenceManager } from '@/components/ObligationEvidenceManager';
+import { useObligationEvidence } from '@/hooks/useObligationEvidence';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { toast } from 'sonner';
 
 const EU_COUNTRIES = [
@@ -583,62 +592,21 @@ export default function AdminImplementationTrackerPage() {
             <CardContent>
               <div className="space-y-6">
                 {(['primary_use', 'secondary_use', 'general'] as ObligationCategory[]).map(category => (
-                  <div key={category}>
+                <div key={category}>
                     <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
                       {CATEGORY_ICONS[category]}
                       {CATEGORY_LABELS[category]}
                     </h3>
-                    <div className="border rounded-lg overflow-hidden">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Obligation</TableHead>
-                            <TableHead className="w-[120px]">Articles</TableHead>
-                            <TableHead className="w-[150px]">Status</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {obligationsByCategory[category]?.map(ob => {
-                            const currentStatus = countryStatusMap[ob.id] || 'not_started';
-                            return (
-                              <TableRow key={ob.id}>
-                                <TableCell>
-                                  <div>
-                                    <span className="font-medium text-sm">{ob.name}</span>
-                                    <p className="text-xs text-muted-foreground line-clamp-1">{ob.description}</p>
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="flex gap-1 flex-wrap">
-                                    {ob.article_references.map(ref => (
-                                      <Badge key={ref} variant="outline" className="text-[10px]">{ref}</Badge>
-                                    ))}
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <Select 
-                                    value={currentStatus} 
-                                    onValueChange={(v) => handleStatusChange(ob.id, v as ObligationStatus)}
-                                  >
-                                    <SelectTrigger className="h-8">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {(['not_started', 'in_progress', 'partial', 'completed'] as ObligationStatus[]).map(status => (
-                                        <SelectItem key={status} value={status}>
-                                          <Badge className={`${STATUS_COLORS[status]} text-xs`}>
-                                            {STATUS_LABELS[status]}
-                                          </Badge>
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
-                        </TableBody>
-                      </Table>
+                    <div className="space-y-2">
+                      {obligationsByCategory[category]?.map(ob => (
+                        <ObligationRowWithEvidence 
+                          key={ob.id}
+                          obligation={ob}
+                          countryCode={selectedCountry}
+                          currentStatus={countryStatusMap[ob.id] || 'not_started'}
+                          onStatusChange={(status) => handleStatusChange(ob.id, status)}
+                        />
+                      ))}
                     </div>
                   </div>
                 ))}
@@ -648,5 +616,98 @@ export default function AdminImplementationTrackerPage() {
         </TabsContent>
       </Tabs>
     </AdminPageLayout>
+  );
+}
+
+// Separate component for obligation row with evidence
+interface ObligationRowProps {
+  obligation: {
+    id: string;
+    name: string;
+    description: string | null;
+    article_references: string[];
+  };
+  countryCode: string;
+  currentStatus: ObligationStatus;
+  onStatusChange: (status: ObligationStatus) => void;
+}
+
+const ObligationRowWithEvidence = ({ 
+  obligation, 
+  countryCode, 
+  currentStatus, 
+  onStatusChange 
+}: ObligationRowProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const { evidence } = useObligationEvidence(countryCode, obligation.id);
+  const evidenceCount = evidence.length;
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <div className="border rounded-lg overflow-hidden">
+        <CollapsibleTrigger asChild>
+          <button 
+            type="button"
+            className="w-full p-3 flex items-center justify-between gap-3 hover:bg-muted/50 transition-colors cursor-pointer"
+          >
+            <div className="flex-1 min-w-0 text-left">
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-sm">{obligation.name}</span>
+                {evidenceCount > 0 && (
+                  <Badge variant="outline" className="text-[10px] gap-1">
+                    <Paperclip className="h-2.5 w-2.5" />
+                    {evidenceCount}
+                  </Badge>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{obligation.description}</p>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex gap-1">
+                {obligation.article_references.map(ref => (
+                  <Badge key={ref} variant="outline" className="text-[10px]">{ref}</Badge>
+                ))}
+              </div>
+              <Select 
+                value={currentStatus} 
+                onValueChange={(v) => {
+                  onStatusChange(v as ObligationStatus);
+                }}
+              >
+                <SelectTrigger 
+                  className="h-8 w-[130px]"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {(['not_started', 'in_progress', 'partial', 'completed'] as ObligationStatus[]).map(status => (
+                    <SelectItem key={status} value={status}>
+                      <Badge className={`${STATUS_COLORS[status]} text-xs`}>
+                        {STATUS_LABELS[status]}
+                      </Badge>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+            </div>
+          </button>
+        </CollapsibleTrigger>
+        
+        <CollapsibleContent>
+          <div className="px-3 pb-3 border-t bg-muted/30">
+            <div className="pt-3">
+              <ObligationEvidenceManager
+                countryCode={countryCode}
+                obligationId={obligation.id}
+                obligationName={obligation.name}
+                canEdit={true}
+              />
+            </div>
+          </div>
+        </CollapsibleContent>
+      </div>
+    </Collapsible>
   );
 }

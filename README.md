@@ -189,6 +189,18 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Central management** via admin dashboard
 - **Per-article/recital footnotes** displayed at content bottom
 
+### 🔐 Security & Authentication
+- **Two-Factor Authentication (2FA)** - Optional MFA for enhanced account security
+  - Authenticator app support (TOTP) via Google Authenticator, Authy, etc.
+  - Email OTP as an alternative verification method
+  - Admin-controlled enforcement with 6-month grace period transition
+  - Gentle reminder banners for users without MFA enabled
+  - Security settings page in user profile for enrollment
+- **Admin Security Settings** at `/admin/security` for super admins
+  - Toggle MFA enforcement and reminders
+  - Configure allowed authentication methods
+  - Set transition grace period dates
+
 ### 🔐 Admin Backend
 - **Role-based access control** (Admin/Editor roles)
 - **Centralized API documentation** at `/admin/api-docs` with all GET/POST endpoints

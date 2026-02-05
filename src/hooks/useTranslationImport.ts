@@ -210,6 +210,33 @@ export interface ParsedFootnote {
    const [englishSource, setEnglishSource] = useState<EnglishSource | null>(null);
    const [isImporting, setIsImporting] = useState(false);
  
+  // Preprocess text to add line breaks before structural markers
+  const preprocessText = useCallback((text: string): string => {
+    let processed = text;
+    
+    // Add newlines before article markers across all languages
+    // Match "Article 1", "Artikel 1", "Artículo 1", etc.
+    processed = processed.replace(/(Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu)\s+(\d+)/gi, '\n$1 $2');
+    
+    // Add newlines before chapter markers
+    processed = processed.replace(/(CHAPTER|KAPITEL|CHAPITRE|CAPÍTULO|CAPO|HOOFDSTUK|ROZDZIAŁ|KAPITOLA|CAPITOLUL|ГЛАВА|ΚΕΦΑΛΑΙΟ|PEATÜKK|NODAĻA|SKYRIUS|POGLAVJE|POGLAVLJE|KAPITOLU|CAIBIDIL)\s+([IVXLCDM]+)/gi, '\n$1 $2');
+    
+    // Add newlines before annex markers
+    processed = processed.replace(/(ANNEX|ANHANG|ANNEXE|ANEXO|ALLEGATO|BIJLAGE|ZAŁĄCZNIK|PŘÍLOHA|PRÍLOHA|ANEXA|ПРИЛОЖЕНИЕ|ΠΑΡΑΡΤΗΜΑ|BILAGA|BILAG|LIITE|LISA|PIELIKUMS|PRIEDAS|PRILOGA|PRILOG|ANNESS|IARSCRÍBHINN)\s+([IVXLCDM]+)/gi, '\n$1 $2');
+    
+    // Add newlines before recital markers (1), (2), etc. - but be careful not to break existing patterns
+    // Only add newline if preceded by text (not already at start of line)
+    processed = processed.replace(/([.;:])(\s*)\((\d{1,3})\)\s+/g, '$1\n($3) ');
+    
+    // Normalize multiple spaces
+    processed = processed.replace(/  +/g, ' ');
+    
+    // Normalize multiple newlines
+    processed = processed.replace(/\n{3,}/g, '\n\n');
+    
+    return processed;
+  }, []);
+
   // Detect language from content patterns (checks article patterns first, then chapters)
    const detectLanguage = useCallback((text: string): string => {
     const lines = text.split('\n').slice(0, 500); // Check first 500 lines
@@ -644,8 +671,11 @@ export interface ParsedFootnote {
          }
        }
        
+      // Preprocess text to add line breaks before structural markers
+      const processedText = preprocessText(text);
+      
        // Detect language
-       const detectedLanguage = detectLanguage(text);
+      const detectedLanguage = detectLanguage(processedText);
        if (detectedLanguage === 'unknown') {
          toast.warning('Could not detect language - using English patterns');
        }
@@ -653,7 +683,7 @@ export interface ParsedFootnote {
        const lang = detectedLanguage === 'unknown' ? 'en' : detectedLanguage;
        
       // Split into lines and find section boundaries
-      const lines = text.split('\n');
+      const lines = processedText.split('\n');
       const boundaries = findSectionBoundaries(lines);
       
       // Determine parse ranges
@@ -667,7 +697,7 @@ export interface ParsedFootnote {
       const articles = parseArticles(lines, lang, articlesStartLine, articlesEndLine);
       const definitions = parseDefinitions(articles);
       const annexes = parseAnnexes(lines, lang, annexesStartLine);
-      const footnotes = parseFootnotes(text);
+      const footnotes = parseFootnotes(processedText);
        
        const parsed: ParsedContent = {
          articles,
@@ -697,7 +727,7 @@ export interface ParsedFootnote {
      } finally {
        setIsParsing(false);
      }
-  }, [englishSource, loadEnglishSource, detectLanguage, findSectionBoundaries, parseArticles, parseRecitals, parseDefinitions, parseAnnexes, parseFootnotes, validateContent]);
+  }, [englishSource, loadEnglishSource, preprocessText, detectLanguage, findSectionBoundaries, parseArticles, parseRecitals, parseDefinitions, parseAnnexes, parseFootnotes, validateContent]);
  
    // Import translations to database
    const importTranslations = useCallback(async (

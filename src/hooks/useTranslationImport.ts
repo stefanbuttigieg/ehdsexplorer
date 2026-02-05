@@ -8,7 +8,7 @@ import {
   type StructureAnalysis,
 } from './useAdaptiveParser';
 
-export type { ParsedContent, ParsedArticle, ParsedRecital, ParsedDefinition, ParsedAnnex, ParsedFootnote } from './useAdaptiveParser';
+export type { ParsedContent, ParsedArticle, ParsedRecital, ParsedDefinition, ParsedAnnex, ParsedFootnote, StructureAnalysis } from './useAdaptiveParser';
 
 export interface ValidationResult {
   isValid: boolean;
@@ -220,17 +220,18 @@ export function useTranslationImport() {
      setValidation(null);
    }, []);
  
-   return {
-     isParsing,
-     isImporting,
-     parsedContent,
-     validation,
-     englishSource,
-     parseDocument,
-     importTranslations,
-     loadEnglishSource,
-     reset,
-   };
+  return {
+    isParsing,
+    isImporting,
+    parsedContent,
+    validation,
+    englishSource,
+    structureAnalysis,
+    parseDocument,
+    importTranslations,
+    loadEnglishSource,
+    reset,
+  };
 }
 
 // Validation function - kept locally since it needs EnglishSource type

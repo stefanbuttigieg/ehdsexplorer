@@ -1,26 +1,27 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
- import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Upload, FileText, Languages, Loader2, AlertTriangle, Check, RotateCcw, FileWarning, Globe } from 'lucide-react';
- import { Button } from '@/components/ui/button';
- import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
- import { Badge } from '@/components/ui/badge';
- import { Progress } from '@/components/ui/progress';
- import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
- import {
-   Select,
-   SelectContent,
-   SelectItem,
-   SelectTrigger,
-   SelectValue,
- } from '@/components/ui/select';
+import { useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, Upload, FileText, Languages, Loader2, AlertTriangle, Check, RotateCcw, FileWarning, Globe, Eye } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
- import Layout from '@/components/Layout';
- import { useAuth } from '@/hooks/useAuth';
- import { useLanguages } from '@/hooks/useLanguages';
- import { useTranslationImport } from '@/hooks/useTranslationImport';
- import { TranslationDiffPreview } from '@/components/admin/TranslationDiffPreview';
+import Layout from '@/components/Layout';
+import { useAuth } from '@/hooks/useAuth';
+import { useLanguages } from '@/hooks/useLanguages';
+import { useTranslationImport } from '@/hooks/useTranslationImport';
+import { TranslationDiffPreview } from '@/components/admin/TranslationDiffPreview';
 import { EurLexImporter } from '@/components/admin/EurLexImporter';
- 
+import { ExtractionPreviewViewer } from '@/components/admin/ExtractionPreviewViewer';
+import type { StructureAnalysis } from '@/hooks/useAdaptiveParser';
 // PDF.js types
 type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocument']>['promise']>;
 
@@ -38,17 +39,18 @@ type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocum
    const navigate = useNavigate();
    const { data: languages } = useLanguages();
    
-   const {
-     isParsing,
-     isImporting,
-     parsedContent,
-     validation,
-     englishSource,
-     parseDocument,
-     importTranslations,
-     loadEnglishSource,
-     reset,
-   } = useTranslationImport();
+  const {
+    isParsing,
+    isImporting,
+    parsedContent,
+    validation,
+    englishSource,
+    structureAnalysis: hookAnalysis,
+    parseDocument,
+    importTranslations,
+    loadEnglishSource,
+    reset,
+  } = useTranslationImport();
  
    const [selectedLanguage, setSelectedLanguage] = useState<string>('');
    const [selectedArticles, setSelectedArticles] = useState<number[]>([]);
@@ -59,6 +61,8 @@ type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocum
   const [parseError, setParseError] = useState<string | null>(null);
   const [extractedText, setExtractedText] = useState('');
   const [importMethod, setImportMethod] = useState<'upload' | 'url'>('url');
+  const [structureAnalysis, setStructureAnalysis] = useState<StructureAnalysis | null>(null);
+  const [showExtractionPreview, setShowExtractionPreview] = useState(false);
   const [sourceUrl, setSourceUrl] = useState<string>('');
   const isMountedRef = useRef(true);
 
@@ -222,16 +226,17 @@ type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocum
    }, [selectedLanguage, selectedArticles, selectedRecitals, importTranslations, navigate]);
  
   const handleReset = useCallback(() => {
-     reset();
-     setUploadedFile(null);
-     setSelectedArticles([]);
-     setSelectedRecitals([]);
-     setParseProgress(0);
+    reset();
+    setUploadedFile(null);
+    setSelectedArticles([]);
+    setSelectedRecitals([]);
+    setParseProgress(0);
     setParseStatus('idle');
     setParseError(null);
     setExtractedText('');
-    setSourceUrl('');
-   }, [reset]);
+    setStructureAnalysis(null);
+    setShowExtractionPreview(false);
+  }, [reset]);
  
   const handleArticleSelect = useCallback((articleNumber: number, selected: boolean) => {
      setSelectedArticles(prev => 
@@ -297,12 +302,21 @@ type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocum
                Parse translated regulation PDFs and import content with validation
              </p>
            </div>
-           {parsedContent && (
-             <Button variant="outline" onClick={handleReset}>
-               <RotateCcw className="h-4 w-4 mr-2" />
-               Start Over
-             </Button>
-           )}
+          {parsedContent && (
+            <div className="flex gap-2">
+              <Button
+                variant={showExtractionPreview ? 'default' : 'outline'}
+                onClick={() => setShowExtractionPreview(!showExtractionPreview)}
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                {showExtractionPreview ? 'Hide' : 'Show'} Preview
+              </Button>
+              <Button variant="outline" onClick={handleReset}>
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Start Over
+              </Button>
+            </div>
+          )}
          </div>
  
          {/* Source Data Status */}
@@ -468,6 +482,14 @@ type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocum
          ) : (
            /* Preview and Import Section */
            <div className="space-y-6">
+             {/* Extraction Preview Viewer */}
+             {showExtractionPreview && extractedText && (hookAnalysis || structureAnalysis) && (
+               <ExtractionPreviewViewer
+                 sourceText={extractedText}
+                 parsedContent={parsedContent}
+                 analysis={(hookAnalysis || structureAnalysis)!}
+               />
+             )}
              {/* Language Selection */}
              <Card>
                <CardHeader className="pb-3">

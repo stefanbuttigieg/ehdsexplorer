@@ -462,6 +462,9 @@ type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocum
                <TranslationDiffPreview
                  parsedArticles={parsedContent.articles}
                  parsedRecitals={parsedContent.recitals}
+                  parsedDefinitions={parsedContent.definitions}
+                  parsedAnnexes={parsedContent.annexes}
+                  parsedFootnotes={parsedContent.footnotes}
                  englishSource={englishSource}
                  validation={validation}
                  selectedArticles={selectedArticles}

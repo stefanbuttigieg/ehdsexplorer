@@ -1,5 +1,5 @@
  import { useState, useMemo } from 'react';
- import { Check, X, AlertTriangle, ChevronDown, ChevronRight, Eye, Search } from 'lucide-react';
+import { Check, X, AlertTriangle, ChevronDown, ChevronRight, Eye, Search, BookOpen, FileText, StickyNote } from 'lucide-react';
  import { Badge } from '@/components/ui/badge';
  import { Button } from '@/components/ui/button';
  import { Checkbox } from '@/components/ui/checkbox';
@@ -8,11 +8,14 @@
  import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
  import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
  import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
- import type { ParsedArticle, ParsedRecital, EnglishSource, ValidationResult } from '@/hooks/useTranslationImport';
+import type { ParsedArticle, ParsedRecital, ParsedDefinition, ParsedAnnex, ParsedFootnote, EnglishSource, ValidationResult } from '@/hooks/useTranslationImport';
  
  interface TranslationDiffPreviewProps {
    parsedArticles: ParsedArticle[];
    parsedRecitals: ParsedRecital[];
+  parsedDefinitions: ParsedDefinition[];
+  parsedAnnexes: ParsedAnnex[];
+  parsedFootnotes: ParsedFootnote[];
    englishSource: EnglishSource;
    validation: ValidationResult;
    selectedArticles: number[];
@@ -26,6 +29,9 @@
  export function TranslationDiffPreview({
    parsedArticles,
    parsedRecitals,
+  parsedDefinitions,
+  parsedAnnexes,
+  parsedFootnotes,
    englishSource,
    validation,
    selectedArticles,
@@ -129,6 +135,15 @@
            <div className="flex gap-4 text-sm">
              <span>Articles: <Badge variant="secondary">{validation.articleCount} / 105</Badge></span>
              <span>Recitals: <Badge variant="secondary">{validation.recitalCount} / 115</Badge></span>
+              {validation.definitionCount > 0 && (
+                <span>Definitions: <Badge variant="secondary">{validation.definitionCount}</Badge></span>
+              )}
+              {validation.annexCount > 0 && (
+                <span>Annexes: <Badge variant="secondary">{validation.annexCount}</Badge></span>
+              )}
+              {validation.footnoteCount > 0 && (
+                <span>Footnotes: <Badge variant="secondary">{validation.footnoteCount}</Badge></span>
+              )}
            </div>
            
            {validation.errors.length > 0 && (
@@ -177,6 +192,21 @@
            <TabsTrigger value="recitals">
              Recitals ({filteredRecitals.length})
            </TabsTrigger>
+            {parsedDefinitions.length > 0 && (
+              <TabsTrigger value="definitions">
+                Definitions ({parsedDefinitions.length})
+              </TabsTrigger>
+            )}
+            {parsedAnnexes.length > 0 && (
+              <TabsTrigger value="annexes">
+                Annexes ({parsedAnnexes.length})
+              </TabsTrigger>
+            )}
+            {parsedFootnotes.length > 0 && (
+              <TabsTrigger value="footnotes">
+                Footnotes ({parsedFootnotes.length})
+              </TabsTrigger>
+            )}
          </TabsList>
  
          <TabsContent value="articles" className="mt-4">
@@ -386,6 +416,77 @@
              </div>
            </ScrollArea>
          </TabsContent>
+
+          {/* Definitions Tab */}
+          <TabsContent value="definitions" className="mt-4">
+            <ScrollArea className="h-[500px] border rounded-md">
+              <div className="p-2 space-y-2">
+                {parsedDefinitions.map((def) => (
+                  <div key={def.definitionNumber} className="border rounded-md p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="outline">({def.definitionNumber})</Badge>
+                      <span className="font-medium">{def.term}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{def.definition.slice(0, 200)}...</p>
+                  </div>
+                ))}
+                {parsedDefinitions.length === 0 && (
+                  <p className="text-center text-muted-foreground py-8">
+                    <BookOpen className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    No definitions extracted. Definitions are parsed from Article 2.
+                  </p>
+                )}
+              </div>
+            </ScrollArea>
+          </TabsContent>
+
+          {/* Annexes Tab */}
+          <TabsContent value="annexes" className="mt-4">
+            <ScrollArea className="h-[500px] border rounded-md">
+              <div className="p-2 space-y-2">
+                {parsedAnnexes.map((annex) => (
+                  <div key={annex.annexNumber} className="border rounded-md p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="outline">ANNEX {annex.romanNumeral}</Badge>
+                      <span className="font-medium">{annex.title}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {annex.content.slice(0, 300)}...
+                      <Badge variant="secondary" className="ml-2">{annex.content.length} chars</Badge>
+                    </p>
+                  </div>
+                ))}
+                {parsedAnnexes.length === 0 && (
+                  <p className="text-center text-muted-foreground py-8">
+                    <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    No annexes found. Look for ANNEX I, ANNEX II markers.
+                  </p>
+                )}
+              </div>
+            </ScrollArea>
+          </TabsContent>
+
+          {/* Footnotes Tab */}
+          <TabsContent value="footnotes" className="mt-4">
+            <ScrollArea className="h-[500px] border rounded-md">
+              <div className="p-2 space-y-2">
+                {parsedFootnotes.map((fn, idx) => (
+                  <div key={idx} className="border rounded-md p-3">
+                    <div className="flex items-start gap-2">
+                      <Badge variant="outline" className="shrink-0">({fn.marker})</Badge>
+                      <p className="text-sm">{fn.content}</p>
+                    </div>
+                  </div>
+                ))}
+                {parsedFootnotes.length === 0 && (
+                  <p className="text-center text-muted-foreground py-8">
+                    <StickyNote className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    No footnotes found. Footnotes are detected at the document end.
+                  </p>
+                )}
+              </div>
+            </ScrollArea>
+          </TabsContent>
        </Tabs>
      </div>
    );

@@ -444,21 +444,27 @@ export interface ParsedFootnote {
   // Remove table header separators like | --- | --- |
   processed = processed.replace(/^\|[\s-:|]+\|$/gm, '');
   
-  // Convert table rows to plain text
-  // Pattern: | cell1 | cell2 | -> cell1 cell2
-  processed = processed.replace(/^\|\s*([^|]*?)\s*\|\s*([^|]*?)\s*\|$/gm, (match, cell1, cell2) => {
-    // If first cell is empty or just whitespace, return second cell
-    if (!cell1.trim()) return cell2.trim();
-    // If second cell is empty, return first cell
-    if (!cell2.trim()) return cell1.trim();
-    // Combine both cells
-    return `${cell1.trim()} ${cell2.trim()}`;
+  // Handle EUR-Lex table format for recitals: | (1) | content |
+  // This pattern specifically handles recital tables
+  processed = processed.replace(/^\|\s*\((\d+)\)\s*\|\s*(.+?)\s*\|$/gm, (match, num, content) => {
+    return `(${num}) ${content.trim()}`;
   });
   
-  // Handle 3-column tables: | col1 | col2 | col3 |
-  processed = processed.replace(/^\|\s*([^|]*?)\s*\|\s*([^|]*?)\s*\|\s*([^|]*?)\s*\|$/gm, (match, c1, c2, c3) => {
-    const parts = [c1, c2, c3].filter(p => p && p.trim()).map(p => p.trim());
+  // Handle 3-column header tables: | | 2025/327 | 5.3.2025 |
+  processed = processed.replace(/^\|\s*([^|]*)\s*\|\s*([^|]*)\s*\|\s*([^|]*)\s*\|$/gm, (match, c1, c2, c3) => {
+    const parts = [c1, c2, c3].map(p => p?.trim()).filter(Boolean);
+    if (parts.length === 0) return '';
     return parts.join(' ');
+  });
+  
+  // Handle 2-column tables (general case after recitals are handled)
+  processed = processed.replace(/^\|\s*([^|]+)\s*\|\s*([^|]+)\s*\|$/gm, (match, cell1, cell2) => {
+    const c1 = cell1?.trim() || '';
+    const c2 = cell2?.trim() || '';
+    if (!c1 && !c2) return '';
+    if (!c1) return c2;
+    if (!c2) return c1;
+    return `${c1} ${c2}`;
   });
   
   // Clean up any remaining pipe characters at start/end of lines
@@ -468,12 +474,18 @@ export interface ParsedFootnote {
   // Remove markdown image syntax ![alt](url)
   processed = processed.replace(/!\[([^\]]*)\]\([^)]+\)/g, '');
   
-  // Remove markdown links but keep the text [text](url) -> text
+  // Convert EUR-Lex footnote links to markers: [(1)](url#ntr1-...) -> [^1]
+  processed = processed.replace(/\[\((\d+)\)\]\([^)]*#ntr\d+-[^)]+\)/g, '[^$1]');
+  
+  // For other markdown links, keep the text: [text](url) -> text
   processed = processed.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
   
   // Remove horizontal rules
   processed = processed.replace(/^\s*\*\s*\*\s*\*\s*$/gm, '');
   processed = processed.replace(/^\s*-{3,}\s*$/gm, '');
+  
+  // Remove <br> tags
+  processed = processed.replace(/<br\s*\/?>/gi, ' ');
    
    // Add newlines before article markers across all languages
    processed = processed.replace(/(Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu)\s+(\d+)/gi, '\n$1 $2');
@@ -493,8 +505,9 @@ export interface ParsedFootnote {
    // Normalize multiple newlines
    processed = processed.replace(/\n{3,}/g, '\n\n');
   
-  // Final cleanup: trim each line
+  // Final cleanup: trim each line and remove empty lines in groups
   processed = processed.split('\n').map(line => line.trim()).join('\n');
+  processed = processed.replace(/\n{3,}/g, '\n\n');
    
    return processed;
  }
@@ -746,21 +759,50 @@ export interface ParsedFootnote {
  function parseFootnotesFn(text: string): ParsedFootnote[] {
    const footnotes: ParsedFootnote[] = [];
    
-   const footnotePattern = /^\((\d+|\*{1,3})\)\s+(.+)$/gm;
+  // EUR-Lex footnotes appear at the end in various formats:
+  // - (1) OJ C 123, 4.5.2023, p. 1.
+  // - (1) Regulation (EU) 2016/679...
+  // - [^1] footnote content
+  // We look for OJ references, Regulation/Directive references in the last portion of text
    
    const lines = text.split('\n');
-   const lastSection = lines.slice(-100).join('\n');
+  
+  // Find where footnotes likely start - look for patterns indicating footnote section
+  let footnoteStartIdx = lines.length;
+  for (let i = lines.length - 1; i >= Math.max(0, lines.length - 200); i--) {
+    const line = lines[i].trim();
+    // Footnotes often start with (1) or (*) followed by OJ or legal reference
+    if (/^\([\d*]+\)\s+OJ\s/i.test(line) || /^\([\d*]+\)\s+(?:Regulation|Directive|Decision)/i.test(line)) {
+      footnoteStartIdx = i;
+    }
+  }
+  
+  const lastSection = lines.slice(footnoteStartIdx).join('\n');
+  
+  // Pattern for numbered footnotes: (1) content or (*) content
+  const footnotePattern = /^\((\d+|\*{1,3})\)\s+(.+)$/gm;
    
    let match;
    while ((match = footnotePattern.exec(lastSection)) !== null) {
      const marker = match[1];
      const content = match[2].trim();
      
-     if (content.length > 10 && /OJ|Regulation|Directive|Decision|COM|EUR-Lex/i.test(content)) {
+    // Accept footnotes that look like legal references
+    if (content.length > 10 && /OJ|Regulation|Directive|Decision|COM|EUR-Lex|ABl\.|Verordnung|Richtlinie|Beschluss/i.test(content)) {
        footnotes.push({ marker, content });
      }
    }
    
+  // Also look for [^n] style footnote markers in content and their definitions
+  const inlineFootnotePattern = /\[\^(\d+)\]:\s*(.+)$/gm;
+  while ((match = inlineFootnotePattern.exec(text)) !== null) {
+    const marker = match[1];
+    const content = match[2].trim();
+    if (content.length > 5 && !footnotes.find(f => f.marker === marker)) {
+      footnotes.push({ marker, content });
+    }
+  }
+  
    return footnotes;
  }
  

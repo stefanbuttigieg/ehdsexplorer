@@ -1,4 +1,4 @@
- import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
  import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Upload, FileText, Languages, Loader2, AlertTriangle, Check, RotateCcw, FileWarning } from 'lucide-react';
  import { Button } from '@/components/ui/button';
@@ -19,6 +19,9 @@ import { ArrowLeft, Upload, FileText, Languages, Loader2, AlertTriangle, Check, 
  import { useTranslationImport } from '@/hooks/useTranslationImport';
  import { TranslationDiffPreview } from '@/components/admin/TranslationDiffPreview';
  
+// PDF.js types
+type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocument']>['promise']>;
+
  // Language code to name mapping
  const LANGUAGE_NAMES: Record<string, string> = {
    en: 'English', de: 'German', fr: 'French', es: 'Spanish', it: 'Italian',
@@ -53,6 +56,15 @@ import { ArrowLeft, Upload, FileText, Languages, Loader2, AlertTriangle, Check, 
   const [parseStatus, setParseStatus] = useState<'idle' | 'extracting' | 'parsing' | 'done' | 'error'>('idle');
   const [parseError, setParseError] = useState<string | null>(null);
   const [extractedText, setExtractedText] = useState('');
+  const isMountedRef = useRef(true);
+
+  // Track component mount state
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
  
    useEffect(() => {
      if (!loading && !user) {
@@ -91,37 +103,7 @@ import { ArrowLeft, Upload, FileText, Languages, Loader2, AlertTriangle, Check, 
      }
    }, [parsedContent, validation]);
  
-  // Extract text from PDF using pdf.js
-  const extractTextFromPDF = useCallback(async (file: File): Promise<string> => {
-    // Dynamically import pdfjs-dist to avoid worker issues
-    const pdfjsLib = await import('pdfjs-dist');
-    
-    // Set worker source using ESM import
-    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-      'pdfjs-dist/build/pdf.worker.min.mjs',
-      import.meta.url
-    ).toString();
-    
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    
-    let fullText = '';
-    const totalPages = pdf.numPages;
-    
-    for (let i = 1; i <= totalPages; i++) {
-      setParseProgress(Math.round((i / totalPages) * 50)); // First 50% for extraction
-      const page = await pdf.getPage(i);
-      const textContent = await page.getTextContent();
-      const pageText = textContent.items
-        .map((item: any) => item.str)
-        .join(' ');
-      fullText += pageText + '\n\n';
-    }
-    
-    return fullText;
-  }, []);
-
-   const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
      const file = event.target.files?.[0];
      if (!file) return;
      
@@ -135,19 +117,47 @@ import { ArrowLeft, Upload, FileText, Languages, Loader2, AlertTriangle, Check, 
      if (file.type === 'application/pdf') {
       try {
         setParseProgress(5);
-        const text = await extractTextFromPDF(file);
-        setExtractedText(text);
+        
+        // Dynamically import pdfjs-dist
+        const pdfjsLib = await import('pdfjs-dist');
+        
+        // Set worker source
+        pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+          'pdfjs-dist/build/pdf.worker.min.mjs',
+          import.meta.url
+        ).toString();
+        
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        
+        let fullText = '';
+        const totalPages = pdf.numPages;
+        
+        for (let i = 1; i <= totalPages; i++) {
+          if (!isMountedRef.current) return;
+          setParseProgress(Math.round((i / totalPages) * 50));
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+          const pageText = textContent.items
+            .map((item: any) => item.str)
+            .join(' ');
+          fullText += pageText + '\n\n';
+        }
+        
+        if (!isMountedRef.current) return;
+        setExtractedText(fullText);
         setParseProgress(60);
-       setParseStatus('parsing');
-        await parseDocument(text);
+        setParseStatus('parsing');
+        await parseDocument(fullText);
+        if (!isMountedRef.current) return;
         setParseProgress(100);
-       setParseStatus('done');
+        setParseStatus('done');
       } catch (error) {
         console.error('Failed to parse PDF:', error);
+        if (!isMountedRef.current) return;
         setParseProgress(0);
-       setParseStatus('error');
-       setParseError(error instanceof Error ? error.message : 'Failed to extract text from PDF');
-        // Store extracted text for manual review if parsing failed
+        setParseStatus('error');
+        setParseError(error instanceof Error ? error.message : 'Failed to extract text from PDF');
         setExtractedText('');
       }
       return;
@@ -162,23 +172,25 @@ import { ArrowLeft, Upload, FileText, Languages, Loader2, AlertTriangle, Check, 
        setParseProgress(60);
       setParseStatus('parsing');
        await parseDocument(text);
+      if (!isMountedRef.current) return;
        setParseProgress(100);
       setParseStatus('done');
      } catch (error) {
        console.error('Failed to read file:', error);
+      if (!isMountedRef.current) return;
        setParseProgress(0);
       setParseStatus('error');
       setParseError(error instanceof Error ? error.message : 'Failed to read file');
      }
-  }, [parseDocument, extractTextFromPDF]);
+  }, [parseDocument]);
  
-   const handleTextPaste = useCallback(async (text: string) => {
+  const handleTextPaste = useCallback(async (text: string) => {
      if (!text.trim()) return;
     setExtractedText(text);
      await parseDocument(text);
    }, [parseDocument]);
  
-   const handleImport = useCallback(async () => {
+  const handleImport = useCallback(async () => {
      if (!selectedLanguage) {
        alert('Please select a target language');
        return;
@@ -191,7 +203,7 @@ import { ArrowLeft, Upload, FileText, Languages, Loader2, AlertTriangle, Check, 
      }
    }, [selectedLanguage, selectedArticles, selectedRecitals, importTranslations, navigate]);
  
-   const handleReset = useCallback(() => {
+  const handleReset = useCallback(() => {
      reset();
      setUploadedFile(null);
      setSelectedArticles([]);
@@ -202,7 +214,7 @@ import { ArrowLeft, Upload, FileText, Languages, Loader2, AlertTriangle, Check, 
     setExtractedText('');
    }, [reset]);
  
-   const handleArticleSelect = useCallback((articleNumber: number, selected: boolean) => {
+  const handleArticleSelect = useCallback((articleNumber: number, selected: boolean) => {
      setSelectedArticles(prev => 
        selected 
          ? [...prev, articleNumber]
@@ -210,7 +222,7 @@ import { ArrowLeft, Upload, FileText, Languages, Loader2, AlertTriangle, Check, 
      );
    }, []);
  
-   const handleRecitalSelect = useCallback((recitalNumber: number, selected: boolean) => {
+  const handleRecitalSelect = useCallback((recitalNumber: number, selected: boolean) => {
      setSelectedRecitals(prev =>
        selected
          ? [...prev, recitalNumber]
@@ -218,7 +230,7 @@ import { ArrowLeft, Upload, FileText, Languages, Loader2, AlertTriangle, Check, 
      );
    }, []);
  
-   const handleSelectAllArticles = useCallback((selected: boolean) => {
+  const handleSelectAllArticles = useCallback((selected: boolean) => {
      if (selected && parsedContent) {
        setSelectedArticles(parsedContent.articles.map(a => a.articleNumber));
      } else {
@@ -226,7 +238,7 @@ import { ArrowLeft, Upload, FileText, Languages, Loader2, AlertTriangle, Check, 
      }
    }, [parsedContent]);
  
-   const handleSelectAllRecitals = useCallback((selected: boolean) => {
+  const handleSelectAllRecitals = useCallback((selected: boolean) => {
      if (selected && parsedContent) {
        setSelectedRecitals(parsedContent.recitals.map(r => r.recitalNumber));
      } else {
@@ -337,17 +349,17 @@ import { ArrowLeft, Upload, FileText, Languages, Loader2, AlertTriangle, Check, 
                </div>
  
                {uploadedFile && uploadedFile.type === 'application/pdf' && (
-               <Alert variant={parseStatus === 'error' ? 'destructive' : 'default'}>
+                <Alert variant={parseStatus === 'error' ? 'destructive' : 'default'}>
                   {parseStatus === 'error' ? <FileWarning className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
-                   <AlertTitle>PDF Uploaded: {uploadedFile.name}</AlertTitle>
-                   <AlertDescription>
-                   {parseStatus === 'extracting' && 'Extracting text from PDF pages...'}
-                   {parseStatus === 'parsing' && 'Analyzing structure and detecting articles/recitals...'}
-                   {parseStatus === 'done' && 'PDF parsed successfully! Review the results below.'}
-                   {parseStatus === 'error' && (parseError || 'Failed to parse PDF. Please paste the text manually below.')}
-                   {parseStatus === 'idle' && 'PDF will be automatically parsed. If results are incorrect, paste the text manually below.'}
-                   </AlertDescription>
-                 </Alert>
+                  <AlertTitle>PDF Uploaded: {uploadedFile.name}</AlertTitle>
+                  <AlertDescription>
+                    {parseStatus === 'extracting' && 'Extracting text from PDF pages...'}
+                    {parseStatus === 'parsing' && 'Analyzing structure and detecting articles/recitals...'}
+                    {parseStatus === 'done' && 'PDF parsed successfully! Review the results below.'}
+                    {parseStatus === 'error' && (parseError || 'Failed to parse PDF. Please paste the text manually below.')}
+                    {parseStatus === 'idle' && 'PDF will be automatically parsed. If results are incorrect, paste the text manually below.'}
+                  </AlertDescription>
+                </Alert>
                )}
  
               {(parseStatus === 'extracting' || parseStatus === 'parsing') && (
@@ -365,23 +377,23 @@ import { ArrowLeft, Upload, FileText, Languages, Loader2, AlertTriangle, Check, 
                     </div>
                   </div>
                   <p className="text-sm text-center text-muted-foreground">
-                   {parseStatus === 'extracting' 
-                     ? 'Reading PDF pages and extracting text content...' 
-                     : 'Detecting articles, recitals, and chapter boundaries...'}
+                    {parseStatus === 'extracting' 
+                      ? 'Reading PDF pages and extracting text content...' 
+                      : 'Detecting articles, recitals, and chapter boundaries...'}
                   </p>
-                 </div>
-               )}
+                </div>
+              )}
  
                {/* Text Paste Area */}
                <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  {extractedText ? 'Extracted text (edit if needed):' : 'Or paste text content directly:'}
-                </label>
+                  <label className="text-sm font-medium">
+                    {extractedText ? 'Extracted text (edit if needed):' : 'Or paste text content directly:'}
+                  </label>
                  <textarea
                    className="w-full h-64 p-4 border rounded-md font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
                    placeholder="Paste the full text content of the translated regulation here...&#10;&#10;The parser will detect:&#10;- Article markers (Article 1, Artikel 1, Artículo 1, etc.)&#10;- Recital markers ((1), (2), etc.)&#10;- Chapter boundaries (CHAPTER I, KAPITEL I, etc.)"
-                  value={extractedText}
-                  onChange={(e) => setExtractedText(e.target.value)}
+                    value={extractedText}
+                    onChange={(e) => setExtractedText(e.target.value)}
                    onPaste={(e) => {
                      const text = e.clipboardData.getData('text');
                      if (text.length > 1000) {
@@ -394,11 +406,11 @@ import { ArrowLeft, Upload, FileText, Languages, Loader2, AlertTriangle, Check, 
                  <Button
                    variant="secondary"
                    className="w-full"
-                  disabled={isParsing || !extractedText.trim()}
+                    disabled={isParsing || !extractedText.trim()}
                    onClick={() => {
-                    if (extractedText.trim()) {
-                      handleTextPaste(extractedText);
-                     }
+                      if (extractedText.trim()) {
+                        handleTextPaste(extractedText);
+                      }
                    }}
                  >
                    {isParsing ? (

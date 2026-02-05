@@ -68,3 +68,9 @@ verify_jwt = false
 
 [functions.update-obligation-status]
 verify_jwt = false
+ 
+ [functions.send-email-otp]
+ verify_jwt = false
+ 
+ [functions.verify-email-otp-login]
+ verify_jwt = false

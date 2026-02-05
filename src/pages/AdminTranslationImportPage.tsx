@@ -230,13 +230,16 @@ type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocum
   }, [parseDocument]);
 
   const handleImport = useCallback(async () => {
-    if (!selectedLanguage) {
-      alert('Please select a target language');
+    // Language required for translations (articles, recitals, annexes) but not for footnotes-only import
+    const needsLanguage = selectedArticles.length > 0 || selectedRecitals.length > 0 || selectedAnnexes.length > 0;
+    
+    if (needsLanguage && !selectedLanguage) {
+      alert('Please select a target language for translations');
       return;
     }
     
     const success = await importTranslations(
-      selectedLanguage, 
+      selectedLanguage || 'en', // Default to 'en' for footnotes-only (not used)
       selectedArticles, 
       selectedRecitals,
       selectedAnnexes,
@@ -619,7 +622,13 @@ type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocum
                   <Button
                     size="lg"
                     onClick={handleImport}
-                    disabled={isImporting || !selectedLanguage || (selectedArticles.length === 0 && selectedRecitals.length === 0 && selectedAnnexes.length === 0 && selectedFootnotes.length === 0)}
+                    disabled={
+                      isImporting || 
+                      // Language required for articles, recitals, annexes (translations) but not footnotes
+                      (!selectedLanguage && (selectedArticles.length > 0 || selectedRecitals.length > 0 || selectedAnnexes.length > 0)) ||
+                      // Must have at least one item selected
+                      (selectedArticles.length === 0 && selectedRecitals.length === 0 && selectedAnnexes.length === 0 && selectedFootnotes.length === 0)
+                    }
                   >
                     {isImporting ? (
                       <>
@@ -629,7 +638,9 @@ type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocum
                     ) : (
                       <>
                         <Check className="h-4 w-4 mr-2" />
-                        Import Translations
+                        {selectedFootnotes.length > 0 && selectedArticles.length === 0 && selectedRecitals.length === 0 && selectedAnnexes.length === 0 
+                          ? 'Import Footnotes' 
+                          : 'Import Translations'}
                       </>
                     )}
                   </Button>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Globe, Languages, Check, X, Edit2, Plus, Trash2, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Globe, Languages, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -92,6 +92,12 @@ const AdminTranslationsPage = () => {
               Manage translations for all content types across EU languages
             </p>
           </div>
+          <Link to="/admin/translation-import">
+            <Button variant="outline" className="gap-2">
+              <Upload className="h-4 w-4" />
+              Import from PDF
+            </Button>
+          </Link>
         </div>
 
         {/* Language Selection */}

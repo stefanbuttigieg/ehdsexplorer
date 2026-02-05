@@ -108,6 +108,7 @@ const AdminApiLogsPage = lazy(() => import("./pages/AdminApiLogsPage"));
 const AdminApiDocsPage = lazy(() => import("./pages/AdminApiDocsPage"));
 const AdminSEOPage = lazy(() => import("./pages/AdminSEOPage"));
 const AdminSecuritySettingsPage = lazy(() => import("./pages/AdminSecuritySettingsPage"));
+const AdminTranslationImportPage = lazy(() => import("./pages/AdminTranslationImportPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -238,6 +239,7 @@ const App = () => (
             <Route path="/admin/api-docs" element={<AdminApiDocsPage />} />
             <Route path="/admin/seo" element={<AdminSEOPage />} />
             <Route path="/admin/security" element={<AdminSecuritySettingsPage />} />
+            <Route path="/admin/translation-import" element={<AdminTranslationImportPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>

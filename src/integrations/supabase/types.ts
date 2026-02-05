@@ -2478,6 +2478,63 @@ export type Database = {
         }
         Relationships: []
       }
+      parsing_patterns: {
+        Row: {
+          adoption_marker: string | null
+          annex_pattern: string | null
+          article_pattern: string | null
+          chapter_pattern: string | null
+          created_at: string
+          created_by: string | null
+          failure_count: number
+          id: string
+          language_code: string
+          last_used_at: string | null
+          notes: string | null
+          recital_pattern: string | null
+          source_type: string
+          source_url: string | null
+          success_count: number
+          updated_at: string
+        }
+        Insert: {
+          adoption_marker?: string | null
+          annex_pattern?: string | null
+          article_pattern?: string | null
+          chapter_pattern?: string | null
+          created_at?: string
+          created_by?: string | null
+          failure_count?: number
+          id?: string
+          language_code: string
+          last_used_at?: string | null
+          notes?: string | null
+          recital_pattern?: string | null
+          source_type: string
+          source_url?: string | null
+          success_count?: number
+          updated_at?: string
+        }
+        Update: {
+          adoption_marker?: string | null
+          annex_pattern?: string | null
+          article_pattern?: string | null
+          chapter_pattern?: string | null
+          created_at?: string
+          created_by?: string | null
+          failure_count?: number
+          id?: string
+          language_code?: string
+          last_used_at?: string | null
+          notes?: string | null
+          recital_pattern?: string | null
+          source_type?: string
+          source_url?: string | null
+          success_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       plain_language_feedback: {
         Row: {
           comment: string | null
@@ -3264,6 +3321,71 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      translation_import_history: {
+        Row: {
+          annexes_parsed: number
+          articles_imported: number
+          articles_parsed: number
+          created_at: string
+          created_by: string | null
+          definitions_parsed: number
+          error_message: string | null
+          footnotes_parsed: number
+          id: string
+          language_code: string
+          pattern_id: string | null
+          recitals_imported: number
+          recitals_parsed: number
+          source_type: string
+          source_url: string | null
+          success: boolean
+        }
+        Insert: {
+          annexes_parsed?: number
+          articles_imported?: number
+          articles_parsed?: number
+          created_at?: string
+          created_by?: string | null
+          definitions_parsed?: number
+          error_message?: string | null
+          footnotes_parsed?: number
+          id?: string
+          language_code: string
+          pattern_id?: string | null
+          recitals_imported?: number
+          recitals_parsed?: number
+          source_type: string
+          source_url?: string | null
+          success?: boolean
+        }
+        Update: {
+          annexes_parsed?: number
+          articles_imported?: number
+          articles_parsed?: number
+          created_at?: string
+          created_by?: string | null
+          definitions_parsed?: number
+          error_message?: string | null
+          footnotes_parsed?: number
+          id?: string
+          language_code?: string
+          pattern_id?: string | null
+          recitals_imported?: number
+          recitals_parsed?: number
+          source_type?: string
+          source_url?: string | null
+          success?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "translation_import_history_pattern_id_fkey"
+            columns: ["pattern_id"]
+            isOneToOne: false
+            referencedRelation: "parsing_patterns"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ui_translations: {
         Row: {

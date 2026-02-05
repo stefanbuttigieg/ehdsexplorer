@@ -1,6 +1,6 @@
  import { useState, useCallback, useEffect } from 'react';
  import { useNavigate, Link } from 'react-router-dom';
- import { ArrowLeft, Upload, FileText, Languages, Loader2, AlertTriangle, Check, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Upload, FileText, Languages, Loader2, AlertTriangle, Check, RotateCcw, FileWarning } from 'lucide-react';
  import { Button } from '@/components/ui/button';
  import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
  import { Badge } from '@/components/ui/badge';
@@ -18,10 +18,6 @@
  import { useLanguages } from '@/hooks/useLanguages';
  import { useTranslationImport } from '@/hooks/useTranslationImport';
  import { TranslationDiffPreview } from '@/components/admin/TranslationDiffPreview';
-import * as pdfjsLib from 'pdfjs-dist';
-
-// Set up PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
  
  // Language code to name mapping
  const LANGUAGE_NAMES: Record<string, string> = {
@@ -54,6 +50,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.j
    const [selectedRecitals, setSelectedRecitals] = useState<number[]>([]);
    const [uploadedFile, setUploadedFile] = useState<File | null>(null);
    const [parseProgress, setParseProgress] = useState(0);
+  const [parseStatus, setParseStatus] = useState<'idle' | 'extracting' | 'parsing' | 'done' | 'error'>('idle');
+  const [parseError, setParseError] = useState<string | null>(null);
   const [extractedText, setExtractedText] = useState('');
  
    useEffect(() => {
@@ -95,6 +93,15 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.j
  
   // Extract text from PDF using pdf.js
   const extractTextFromPDF = useCallback(async (file: File): Promise<string> => {
+    // Dynamically import pdfjs-dist to avoid worker issues
+    const pdfjsLib = await import('pdfjs-dist');
+    
+    // Set worker source using ESM import
+    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+      'pdfjs-dist/build/pdf.worker.min.mjs',
+      import.meta.url
+    ).toString();
+    
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     
@@ -119,7 +126,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.j
      if (!file) return;
      
      setUploadedFile(file);
-     setParseProgress(10);
+    setParseProgress(0);
+    setParseStatus('extracting');
+    setParseError(null);
     setExtractedText('');
      
      // For PDFs, we need to use the document parser
@@ -129,11 +138,15 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.j
         const text = await extractTextFromPDF(file);
         setExtractedText(text);
         setParseProgress(60);
+       setParseStatus('parsing');
         await parseDocument(text);
         setParseProgress(100);
+       setParseStatus('done');
       } catch (error) {
         console.error('Failed to parse PDF:', error);
         setParseProgress(0);
+       setParseStatus('error');
+       setParseError(error instanceof Error ? error.message : 'Failed to extract text from PDF');
         // Store extracted text for manual review if parsing failed
         setExtractedText('');
       }
@@ -142,15 +155,20 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.j
      
      // For text files, read directly
      try {
+      setParseStatus('extracting');
        setParseProgress(30);
        const text = await file.text();
       setExtractedText(text);
        setParseProgress(60);
+      setParseStatus('parsing');
        await parseDocument(text);
        setParseProgress(100);
+      setParseStatus('done');
      } catch (error) {
        console.error('Failed to read file:', error);
        setParseProgress(0);
+      setParseStatus('error');
+      setParseError(error instanceof Error ? error.message : 'Failed to read file');
      }
   }, [parseDocument, extractTextFromPDF]);
  
@@ -179,6 +197,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.j
      setSelectedArticles([]);
      setSelectedRecitals([]);
      setParseProgress(0);
+    setParseStatus('idle');
+    setParseError(null);
     setExtractedText('');
    }, [reset]);
  
@@ -317,22 +337,37 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.j
                </div>
  
                {uploadedFile && uploadedFile.type === 'application/pdf' && (
-                <Alert variant={parseProgress > 0 && parseProgress < 100 ? 'default' : undefined}>
-                   <AlertTriangle className="h-4 w-4" />
+               <Alert variant={parseStatus === 'error' ? 'destructive' : 'default'}>
+                  {parseStatus === 'error' ? <FileWarning className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
                    <AlertTitle>PDF Uploaded: {uploadedFile.name}</AlertTitle>
                    <AlertDescription>
-                    {parseProgress > 0 && parseProgress < 100 
-                      ? 'Extracting text from PDF...' 
-                      : 'PDF will be automatically parsed. If results are incorrect, paste the text manually below.'}
+                   {parseStatus === 'extracting' && 'Extracting text from PDF pages...'}
+                   {parseStatus === 'parsing' && 'Analyzing structure and detecting articles/recitals...'}
+                   {parseStatus === 'done' && 'PDF parsed successfully! Review the results below.'}
+                   {parseStatus === 'error' && (parseError || 'Failed to parse PDF. Please paste the text manually below.')}
+                   {parseStatus === 'idle' && 'PDF will be automatically parsed. If results are incorrect, paste the text manually below.'}
                    </AlertDescription>
                  </Alert>
                )}
  
-               {parseProgress > 0 && parseProgress < 100 && (
-                 <div className="space-y-2">
-                   <Progress value={parseProgress} />
+              {(parseStatus === 'extracting' || parseStatus === 'parsing') && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                    <div className="flex-1">
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="font-medium">
+                          {parseStatus === 'extracting' ? 'Extracting text...' : 'Parsing content...'}
+                        </span>
+                        <span className="text-muted-foreground">{parseProgress}%</span>
+                      </div>
+                      <Progress value={parseProgress} className="h-2" />
+                    </div>
+                  </div>
                   <p className="text-sm text-center text-muted-foreground">
-                    {parseProgress < 50 ? 'Extracting text from PDF...' : 'Parsing content...'}
+                   {parseStatus === 'extracting' 
+                     ? 'Reading PDF pages and extracting text content...' 
+                     : 'Detecting articles, recitals, and chapter boundaries...'}
                   </p>
                  </div>
                )}

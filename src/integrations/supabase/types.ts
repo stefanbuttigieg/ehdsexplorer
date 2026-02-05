@@ -1287,6 +1287,60 @@ export type Database = {
         }
         Relationships: []
       }
+      footnote_translations: {
+        Row: {
+          content: string
+          created_at: string | null
+          footnote_id: string
+          id: string
+          is_published: boolean | null
+          language_code: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          translated_by: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          footnote_id: string
+          id?: string
+          is_published?: boolean | null
+          language_code: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          translated_by?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          footnote_id?: string
+          id?: string
+          is_published?: boolean | null
+          language_code?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          translated_by?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "footnote_translations_footnote_id_fkey"
+            columns: ["footnote_id"]
+            isOneToOne: false
+            referencedRelation: "footnotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "footnote_translations_language_code_fkey"
+            columns: ["language_code"]
+            isOneToOne: false
+            referencedRelation: "languages"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       footnotes: {
         Row: {
           article_id: number | null

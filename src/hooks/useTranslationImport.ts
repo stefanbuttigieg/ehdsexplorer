@@ -155,7 +155,7 @@ export function useTranslationImport() {
    setIsImporting(true);
    
    try {
-     // Filter selected articles
+     // Filter selected items
      const articlesToImport = currentParsedContent.articles.filter(a => selectedArticles.includes(a.articleNumber));
      const recitalsToImport = currentParsedContent.recitals.filter(r => selectedRecitals.includes(r.recitalNumber));
      const annexesToImport = currentParsedContent.annexes.filter(a => selectedAnnexes.includes(a.annexNumber));
@@ -206,13 +206,59 @@ export function useTranslationImport() {
        };
      }).filter(Boolean);
 
-     // Map footnotes - these go directly to footnotes table (not translations)
-     const footnoteInserts = footnotesToImport.map(fn => ({
-       marker: fn.marker,
-       content: fn.content,
-       article_id: null,
-       recital_id: null,
-     }));
+     // For footnotes, we need to first find or create the English footnote, then add translation
+     // This requires a different approach - we'll try to match by marker
+     const { data: existingFootnotes } = await supabase
+       .from('footnotes')
+       .select('id, marker');
+     
+     const footnoteTranslations: Array<{
+       footnote_id: string;
+       language_code: string;
+       content: string;
+       is_published: boolean;
+     }> = [];
+
+     for (const fn of footnotesToImport) {
+       // Find existing footnote by marker
+       const existingFn = existingFootnotes?.find(ef => ef.marker === fn.marker);
+       
+       if (existingFn) {
+         // Add translation for existing footnote
+         footnoteTranslations.push({
+           footnote_id: existingFn.id,
+           language_code: languageCode,
+           content: fn.content,
+           is_published: false,
+         });
+       } else {
+         // Create the footnote first (with English placeholder), then add translation
+         const { data: newFn, error: createError } = await supabase
+           .from('footnotes')
+           .insert({
+             marker: fn.marker,
+             content: `[Translation source: ${languageCode}] ${fn.content.slice(0, 100)}...`,
+             article_id: null,
+             recital_id: null,
+           })
+           .select('id')
+           .single();
+         
+         if (createError) {
+           console.error('Failed to create footnote:', createError);
+           continue;
+         }
+         
+         if (newFn) {
+           footnoteTranslations.push({
+             footnote_id: newFn.id,
+             language_code: languageCode,
+             content: fn.content,
+             is_published: false,
+           });
+         }
+       }
+     }
      
      // Upsert translations
      if (articleTranslations.length > 0) {
@@ -245,10 +291,12 @@ export function useTranslationImport() {
        if (annexError) throw annexError;
      }
 
-     if (footnoteInserts.length > 0) {
+     if (footnoteTranslations.length > 0) {
        const { error: footnoteError } = await supabase
-         .from('footnotes')
-         .insert(footnoteInserts);
+         .from('footnote_translations')
+         .upsert(footnoteTranslations, {
+           onConflict: 'footnote_id,language_code',
+         });
        
        if (footnoteError) throw footnoteError;
      }
@@ -257,7 +305,7 @@ export function useTranslationImport() {
      if (articleTranslations.length > 0) parts.push(`${articleTranslations.length} articles`);
      if (recitalTranslations.length > 0) parts.push(`${recitalTranslations.length} recitals`);
      if (annexTranslations.length > 0) parts.push(`${annexTranslations.length} annexes`);
-     if (footnoteInserts.length > 0) parts.push(`${footnoteInserts.length} footnotes`);
+     if (footnoteTranslations.length > 0) parts.push(`${footnoteTranslations.length} footnotes`);
      
      toast.success(`Imported ${parts.join(', ')}`);
      return true;

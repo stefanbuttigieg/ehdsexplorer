@@ -804,3 +804,178 @@ export async function getLearnedPatterns(languageCode: string): Promise<{
     return null;
   }
 }
+
+// === Section boundaries for manual corrections ===
+export interface SectionBoundaries {
+  recitalStart?: number;
+  recitalEnd?: number;
+  articleStart?: number;
+  articleEnd?: number;
+  annexStart?: number;
+  annexEnd?: number;
+  footnoteStart?: number;
+  footnoteEnd?: number;
+}
+
+export interface BoundaryMarkers {
+  recitalStartText?: string;
+  articleStartText?: string;
+  annexStartText?: string;
+  footnoteStartText?: string;
+}
+
+export async function saveSectionBoundaries(
+  languageCode: string,
+  sourceType: string,
+  boundaries: SectionBoundaries,
+  markers: BoundaryMarkers
+): Promise<boolean> {
+  try {
+    // First check if pattern exists
+    const { data: existing } = await supabase
+      .from('parsing_patterns')
+      .select('id')
+      .eq('language_code', languageCode)
+      .eq('source_type', sourceType)
+      .maybeSingle();
+    
+    const boundariesJson = {
+      recitals: boundaries.recitalStart !== undefined ? { start: boundaries.recitalStart, end: boundaries.recitalEnd } : undefined,
+      articles: boundaries.articleStart !== undefined ? { start: boundaries.articleStart, end: boundaries.articleEnd } : undefined,
+      annexes: boundaries.annexStart !== undefined ? { start: boundaries.annexStart, end: boundaries.annexEnd } : undefined,
+      footnotes: boundaries.footnoteStart !== undefined ? { start: boundaries.footnoteStart, end: boundaries.footnoteEnd } : undefined,
+    };
+    
+    const markersJson = {
+      recitalStart: markers.recitalStartText,
+      articleStart: markers.articleStartText,
+      annexStart: markers.annexStartText,
+      footnoteStart: markers.footnoteStartText,
+    };
+    
+    if (existing) {
+      const { error } = await supabase
+        .from('parsing_patterns')
+        .update({
+          section_boundaries: boundariesJson,
+          boundary_markers: markersJson,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', existing.id);
+      
+      if (error) {
+        console.error('Failed to update boundaries:', error);
+        return false;
+      }
+    } else {
+      const { error } = await supabase
+        .from('parsing_patterns')
+        .insert({
+          language_code: languageCode,
+          source_type: sourceType,
+          section_boundaries: boundariesJson,
+          boundary_markers: markersJson,
+          success_count: 0,
+          failure_count: 0,
+        });
+      
+      if (error) {
+        console.error('Failed to save boundaries:', error);
+        return false;
+      }
+    }
+    
+    toast.success('Section boundaries saved successfully');
+    return true;
+  } catch (err) {
+    console.error('Error saving boundaries:', err);
+    return false;
+  }
+}
+
+export async function getSectionBoundaries(languageCode: string): Promise<{
+  boundaries: SectionBoundaries;
+  markers: BoundaryMarkers;
+} | null> {
+  try {
+    const { data, error } = await supabase
+      .from('parsing_patterns')
+      .select('section_boundaries, boundary_markers')
+      .eq('language_code', languageCode)
+      .order('success_count', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    
+    if (error || !data) return null;
+    
+    const sb = data.section_boundaries as any || {};
+    const bm = data.boundary_markers as any || {};
+    
+    return {
+      boundaries: {
+        recitalStart: sb.recitals?.start,
+        recitalEnd: sb.recitals?.end,
+        articleStart: sb.articles?.start,
+        articleEnd: sb.articles?.end,
+        annexStart: sb.annexes?.start,
+        annexEnd: sb.annexes?.end,
+        footnoteStart: sb.footnotes?.start,
+        footnoteEnd: sb.footnotes?.end,
+      },
+      markers: {
+        recitalStartText: bm.recitalStart,
+        articleStartText: bm.articleStart,
+        annexStartText: bm.annexStart,
+        footnoteStartText: bm.footnoteStart,
+      },
+    };
+  } catch {
+    return null;
+  }
+}
+
+// Parse with manual boundaries applied
+export async function parseDocumentWithBoundaries(
+  text: string,
+  boundaries: SectionBoundaries
+): Promise<{ content: ParsedContent; analysis: StructureAnalysis }> {
+  const analysis = analyzeStructure(text);
+  const processed = adaptivePreprocess(text, analysis);
+  const lines = processed.split('\n');
+  
+  const lang = analysis.detectedLanguage !== 'unknown' ? analysis.detectedLanguage : 'en';
+  
+  // Use manual boundaries if provided, otherwise use detected
+  const recitalsEnd = boundaries.recitalEnd !== undefined 
+    ? Math.floor(boundaries.recitalEnd / 50) // approximate line from char index
+    : (analysis.adoptionLineIndex > 0 ? analysis.adoptionLineIndex : analysis.firstArticleIndex > 0 ? analysis.firstArticleIndex : 200);
+  
+  const articlesStart = boundaries.articleStart !== undefined
+    ? Math.floor(boundaries.articleStart / 50)
+    : (analysis.firstArticleIndex > 0 ? analysis.firstArticleIndex : 0);
+  
+  const articlesEnd = boundaries.articleEnd !== undefined
+    ? Math.floor(boundaries.articleEnd / 50)
+    : (analysis.firstAnnexIndex > 0 ? analysis.firstAnnexIndex : lines.length);
+  
+  const annexesStart = boundaries.annexStart !== undefined
+    ? Math.floor(boundaries.annexStart / 50)
+    : (analysis.firstAnnexIndex > 0 ? analysis.firstAnnexIndex : lines.length);
+  
+  const recitals = parseRecitals(lines, lang, recitalsEnd);
+  const articles = parseArticles(lines, lang, articlesStart, articlesEnd);
+  const definitions = parseDefinitions(articles);
+  const annexes = parseAnnexes(lines, lang, annexesStart);
+  const footnotes = parseFootnotes(processed, analysis);
+  
+  const content: ParsedContent = {
+    articles,
+    recitals,
+    definitions,
+    annexes,
+    footnotes,
+    detectedLanguage: lang,
+  };
+  
+  return { content, analysis };
+}

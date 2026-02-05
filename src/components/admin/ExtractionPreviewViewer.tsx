@@ -1,5 +1,5 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
-import { ChevronDown, ChevronRight, Eye, EyeOff, FileText, List, BookOpen, Hash, StickyNote, AlertCircle } from 'lucide-react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { ChevronDown, ChevronRight, Eye, EyeOff, FileText, List, BookOpen, Hash, StickyNote, AlertCircle, MousePointer2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -9,12 +9,18 @@ import { cn } from '@/lib/utils';
 import {
   ParsedContent,
   StructureAnalysis,
+  saveSectionBoundaries,
+  parseDocumentWithBoundaries,
+  type SectionBoundaries,
+  type BoundaryMarkers,
 } from '@/hooks/useAdaptiveParser';
+import { PatternSelectionToolbar, type SelectionMark, type SelectionType } from './PatternSelectionToolbar';
 
 interface ExtractionPreviewViewerProps {
   sourceText: string;
   parsedContent: ParsedContent;
   analysis: StructureAnalysis;
+  onReparse?: (content: ParsedContent, analysis: StructureAnalysis) => void;
 }
 
 interface ExtractionMatch {
@@ -39,6 +45,7 @@ export function ExtractionPreviewViewer({
   sourceText,
   parsedContent,
   analysis,
+  onReparse,
 }: ExtractionPreviewViewerProps) {
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<{ type: string; number: number | string } | null>(null);
@@ -50,6 +57,13 @@ export function ExtractionPreviewViewer({
     footnotes: true,
     definitions: true,
   });
+  
+  // Selection mode state
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [currentSelectionType, setCurrentSelectionType] = useState<SelectionType | null>(null);
+  const [marks, setMarks] = useState<SelectionMark[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isReparsing, setIsReparsing] = useState(false);
   
   const sourceRef = useRef<HTMLDivElement>(null);
 
@@ -207,6 +221,129 @@ export function ExtractionPreviewViewer({
     setSelectedType(type);
   };
 
+  // Handle text selection in source
+  const handleTextSelection = useCallback(() => {
+    if (!isSelectionMode || !currentSelectionType) return;
+    
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed) return;
+    
+    const selectedText = selection.toString().trim();
+    if (!selectedText || selectedText.length < 3) return;
+    
+    // Get the selection position relative to the source text
+    const range = selection.getRangeAt(0);
+    const preSelectionRange = range.cloneRange();
+    preSelectionRange.selectNodeContents(sourceRef.current!);
+    preSelectionRange.setEnd(range.startContainer, range.startOffset);
+    const startIndex = preSelectionRange.toString().length;
+    const endIndex = startIndex + selectedText.length;
+    
+    // Add the mark
+    setMarks(prev => {
+      // Remove existing mark of same type
+      const filtered = prev.filter(m => m.type !== currentSelectionType);
+      return [...filtered, {
+        type: currentSelectionType,
+        startIndex,
+        endIndex,
+        selectedText: selectedText.slice(0, 100),
+      }];
+    });
+    
+    // Clear selection
+    selection.removeAllRanges();
+  }, [isSelectionMode, currentSelectionType]);
+
+  // Build boundaries from marks
+  const buildBoundariesFromMarks = useCallback((): SectionBoundaries => {
+    const boundaries: SectionBoundaries = {};
+    
+    for (const mark of marks) {
+      switch (mark.type) {
+        case 'recital-start':
+          boundaries.recitalStart = mark.startIndex;
+          break;
+        case 'article-start':
+          boundaries.articleStart = mark.startIndex;
+          // If recital end not set, use article start
+          if (!boundaries.recitalEnd) boundaries.recitalEnd = mark.startIndex;
+          break;
+        case 'annex-start':
+          boundaries.annexStart = mark.startIndex;
+          // If article end not set, use annex start
+          if (!boundaries.articleEnd) boundaries.articleEnd = mark.startIndex;
+          break;
+        case 'footnote-start':
+          boundaries.footnoteStart = mark.startIndex;
+          break;
+        case 'section-end':
+          // Use as end for the most recent start type
+          const lastStartMark = [...marks].reverse().find(m => m.type.endsWith('-start'));
+          if (lastStartMark) {
+            if (lastStartMark.type === 'recital-start') boundaries.recitalEnd = mark.startIndex;
+            else if (lastStartMark.type === 'article-start') boundaries.articleEnd = mark.startIndex;
+            else if (lastStartMark.type === 'annex-start') boundaries.annexEnd = mark.startIndex;
+            else if (lastStartMark.type === 'footnote-start') boundaries.footnoteEnd = mark.startIndex;
+          }
+          break;
+      }
+    }
+    
+    return boundaries;
+  }, [marks]);
+
+  // Handle re-parse with current marks
+  const handleReparse = useCallback(async () => {
+    if (marks.length === 0) return;
+    
+    setIsReparsing(true);
+    try {
+      const boundaries = buildBoundariesFromMarks();
+      const { content, analysis: newAnalysis } = await parseDocumentWithBoundaries(sourceText, boundaries);
+      onReparse?.(content, newAnalysis);
+    } catch (err) {
+      console.error('Re-parse failed:', err);
+    } finally {
+      setIsReparsing(false);
+    }
+  }, [marks, sourceText, buildBoundariesFromMarks, onReparse]);
+
+  // Handle save patterns and re-parse
+  const handleSaveAndReparse = useCallback(async () => {
+    if (marks.length === 0) return;
+    
+    setIsSaving(true);
+    try {
+      const boundaries = buildBoundariesFromMarks();
+      
+      // Build markers from selected text
+      const boundaryMarkers: BoundaryMarkers = {};
+      for (const mark of marks) {
+        if (mark.type === 'recital-start') boundaryMarkers.recitalStartText = mark.selectedText;
+        else if (mark.type === 'article-start') boundaryMarkers.articleStartText = mark.selectedText;
+        else if (mark.type === 'annex-start') boundaryMarkers.annexStartText = mark.selectedText;
+        else if (mark.type === 'footnote-start') boundaryMarkers.footnoteStartText = mark.selectedText;
+      }
+      
+      // Save to database
+      await saveSectionBoundaries(
+        analysis.detectedLanguage,
+        analysis.tableFormat === 'two-column' ? 'eurlex-table' : 'eurlex-html',
+        boundaries,
+        boundaryMarkers
+      );
+      
+      // Re-parse
+      const { content, analysis: newAnalysis } = await parseDocumentWithBoundaries(sourceText, boundaries);
+      onReparse?.(content, newAnalysis);
+    } catch (err) {
+      console.error('Save and re-parse failed:', err);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [marks, sourceText, analysis, buildBoundariesFromMarks, onReparse]);
+
   // Stats
   const stats = {
     recitals: parsedContent.recitals.length,
@@ -237,15 +374,44 @@ export function ExtractionPreviewViewer({
             </Badge>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowHighlights(!showHighlights)}
-        >
-          {showHighlights ? <Eye className="h-4 w-4 mr-1" /> : <EyeOff className="h-4 w-4 mr-1" />}
-          {showHighlights ? 'Hide' : 'Show'} Highlights
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant={isSelectionMode ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setIsSelectionMode(!isSelectionMode)}
+          >
+            <MousePointer2 className="h-4 w-4 mr-1" />
+            {isSelectionMode ? 'Exit Selection' : 'Select Boundaries'}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowHighlights(!showHighlights)}
+          >
+            {showHighlights ? <Eye className="h-4 w-4 mr-1" /> : <EyeOff className="h-4 w-4 mr-1" />}
+            {showHighlights ? 'Hide' : 'Show'} Highlights
+          </Button>
+        </div>
       </div>
+
+      {/* Selection toolbar */}
+      {isSelectionMode && (
+        <div className="p-2 border-b bg-muted/30">
+          <PatternSelectionToolbar
+            isSelectionMode={isSelectionMode}
+            onToggleSelectionMode={() => setIsSelectionMode(false)}
+            currentSelectionType={currentSelectionType}
+            onSelectType={setCurrentSelectionType}
+            marks={marks}
+            onRemoveMark={(idx) => setMarks(prev => prev.filter((_, i) => i !== idx))}
+            onClearMarks={() => setMarks([])}
+            onSavePatterns={handleSaveAndReparse}
+            onReparse={handleReparse}
+            isSaving={isSaving}
+            isReparsing={isReparsing}
+          />
+        </div>
+      )}
 
       {/* Main content */}
       <div className="flex flex-1 overflow-hidden">
@@ -254,6 +420,11 @@ export function ExtractionPreviewViewer({
           <div className="p-2 border-b bg-muted/30 flex items-center gap-2">
             <FileText className="h-4 w-4" />
             <span className="text-sm font-medium">Source Content</span>
+            {isSelectionMode && currentSelectionType && (
+              <Badge variant="default" className="text-xs">
+                Click & drag to mark: {currentSelectionType.replace('-', ' ')}
+              </Badge>
+            )}
             <Badge variant="secondary" className="ml-auto">
               {analysis.detectedLanguage.toUpperCase()}
             </Badge>
@@ -261,6 +432,7 @@ export function ExtractionPreviewViewer({
           <ScrollArea className="flex-1">
             <div 
               ref={sourceRef}
+              onMouseUp={handleTextSelection}
               className="p-4 font-mono text-xs leading-relaxed whitespace-pre-wrap"
             >
               {Array.isArray(highlightedSource) ? (

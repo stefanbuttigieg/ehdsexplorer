@@ -2483,6 +2483,7 @@ export type Database = {
           adoption_marker: string | null
           annex_pattern: string | null
           article_pattern: string | null
+          boundary_markers: Json | null
           chapter_pattern: string | null
           created_at: string
           created_by: string | null
@@ -2492,6 +2493,7 @@ export type Database = {
           last_used_at: string | null
           notes: string | null
           recital_pattern: string | null
+          section_boundaries: Json | null
           source_type: string
           source_url: string | null
           success_count: number
@@ -2501,6 +2503,7 @@ export type Database = {
           adoption_marker?: string | null
           annex_pattern?: string | null
           article_pattern?: string | null
+          boundary_markers?: Json | null
           chapter_pattern?: string | null
           created_at?: string
           created_by?: string | null
@@ -2510,6 +2513,7 @@ export type Database = {
           last_used_at?: string | null
           notes?: string | null
           recital_pattern?: string | null
+          section_boundaries?: Json | null
           source_type: string
           source_url?: string | null
           success_count?: number
@@ -2519,6 +2523,7 @@ export type Database = {
           adoption_marker?: string | null
           annex_pattern?: string | null
           article_pattern?: string | null
+          boundary_markers?: Json | null
           chapter_pattern?: string | null
           created_at?: string
           created_by?: string | null
@@ -2528,6 +2533,7 @@ export type Database = {
           last_used_at?: string | null
           notes?: string | null
           recital_pattern?: string | null
+          section_boundaries?: Json | null
           source_type?: string
           source_url?: string | null
           success_count?: number

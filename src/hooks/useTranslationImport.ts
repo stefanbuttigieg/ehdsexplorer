@@ -231,6 +231,8 @@ export function useTranslationImport() {
     importTranslations,
     loadEnglishSource,
     reset,
+    setParsedContent,
+    setStructureAnalysis,
   };
 }
 

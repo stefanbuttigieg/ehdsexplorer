@@ -17,6 +17,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Translation Import Tool
+- **PDF Translation Parser** - New admin tool at `/admin/translation-import` for bulk importing translated regulation content
+  - Multi-language pattern detection for Article, Recital, and Chapter markers (24 EU languages)
+  - Automatic language detection from document content
+  - Structural validation against English source (105 articles, 115 recitals)
+  - Side-by-side diff preview comparing translated content with English source
+  - Selective import with checkbox selection for individual articles/recitals
+  - Duplicate and missing content detection with warnings
+  - Character count validation to identify parsing issues
+- **Translation Import Hook** - `useTranslationImport` for parsing and validating regulation documents
+- **Diff Preview Component** - `TranslationDiffPreview` for comparing and selecting translations
+
 #### MFA Login Verification Flow
 - **Login MFA Challenge** - Users with MFA enabled are now properly prompted for verification after password entry
   - Unified verification dialog supporting both TOTP (authenticator apps) and Email OTP

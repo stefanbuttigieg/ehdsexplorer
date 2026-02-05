@@ -13,6 +13,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.3] - 2026-02-05
+
+### Added
+
+#### MFA Login Verification Flow
+- **Login MFA Challenge** - Users with MFA enabled are now properly prompted for verification after password entry
+  - Unified verification dialog supporting both TOTP (authenticator apps) and Email OTP
+  - Tab-based interface to switch between verification methods when both are enrolled
+  - Session held at AAL1 until verification is completed, then elevated to AAL2
+- **Email OTP Login Verification** - New edge function `verify-email-otp-login` for secure code validation during login
+- **Automatic MFA Detection** - Login flow now checks both native TOTP factors and custom Email OTP preferences
+
+### Fixed
+- **TOTP QR Code Loading** - Fixed issue where authenticator app setup QR code was stuck in loading state
+  - Refactored enrollment trigger from `onOpenChange` to proper `useEffect` hook
+  - Added `isStarting` state to prevent duplicate enrollment requests
+  - Enhanced error handling with cancel option when enrollment fails
+
+---
+
 ## [2.0.2] - 2026-02-04
 
 ### Added

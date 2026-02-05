@@ -196,6 +196,8 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
   - Admin-controlled enforcement with 6-month grace period transition
   - Gentle reminder banners for users without MFA enabled
   - Security settings page in user profile for enrollment
+  - **Login MFA verification** - Automatic challenge prompts during login for enrolled users
+  - Unified verification dialog supporting both TOTP and Email OTP methods
 - **Admin Security Settings** at `/admin/security` for super admins
   - Toggle MFA enforcement and reminders
   - Configure allowed authentication methods

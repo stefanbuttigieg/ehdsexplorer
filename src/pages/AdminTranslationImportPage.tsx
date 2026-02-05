@@ -18,6 +18,10 @@
  import { useLanguages } from '@/hooks/useLanguages';
  import { useTranslationImport } from '@/hooks/useTranslationImport';
  import { TranslationDiffPreview } from '@/components/admin/TranslationDiffPreview';
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Set up PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
  
  // Language code to name mapping
  const LANGUAGE_NAMES: Record<string, string> = {
@@ -50,6 +54,7 @@
    const [selectedRecitals, setSelectedRecitals] = useState<number[]>([]);
    const [uploadedFile, setUploadedFile] = useState<File | null>(null);
    const [parseProgress, setParseProgress] = useState(0);
+  const [extractedText, setExtractedText] = useState('');
  
    useEffect(() => {
      if (!loading && !user) {
@@ -88,24 +93,58 @@
      }
    }, [parsedContent, validation]);
  
+  // Extract text from PDF using pdf.js
+  const extractTextFromPDF = useCallback(async (file: File): Promise<string> => {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    
+    let fullText = '';
+    const totalPages = pdf.numPages;
+    
+    for (let i = 1; i <= totalPages; i++) {
+      setParseProgress(Math.round((i / totalPages) * 50)); // First 50% for extraction
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items
+        .map((item: any) => item.str)
+        .join(' ');
+      fullText += pageText + '\n\n';
+    }
+    
+    return fullText;
+  }, []);
+
    const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
      const file = event.target.files?.[0];
      if (!file) return;
      
      setUploadedFile(file);
      setParseProgress(10);
+    setExtractedText('');
      
      // For PDFs, we need to use the document parser
      if (file.type === 'application/pdf') {
-       // Store file for manual parsing step
-       setParseProgress(0);
-       return;
+      try {
+        setParseProgress(5);
+        const text = await extractTextFromPDF(file);
+        setExtractedText(text);
+        setParseProgress(60);
+        await parseDocument(text);
+        setParseProgress(100);
+      } catch (error) {
+        console.error('Failed to parse PDF:', error);
+        setParseProgress(0);
+        // Store extracted text for manual review if parsing failed
+        setExtractedText('');
+      }
+      return;
      }
      
      // For text files, read directly
      try {
        setParseProgress(30);
        const text = await file.text();
+      setExtractedText(text);
        setParseProgress(60);
        await parseDocument(text);
        setParseProgress(100);
@@ -113,21 +152,11 @@
        console.error('Failed to read file:', error);
        setParseProgress(0);
      }
-   }, [parseDocument]);
- 
-   const handleParsePDF = useCallback(async () => {
-     if (!uploadedFile) return;
-     
-     // For now, show instructions - PDF parsing requires the parse_document tool
-     // which needs to be called by the AI assistant
-     alert(
-       'PDF parsing requires the AI assistant.\n\n' +
-       'Please paste the text content from your PDF into a text file, or ask me to parse the PDF for you.'
-     );
-   }, [uploadedFile]);
+  }, [parseDocument, extractTextFromPDF]);
  
    const handleTextPaste = useCallback(async (text: string) => {
      if (!text.trim()) return;
+    setExtractedText(text);
      await parseDocument(text);
    }, [parseDocument]);
  
@@ -150,6 +179,7 @@
      setSelectedArticles([]);
      setSelectedRecitals([]);
      setParseProgress(0);
+    setExtractedText('');
    }, [reset]);
  
    const handleArticleSelect = useCallback((articleNumber: number, selected: boolean) => {
@@ -287,11 +317,13 @@
                </div>
  
                {uploadedFile && uploadedFile.type === 'application/pdf' && (
-                 <Alert>
+                <Alert variant={parseProgress > 0 && parseProgress < 100 ? 'default' : undefined}>
                    <AlertTriangle className="h-4 w-4" />
                    <AlertTitle>PDF Uploaded: {uploadedFile.name}</AlertTitle>
                    <AlertDescription>
-                     For best results, please paste the extracted text below. PDF parsing can be inconsistent.
+                    {parseProgress > 0 && parseProgress < 100 
+                      ? 'Extracting text from PDF...' 
+                      : 'PDF will be automatically parsed. If results are incorrect, paste the text manually below.'}
                    </AlertDescription>
                  </Alert>
                )}
@@ -299,16 +331,22 @@
                {parseProgress > 0 && parseProgress < 100 && (
                  <div className="space-y-2">
                    <Progress value={parseProgress} />
-                   <p className="text-sm text-center text-muted-foreground">Parsing document...</p>
+                  <p className="text-sm text-center text-muted-foreground">
+                    {parseProgress < 50 ? 'Extracting text from PDF...' : 'Parsing content...'}
+                  </p>
                  </div>
                )}
  
                {/* Text Paste Area */}
                <div className="space-y-2">
-                 <label className="text-sm font-medium">Or paste text content directly:</label>
+                <label className="text-sm font-medium">
+                  {extractedText ? 'Extracted text (edit if needed):' : 'Or paste text content directly:'}
+                </label>
                  <textarea
                    className="w-full h-64 p-4 border rounded-md font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
                    placeholder="Paste the full text content of the translated regulation here...&#10;&#10;The parser will detect:&#10;- Article markers (Article 1, Artikel 1, Artículo 1, etc.)&#10;- Recital markers ((1), (2), etc.)&#10;- Chapter boundaries (CHAPTER I, KAPITEL I, etc.)"
+                  value={extractedText}
+                  onChange={(e) => setExtractedText(e.target.value)}
                    onPaste={(e) => {
                      const text = e.clipboardData.getData('text');
                      if (text.length > 1000) {
@@ -321,11 +359,10 @@
                  <Button
                    variant="secondary"
                    className="w-full"
-                   disabled={isParsing}
+                  disabled={isParsing || !extractedText.trim()}
                    onClick={() => {
-                     const textarea = document.querySelector('textarea');
-                     if (textarea && textarea.value) {
-                       handleTextPaste(textarea.value);
+                    if (extractedText.trim()) {
+                      handleTextPaste(extractedText);
                      }
                    }}
                  >

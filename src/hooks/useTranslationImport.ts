@@ -439,6 +439,41 @@ export interface ParsedFootnote {
  
  function preprocessTextFn(text: string): string {
    let processed = text;
+  
+  // Strip markdown table syntax (EUR-Lex HTML converted to markdown often uses tables)
+  // Remove table header separators like | --- | --- |
+  processed = processed.replace(/^\|[\s-:|]+\|$/gm, '');
+  
+  // Convert table rows to plain text
+  // Pattern: | cell1 | cell2 | -> cell1 cell2
+  processed = processed.replace(/^\|\s*([^|]*?)\s*\|\s*([^|]*?)\s*\|$/gm, (match, cell1, cell2) => {
+    // If first cell is empty or just whitespace, return second cell
+    if (!cell1.trim()) return cell2.trim();
+    // If second cell is empty, return first cell
+    if (!cell2.trim()) return cell1.trim();
+    // Combine both cells
+    return `${cell1.trim()} ${cell2.trim()}`;
+  });
+  
+  // Handle 3-column tables: | col1 | col2 | col3 |
+  processed = processed.replace(/^\|\s*([^|]*?)\s*\|\s*([^|]*?)\s*\|\s*([^|]*?)\s*\|$/gm, (match, c1, c2, c3) => {
+    const parts = [c1, c2, c3].filter(p => p && p.trim()).map(p => p.trim());
+    return parts.join(' ');
+  });
+  
+  // Clean up any remaining pipe characters at start/end of lines
+  processed = processed.replace(/^\s*\|\s*/gm, '');
+  processed = processed.replace(/\s*\|\s*$/gm, '');
+  
+  // Remove markdown image syntax ![alt](url)
+  processed = processed.replace(/!\[([^\]]*)\]\([^)]+\)/g, '');
+  
+  // Remove markdown links but keep the text [text](url) -> text
+  processed = processed.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+  
+  // Remove horizontal rules
+  processed = processed.replace(/^\s*\*\s*\*\s*\*\s*$/gm, '');
+  processed = processed.replace(/^\s*-{3,}\s*$/gm, '');
    
    // Add newlines before article markers across all languages
    processed = processed.replace(/(Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu)\s+(\d+)/gi, '\n$1 $2');
@@ -457,6 +492,9 @@ export interface ParsedFootnote {
    
    // Normalize multiple newlines
    processed = processed.replace(/\n{3,}/g, '\n\n');
+  
+  // Final cleanup: trim each line
+  processed = processed.split('\n').map(line => line.trim()).join('\n');
    
    return processed;
  }

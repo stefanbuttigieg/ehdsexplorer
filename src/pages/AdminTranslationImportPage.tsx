@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
  import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Upload, FileText, Languages, Loader2, AlertTriangle, Check, RotateCcw, FileWarning } from 'lucide-react';
+import { ArrowLeft, Upload, FileText, Languages, Loader2, AlertTriangle, Check, RotateCcw, FileWarning, Globe } from 'lucide-react';
  import { Button } from '@/components/ui/button';
  import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
  import { Badge } from '@/components/ui/badge';
@@ -13,11 +13,13 @@ import { ArrowLeft, Upload, FileText, Languages, Loader2, AlertTriangle, Check, 
    SelectTrigger,
    SelectValue,
  } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
  import Layout from '@/components/Layout';
  import { useAuth } from '@/hooks/useAuth';
  import { useLanguages } from '@/hooks/useLanguages';
  import { useTranslationImport } from '@/hooks/useTranslationImport';
  import { TranslationDiffPreview } from '@/components/admin/TranslationDiffPreview';
+import { EurLexImporter } from '@/components/admin/EurLexImporter';
  
 // PDF.js types
 type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocument']>['promise']>;
@@ -56,6 +58,8 @@ type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocum
   const [parseStatus, setParseStatus] = useState<'idle' | 'extracting' | 'parsing' | 'done' | 'error'>('idle');
   const [parseError, setParseError] = useState<string | null>(null);
   const [extractedText, setExtractedText] = useState('');
+  const [importMethod, setImportMethod] = useState<'upload' | 'url'>('url');
+  const [sourceUrl, setSourceUrl] = useState<string>('');
   const isMountedRef = useRef(true);
 
   // Track component mount state
@@ -190,6 +194,20 @@ type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocum
      await parseDocument(text);
    }, [parseDocument]);
  
+  const handleEurLexContent = useCallback(async (content: string, url: string) => {
+    setSourceUrl(url);
+    setExtractedText(content);
+    setParseStatus('parsing');
+    setParseProgress(70);
+    
+    await parseDocument(content);
+    
+    if (isMountedRef.current) {
+      setParseProgress(100);
+      setParseStatus('done');
+    }
+  }, [parseDocument]);
+
   const handleImport = useCallback(async () => {
      if (!selectedLanguage) {
        alert('Please select a target language');
@@ -212,6 +230,7 @@ type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocum
     setParseStatus('idle');
     setParseError(null);
     setExtractedText('');
+    setSourceUrl('');
    }, [reset]);
  
   const handleArticleSelect = useCallback((articleNumber: number, selected: boolean) => {
@@ -316,115 +335,136 @@ type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocum
          </Card>
  
          {!parsedContent ? (
-           /* Upload Section */
-           <Card>
-             <CardHeader>
-               <CardTitle className="flex items-center gap-2">
-                 <Languages className="h-5 w-5" />
-                 Upload Translated Document
-               </CardTitle>
-               <CardDescription>
-                 Upload a PDF or paste text content from a translated version of the EHDS Regulation
-               </CardDescription>
-             </CardHeader>
-             <CardContent className="space-y-6">
-               {/* File Upload */}
-               <div className="border-2 border-dashed rounded-lg p-8 text-center">
-                 <input
-                   type="file"
-                   accept=".pdf,.txt,.md"
-                   onChange={handleFileUpload}
-                   className="hidden"
-                   id="file-upload"
-                   disabled={isParsing}
-                 />
-                 <label
-                   htmlFor="file-upload"
-                   className="cursor-pointer flex flex-col items-center gap-2"
-                 >
-                   <Upload className="h-12 w-12 text-muted-foreground" />
-                   <p className="font-medium">Click to upload or drag and drop</p>
-                   <p className="text-sm text-muted-foreground">PDF, TXT, or Markdown files</p>
-                 </label>
-               </div>
- 
-               {uploadedFile && uploadedFile.type === 'application/pdf' && (
-                <Alert variant={parseStatus === 'error' ? 'destructive' : 'default'}>
-                  {parseStatus === 'error' ? <FileWarning className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
-                  <AlertTitle>PDF Uploaded: {uploadedFile.name}</AlertTitle>
-                  <AlertDescription>
-                    {parseStatus === 'extracting' && 'Extracting text from PDF pages...'}
-                    {parseStatus === 'parsing' && 'Analyzing structure and detecting articles/recitals...'}
-                    {parseStatus === 'done' && 'PDF parsed successfully! Review the results below.'}
-                    {parseStatus === 'error' && (parseError || 'Failed to parse PDF. Please paste the text manually below.')}
-                    {parseStatus === 'idle' && 'PDF will be automatically parsed. If results are incorrect, paste the text manually below.'}
-                  </AlertDescription>
-                </Alert>
-               )}
- 
-              {(parseStatus === 'extracting' || parseStatus === 'parsing') && (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                    <div className="flex-1">
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="font-medium">
-                          {parseStatus === 'extracting' ? 'Extracting text...' : 'Parsing content...'}
-                        </span>
-                        <span className="text-muted-foreground">{parseProgress}%</span>
+            /* Import Method Selection */
+            <div className="space-y-6">
+              <Tabs value={importMethod} onValueChange={(v) => setImportMethod(v as 'upload' | 'url')}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="url" className="gap-2">
+                    <Globe className="h-4 w-4" />
+                    EUR-Lex URL
+                  </TabsTrigger>
+                  <TabsTrigger value="upload" className="gap-2">
+                    <Upload className="h-4 w-4" />
+                    Upload PDF/Text
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="url" className="mt-4">
+                  <EurLexImporter onContentFetched={handleEurLexContent} />
+                </TabsContent>
+
+                <TabsContent value="upload" className="mt-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Languages className="h-5 w-5" />
+                        Upload Translated Document
+                      </CardTitle>
+                      <CardDescription>
+                        Upload a PDF or paste text content from a translated version of the EHDS Regulation
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {/* File Upload */}
+                      <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                        <input
+                          type="file"
+                          accept=".pdf,.txt,.md"
+                          onChange={handleFileUpload}
+                          className="hidden"
+                          id="file-upload"
+                          disabled={isParsing}
+                        />
+                        <label
+                          htmlFor="file-upload"
+                          className="cursor-pointer flex flex-col items-center gap-2"
+                        >
+                          <Upload className="h-12 w-12 text-muted-foreground" />
+                          <p className="font-medium">Click to upload or drag and drop</p>
+                          <p className="text-sm text-muted-foreground">PDF, TXT, or Markdown files</p>
+                        </label>
                       </div>
-                      <Progress value={parseProgress} className="h-2" />
-                    </div>
-                  </div>
-                  <p className="text-sm text-center text-muted-foreground">
-                    {parseStatus === 'extracting' 
-                      ? 'Reading PDF pages and extracting text content...' 
-                      : 'Detecting articles, recitals, and chapter boundaries...'}
-                  </p>
-                </div>
-              )}
- 
-               {/* Text Paste Area */}
-               <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    {extractedText ? 'Extracted text (edit if needed):' : 'Or paste text content directly:'}
-                  </label>
-                 <textarea
-                   className="w-full h-64 p-4 border rounded-md font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
-                   placeholder="Paste the full text content of the translated regulation here...&#10;&#10;The parser will detect:&#10;- Article markers (Article 1, Artikel 1, Artículo 1, etc.)&#10;- Recital markers ((1), (2), etc.)&#10;- Chapter boundaries (CHAPTER I, KAPITEL I, etc.)"
-                    value={extractedText}
-                    onChange={(e) => setExtractedText(e.target.value)}
-                   onPaste={(e) => {
-                     const text = e.clipboardData.getData('text');
-                     if (text.length > 1000) {
-                       e.preventDefault();
-                       handleTextPaste(text);
-                     }
-                   }}
-                   disabled={isParsing}
-                 />
-                 <Button
-                   variant="secondary"
-                   className="w-full"
-                    disabled={isParsing || !extractedText.trim()}
-                   onClick={() => {
-                      if (extractedText.trim()) {
-                        handleTextPaste(extractedText);
-                      }
-                   }}
-                 >
-                   {isParsing ? (
-                     <>
-                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                       Parsing...
-                     </>
-                   ) : (
-                     'Parse Content'
-                   )}
-                 </Button>
-               </div>
-             </CardContent>
-           </Card>
+
+                      {uploadedFile && uploadedFile.type === 'application/pdf' && (
+                        <Alert variant={parseStatus === 'error' ? 'destructive' : 'default'}>
+                          {parseStatus === 'error' ? <FileWarning className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
+                          <AlertTitle>PDF Uploaded: {uploadedFile.name}</AlertTitle>
+                          <AlertDescription>
+                            {parseStatus === 'extracting' && 'Extracting text from PDF pages...'}
+                            {parseStatus === 'parsing' && 'Analyzing structure and detecting articles/recitals...'}
+                            {parseStatus === 'done' && 'PDF parsed successfully! Review the results below.'}
+                            {parseStatus === 'error' && (parseError || 'Failed to parse PDF. Please paste the text manually below.')}
+                            {parseStatus === 'idle' && 'PDF will be automatically parsed. If results are incorrect, paste the text manually below.'}
+                          </AlertDescription>
+                        </Alert>
+                      )}
+
+                      {(parseStatus === 'extracting' || parseStatus === 'parsing') && (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3">
+                            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                            <div className="flex-1">
+                              <div className="flex justify-between text-sm mb-1">
+                                <span className="font-medium">
+                                  {parseStatus === 'extracting' ? 'Extracting text...' : 'Parsing content...'}
+                                </span>
+                                <span className="text-muted-foreground">{parseProgress}%</span>
+                              </div>
+                              <Progress value={parseProgress} className="h-2" />
+                            </div>
+                          </div>
+                          <p className="text-sm text-center text-muted-foreground">
+                            {parseStatus === 'extracting' 
+                              ? 'Reading PDF pages and extracting text content...' 
+                              : 'Detecting articles, recitals, and chapter boundaries...'}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Text Paste Area */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">
+                          {extractedText ? 'Extracted text (edit if needed):' : 'Or paste text content directly:'}
+                        </label>
+                        <textarea
+                          className="w-full h-64 p-4 border rounded-md font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+                          placeholder="Paste the full text content of the translated regulation here...&#10;&#10;The parser will detect:&#10;- Article markers (Article 1, Artikel 1, Artículo 1, etc.)&#10;- Recital markers ((1), (2), etc.)&#10;- Chapter boundaries (CHAPTER I, KAPITEL I, etc.)"
+                          value={extractedText}
+                          onChange={(e) => setExtractedText(e.target.value)}
+                          onPaste={(e) => {
+                            const text = e.clipboardData.getData('text');
+                            if (text.length > 1000) {
+                              e.preventDefault();
+                              handleTextPaste(text);
+                            }
+                          }}
+                          disabled={isParsing}
+                        />
+                        <Button
+                          variant="secondary"
+                          className="w-full"
+                          disabled={isParsing || !extractedText.trim()}
+                          onClick={() => {
+                            if (extractedText.trim()) {
+                              handleTextPaste(extractedText);
+                            }
+                          }}
+                        >
+                          {isParsing ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Parsing...
+                            </>
+                          ) : (
+                            'Parse Content'
+                          )}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </div>
          ) : (
            /* Preview and Import Section */
            <div className="space-y-6">

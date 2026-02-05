@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { QrCode, Copy, Check, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -21,42 +21,68 @@ interface TOTPSetupDialogProps {
 
 export function TOTPSetupDialog({ open, onOpenChange }: TOTPSetupDialogProps) {
   const { toast } = useToast();
-  const { startTOTPEnrollment, verifyTOTPEnrollment, cancelEnrollment, enrollmentData } = useMFAEnrollment();
+  const { startTOTPEnrollment, verifyTOTPEnrollment, cancelEnrollment } = useMFAEnrollment();
   const [step, setStep] = useState<'loading' | 'scan' | 'verify'>('loading');
   const [verificationCode, setVerificationCode] = useState('');
   const [copied, setCopied] = useState(false);
   const [localEnrollment, setLocalEnrollment] = useState<TOTPEnrollment | null>(null);
+  const [isStarting, setIsStarting] = useState(false);
 
-  const handleOpen = async (isOpen: boolean) => {
-    if (isOpen) {
-      setStep('loading');
-      setVerificationCode('');
-      setCopied(false);
-      try {
-        const data = await startTOTPEnrollment();
-        console.log('TOTP enrollment data:', data);
-        if (data?.totp?.qr_code) {
-          setLocalEnrollment(data);
-          setStep('scan');
-        } else {
-          console.error('No QR code in enrollment response:', data);
+  // Start enrollment when dialog opens
+  useEffect(() => {
+    if (open && !localEnrollment && !isStarting) {
+      const startEnrollment = async () => {
+        setIsStarting(true);
+        setStep('loading');
+        setVerificationCode('');
+        setCopied(false);
+        
+        try {
+          console.log('Starting TOTP enrollment...');
+          const data = await startTOTPEnrollment();
+          console.log('TOTP enrollment response:', JSON.stringify(data, null, 2));
+          
+          if (data?.totp?.qr_code) {
+            console.log('QR code received, length:', data.totp.qr_code.length);
+            setLocalEnrollment(data);
+            setStep('scan');
+          } else {
+            console.error('No QR code in enrollment response:', data);
+            toast({
+              title: 'Setup failed',
+              description: 'Could not generate QR code. Please try again.',
+              variant: 'destructive',
+            });
+            onOpenChange(false);
+          }
+        } catch (error: any) {
+          console.error('TOTP enrollment error:', error);
           toast({
             title: 'Setup failed',
-            description: 'Could not generate QR code. Please try again.',
+            description: error.message || 'Failed to start authenticator setup.',
             variant: 'destructive',
           });
           onOpenChange(false);
+        } finally {
+          setIsStarting(false);
         }
-      } catch (error) {
-        console.error('TOTP enrollment error:', error);
-        onOpenChange(false);
-      }
-    } else {
-      cancelEnrollment();
-      setLocalEnrollment(null);
+      };
+      
+      startEnrollment();
     }
-    onOpenChange(isOpen);
-  };
+  }, [open, localEnrollment, isStarting, startTOTPEnrollment, onOpenChange, toast]);
+
+  // Reset state when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setLocalEnrollment(null);
+      setStep('loading');
+      setVerificationCode('');
+      setCopied(false);
+      setIsStarting(false);
+      cancelEnrollment();
+    }
+  }, [open, cancelEnrollment]);
 
   const handleCopySecret = async () => {
     if (localEnrollment?.totp.secret) {
@@ -76,16 +102,17 @@ export function TOTPSetupDialog({ open, onOpenChange }: TOTPSetupDialogProps) {
         code: verificationCode,
       });
       onOpenChange(false);
-      setLocalEnrollment(null);
     } catch {
       // Error handled in mutation
     }
   };
 
-  const enrollment = localEnrollment || enrollmentData;
+  const handleClose = () => {
+    onOpenChange(false);
+  };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpen}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -105,14 +132,18 @@ export function TOTPSetupDialog({ open, onOpenChange }: TOTPSetupDialogProps) {
           </div>
         )}
 
-        {step === 'scan' && enrollment && (
+        {step === 'scan' && localEnrollment && (
           <div className="space-y-4">
             <div className="flex justify-center">
               <div className="p-4 bg-white rounded-lg">
                 <img 
-                  src={enrollment.totp.qr_code} 
+                  src={localEnrollment.totp.qr_code} 
                   alt="QR Code for authenticator app"
                   className="w-48 h-48"
+                  onError={(e) => {
+                    console.error('QR code image failed to load');
+                    e.currentTarget.style.display = 'none';
+                  }}
                 />
               </div>
             </div>
@@ -123,7 +154,7 @@ export function TOTPSetupDialog({ open, onOpenChange }: TOTPSetupDialogProps) {
             
             <div className="flex items-center gap-2">
               <code className="flex-1 p-2 bg-muted rounded text-xs font-mono break-all">
-                {enrollment.totp.secret}
+                {localEnrollment.totp.secret}
               </code>
               <Button
                 variant="outline"
@@ -157,9 +188,14 @@ export function TOTPSetupDialog({ open, onOpenChange }: TOTPSetupDialogProps) {
         )}
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
+          {step === 'loading' && (
+            <Button variant="outline" onClick={handleClose}>
+              Cancel
+            </Button>
+          )}
           {step === 'scan' && (
             <>
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
+              <Button variant="outline" onClick={handleClose}>
                 Cancel
               </Button>
               <Button onClick={() => setStep('verify')}>

@@ -11,7 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import Layout from '@/components/Layout';
 import { supabase } from '@/integrations/supabase/client';
 import { Info, ArrowLeft, UserPlus, LogIn, Shield } from 'lucide-react';
-import { MFAVerifyDialog } from '@/components/mfa/MFAVerifyDialog';
+ import { LoginMFAVerifyDialog } from '@/components/mfa/LoginMFAVerifyDialog';
 
 const authSchema = z.object({
   email: z.string().email('Invalid email address').max(255),
@@ -31,7 +31,9 @@ const AdminAuthPage = () => {
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
   const [showMFAVerify, setShowMFAVerify] = useState(false);
-  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
+   const [mfaTotpFactorId, setMfaTotpFactorId] = useState<string | null>(null);
+   const [mfaEmailEnabled, setMfaEmailEnabled] = useState(false);
+   const [mfaUserEmail, setMfaUserEmail] = useState('');
   const { user, loading, signIn, isEditor } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -107,12 +109,25 @@ const AdminAuthPage = () => {
 
       // Check if MFA is required
       if (data.session) {
-        const { data: factorsData } = await supabase.auth.mfa.listFactors();
-        const verifiedFactors = factorsData?.totp?.filter(f => f.status === 'verified') ?? [];
-        
-        if (verifiedFactors.length > 0) {
-          // User has MFA enabled - need to verify
-          setMfaFactorId(verifiedFactors[0].id);
+         // Check for TOTP factors
+         const { data: factorsData } = await supabase.auth.mfa.listFactors();
+         const verifiedTotpFactors = factorsData?.totp?.filter(f => f.status === 'verified') ?? [];
+         
+         // Check for Email OTP in user preferences
+         const { data: mfaPrefs } = await supabase
+           .from('user_mfa_preferences')
+           .select('email_otp_enabled')
+           .eq('user_id', data.user.id)
+           .maybeSingle();
+         
+         const hasTotp = verifiedTotpFactors.length > 0;
+         const hasEmailOtp = mfaPrefs?.email_otp_enabled === true;
+         
+         if (hasTotp || hasEmailOtp) {
+           // User has MFA enabled - need to verify
+           setMfaTotpFactorId(hasTotp ? verifiedTotpFactors[0].id : null);
+           setMfaEmailEnabled(hasEmailOtp);
+           setMfaUserEmail(data.user.email || email);
           setShowMFAVerify(true);
           return;
         }
@@ -132,7 +147,9 @@ const AdminAuthPage = () => {
 
   const handleMFASuccess = () => {
     setShowMFAVerify(false);
-    setMfaFactorId(null);
+     setMfaTotpFactorId(null);
+     setMfaEmailEnabled(false);
+     setMfaUserEmail('');
     toast({ title: 'Signed in successfully' });
   };
 
@@ -140,7 +157,9 @@ const AdminAuthPage = () => {
     // Sign out if MFA verification is cancelled
     await supabase.auth.signOut();
     setShowMFAVerify(false);
-    setMfaFactorId(null);
+     setMfaTotpFactorId(null);
+     setMfaEmailEnabled(false);
+     setMfaUserEmail('');
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -411,15 +430,15 @@ const AdminAuthPage = () => {
         </Card>
 
         {/* MFA Verification Dialog */}
-        {mfaFactorId && (
-          <MFAVerifyDialog
-            open={showMFAVerify}
-            onOpenChange={setShowMFAVerify}
-            factorId={mfaFactorId}
-            onSuccess={handleMFASuccess}
-            onCancel={handleMFACancel}
-          />
-        )}
+         <LoginMFAVerifyDialog
+           open={showMFAVerify}
+           onOpenChange={setShowMFAVerify}
+           totpFactorId={mfaTotpFactorId}
+           emailOTPEnabled={mfaEmailEnabled}
+           userEmail={mfaUserEmail}
+           onSuccess={handleMFASuccess}
+           onCancel={handleMFACancel}
+         />
       </div>
     </Layout>
   );

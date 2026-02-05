@@ -10,37 +10,49 @@ import { Check, X, AlertTriangle, ChevronDown, ChevronRight, Eye, Search, BookOp
  import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { ParsedArticle, ParsedRecital, ParsedDefinition, ParsedAnnex, ParsedFootnote, EnglishSource, ValidationResult } from '@/hooks/useTranslationImport';
  
- interface TranslationDiffPreviewProps {
-   parsedArticles: ParsedArticle[];
-   parsedRecitals: ParsedRecital[];
+interface TranslationDiffPreviewProps {
+  parsedArticles: ParsedArticle[];
+  parsedRecitals: ParsedRecital[];
   parsedDefinitions: ParsedDefinition[];
   parsedAnnexes: ParsedAnnex[];
   parsedFootnotes: ParsedFootnote[];
-   englishSource: EnglishSource;
-   validation: ValidationResult;
-   selectedArticles: number[];
-   selectedRecitals: number[];
-   onArticleSelect: (articleNumber: number, selected: boolean) => void;
-   onRecitalSelect: (recitalNumber: number, selected: boolean) => void;
-   onSelectAllArticles: (selected: boolean) => void;
-   onSelectAllRecitals: (selected: boolean) => void;
- }
- 
- export function TranslationDiffPreview({
-   parsedArticles,
-   parsedRecitals,
+  englishSource: EnglishSource;
+  validation: ValidationResult;
+  selectedArticles: number[];
+  selectedRecitals: number[];
+  selectedAnnexes: number[];
+  selectedFootnotes: number[];
+  onArticleSelect: (articleNumber: number, selected: boolean) => void;
+  onRecitalSelect: (recitalNumber: number, selected: boolean) => void;
+  onAnnexSelect: (annexNumber: number, selected: boolean) => void;
+  onFootnoteSelect: (footnoteIndex: number, selected: boolean) => void;
+  onSelectAllArticles: (selected: boolean) => void;
+  onSelectAllRecitals: (selected: boolean) => void;
+  onSelectAllAnnexes: (selected: boolean) => void;
+  onSelectAllFootnotes: (selected: boolean) => void;
+}
+
+export function TranslationDiffPreview({
+  parsedArticles,
+  parsedRecitals,
   parsedDefinitions,
   parsedAnnexes,
   parsedFootnotes,
-   englishSource,
-   validation,
-   selectedArticles,
-   selectedRecitals,
-   onArticleSelect,
-   onRecitalSelect,
-   onSelectAllArticles,
-   onSelectAllRecitals,
- }: TranslationDiffPreviewProps) {
+  englishSource,
+  validation,
+  selectedArticles,
+  selectedRecitals,
+  selectedAnnexes,
+  selectedFootnotes,
+  onArticleSelect,
+  onRecitalSelect,
+  onAnnexSelect,
+  onFootnoteSelect,
+  onSelectAllArticles,
+  onSelectAllRecitals,
+  onSelectAllAnnexes,
+  onSelectAllFootnotes,
+}: TranslationDiffPreviewProps) {
    const [expandedArticles, setExpandedArticles] = useState<Set<number>>(new Set());
    const [expandedRecitals, setExpandedRecitals] = useState<Set<number>>(new Set());
    const [searchQuery, setSearchQuery] = useState('');
@@ -111,11 +123,17 @@ import type { ParsedArticle, ParsedRecital, ParsedDefinition, ParsedAnnex, Parse
      });
    };
  
-   const allArticlesSelected = parsedArticles.length > 0 && 
-     parsedArticles.every(a => selectedArticles.includes(a.articleNumber));
-   
-   const allRecitalsSelected = parsedRecitals.length > 0 &&
-     parsedRecitals.every(r => selectedRecitals.includes(r.recitalNumber));
+  const allArticlesSelected = parsedArticles.length > 0 && 
+    parsedArticles.every(a => selectedArticles.includes(a.articleNumber));
+  
+  const allRecitalsSelected = parsedRecitals.length > 0 &&
+    parsedRecitals.every(r => selectedRecitals.includes(r.recitalNumber));
+
+  const allAnnexesSelected = parsedAnnexes.length > 0 &&
+    parsedAnnexes.every(a => selectedAnnexes.includes(a.annexNumber));
+
+  const allFootnotesSelected = parsedFootnotes.length > 0 &&
+    parsedFootnotes.every((_, i) => selectedFootnotes.includes(i));
  
    return (
      <div className="space-y-4">
@@ -442,20 +460,44 @@ import type { ParsedArticle, ParsedRecital, ParsedDefinition, ParsedAnnex, Parse
 
           {/* Annexes Tab */}
           <TabsContent value="annexes" className="mt-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Checkbox
+                id="select-all-annexes"
+                checked={allAnnexesSelected}
+                onCheckedChange={(checked) => onSelectAllAnnexes(!!checked)}
+              />
+              <label htmlFor="select-all-annexes" className="text-sm font-medium">
+                Select all annexes for import
+              </label>
+              <Badge variant="outline" className="ml-auto">
+                {selectedAnnexes.length} selected
+              </Badge>
+            </div>
+
             <ScrollArea className="h-[500px] border rounded-md">
               <div className="p-2 space-y-2">
-                {parsedAnnexes.map((annex) => (
-                  <div key={annex.annexNumber} className="border rounded-md p-3">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="outline">ANNEX {annex.romanNumeral}</Badge>
-                      <span className="font-medium">{annex.title}</span>
+                {parsedAnnexes.map((annex) => {
+                  const isSelected = selectedAnnexes.includes(annex.annexNumber);
+                  return (
+                    <div 
+                      key={annex.annexNumber} 
+                      className={`border rounded-md p-3 ${isSelected ? 'bg-primary/5' : ''}`}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={(checked) => onAnnexSelect(annex.annexNumber, !!checked)}
+                        />
+                        <Badge variant="outline">ANNEX {annex.romanNumeral}</Badge>
+                        <span className="font-medium">{annex.title}</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground ml-6">
+                        {annex.content.slice(0, 300)}...
+                        <Badge variant="secondary" className="ml-2">{annex.content.length} chars</Badge>
+                      </p>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {annex.content.slice(0, 300)}...
-                      <Badge variant="secondary" className="ml-2">{annex.content.length} chars</Badge>
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
                 {parsedAnnexes.length === 0 && (
                   <p className="text-center text-muted-foreground py-8">
                     <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -468,16 +510,41 @@ import type { ParsedArticle, ParsedRecital, ParsedDefinition, ParsedAnnex, Parse
 
           {/* Footnotes Tab */}
           <TabsContent value="footnotes" className="mt-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Checkbox
+                id="select-all-footnotes"
+                checked={allFootnotesSelected}
+                onCheckedChange={(checked) => onSelectAllFootnotes(!!checked)}
+              />
+              <label htmlFor="select-all-footnotes" className="text-sm font-medium">
+                Select all footnotes for import
+              </label>
+              <Badge variant="outline" className="ml-auto">
+                {selectedFootnotes.length} selected
+              </Badge>
+            </div>
+
             <ScrollArea className="h-[500px] border rounded-md">
               <div className="p-2 space-y-2">
-                {parsedFootnotes.map((fn, idx) => (
-                  <div key={idx} className="border rounded-md p-3">
-                    <div className="flex items-start gap-2">
-                      <Badge variant="outline" className="shrink-0">({fn.marker})</Badge>
-                      <p className="text-sm">{fn.content}</p>
+                {parsedFootnotes.map((fn, idx) => {
+                  const isSelected = selectedFootnotes.includes(idx);
+                  return (
+                    <div 
+                      key={idx} 
+                      className={`border rounded-md p-3 ${isSelected ? 'bg-primary/5' : ''}`}
+                    >
+                      <div className="flex items-start gap-2">
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={(checked) => onFootnoteSelect(idx, !!checked)}
+                          className="mt-0.5"
+                        />
+                        <Badge variant="outline" className="shrink-0">({fn.marker})</Badge>
+                        <p className="text-sm">{fn.content}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 {parsedFootnotes.length === 0 && (
                   <p className="text-center text-muted-foreground py-8">
                     <StickyNote className="h-8 w-8 mx-auto mb-2 opacity-50" />

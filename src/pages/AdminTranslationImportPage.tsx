@@ -61,11 +61,13 @@ type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocum
     setStructureAnalysis(analysis);
   }, [setParsedContent, setHookAnalysis]);
  
-   const [selectedLanguage, setSelectedLanguage] = useState<string>('');
-   const [selectedArticles, setSelectedArticles] = useState<number[]>([]);
-   const [selectedRecitals, setSelectedRecitals] = useState<number[]>([]);
-   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-   const [parseProgress, setParseProgress] = useState(0);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('');
+  const [selectedArticles, setSelectedArticles] = useState<number[]>([]);
+  const [selectedRecitals, setSelectedRecitals] = useState<number[]>([]);
+  const [selectedAnnexes, setSelectedAnnexes] = useState<number[]>([]);
+  const [selectedFootnotes, setSelectedFootnotes] = useState<number[]>([]);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [parseProgress, setParseProgress] = useState(0);
   const [parseStatus, setParseStatus] = useState<'idle' | 'extracting' | 'parsing' | 'done' | 'error'>('idle');
   const [parseError, setParseError] = useState<string | null>(null);
   const [extractedText, setExtractedText] = useState('');
@@ -98,27 +100,33 @@ type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocum
      }
    }, [user, isEditor, loadEnglishSource]);
  
-   // Auto-select all valid items when parsing completes
-   useEffect(() => {
-     if (parsedContent && validation) {
-       // Select all articles that have a match in English source
-       const validArticles = parsedContent.articles
-         .filter(a => !validation.duplicateArticles.includes(a.articleNumber))
-         .map(a => a.articleNumber);
-       setSelectedArticles(validArticles);
-       
-       // Select all recitals that have a match in English source
-       const validRecitals = parsedContent.recitals
-         .filter(r => !validation.duplicateRecitals.includes(r.recitalNumber))
-         .map(r => r.recitalNumber);
-       setSelectedRecitals(validRecitals);
-       
-       // Auto-detect language if possible
-       if (parsedContent.detectedLanguage && parsedContent.detectedLanguage !== 'en') {
-         setSelectedLanguage(parsedContent.detectedLanguage);
-       }
-     }
-   }, [parsedContent, validation]);
+  // Auto-select all valid items when parsing completes
+  useEffect(() => {
+    if (parsedContent && validation) {
+      // Select all articles that have a match in English source
+      const validArticles = parsedContent.articles
+        .filter(a => !validation.duplicateArticles.includes(a.articleNumber))
+        .map(a => a.articleNumber);
+      setSelectedArticles(validArticles);
+      
+      // Select all recitals that have a match in English source
+      const validRecitals = parsedContent.recitals
+        .filter(r => !validation.duplicateRecitals.includes(r.recitalNumber))
+        .map(r => r.recitalNumber);
+      setSelectedRecitals(validRecitals);
+
+      // Select all annexes
+      setSelectedAnnexes(parsedContent.annexes.map(a => a.annexNumber));
+
+      // Select all footnotes
+      setSelectedFootnotes(parsedContent.footnotes.map((_, i) => i));
+      
+      // Auto-detect language if possible
+      if (parsedContent.detectedLanguage && parsedContent.detectedLanguage !== 'en') {
+        setSelectedLanguage(parsedContent.detectedLanguage);
+      }
+    }
+  }, [parsedContent, validation]);
  
   const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
      const file = event.target.files?.[0];
@@ -222,23 +230,31 @@ type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocum
   }, [parseDocument]);
 
   const handleImport = useCallback(async () => {
-     if (!selectedLanguage) {
-       alert('Please select a target language');
-       return;
-     }
-     
-     const success = await importTranslations(selectedLanguage, selectedArticles, selectedRecitals);
-     if (success) {
-       // Navigate to translations page
-       navigate('/admin/translations');
-     }
-   }, [selectedLanguage, selectedArticles, selectedRecitals, importTranslations, navigate]);
+    if (!selectedLanguage) {
+      alert('Please select a target language');
+      return;
+    }
+    
+    const success = await importTranslations(
+      selectedLanguage, 
+      selectedArticles, 
+      selectedRecitals,
+      selectedAnnexes,
+      selectedFootnotes
+    );
+    if (success) {
+      // Navigate to translations page
+      navigate('/admin/translations');
+    }
+  }, [selectedLanguage, selectedArticles, selectedRecitals, selectedAnnexes, selectedFootnotes, importTranslations, navigate]);
  
   const handleReset = useCallback(() => {
     reset();
     setUploadedFile(null);
     setSelectedArticles([]);
     setSelectedRecitals([]);
+    setSelectedAnnexes([]);
+    setSelectedFootnotes([]);
     setParseProgress(0);
     setParseStatus('idle');
     setParseError(null);
@@ -264,20 +280,52 @@ type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocum
    }, []);
  
   const handleSelectAllArticles = useCallback((selected: boolean) => {
-     if (selected && parsedContent) {
-       setSelectedArticles(parsedContent.articles.map(a => a.articleNumber));
-     } else {
-       setSelectedArticles([]);
-     }
-   }, [parsedContent]);
- 
+    if (selected && parsedContent) {
+      setSelectedArticles(parsedContent.articles.map(a => a.articleNumber));
+    } else {
+      setSelectedArticles([]);
+    }
+  }, [parsedContent]);
+
   const handleSelectAllRecitals = useCallback((selected: boolean) => {
-     if (selected && parsedContent) {
-       setSelectedRecitals(parsedContent.recitals.map(r => r.recitalNumber));
-     } else {
-       setSelectedRecitals([]);
-     }
-   }, [parsedContent]);
+    if (selected && parsedContent) {
+      setSelectedRecitals(parsedContent.recitals.map(r => r.recitalNumber));
+    } else {
+      setSelectedRecitals([]);
+    }
+  }, [parsedContent]);
+
+  const handleAnnexSelect = useCallback((annexNumber: number, selected: boolean) => {
+    setSelectedAnnexes(prev =>
+      selected
+        ? [...prev, annexNumber]
+        : prev.filter(n => n !== annexNumber)
+    );
+  }, []);
+
+  const handleFootnoteSelect = useCallback((footnoteIndex: number, selected: boolean) => {
+    setSelectedFootnotes(prev =>
+      selected
+        ? [...prev, footnoteIndex]
+        : prev.filter(n => n !== footnoteIndex)
+    );
+  }, []);
+
+  const handleSelectAllAnnexes = useCallback((selected: boolean) => {
+    if (selected && parsedContent) {
+      setSelectedAnnexes(parsedContent.annexes.map(a => a.annexNumber));
+    } else {
+      setSelectedAnnexes([]);
+    }
+  }, [parsedContent]);
+
+  const handleSelectAllFootnotes = useCallback((selected: boolean) => {
+    if (selected && parsedContent) {
+      setSelectedFootnotes(parsedContent.footnotes.map((_, i) => i));
+    } else {
+      setSelectedFootnotes([]);
+    }
+  }, [parsedContent]);
  
    // Get available languages (non-English)
    const availableLanguages = languages?.filter(l => l.code !== 'en') || [];
@@ -529,55 +577,65 @@ type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocum
                </CardContent>
              </Card>
  
-             {/* Diff Preview */}
-             {englishSource && validation && (
-               <TranslationDiffPreview
-                 parsedArticles={parsedContent.articles}
-                 parsedRecitals={parsedContent.recitals}
-                  parsedDefinitions={parsedContent.definitions}
-                  parsedAnnexes={parsedContent.annexes}
-                  parsedFootnotes={parsedContent.footnotes}
-                 englishSource={englishSource}
-                 validation={validation}
-                 selectedArticles={selectedArticles}
-                 selectedRecitals={selectedRecitals}
-                 onArticleSelect={handleArticleSelect}
-                 onRecitalSelect={handleRecitalSelect}
-                 onSelectAllArticles={handleSelectAllArticles}
-                 onSelectAllRecitals={handleSelectAllRecitals}
-               />
-             )}
- 
-             {/* Import Button */}
-             <Card>
-               <CardContent className="pt-6">
-                 <div className="flex items-center justify-between">
-                   <div className="text-sm text-muted-foreground">
-                     Ready to import {selectedArticles.length} articles and {selectedRecitals.length} recitals
-                     {selectedLanguage && (
-                       <> to <Badge>{LANGUAGE_NAMES[selectedLanguage] || selectedLanguage}</Badge></>
-                     )}
-                   </div>
-                   <Button
-                     size="lg"
-                     onClick={handleImport}
-                     disabled={isImporting || !selectedLanguage || (selectedArticles.length === 0 && selectedRecitals.length === 0)}
-                   >
-                     {isImporting ? (
-                       <>
-                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                         Importing...
-                       </>
-                     ) : (
-                       <>
-                         <Check className="h-4 w-4 mr-2" />
-                         Import Translations
-                       </>
-                     )}
-                   </Button>
-                 </div>
-               </CardContent>
-             </Card>
+            {/* Diff Preview */}
+            {englishSource && validation && (
+              <TranslationDiffPreview
+                parsedArticles={parsedContent.articles}
+                parsedRecitals={parsedContent.recitals}
+                parsedDefinitions={parsedContent.definitions}
+                parsedAnnexes={parsedContent.annexes}
+                parsedFootnotes={parsedContent.footnotes}
+                englishSource={englishSource}
+                validation={validation}
+                selectedArticles={selectedArticles}
+                selectedRecitals={selectedRecitals}
+                selectedAnnexes={selectedAnnexes}
+                selectedFootnotes={selectedFootnotes}
+                onArticleSelect={handleArticleSelect}
+                onRecitalSelect={handleRecitalSelect}
+                onAnnexSelect={handleAnnexSelect}
+                onFootnoteSelect={handleFootnoteSelect}
+                onSelectAllArticles={handleSelectAllArticles}
+                onSelectAllRecitals={handleSelectAllRecitals}
+                onSelectAllAnnexes={handleSelectAllAnnexes}
+                onSelectAllFootnotes={handleSelectAllFootnotes}
+              />
+            )}
+
+            {/* Import Button */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div className="text-sm text-muted-foreground">
+                    Ready to import: 
+                    {selectedArticles.length > 0 && <Badge variant="secondary" className="ml-2">{selectedArticles.length} articles</Badge>}
+                    {selectedRecitals.length > 0 && <Badge variant="secondary" className="ml-2">{selectedRecitals.length} recitals</Badge>}
+                    {selectedAnnexes.length > 0 && <Badge variant="secondary" className="ml-2">{selectedAnnexes.length} annexes</Badge>}
+                    {selectedFootnotes.length > 0 && <Badge variant="secondary" className="ml-2">{selectedFootnotes.length} footnotes</Badge>}
+                    {selectedLanguage && (
+                      <> to <Badge className="ml-1">{LANGUAGE_NAMES[selectedLanguage] || selectedLanguage}</Badge></>
+                    )}
+                  </div>
+                  <Button
+                    size="lg"
+                    onClick={handleImport}
+                    disabled={isImporting || !selectedLanguage || (selectedArticles.length === 0 && selectedRecitals.length === 0 && selectedAnnexes.length === 0 && selectedFootnotes.length === 0)}
+                  >
+                    {isImporting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Importing...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="h-4 w-4 mr-2" />
+                        Import Translations
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
            </div>
          )}
        </div>

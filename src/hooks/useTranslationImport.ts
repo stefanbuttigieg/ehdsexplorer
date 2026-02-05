@@ -136,83 +136,138 @@ export function useTranslationImport() {
     }
   }, [loadEnglishSource]);
  
-   // Import translations to database
-   const importTranslations = useCallback(async (
-     languageCode: string,
-     selectedArticles: number[],
-     selectedRecitals: number[]
-   ) => {
-     const currentParsedContent = parsedContent;
-     const currentEnglishSource = englishSourceRef.current;
+ // Import translations to database
+ const importTranslations = useCallback(async (
+   languageCode: string,
+   selectedArticles: number[],
+   selectedRecitals: number[],
+   selectedAnnexes: number[] = [],
+   selectedFootnotes: number[] = []
+ ) => {
+   const currentParsedContent = parsedContent;
+   const currentEnglishSource = englishSourceRef.current;
+   
+   if (!currentParsedContent || !currentEnglishSource) {
+     toast.error('No parsed content to import');
+     return false;
+   }
+   
+   setIsImporting(true);
+   
+   try {
+     // Filter selected articles
+     const articlesToImport = currentParsedContent.articles.filter(a => selectedArticles.includes(a.articleNumber));
+     const recitalsToImport = currentParsedContent.recitals.filter(r => selectedRecitals.includes(r.recitalNumber));
+     const annexesToImport = currentParsedContent.annexes.filter(a => selectedAnnexes.includes(a.annexNumber));
+     const footnotesToImport = currentParsedContent.footnotes.filter((_, i) => selectedFootnotes.includes(i));
      
-     if (!currentParsedContent || !currentEnglishSource) {
-       toast.error('No parsed content to import');
-       return false;
+     // Map to database format - Articles
+     const articleTranslations = articlesToImport.map(article => {
+       const sourceArticle = currentEnglishSource.articles.find(a => a.article_number === article.articleNumber);
+       if (!sourceArticle) return null;
+       
+       return {
+         article_id: sourceArticle.id,
+         language_code: languageCode,
+         title: article.title,
+         content: article.content,
+         is_published: false,
+       };
+     }).filter(Boolean);
+     
+     // Map to database format - Recitals
+     const recitalTranslations = recitalsToImport.map(recital => {
+       const sourceRecital = currentEnglishSource.recitals.find(r => r.recital_number === recital.recitalNumber);
+       if (!sourceRecital) return null;
+       
+       return {
+         recital_id: sourceRecital.id,
+         language_code: languageCode,
+         content: recital.content,
+         is_published: false,
+       };
+     }).filter(Boolean);
+
+     // Map to database format - Annexes
+     const annexTranslations = annexesToImport.map(annex => {
+       // Try to find matching English annex by roman numeral
+       const sourceAnnex = currentEnglishSource.annexes.find(a => 
+         a.id.toLowerCase().includes(annex.romanNumeral.toLowerCase()) ||
+         a.title.toLowerCase().includes(annex.romanNumeral.toLowerCase())
+       );
+       if (!sourceAnnex) return null;
+       
+       return {
+         annex_id: sourceAnnex.id,
+         language_code: languageCode,
+         title: annex.title,
+         content: annex.content,
+         is_published: false,
+       };
+     }).filter(Boolean);
+
+     // Map footnotes - these go directly to footnotes table (not translations)
+     const footnoteInserts = footnotesToImport.map(fn => ({
+       marker: fn.marker,
+       content: fn.content,
+       article_id: null,
+       recital_id: null,
+     }));
+     
+     // Upsert translations
+     if (articleTranslations.length > 0) {
+       const { error: articleError } = await supabase
+         .from('article_translations')
+         .upsert(articleTranslations as any[], {
+           onConflict: 'article_id,language_code',
+         });
+       
+       if (articleError) throw articleError;
      }
      
-     setIsImporting(true);
-     
-     try {
-       // Filter selected articles
-       const articlesToImport = currentParsedContent.articles.filter(a => selectedArticles.includes(a.articleNumber));
-       const recitalsToImport = currentParsedContent.recitals.filter(r => selectedRecitals.includes(r.recitalNumber));
+     if (recitalTranslations.length > 0) {
+       const { error: recitalError } = await supabase
+         .from('recital_translations')
+         .upsert(recitalTranslations as any[], {
+           onConflict: 'recital_id,language_code',
+         });
        
-       // Map to database format
-       const articleTranslations = articlesToImport.map(article => {
-         const sourceArticle = currentEnglishSource.articles.find(a => a.article_number === article.articleNumber);
-         if (!sourceArticle) return null;
-         
-         return {
-           article_id: sourceArticle.id,
-           language_code: languageCode,
-           title: article.title,
-           content: article.content,
-           is_published: false,
-         };
-       }).filter(Boolean);
-       
-       const recitalTranslations = recitalsToImport.map(recital => {
-         const sourceRecital = currentEnglishSource.recitals.find(r => r.recital_number === recital.recitalNumber);
-         if (!sourceRecital) return null;
-         
-         return {
-           recital_id: sourceRecital.id,
-           language_code: languageCode,
-           content: recital.content,
-           is_published: false,
-         };
-       }).filter(Boolean);
-       
-       // Upsert translations
-       if (articleTranslations.length > 0) {
-         const { error: articleError } = await supabase
-           .from('article_translations')
-           .upsert(articleTranslations as any[], {
-             onConflict: 'article_id,language_code',
-           });
-         
-         if (articleError) throw articleError;
-       }
-       
-       if (recitalTranslations.length > 0) {
-         const { error: recitalError } = await supabase
-           .from('recital_translations')
-           .upsert(recitalTranslations as any[], {
-             onConflict: 'recital_id,language_code',
-           });
-         
-         if (recitalError) throw recitalError;
-       }
-       
-       toast.success(`Imported ${articleTranslations.length} articles and ${recitalTranslations.length} recitals`);
-       return true;
-     } catch (error) {
-       toast.error('Failed to import translations: ' + (error as Error).message);
-       return false;
-     } finally {
-       setIsImporting(false);
+       if (recitalError) throw recitalError;
      }
-   }, [parsedContent]);
+
+     if (annexTranslations.length > 0) {
+       const { error: annexError } = await supabase
+         .from('annex_translations')
+         .upsert(annexTranslations as any[], {
+           onConflict: 'annex_id,language_code',
+         });
+       
+       if (annexError) throw annexError;
+     }
+
+     if (footnoteInserts.length > 0) {
+       const { error: footnoteError } = await supabase
+         .from('footnotes')
+         .insert(footnoteInserts);
+       
+       if (footnoteError) throw footnoteError;
+     }
+     
+     const parts = [];
+     if (articleTranslations.length > 0) parts.push(`${articleTranslations.length} articles`);
+     if (recitalTranslations.length > 0) parts.push(`${recitalTranslations.length} recitals`);
+     if (annexTranslations.length > 0) parts.push(`${annexTranslations.length} annexes`);
+     if (footnoteInserts.length > 0) parts.push(`${footnoteInserts.length} footnotes`);
+     
+     toast.success(`Imported ${parts.join(', ')}`);
+     return true;
+   } catch (error) {
+     toast.error('Failed to import translations: ' + (error as Error).message);
+     return false;
+   } finally {
+     setIsImporting(false);
+   }
+ }, [parsedContent]);
  
    // Reset state
    const reset = useCallback(() => {

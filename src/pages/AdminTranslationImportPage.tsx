@@ -21,7 +21,7 @@ import { useTranslationImport } from '@/hooks/useTranslationImport';
 import { TranslationDiffPreview } from '@/components/admin/TranslationDiffPreview';
 import { EurLexImporter } from '@/components/admin/EurLexImporter';
 import { ExtractionPreviewViewer } from '@/components/admin/ExtractionPreviewViewer';
-import type { StructureAnalysis } from '@/hooks/useAdaptiveParser';
+import type { StructureAnalysis, ParsedContent } from '@/hooks/useAdaptiveParser';
 // PDF.js types
 type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocument']>['promise']>;
 
@@ -50,7 +50,16 @@ type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocum
     importTranslations,
     loadEnglishSource,
     reset,
+    setParsedContent,
+    setStructureAnalysis: setHookAnalysis,
   } = useTranslationImport();
+
+  // Handle reparse from ExtractionPreviewViewer
+  const handleReparse = useCallback((content: ParsedContent, analysis: StructureAnalysis) => {
+    setParsedContent(content);
+    setHookAnalysis(analysis);
+    setStructureAnalysis(analysis);
+  }, [setParsedContent, setHookAnalysis]);
  
    const [selectedLanguage, setSelectedLanguage] = useState<string>('');
    const [selectedArticles, setSelectedArticles] = useState<number[]>([]);
@@ -484,12 +493,13 @@ type PDFDocumentProxy = Awaited<ReturnType<typeof import('pdfjs-dist')['getDocum
            <div className="space-y-6">
              {/* Extraction Preview Viewer */}
              {showExtractionPreview && extractedText && (hookAnalysis || structureAnalysis) && (
-               <ExtractionPreviewViewer
-                 sourceText={extractedText}
-                 parsedContent={parsedContent}
-                 analysis={(hookAnalysis || structureAnalysis)!}
-               />
-             )}
+                <ExtractionPreviewViewer
+                  sourceText={extractedText}
+                  parsedContent={parsedContent}
+                  analysis={(hookAnalysis || structureAnalysis)!}
+                  onReparse={handleReparse}
+                />
+              )}
              {/* Language Selection */}
              <Card>
                <CardHeader className="pb-3">

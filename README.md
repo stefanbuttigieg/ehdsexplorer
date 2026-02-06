@@ -198,6 +198,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
   - Security settings page in user profile for enrollment
   - **Login MFA verification** - Automatic challenge prompts during login for enrolled users
   - Unified verification dialog supporting both TOTP and Email OTP methods
+  - Race condition fix ensures MFA dialog stays open until verification completes
 - **Admin Security Settings** at `/admin/security` for super admins
   - Toggle MFA enforcement and reminders
   - Configure allowed authentication methods

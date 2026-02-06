@@ -206,59 +206,66 @@ export function useTranslationImport() {
        };
      }).filter(Boolean);
 
-     // For footnotes, we need to first find or create the English footnote, then add translation
-     // This requires a different approach - we'll try to match by marker
-     const { data: existingFootnotes } = await supabase
-       .from('footnotes')
-       .select('id, marker');
-     
-     const footnoteTranslations: Array<{
-       footnote_id: string;
-       language_code: string;
-       content: string;
-       is_published: boolean;
-     }> = [];
+      // For footnotes, we need to first find or create the base footnote, then add translation
+      const { data: existingFootnotes } = await supabase
+        .from('footnotes')
+        .select('id, marker');
+      
+      const footnoteTranslations: Array<{
+        footnote_id: string;
+        language_code: string;
+        content: string;
+        is_published: boolean;
+      }> = [];
 
-     for (const fn of footnotesToImport) {
-       // Find existing footnote by marker
-       const existingFn = existingFootnotes?.find(ef => ef.marker === fn.marker);
-       
-       if (existingFn) {
-         // Add translation for existing footnote
-         footnoteTranslations.push({
-           footnote_id: existingFn.id,
-           language_code: languageCode,
-           content: fn.content,
-           is_published: false,
-         });
-       } else {
-         // Create the footnote first (with English placeholder), then add translation
-         const { data: newFn, error: createError } = await supabase
-           .from('footnotes')
-           .insert({
-             marker: fn.marker,
-             content: `[Translation source: ${languageCode}] ${fn.content.slice(0, 100)}...`,
-             article_id: null,
-             recital_id: null,
-           })
-           .select('id')
-           .single();
-         
-         if (createError) {
-           console.error('Failed to create footnote:', createError);
-           continue;
-         }
-         
-         if (newFn) {
-           footnoteTranslations.push({
-             footnote_id: newFn.id,
-             language_code: languageCode,
-             content: fn.content,
-             is_published: false,
-           });
-         }
-       }
-     }
+      // First, create all missing base footnotes in a batch for efficiency
+      const missingFootnotes = footnotesToImport.filter(
+        fn => !existingFootnotes?.find(ef => ef.marker === fn.marker)
+      );
+      
+      let newFootnoteMap: Record<string, string> = {};
+      
+      if (missingFootnotes.length > 0) {
+        const footnotesToCreate = missingFootnotes.map(fn => ({
+          marker: fn.marker,
+          content: fn.content, // Use full content as English base
+          article_id: null,
+          recital_id: null,
+        }));
+        
+        const { data: createdFootnotes, error: createError } = await supabase
+          .from('footnotes')
+          .insert(footnotesToCreate)
+          .select('id, marker');
+        
+        if (createError) {
+          console.error('Failed to create base footnotes:', createError);
+          toast.error(`Failed to create ${missingFootnotes.length} footnotes: ${createError.message}`);
+        } else if (createdFootnotes) {
+          // Map marker to new id
+          createdFootnotes.forEach(fn => {
+            newFootnoteMap[fn.marker] = fn.id;
+          });
+          console.log(`Created ${createdFootnotes.length} new base footnotes`);
+        }
+      }
+
+      // Now build translations for all footnotes
+      for (const fn of footnotesToImport) {
+        const existingFn = existingFootnotes?.find(ef => ef.marker === fn.marker);
+        const footnoteId = existingFn?.id || newFootnoteMap[fn.marker];
+        
+        if (footnoteId) {
+          footnoteTranslations.push({
+            footnote_id: footnoteId,
+            language_code: languageCode,
+            content: fn.content,
+            is_published: false,
+          });
+        } else {
+          console.warn(`Could not find or create footnote with marker: ${fn.marker}`);
+        }
+      }
      
      // Upsert translations
      if (articleTranslations.length > 0) {

@@ -31,9 +31,10 @@ const AdminAuthPage = () => {
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
   const [showMFAVerify, setShowMFAVerify] = useState(false);
-   const [mfaTotpFactorId, setMfaTotpFactorId] = useState<string | null>(null);
-   const [mfaEmailEnabled, setMfaEmailEnabled] = useState(false);
-   const [mfaUserEmail, setMfaUserEmail] = useState('');
+  const [mfaTotpFactorId, setMfaTotpFactorId] = useState<string | null>(null);
+  const [mfaEmailEnabled, setMfaEmailEnabled] = useState(false);
+  const [mfaUserEmail, setMfaUserEmail] = useState('');
+  const [awaitingMFA, setAwaitingMFA] = useState(false); // Block redirects while MFA pending
   const { user, loading, signIn, isEditor } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -50,18 +51,21 @@ const AdminAuthPage = () => {
       return;
     }
 
+    // CRITICAL: Do NOT redirect if MFA verification is in progress
+    if (awaitingMFA || showMFAVerify) {
+      return;
+    }
+
     if (!loading && user) {
       // If user is an editor/admin, go to admin dashboard
       if (isEditor) {
         navigate('/admin');
       } else {
         // Regular user - redirect to home silently
-        // Don't show read-only message as it can be confusing for users with roles
-        // that just haven't loaded yet, or for users who don't need admin access
         navigate('/');
       }
     }
-  }, [user, loading, isEditor, navigate, toast]);
+  }, [user, loading, isEditor, navigate, toast, awaitingMFA, showMFAVerify]);
 
   // Also listen for auth state changes to detect invite/recovery
   useEffect(() => {
@@ -124,7 +128,8 @@ const AdminAuthPage = () => {
          const hasEmailOtp = mfaPrefs?.email_otp_enabled === true;
          
          if (hasTotp || hasEmailOtp) {
-           // User has MFA enabled - need to verify
+           // User has MFA enabled - block redirects and show verification dialog
+           setAwaitingMFA(true);
            setMfaTotpFactorId(hasTotp ? verifiedTotpFactors[0].id : null);
            setMfaEmailEnabled(hasEmailOtp);
            setMfaUserEmail(data.user.email || email);
@@ -147,19 +152,27 @@ const AdminAuthPage = () => {
 
   const handleMFASuccess = () => {
     setShowMFAVerify(false);
-     setMfaTotpFactorId(null);
-     setMfaEmailEnabled(false);
-     setMfaUserEmail('');
+    setAwaitingMFA(false); // Allow redirects now
+    setMfaTotpFactorId(null);
+    setMfaEmailEnabled(false);
+    setMfaUserEmail('');
     toast({ title: 'Signed in successfully' });
+    // Navigate after successful MFA
+    if (isEditor) {
+      navigate('/admin');
+    } else {
+      navigate('/');
+    }
   };
 
   const handleMFACancel = async () => {
     // Sign out if MFA verification is cancelled
     await supabase.auth.signOut();
     setShowMFAVerify(false);
-     setMfaTotpFactorId(null);
-     setMfaEmailEnabled(false);
-     setMfaUserEmail('');
+    setAwaitingMFA(false);
+    setMfaTotpFactorId(null);
+    setMfaEmailEnabled(false);
+    setMfaUserEmail('');
   };
 
   const handleSignUp = async (e: React.FormEvent) => {

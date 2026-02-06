@@ -42,6 +42,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Refactored enrollment trigger from `onOpenChange` to proper `useEffect` hook
   - Added `isStarting` state to prevent duplicate enrollment requests
   - Enhanced error handling with cancel option when enrollment fails
+- **MFA Verification Race Condition** - Fixed issue where MFA dialog would flash momentarily then redirect
+  - Added `awaitingMFA` state flag to block premature navigation during verification
+  - Redirect logic now waits for successful MFA completion before proceeding
+  - Cancel during MFA properly signs out user and resets authentication state
+- **Footnote Import Missing Base Records** - Fixed translation import not creating base footnote entries
+  - Batch-insert missing base footnotes before processing translations
+  - Base footnotes now store full content instead of truncated placeholders
+  - Improved marker-to-UUID mapping for correct translation linking
 
 ---
 

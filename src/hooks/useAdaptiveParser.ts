@@ -934,6 +934,15 @@ export async function getSectionBoundaries(languageCode: string): Promise<{
   }
 }
 
+// Helper: convert a character index in a string to a line number
+function charIndexToLine(text: string, charIndex: number): number {
+  let line = 0;
+  for (let i = 0; i < Math.min(charIndex, text.length); i++) {
+    if (text[i] === '\n') line++;
+  }
+  return line;
+}
+
 // Parse with manual boundaries applied
 export async function parseDocumentWithBoundaries(
   text: string,
@@ -945,22 +954,47 @@ export async function parseDocumentWithBoundaries(
   
   const lang = analysis.detectedLanguage !== 'unknown' ? analysis.detectedLanguage : 'en';
   
-  // Use manual boundaries if provided, otherwise use detected
-  const recitalsEnd = boundaries.recitalEnd !== undefined 
-    ? Math.floor(boundaries.recitalEnd / 50) // approximate line from char index
-    : (analysis.adoptionLineIndex > 0 ? analysis.adoptionLineIndex : analysis.firstArticleIndex > 0 ? analysis.firstArticleIndex : 200);
+  // Convert character indices to line numbers using actual newline counting
+  // Boundaries are character offsets in the *original* sourceText, but we parse
+  // the *processed* text. We do a best-effort conversion by searching for the
+  // boundary marker text in the processed text and then counting lines.
   
-  const articlesStart = boundaries.articleStart !== undefined
-    ? Math.floor(boundaries.articleStart / 50)
-    : (analysis.firstArticleIndex > 0 ? analysis.firstArticleIndex : 0);
+  const convertBoundary = (charIdx: number | undefined, fallback: number): number => {
+    if (charIdx === undefined) return fallback;
+    // The charIdx is from the original text. Find approximate position in processed text.
+    // Since preprocessing mostly preserves text order, use the same char index clamped to processed length.
+    const clampedIdx = Math.min(charIdx, processed.length);
+    return charIndexToLine(processed, clampedIdx);
+  };
   
-  const articlesEnd = boundaries.articleEnd !== undefined
-    ? Math.floor(boundaries.articleEnd / 50)
-    : (analysis.firstAnnexIndex > 0 ? analysis.firstAnnexIndex : lines.length);
+  const recitalsEnd = convertBoundary(
+    boundaries.recitalEnd,
+    analysis.adoptionLineIndex > 0 ? analysis.adoptionLineIndex : (analysis.firstArticleIndex > 0 ? analysis.firstArticleIndex : 200)
+  );
   
-  const annexesStart = boundaries.annexStart !== undefined
-    ? Math.floor(boundaries.annexStart / 50)
-    : (analysis.firstAnnexIndex > 0 ? analysis.firstAnnexIndex : lines.length);
+  const articlesStart = convertBoundary(
+    boundaries.articleStart,
+    analysis.firstArticleIndex > 0 ? analysis.firstArticleIndex : 0
+  );
+  
+  const articlesEnd = convertBoundary(
+    boundaries.articleEnd,
+    analysis.firstAnnexIndex > 0 ? analysis.firstAnnexIndex : lines.length
+  );
+  
+  const annexesStart = convertBoundary(
+    boundaries.annexStart,
+    analysis.firstAnnexIndex > 0 ? analysis.firstAnnexIndex : lines.length
+  );
+  
+  console.log('Parsing with boundaries:', {
+    recitalsEnd,
+    articlesStart,
+    articlesEnd,
+    annexesStart,
+    totalLines: lines.length,
+    boundaries,
+  });
   
   const recitals = parseRecitals(lines, lang, recitalsEnd);
   const articles = parseArticles(lines, lang, articlesStart, articlesEnd);

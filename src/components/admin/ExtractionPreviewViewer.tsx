@@ -1,5 +1,6 @@
-import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback, memo } from 'react';
 import { ChevronDown, ChevronRight, Eye, EyeOff, FileText, List, BookOpen, Hash, StickyNote, AlertCircle, MousePointer2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -14,7 +15,7 @@ import {
   type SectionBoundaries,
   type BoundaryMarkers,
 } from '@/hooks/useAdaptiveParser';
-import { PatternSelectionToolbar, type SelectionMark, type SelectionType } from './PatternSelectionToolbar';
+import { PatternSelectionToolbar, type SelectionMark, type SelectionType, getSelectionColor } from './PatternSelectionToolbar';
 
 interface ExtractionPreviewViewerProps {
   sourceText: string;
@@ -40,6 +41,39 @@ const TYPE_COLORS: Record<string, { bg: string; border: string; text: string }> 
   chapter: { bg: 'bg-red-100 dark:bg-red-900/30', border: 'border-red-400', text: 'text-red-700 dark:text-red-300' },
   definition: { bg: 'bg-cyan-100 dark:bg-cyan-900/30', border: 'border-cyan-400', text: 'text-cyan-700 dark:text-cyan-300' },
 };
+
+// Renders the full source text in selection mode with existing marks highlighted
+const SelectionModeSource = memo(({ sourceText, marks }: { sourceText: string; marks: SelectionMark[] }) => {
+  if (marks.length === 0) return <>{sourceText}</>;
+  
+  // Sort marks by startIndex
+  const sorted = [...marks].sort((a, b) => a.startIndex - b.startIndex);
+  const segments: React.ReactNode[] = [];
+  let lastEnd = 0;
+  
+  for (const mark of sorted) {
+    if (mark.startIndex > lastEnd) {
+      segments.push(<span key={`t-${lastEnd}`}>{sourceText.slice(lastEnd, mark.startIndex)}</span>);
+    }
+    const colorClass = getSelectionColor(mark.type);
+    segments.push(
+      <span
+        key={`m-${mark.startIndex}`}
+        className={`${colorClass} rounded px-0.5`}
+        title={mark.type.replace('-', ' ')}
+      >
+        {sourceText.slice(mark.startIndex, mark.endIndex)}
+      </span>
+    );
+    lastEnd = mark.endIndex;
+  }
+  
+  if (lastEnd < sourceText.length) {
+    segments.push(<span key={`t-${lastEnd}`}>{sourceText.slice(lastEnd)}</span>);
+  }
+  
+  return <>{segments}</>;
+});
 
 export function ExtractionPreviewViewer({
   sourceText,
@@ -231,20 +265,46 @@ export function ExtractionPreviewViewer({
     const selectedText = selection.toString().trim();
     if (!selectedText || selectedText.length < 3) return;
     
-    // Get the selection position relative to the source text
+    // In selection mode we render plain sourceText, so the DOM text matches sourceText exactly.
+    // Calculate offset by walking from the start of the container to the selection start.
     const range = selection.getRangeAt(0);
-    const preSelectionRange = range.cloneRange();
+    const preSelectionRange = document.createRange();
     preSelectionRange.selectNodeContents(sourceRef.current!);
     preSelectionRange.setEnd(range.startContainer, range.startOffset);
     const startIndex = preSelectionRange.toString().length;
     const endIndex = startIndex + selectedText.length;
+    
+    // Verify the offset matches the actual source text
+    const verifyText = sourceText.slice(startIndex, endIndex).trim();
+    if (verifyText !== selectedText) {
+      console.warn('Selection offset mismatch — DOM text may differ from source. Falling back to indexOf.');
+      // Fallback: search for the selected text in sourceText
+      const fallbackIndex = sourceText.indexOf(selectedText);
+      if (fallbackIndex === -1) {
+        console.error('Could not find selected text in source');
+        selection.removeAllRanges();
+        return;
+      }
+      setMarks(prev => {
+        const filtered = prev.filter(m => m.type !== currentSelectionType);
+        return [...filtered, {
+          type: currentSelectionType!,
+          startIndex: fallbackIndex,
+          endIndex: fallbackIndex + selectedText.length,
+          selectedText: selectedText.slice(0, 100),
+        }];
+      });
+      selection.removeAllRanges();
+      toast.success(`Marked "${selectedText.slice(0, 40)}…" as ${currentSelectionType!.replace('-', ' ')}`);
+      return;
+    }
     
     // Add the mark
     setMarks(prev => {
       // Remove existing mark of same type
       const filtered = prev.filter(m => m.type !== currentSelectionType);
       return [...filtered, {
-        type: currentSelectionType,
+        type: currentSelectionType!,
         startIndex,
         endIndex,
         selectedText: selectedText.slice(0, 100),
@@ -253,7 +313,8 @@ export function ExtractionPreviewViewer({
     
     // Clear selection
     selection.removeAllRanges();
-  }, [isSelectionMode, currentSelectionType]);
+    toast.success(`Marked "${selectedText.slice(0, 40)}…" as ${currentSelectionType!.replace('-', ' ')}`);
+  }, [isSelectionMode, currentSelectionType, sourceText]);
 
   // Build boundaries from marks
   const buildBoundariesFromMarks = useCallback((): SectionBoundaries => {
@@ -433,9 +494,15 @@ export function ExtractionPreviewViewer({
             <div 
               ref={sourceRef}
               onMouseUp={handleTextSelection}
-              className="p-4 font-mono text-xs leading-relaxed whitespace-pre-wrap"
+              className={cn(
+                "p-4 font-mono text-xs leading-relaxed whitespace-pre-wrap",
+                isSelectionMode && currentSelectionType && "cursor-crosshair select-text"
+              )}
             >
-              {Array.isArray(highlightedSource) ? (
+              {/* In selection mode, render plain text so offsets match sourceText exactly */}
+              {isSelectionMode ? (
+                <SelectionModeSource sourceText={sourceText} marks={marks} />
+              ) : Array.isArray(highlightedSource) ? (
                 highlightedSource.map((segment, i) => {
                   if (segment.match) {
                     const colors = TYPE_COLORS[segment.match.type];

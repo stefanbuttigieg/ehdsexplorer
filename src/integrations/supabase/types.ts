@@ -2792,6 +2792,87 @@ export type Database = {
         }
         Relationships: []
       }
+      readiness_assessments: {
+        Row: {
+          ai_gap_analysis: string | null
+          answers: Json
+          completed_at: string | null
+          created_at: string
+          id: string
+          max_score: number | null
+          scores: Json
+          session_id: string | null
+          total_score: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          ai_gap_analysis?: string | null
+          answers?: Json
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          max_score?: number | null
+          scores?: Json
+          session_id?: string | null
+          total_score?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          ai_gap_analysis?: string | null
+          answers?: Json
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          max_score?: number | null
+          scores?: Json
+          session_id?: string | null
+          total_score?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      readiness_questions: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          options: Json
+          question: string
+          sort_order: number
+          updated_at: string
+          weight: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id: string
+          is_active?: boolean
+          options?: Json
+          question: string
+          sort_order?: number
+          updated_at?: string
+          weight?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          options?: Json
+          question?: string
+          sort_order?: number
+          updated_at?: string
+          weight?: number
+        }
+        Relationships: []
+      }
       recital_translations: {
         Row: {
           content: string
@@ -3336,6 +3417,126 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      toolkit_profiles: {
+        Row: {
+          ai_summary: string | null
+          answers: Json
+          completed_at: string | null
+          created_at: string
+          id: string
+          organization_size: string | null
+          profile_type: string | null
+          session_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          ai_summary?: string | null
+          answers?: Json
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          organization_size?: string | null
+          profile_type?: string | null
+          session_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          ai_summary?: string | null
+          answers?: Json
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          organization_size?: string | null
+          profile_type?: string | null
+          session_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      toolkit_questions: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          options: Json
+          question: string
+          question_type: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id: string
+          is_active?: boolean
+          options?: Json
+          question: string
+          question_type?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          options?: Json
+          question?: string
+          question_type?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      toolkit_recommendations: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          is_active: boolean
+          organization_size: string | null
+          priority: number
+          profile_type: string
+          resource_reference: string | null
+          resource_type: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          is_active?: boolean
+          organization_size?: string | null
+          priority?: number
+          profile_type: string
+          resource_reference?: string | null
+          resource_type?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          is_active?: boolean
+          organization_size?: string | null
+          priority?: number
+          profile_type?: string
+          resource_reference?: string | null
+          resource_type?: string
+          title?: string
           updated_at?: string
         }
         Relationships: []

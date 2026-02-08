@@ -109,6 +109,7 @@ const AdminApiDocsPage = lazy(() => import("./pages/AdminApiDocsPage"));
 const AdminSEOPage = lazy(() => import("./pages/AdminSEOPage"));
 const AdminSecuritySettingsPage = lazy(() => import("./pages/AdminSecuritySettingsPage"));
 const AdminTranslationImportPage = lazy(() => import("./pages/AdminTranslationImportPage"));
+const ToolsHubPage = lazy(() => import("./pages/ToolsHubPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -193,6 +194,7 @@ const App = () => (
             <Route path="/for/healthcare-professionals" element={<ForHealthcareProPage />} />
             <Route path="/scenario-finder" element={<ScenarioFinderPage />} />
             <Route path="/topic-index" element={<TopicIndexPage />} />
+            <Route path="/tools" element={<ToolsHubPage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin/set-password" element={<AdminSetPasswordPage />} />
             <Route path="/profile" element={<ProfilePage />} />

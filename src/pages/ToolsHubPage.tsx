@@ -10,14 +10,16 @@ import {
   ArrowRight,
   BookOpen,
   MessageSquare,
-  Construction,
 } from "lucide-react";
 import { useState } from "react";
 import { StarterKitWizard } from "@/components/toolkit/StarterKitWizard";
+import { ReadinessWizard } from "@/components/toolkit/ReadinessWizard";
 import { SEOHead } from "@/components/seo";
 
+type ActiveTool = "starter-kit" | "readiness" | null;
+
 export default function ToolsHubPage() {
-  const [activeToolId, setActiveToolId] = useState<string | null>(null);
+  const [activeToolId, setActiveToolId] = useState<ActiveTool>(null);
 
   return (
     <Layout>
@@ -50,7 +52,8 @@ export default function ToolsHubPage() {
         {!activeToolId && (
           <div className="grid md:grid-cols-2 gap-6 mb-10">
             {/* Starter Kit */}
-            <Card className="group hover:border-primary/50 hover:shadow-md transition-all cursor-pointer"
+            <Card
+              className="group hover:border-primary/50 hover:shadow-md transition-all cursor-pointer"
               onClick={() => setActiveToolId("starter-kit")}
             >
               <CardHeader>
@@ -77,33 +80,27 @@ export default function ToolsHubPage() {
               </CardContent>
             </Card>
 
-            {/* Readiness Assessment (coming in Phase 3) */}
-            <Card className="relative opacity-80">
-              <div className="absolute top-4 right-4">
-                <Badge variant="outline" className="gap-1 text-xs">
-                  <Construction className="h-3 w-3" />
-                  Coming Soon
-                </Badge>
-              </div>
+            {/* Readiness Assessment */}
+            <Card
+              className="group hover:border-primary/50 hover:shadow-md transition-all cursor-pointer"
+              onClick={() => setActiveToolId("readiness")}
+            >
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-muted rounded-lg">
-                    <ClipboardCheck className="h-6 w-6 text-muted-foreground" />
+                  <div className="p-2.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                    <ClipboardCheck className="h-6 w-6 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <CardTitle className="text-lg text-muted-foreground">
-                      Readiness Assessment
-                    </CardTitle>
-                    <CardDescription>
-                      Weighted scoring & gap analysis
-                    </CardDescription>
+                    <CardTitle className="text-lg">Readiness Assessment</CardTitle>
+                    <CardDescription>Weighted scoring & gap analysis</CardDescription>
                   </div>
+                  <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
                 <p className="text-sm text-muted-foreground">
                   Evaluate your current compliance posture across all EHDS domains.
-                  Get a scored report with specific gaps identified and AI-generated action plans.
+                  Get a scored report with specific gaps identified and actionable recommendations.
                 </p>
                 <div className="flex gap-2 mt-4">
                   <Badge variant="secondary">~10 min</Badge>
@@ -115,7 +112,7 @@ export default function ToolsHubPage() {
         )}
 
         {/* Active tool */}
-        {activeToolId === "starter-kit" && (
+        {activeToolId && (
           <div className="mb-10">
             <Button
               variant="ghost"
@@ -125,7 +122,8 @@ export default function ToolsHubPage() {
             >
               ← Back to Tools
             </Button>
-            <StarterKitWizard />
+            {activeToolId === "starter-kit" && <StarterKitWizard />}
+            {activeToolId === "readiness" && <ReadinessWizard />}
           </div>
         )}
 

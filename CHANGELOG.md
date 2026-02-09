@@ -13,6 +13,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.4] - 2026-02-09
+
+### Added
+
+#### Compliance Tools Hub
+- **Tools Hub Page** - New centralized compliance resource center at `/tools` with two interactive tools
+- **Compliance Starter Kit** - Multi-step Q&A wizard for personalized EHDS compliance guidance
+  - 5-step wizard covering organization type, size, product scope, market status, and EHDS awareness
+  - Tailored recommendations based on profile (e.g., EHR Vendor, Health Data Platform, Research Institution)
+  - Organization-size-specific guidance (Startup, SME, Large Enterprise)
+  - Direct links to relevant articles, checklists, and stakeholder pages
+  - Profile persistence for logged-in users and session-based tracking for anonymous users
+- **Readiness Assessment** - Weighted scoring tool for EHDS compliance gap analysis
+  - 14 questions across 5 domains: Data Governance, Technical Readiness, Compliance Framework, Cross-Border, and Security & Privacy
+  - Percentage-based scoring with maturity levels (Beginner to Compliance Ready)
+  - Category breakdown with visual progress bars
+  - Prioritized gap analysis with actionable recommendations
+  - Assessment results saved to database for historical tracking
+
+#### Database Tables
+- `toolkit_questions` - Configurable wizard questions with multi-choice options
+- `toolkit_profiles` - User/session profile storage with answers and classification
+- `toolkit_recommendations` - Tailored recommendations by profile type and organization size
+- `readiness_questions` - Weighted assessment questions organized by domain
+- `readiness_assessments` - Scored assessment results with category breakdowns
+
+---
+
 ## [2.0.3] - 2026-02-05
 
 ### Added

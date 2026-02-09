@@ -148,6 +148,17 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
   - Export to ICS (calendar), CSV (spreadsheet), and JSON formats
   - Hover interactions with milestone highlighting
 
+### 🧰 Compliance Tools Hub
+- **Tools Hub** at `/tools` - Centralized compliance resource center
+- **Compliance Starter Kit** - Multi-step Q&A wizard for personalized EHDS guidance
+  - 5-step wizard: organization type, size, product scope, market status, awareness
+  - Tailored recommendations by profile type and organization size
+  - Direct links to relevant articles, checklists, and stakeholder pages
+- **Readiness Assessment** - Weighted scoring for EHDS compliance gap analysis
+  - 14 questions across 5 domains (Data Governance, Technical, Compliance, Cross-Border, Security)
+  - Maturity levels from Beginner to Compliance Ready
+  - Category breakdown with prioritized gap analysis and recommendations
+
 ### 🎯 Stakeholder Guidance
 - **Scenario Finder** - AI-powered situation analysis at `/scenario-finder`
   - 18 predefined scenario templates by stakeholder type

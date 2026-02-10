@@ -18,7 +18,8 @@ import {
   MessageSquare,
   ArrowRight,
   Building2,
-  Shield
+  Shield,
+  Wrench
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { 
@@ -351,6 +352,29 @@ export default function ForHealthTechPage() {
             </AccordionItem>
           </Accordion>
         </div>
+
+        {/* Tools Hub CTA */}
+        <Card className="mb-8 border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-primary/10 rounded-lg">
+                <Wrench className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold mb-1">Compliance Tools Hub</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Get a personalized starter kit, assess your readiness, and download compliance templates — all tailored to your organization.
+                </p>
+                <Button className="gap-2" asChild>
+                  <Link to="/tools">
+                    Open Tools Hub
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* CTA */}
         <Card className="bg-primary/5 border-primary/20">

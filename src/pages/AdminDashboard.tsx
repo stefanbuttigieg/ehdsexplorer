@@ -229,6 +229,12 @@ const AdminDashboard = () => {
       icon: Download,
       href: '/admin/resources',
     },
+    {
+      title: 'Toolkit Questions',
+      description: 'Manage Starter Kit and Readiness Assessment wizard Q&A',
+      icon: ClipboardCheck,
+      href: '/admin/toolkit-questions',
+    },
   ];
 
   return (

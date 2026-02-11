@@ -48,6 +48,7 @@ const AdminOverviewPage = lazy(() => import("./pages/AdminOverviewPage"));
 const AdminJointActionDeliverablesPage = lazy(() => import("./pages/AdminJointActionDeliverablesPage"));
 const AdminPublishedWorksPage = lazy(() => import("./pages/AdminPublishedWorksPage"));
 const AdminNotificationsPage = lazy(() => import("./pages/AdminNotificationsPage"));
+const AdminResourcesPage = lazy(() => import("./pages/AdminResourcesPage"));
 const AdminUsersPage = lazy(() => import("./pages/AdminUsersPage"));
 const AdminFootnotesPage = lazy(() => import("./pages/AdminFootnotesPage"));
 const AdminHelpCenterPage = lazy(() => import("./pages/AdminHelpCenterPage"));
@@ -242,6 +243,7 @@ const App = () => (
             <Route path="/admin/seo" element={<AdminSEOPage />} />
             <Route path="/admin/security" element={<AdminSecuritySettingsPage />} />
             <Route path="/admin/translation-import" element={<AdminTranslationImportPage />} />
+            <Route path="/admin/resources" element={<AdminResourcesPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>

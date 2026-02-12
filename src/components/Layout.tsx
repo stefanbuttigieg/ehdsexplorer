@@ -164,7 +164,12 @@ const Layout = ({
   
   // Filter nav items based on feature flags
   const navItems = useMemo(() => {
-    const items = [...baseNavItems];
+    let items = [...baseNavItems];
+    
+    // Remove Tools Hub if disabled
+    if (!isFeatureEnabled('tools_hub')) {
+      items = items.filter(item => item.path !== '/tools');
+    }
     
     // Add Teams only if enabled
     if (isFeatureEnabled('teams')) {

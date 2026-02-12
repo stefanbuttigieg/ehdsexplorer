@@ -247,6 +247,9 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Bulk publish** for plain language translations
 - **News summaries** with AI generation and Firecrawl URL scraping
 - **Translation management** - Admin dashboard for multi-language content translations
+- **Downloadable resources** - Upload and manage files with visibility and email-gating controls
+- **Toolkit questions** - Manage Starter Kit and Readiness Assessment wizard Q&A content
+- **Feature flags** - Toggle major features (AI Assistant, Teams, Tools Hub, Implementation Tracker) without code changes
 
 ### 📜 Legal & Compliance
 - **Privacy Policy** page

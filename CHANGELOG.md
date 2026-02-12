@@ -13,6 +13,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.5] - 2026-02-12
+
+### Added
+
+#### Admin Downloadable Resources Management
+- **Resource Manager** - New admin page at `/admin/resources` for managing downloadable resources
+  - File upload integration with storage bucket for actual document hosting
+  - Metadata editing: title, description, resource type, and tags
+  - Visibility toggles for `is_published` and `requires_email` flags
+  - Replace placeholder PDF links with real uploaded documents
+
+#### Admin Toolkit Questions Management
+- **Toolkit Q&A Manager** - New admin page at `/admin/toolkit-questions` for managing wizard content
+  - Full CRUD for Starter Kit and Readiness Assessment questions
+  - Inline options editor for managing answer choices (value, label, description)
+  - Category filtering between Starter Kit and Readiness question types
+  - Question type, sort order, and active status controls
+
+#### Feature Flag: Tools Hub
+- Added `tools_hub` feature flag (default: disabled) to gate Tools Hub visibility
+- Sidebar navigation for `/tools` conditionally rendered based on flag status
+- Enables controlled launch of Tools Hub when content is ready
+
+---
+
 ## [2.0.4] - 2026-02-09
 
 ### Added

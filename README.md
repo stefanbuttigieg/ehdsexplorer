@@ -10,7 +10,7 @@ A comprehensive digital platform for exploring **Regulation (EU) 2025/327** - th
 ![Leaflet](https://img.shields.io/badge/Leaflet-1.9-199900?logo=leaflet)
 ![Capacitor](https://img.shields.io/badge/Capacitor-8.0-119EFF?logo=capacitor)
 [![BuyMeACoffee](https://raw.githubusercontent.com/pachadotdev/buymeacoffee-badges/main/bmc-yellow.svg)](https://buymeacoffee.com/stefanbuttigieg)
-![Lovable Credits](https://img.shields.io/badge/Lovable%20Credits-500%20credits%20used-blue)
+![Lovable Credits](https://img.shields.io/badge/Lovable%20Credits-600%20credits%20used-blue)
 ![Analytics](https://img.shields.io/badge/Analytics-Umami-brightgreen)
 
 

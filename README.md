@@ -312,7 +312,7 @@ The EHDS Explorer provides a public RESTful API for programmatic access to all c
 
 ### Base URL
 ```
-https://lmjjghvrjgffmbidajih.supabase.co/functions/v1/api-data
+https://api.ehdsexplorer.eu/functions/v1/api-data
 ```
 
 ### Features

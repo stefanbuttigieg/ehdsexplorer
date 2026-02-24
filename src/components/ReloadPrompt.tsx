@@ -1,12 +1,9 @@
 import { useRegisterSW } from 'virtual:pwa-register/react';
-import { toast } from 'sonner';
 import { useEffect } from 'react';
-import { RefreshCw } from 'lucide-react';
 
 const ReloadPrompt = () => {
   const {
-    needRefresh: [needRefresh, setNeedRefresh],
-    updateServiceWorker,
+    needRefresh: [needRefresh],
   } = useRegisterSW({
     onRegisteredSW(swUrl, r) {
       console.log('SW registered:', swUrl);
@@ -24,22 +21,10 @@ const ReloadPrompt = () => {
 
   useEffect(() => {
     if (needRefresh) {
-      toast.info('New version available', {
-        description: 'Click reload to update to the latest version.',
-        duration: Infinity,
-        icon: <RefreshCw className="h-4 w-4" />,
-        action: {
-          label: 'Reload',
-          onClick: () => {
-            updateServiceWorker(true);
-          },
-        },
-        onDismiss: () => {
-          setNeedRefresh(false);
-        },
-      });
+      // Auto-update is enabled, so the SW will activate automatically
+      console.log('New version available, auto-updating...');
     }
-  }, [needRefresh, updateServiceWorker, setNeedRefresh]);
+  }, [needRefresh]);
 
   return null;
 };

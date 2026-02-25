@@ -192,7 +192,7 @@ const Index = () => {
         <section className="py-8 px-4 border-b border-border bg-gradient-to-r from-primary/5 via-secondary/5 to-accent/5">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-xl font-bold mb-4 font-serif">Tailored Guidance</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className={`grid grid-cols-1 sm:grid-cols-2 ${isToolsHubEnabled ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-4`}>
               <Link to="/for/citizens">
                 <Card className="hover:border-primary transition-colors cursor-pointer h-full bg-gradient-to-br from-pink-500/10 to-transparent border-pink-500/30">
                   <CardContent className="p-4 flex items-center gap-3">

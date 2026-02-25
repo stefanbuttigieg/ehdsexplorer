@@ -10,6 +10,7 @@ import { useChapters } from "@/hooks/useChapters";
 import { useImplementingActs, getActStats } from "@/hooks/useImplementingActs";
 import { useDefinitions } from "@/hooks/useDefinitions";
 import { useNewsSummaries } from "@/hooks/useNewsSummaries";
+import { useIsFeatureEnabled } from "@/hooks/useFeatureFlags";
 import Layout from "@/components/Layout";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
 import { RecitalsQuickExplorer } from "@/components/RecitalsQuickExplorer";
@@ -43,6 +44,7 @@ const getFeedbackStatus = (deadline: string) => {
 const Index = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const { getChapterProgress } = useReadingProgress();
+  const { isEnabled: isToolsHubEnabled } = useIsFeatureEnabled('tools_hub');
   const { data: chapters, isLoading: chaptersLoading } = useChapters();
   const { data: implementingActs = [] } = useImplementingActs();
   const { data: definitions = [] } = useDefinitions();
@@ -235,6 +237,7 @@ const Index = () => {
                   </CardContent>
                 </Card>
               </Link>
+              {isToolsHubEnabled && (
               <Link to="/tools">
                 <Card className="hover:border-primary transition-colors cursor-pointer h-full bg-gradient-to-br from-amber-500/10 to-transparent border-amber-500/30">
                   <CardContent className="p-4 flex items-center gap-3">
@@ -246,6 +249,7 @@ const Index = () => {
                   </CardContent>
                 </Card>
               </Link>
+              )}
             </div>
           </div>
         </section>

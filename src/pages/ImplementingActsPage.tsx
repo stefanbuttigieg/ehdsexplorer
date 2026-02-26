@@ -9,6 +9,7 @@ import { useImplementingActs, themeLabels, statusLabels, ActStatus, ActTheme, ge
 import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { SubscribeAlertButton } from "@/components/SubscribeAlertButton";
+import { ComitologyUpdateBanner } from "@/components/ComitologyUpdateBanner";
 import { differenceInDays, parse, isAfter, isBefore } from "date-fns";
 
 const getFeedbackDaysRemaining = (deadline: string) => {
@@ -104,6 +105,9 @@ const ImplementingActsPage = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Comitology Register Latest Update */}
+        <ComitologyUpdateBanner />
 
         {/* Stats - now with 5 columns including feedback-closed */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">

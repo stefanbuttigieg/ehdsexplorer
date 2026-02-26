@@ -707,6 +707,36 @@ export type Database = {
         }
         Relationships: []
       }
+      comitology_updates: {
+        Row: {
+          created_at: string
+          id: string
+          scraped_at: string
+          scraped_content: string | null
+          source_url: string | null
+          summary: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          scraped_at?: string
+          scraped_content?: string | null
+          source_url?: string | null
+          summary?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          scraped_at?: string
+          scraped_content?: string | null
+          source_url?: string | null
+          summary?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       country_legislation: {
         Row: {
           adoption_date: string | null

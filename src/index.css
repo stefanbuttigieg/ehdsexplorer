@@ -157,7 +157,15 @@
   }
 
   .article-content ul, .article-content ol {
-    @apply ml-6 mb-4;
+    @apply ml-6 mb-4 list-outside;
+  }
+
+  .article-content ol {
+    @apply list-decimal;
+  }
+
+  .article-content ul {
+    @apply list-disc;
   }
 
   .article-content li {

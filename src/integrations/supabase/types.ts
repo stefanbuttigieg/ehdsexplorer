@@ -1900,6 +1900,45 @@ export type Database = {
           },
         ]
       }
+      implementing_act_linkedin_posts: {
+        Row: {
+          author_name: string | null
+          created_at: string
+          description: string | null
+          id: string
+          implementing_act_id: string
+          post_url: string
+          posted_at: string | null
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_name?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          implementing_act_id: string
+          post_url: string
+          posted_at?: string | null
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          implementing_act_id?: string
+          post_url?: string
+          posted_at?: string | null
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       implementing_act_recital_translations: {
         Row: {
           content: string

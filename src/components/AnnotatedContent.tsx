@@ -9,7 +9,8 @@ import { parseAndLinkReferences } from './LegalReferenceLink';
 
 // Collapse blank lines between numbered list items so markdown treats them as one continuous list
 const fixNumberedLists = (text: string): string => {
-  return text.replace(/^(\d+\.\t.+)\n\n(?=\d+\.\t)/gm, '$1\n');
+  const normalized = text.replace(/\r\n/g, '\n');
+  return normalized.replace(/(^\d+\.\s+.*)\n\s*\n(?=\d+\.\s+)/gm, '$1\n');
 };
 
 interface AnnotatedContentProps {

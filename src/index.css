@@ -185,6 +185,14 @@
     @apply my-6 list-outside;
   }
 
+  .prose ol {
+    @apply list-decimal;
+  }
+
+  .prose ul {
+    @apply list-disc;
+  }
+
   .prose li {
     @apply mb-3;
   }

@@ -21,17 +21,13 @@ const VerifySubscriptionPage = () => {
       }
 
       try {
-        // Find and update the subscription
-        const { data, error } = await supabase
-          .from("implementing_act_subscriptions")
-          .update({ verified: true })
-          .eq("verification_token", token)
-          .select()
-          .single();
+        const { data, error } = await supabase.functions.invoke("verify-subscription", {
+          body: { token },
+        });
 
-        if (error || !data) {
+        if (error || !data?.success) {
           setStatus("error");
-          setMessage("This verification link is invalid or has already been used.");
+          setMessage(data?.error || "This verification link is invalid or has already been used.");
           return;
         }
 

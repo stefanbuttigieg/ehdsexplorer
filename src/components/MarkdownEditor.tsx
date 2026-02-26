@@ -8,6 +8,11 @@ import { Separator } from '@/components/ui/separator';
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 
+// Collapse blank lines between numbered list items so markdown treats them as one continuous list
+const fixNumberedLists = (text: string): string => {
+  return text.replace(/^(\d+\.\t.+)\n\n(?=\d+\.\t)/gm, '$1\n');
+};
+
 interface MarkdownEditorProps {
   value: string;
   onChange: (value: string) => void;
@@ -202,7 +207,7 @@ const MarkdownEditor = ({ value, onChange, rows = 16, placeholder }: MarkdownEdi
             style={{ minHeight: `${rows * 1.5}rem` }}
           >
             {value ? (
-              <ReactMarkdown remarkPlugins={[remarkBreaks]}>{value}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkBreaks]}>{fixNumberedLists(value)}</ReactMarkdown>
             ) : (
               <p className="text-muted-foreground italic">Nothing to preview</p>
             )}

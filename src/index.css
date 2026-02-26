@@ -182,7 +182,7 @@
   }
 
   .prose ul, .prose ol {
-    @apply my-6;
+    @apply my-6 list-outside;
   }
 
   .prose li {

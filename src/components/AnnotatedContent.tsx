@@ -7,6 +7,11 @@ import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
 import { parseAndLinkReferences } from './LegalReferenceLink';
 
+// Collapse blank lines between numbered list items so markdown treats them as one continuous list
+const fixNumberedLists = (text: string): string => {
+  return text.replace(/^(\d+\.\t.+)\n\n(?=\d+\.\t)/gm, '$1\n');
+};
+
 interface AnnotatedContentProps {
   content: string;
   contentType: 'article' | 'recital' | 'implementing_act';
@@ -263,7 +268,7 @@ export const AnnotatedContent = ({
         className="select-text"
       >
         <div className={cn('prose prose-sm dark:prose-invert max-w-none', className)}>
-          <ReactMarkdown remarkPlugins={[remarkBreaks]} components={markdownComponents}>{content}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkBreaks]} components={markdownComponents}>{fixNumberedLists(content)}</ReactMarkdown>
         </div>
       </div>
 

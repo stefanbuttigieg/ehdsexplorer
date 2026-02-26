@@ -15,6 +15,7 @@ import { differenceInDays, parse, isAfter, isBefore } from "date-fns";
 import ImplementingActContent from "@/components/ImplementingActContent";
 import { SubscribeAlertButton } from "@/components/SubscribeAlertButton";
 import { CompareButton } from "@/components/CompareButton";
+import LinkedInPostsSection from "@/components/LinkedInPostsSection";
 
 const parseFeedbackDeadline = (deadline: string) => {
   const parts = deadline.split(" - ");
@@ -265,6 +266,11 @@ const ImplementingActDetail = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* LinkedIn Updates */}
+        <div className="mb-6">
+          <LinkedInPostsSection implementingActId={act.id} />
+        </div>
       </div>
     </Layout>
   );

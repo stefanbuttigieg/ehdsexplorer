@@ -532,7 +532,12 @@ const WordSearchGamePage = () => {
                             {pw.word}
                           </span>
                         ) : (
-                          <span>{pw.word.length} letters</span>
+                          <div>
+                            <span className="font-medium">{pw.word.length} letters</span>
+                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                              {pw.definition.slice(0, 100)}{pw.definition.length > 100 ? '…' : ''}
+                            </p>
+                          </div>
                         )}
                       </div>
                     </TooltipTrigger>

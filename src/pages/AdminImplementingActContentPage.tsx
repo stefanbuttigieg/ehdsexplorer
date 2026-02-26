@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { Linkedin } from "lucide-react";
 import { Plus, Trash2, Edit, Save, X, ArrowLeft } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +23,7 @@ import {
   ImplementingActSection,
   ImplementingActArticle,
 } from "@/hooks/useImplementingActContent";
+import { useLinkedInPosts, useCreateLinkedInPost, useDeleteLinkedInPost, LinkedInPost } from "@/hooks/useLinkedInPosts";
 import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import MarkdownEditor from "@/components/MarkdownEditor";
@@ -45,6 +47,13 @@ const AdminImplementingActContentPage = () => {
   const [newRecital, setNewRecital] = useState({ recital_number: 1, content: "" });
   const [newArticle, setNewArticle] = useState({ article_number: 1, title: "", content: "", section_id: "" });
   const [newSection, setNewSection] = useState({ section_number: 1, title: "" });
+  const { data: linkedInPosts = [] } = useLinkedInPosts(id || "");
+  const createLinkedInPost = useCreateLinkedInPost();
+  const deleteLinkedInPost = useDeleteLinkedInPost();
+
+  const [newLinkedInPostOpen, setNewLinkedInPostOpen] = useState(false);
+  const [editingLinkedInPost, setEditingLinkedInPost] = useState<LinkedInPost | null>(null);
+  const [newLinkedInPost, setNewLinkedInPost] = useState({ post_url: "", title: "", description: "", author_name: "", posted_at: "" });
 
   const isLoading = loadingAct || loadingRecitals || loadingSections || loadingArticles;
 
@@ -241,6 +250,10 @@ const AdminImplementingActContentPage = () => {
             <TabsTrigger value="articles">Articles ({articles.length})</TabsTrigger>
             <TabsTrigger value="recitals">Recitals ({recitals.length})</TabsTrigger>
             <TabsTrigger value="sections">Sections ({sections.length})</TabsTrigger>
+            <TabsTrigger value="linkedin" className="gap-1.5">
+              <Linkedin className="h-3.5 w-3.5" />
+              LinkedIn ({linkedInPosts.length})
+            </TabsTrigger>
           </TabsList>
 
           {/* Articles Tab */}
@@ -638,6 +651,132 @@ const AdminImplementingActContentPage = () => {
                 )}
               </DialogContent>
             </Dialog>
+          </TabsContent>
+
+          {/* LinkedIn Posts Tab */}
+          <TabsContent value="linkedin">
+            <Card>
+              <CardHeader className="flex-row items-center justify-between">
+                <CardTitle>LinkedIn Posts</CardTitle>
+                <Dialog open={newLinkedInPostOpen} onOpenChange={setNewLinkedInPostOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm">
+                      <Plus className="h-4 w-4 mr-2" /> Add Post
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add LinkedIn Post</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label>Post URL *</Label>
+                        <Input
+                          value={newLinkedInPost.post_url}
+                          onChange={(e) => setNewLinkedInPost({ ...newLinkedInPost, post_url: e.target.value })}
+                          placeholder="https://www.linkedin.com/posts/..."
+                        />
+                      </div>
+                      <div>
+                        <Label>Title *</Label>
+                        <Input
+                          value={newLinkedInPost.title}
+                          onChange={(e) => setNewLinkedInPost({ ...newLinkedInPost, title: e.target.value })}
+                          placeholder="Post title or summary"
+                        />
+                      </div>
+                      <div>
+                        <Label>Description</Label>
+                        <Input
+                          value={newLinkedInPost.description}
+                          onChange={(e) => setNewLinkedInPost({ ...newLinkedInPost, description: e.target.value })}
+                          placeholder="Brief description"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Author Name</Label>
+                          <Input
+                            value={newLinkedInPost.author_name}
+                            onChange={(e) => setNewLinkedInPost({ ...newLinkedInPost, author_name: e.target.value })}
+                            placeholder="Author name"
+                          />
+                        </div>
+                        <div>
+                          <Label>Posted Date</Label>
+                          <Input
+                            type="date"
+                            value={newLinkedInPost.posted_at}
+                            onChange={(e) => setNewLinkedInPost({ ...newLinkedInPost, posted_at: e.target.value })}
+                          />
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() => {
+                          if (!newLinkedInPost.post_url || !newLinkedInPost.title) {
+                            toast.error("URL and Title are required");
+                            return;
+                          }
+                          createLinkedInPost.mutate({
+                            implementing_act_id: id!,
+                            post_url: newLinkedInPost.post_url,
+                            title: newLinkedInPost.title,
+                            description: newLinkedInPost.description || null,
+                            author_name: newLinkedInPost.author_name || null,
+                            posted_at: newLinkedInPost.posted_at || null,
+                            sort_order: linkedInPosts.length,
+                          }, {
+                            onSuccess: () => {
+                              setNewLinkedInPostOpen(false);
+                              setNewLinkedInPost({ post_url: "", title: "", description: "", author_name: "", posted_at: "" });
+                              toast.success("LinkedIn post added");
+                            },
+                            onError: (e) => toast.error(`Failed: ${e.message}`),
+                          });
+                        }}
+                        disabled={createLinkedInPost.isPending}
+                      >
+                        <Save className="h-4 w-4 mr-2" /> Save Post
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </CardHeader>
+              <CardContent>
+                {linkedInPosts.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">No LinkedIn posts yet</p>
+                ) : (
+                  <div className="space-y-3">
+                    {linkedInPosts.map((post) => (
+                      <div key={post.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <Linkedin className="h-4 w-4 text-[#0A66C2] shrink-0" />
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm truncate">{post.title}</p>
+                            <p className="text-xs text-muted-foreground truncate">{post.author_name || post.post_url}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => deleteLinkedInPost.mutate(
+                              { id: post.id, implementingActId: id! },
+                              {
+                                onSuccess: () => toast.success("Post deleted"),
+                                onError: (e) => toast.error(`Failed: ${e.message}`),
+                              }
+                            )}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

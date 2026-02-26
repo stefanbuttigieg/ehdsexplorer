@@ -27,31 +27,16 @@ export const useImplementingActSubscriptions = () => {
       implementingActId?: string;
       subscribeAll?: boolean;
     }) => {
-      const { data, error } = await supabase
-        .from("implementing_act_subscriptions")
-        .insert({
+      const { data, error } = await supabase.functions.invoke("subscribe-implementing-act", {
+        body: {
           email,
-          implementing_act_id: subscribeAll ? null : implementingActId,
+          implementing_act_id: subscribeAll ? undefined : implementingActId,
           subscribe_all: subscribeAll,
-        })
-        .select()
-        .single();
+        },
+      });
 
-      if (error) {
-        if (error.code === "23505") {
-          throw new Error("You are already subscribed to this implementing act");
-        }
-        throw error;
-      }
-
-      // Send verification email
-      try {
-        await supabase.functions.invoke("send-verification-email", {
-          body: { subscription_id: data.id },
-        });
-      } catch (emailError) {
-        console.error("Failed to send verification email:", emailError);
-      }
+      if (error) throw new Error("Failed to subscribe");
+      if (data?.error) throw new Error(data.error);
 
       return data;
     },

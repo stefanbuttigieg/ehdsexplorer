@@ -33,13 +33,7 @@ const EU_COUNTRIES: Record<string, string> = {
   ES: 'Spain', SE: 'Sweden',
 };
 
-const getFlagEmoji = (countryCode: string) => {
-  const codePoints = countryCode
-    .toUpperCase()
-    .split('')
-    .map(char => 127397 + char.charCodeAt(0));
-  return String.fromCodePoint(...codePoints);
-};
+import { CountryFlag } from '@/components/CountryFlag';
 
 const STATUS_LABELS: Record<string, string> = {
   not_started: 'Not Started',
@@ -311,7 +305,7 @@ export default function CountryManagerDashboard() {
               <CardHeader className="p-3 sm:p-6 pb-2 sm:pb-4">
                 <div className="flex items-center justify-between gap-2">
                   <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                    <span className="text-xl sm:text-2xl">{getFlagEmoji(country.countryCode)}</span>
+                    <CountryFlag countryCode={country.countryCode} size="xl" />
                     <span className="truncate">{country.countryName}</span>
                   </CardTitle>
                   <Badge 

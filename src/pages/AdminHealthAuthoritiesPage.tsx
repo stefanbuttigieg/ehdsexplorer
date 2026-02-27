@@ -15,6 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/hooks/useAuth';
 import { useHealthAuthorities, HealthAuthority, HealthAuthorityInsert, AuthorityType, AuthorityStatus } from '@/hooks/useHealthAuthorities';
+import { CountryFlag } from '@/components/CountryFlag';
 
 const EU_COUNTRIES = [
   { code: 'AT', name: 'Austria' },
@@ -399,7 +400,7 @@ const AdminHealthAuthoritiesPage = () => {
                   {filteredAuthorities.map((authority) => (
                     <TableRow key={authority.id}>
                       <TableCell className="font-medium">
-                        <span className="text-lg mr-2">{getFlagEmoji(authority.country_code)}</span>
+                        <CountryFlag countryCode={authority.country_code} size="md" className="mr-2" />
                         {authority.country_name}
                       </TableCell>
                       <TableCell>{authority.name}</TableCell>
@@ -528,13 +529,5 @@ const AdminHealthAuthoritiesPage = () => {
   );
 };
 
-// Helper function to get flag emoji from country code
-function getFlagEmoji(countryCode: string): string {
-  const codePoints = countryCode
-    .toUpperCase()
-    .split('')
-    .map(char => 127397 + char.charCodeAt(0));
-  return String.fromCodePoint(...codePoints);
-}
 
 export default AdminHealthAuthoritiesPage;

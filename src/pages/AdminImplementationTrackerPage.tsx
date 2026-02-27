@@ -92,10 +92,7 @@ const EU_COUNTRIES = [
   { code: "SE", name: "Sweden" }
 ];
 
-const getFlagEmoji = (countryCode: string) => {
-  const codePoints = countryCode.toUpperCase().split('').map(char => 127397 + char.charCodeAt(0));
-  return String.fromCodePoint(...codePoints);
-};
+import { CountryFlag } from '@/components/CountryFlag';
 
 const CATEGORY_ICONS: Record<ObligationCategory, React.ReactNode> = {
   primary_use: <FileText className="h-4 w-4" />,
@@ -582,7 +579,7 @@ export default function AdminImplementationTrackerPage() {
                   <SelectContent>
                     {EU_COUNTRIES.map(country => (
                       <SelectItem key={country.code} value={country.code}>
-                        {getFlagEmoji(country.code)} {country.name}
+                        <CountryFlag countryCode={country.code} size="sm" /> {country.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

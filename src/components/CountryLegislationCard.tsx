@@ -12,6 +12,7 @@ import {
   type LegislationStatus,
   type LegislationType
 } from '@/data/legislationConstants';
+import { CountryFlag } from './CountryFlag';
 import { LegislationStatusTimeline } from './LegislationStatusTimeline';
 import { EnforcementMeasuresBadges } from './EnforcementMeasuresBadges';
 import type { CountryLegislation } from '@/hooks/useCountryLegislation';
@@ -39,13 +40,6 @@ const TYPE_BADGE_COLORS: Record<string, string> = {
   preparatory: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
 };
 
-function getFlagEmoji(countryCode: string): string {
-  const codePoints = countryCode
-    .toUpperCase()
-    .split('')
-    .map(char => 127397 + char.charCodeAt(0));
-  return String.fromCodePoint(...codePoints);
-}
 
 export function CountryLegislationCard({ 
   legislation, 
@@ -64,9 +58,7 @@ export function CountryLegislationCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               {showCountry && (
-                <span className="text-lg" title={legislation.country_name}>
-                  {getFlagEmoji(legislation.country_code)}
-                </span>
+                <CountryFlag countryCode={legislation.country_code} size="md" />
               )}
               <span className="font-medium text-sm truncate">{legislation.title}</span>
             </div>
@@ -107,9 +99,7 @@ export function CountryLegislationCard({
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               {showCountry && (
-                <span className="text-2xl" title={legislation.country_name}>
-                  {getFlagEmoji(legislation.country_code)}
-                </span>
+                <CountryFlag countryCode={legislation.country_code} size="lg" />
               )}
               <div className="flex flex-wrap gap-2">
                 <Badge className={cn(STATUS_BADGE_COLORS[legislation.status])}>

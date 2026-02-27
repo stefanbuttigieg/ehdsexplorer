@@ -89,13 +89,7 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-function getFlagEmoji(countryCode: string): string {
-  const codePoints = countryCode
-    .toUpperCase()
-    .split('')
-    .map(char => 127397 + char.charCodeAt(0));
-  return String.fromCodePoint(...codePoints);
-}
+import { CountryFlag } from '@/components/CountryFlag';
 
 export default function AdminCountryLegislationPage() {
   const { user, loading, isEditor } = useAuth();
@@ -285,7 +279,7 @@ export default function AdminCountryLegislationPage() {
                             <SelectContent>
                               {EU_COUNTRIES.map((country) => (
                                 <SelectItem key={country.code} value={country.code}>
-                                  {getFlagEmoji(country.code)} {country.name}
+                                  <CountryFlag countryCode={country.code} size="sm" /> {country.name}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -635,7 +629,7 @@ export default function AdminCountryLegislationPage() {
                   {filteredLegislation?.map((leg) => (
                     <TableRow key={leg.id}>
                       <TableCell>
-                        <span className="text-lg mr-1">{getFlagEmoji(leg.country_code)}</span>
+                        <CountryFlag countryCode={leg.country_code} size="md" className="mr-1" />
                         {leg.country_name}
                       </TableCell>
                       <TableCell className="font-medium max-w-[200px] truncate">

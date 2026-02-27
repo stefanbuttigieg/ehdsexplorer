@@ -46,13 +46,7 @@ const EU_COUNTRIES = [
   { code: 'SE', name: 'Sweden' },
 ];
 
-const getFlagEmoji = (countryCode: string) => {
-  const codePoints = countryCode
-    .toUpperCase()
-    .split('')
-    .map(char => 127397 + char.charCodeAt(0));
-  return String.fromCodePoint(...codePoints);
-};
+import { CountryFlag } from '@/components/CountryFlag';
 
 interface UserWithRoles {
   id: string;
@@ -237,7 +231,7 @@ export default function AdminCountryAssignmentsPage() {
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg flex items-center gap-2">
-                        <span className="text-xl">{getFlagEmoji(country.code)}</span>
+                        <CountryFlag countryCode={country.code} size="lg" />
                         {country.name}
                       </CardTitle>
                       <Badge variant={countryAssignments.length > 0 ? 'default' : 'secondary'}>
@@ -325,7 +319,7 @@ export default function AdminCountryAssignmentsPage() {
                               variant="secondary"
                               className="flex items-center gap-1 pr-1"
                             >
-                              <span>{getFlagEmoji(assignment.country_code)}</span>
+                              <CountryFlag countryCode={assignment.country_code} size="sm" />
                               {country?.name || assignment.country_code}
                               <Button
                                 variant="ghost"
@@ -394,7 +388,7 @@ export default function AdminCountryAssignmentsPage() {
                         checked={selectedCountries.includes(country.code)}
                         onCheckedChange={() => toggleCountrySelection(country.code)}
                       />
-                      <span className="text-lg">{getFlagEmoji(country.code)}</span>
+                      <CountryFlag countryCode={country.code} size="md" />
                       <span className="text-sm">{country.name}</span>
                     </div>
                   ))}

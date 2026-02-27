@@ -48,6 +48,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useImplementationTrackerConfig } from "@/hooks/useImplementationTrackerConfig";
+import { CountryFlag } from "@/components/CountryFlag";
 import { 
   useEhdsObligations, 
   useCountryObligationStatuses,
@@ -78,13 +79,6 @@ const EU_COUNTRIES = [
   { code: "SE", name: "Sweden" }
 ];
 
-const getFlagEmoji = (countryCode: string) => {
-  const codePoints = countryCode
-    .toUpperCase()
-    .split('')
-    .map(char => 127397 + char.charCodeAt(0));
-  return String.fromCodePoint(...codePoints);
-};
 
 const CATEGORY_ICONS: Record<ObligationCategory, React.ReactNode> = {
   primary_use: <FileText className="h-4 w-4" />,
@@ -485,7 +479,7 @@ export const ImplementationTimelineTracker = ({
               <SelectItem value="all">All Countries</SelectItem>
               {EU_COUNTRIES.map(country => (
                 <SelectItem key={country.code} value={country.code}>
-                  {getFlagEmoji(country.code)} {country.name}
+                  <CountryFlag countryCode={country.code} size="sm" /> {country.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -623,7 +617,7 @@ export const ImplementationTimelineTracker = ({
               <Card key={country.countryCode} className="overflow-hidden">
                 <CardHeader className="p-3 md:p-4 pb-2">
                   <CardTitle className="text-base md:text-lg flex items-center gap-2">
-                    <span className="text-xl md:text-2xl">{getFlagEmoji(country.countryCode)}</span>
+                    <CountryFlag countryCode={country.countryCode} size="xl" />
                     {country.countryName}
                   </CardTitle>
                 </CardHeader>
@@ -702,7 +696,7 @@ export const ImplementationTimelineTracker = ({
                   <div key={country.countryCode} className="p-3 border rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <span>{getFlagEmoji(country.countryCode)}</span>
+                        <CountryFlag countryCode={country.countryCode} size="sm" />
                         <span className="font-medium text-sm">{country.countryName}</span>
                       </div>
                       <span className="text-sm font-medium">{country.overallProgress}%</span>
@@ -747,7 +741,7 @@ export const ImplementationTimelineTracker = ({
                       <tr key={country.countryCode} className="border-t border-border hover:bg-muted/30">
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
-                            <span>{getFlagEmoji(country.countryCode)}</span>
+                            <CountryFlag countryCode={country.countryCode} size="md" />
                             <span className="font-medium">{country.countryName}</span>
                           </div>
                         </td>

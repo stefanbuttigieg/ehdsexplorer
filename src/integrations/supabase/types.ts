@@ -2281,6 +2281,48 @@ export type Database = {
         }
         Relationships: []
       }
+      legislation_obligation_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          legislation_id: string
+          notes: string | null
+          obligation_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          legislation_id: string
+          notes?: string | null
+          obligation_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          legislation_id?: string
+          notes?: string | null
+          obligation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legislation_obligation_links_legislation_id_fkey"
+            columns: ["legislation_id"]
+            isOneToOne: false
+            referencedRelation: "country_legislation"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legislation_obligation_links_obligation_id_fkey"
+            columns: ["obligation_id"]
+            isOneToOne: false
+            referencedRelation: "ehds_obligations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mfa_settings: {
         Row: {
           allowed_methods: string[]
@@ -2543,6 +2585,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      obligation_status_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          country_code: string
+          id: string
+          new_status: string
+          notes: string | null
+          obligation_id: string
+          old_status: string | null
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          country_code: string
+          id?: string
+          new_status: string
+          notes?: string | null
+          obligation_id: string
+          old_status?: string | null
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          country_code?: string
+          id?: string
+          new_status?: string
+          notes?: string | null
+          obligation_id?: string
+          old_status?: string | null
+        }
+        Relationships: []
       }
       onboarding_steps: {
         Row: {

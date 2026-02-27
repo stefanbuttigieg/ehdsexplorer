@@ -15,6 +15,8 @@ import {
 import { CountryFlag } from './CountryFlag';
 import { LegislationStatusTimeline } from './LegislationStatusTimeline';
 import { EnforcementMeasuresBadges } from './EnforcementMeasuresBadges';
+import { useLegislationObligationLinks } from '@/hooks/useLegislationObligationLinks';
+import { useEhdsObligations } from '@/hooks/useEhdsObligations';
 import type { CountryLegislation } from '@/hooks/useCountryLegislation';
 
 interface CountryLegislationCardProps {
@@ -47,9 +49,16 @@ export function CountryLegislationCard({
   compact = false 
 }: CountryLegislationCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { data: links } = useLegislationObligationLinks(legislation.id);
+  const { data: obligations } = useEhdsObligations();
   
   const statusConfig = LEGISLATION_STATUSES[legislation.status];
   const typeConfig = LEGISLATION_TYPES[legislation.legislation_type];
+
+  const linkedObligations = (links || []).map(link => {
+    const ob = obligations?.find(o => o.id === link.obligation_id);
+    return ob ? ob.name : null;
+  }).filter(Boolean);
 
   if (compact) {
     return (
@@ -169,6 +178,20 @@ export function CountryLegislationCard({
               details={legislation.enforcement_details}
               maxVisible={4}
             />
+          </div>
+        )}
+
+        {/* Linked Obligations */}
+        {linkedObligations.length > 0 && (
+          <div>
+            <p className="text-sm font-medium mb-2">Implements Obligations</p>
+            <div className="flex flex-wrap gap-1.5">
+              {linkedObligations.map((name) => (
+                <Badge key={name} variant="outline" className="text-xs">
+                  {name}
+                </Badge>
+              ))}
+            </div>
           </div>
         )}
         

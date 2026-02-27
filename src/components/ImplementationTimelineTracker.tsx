@@ -37,6 +37,9 @@ import {
 import { ObligationEvidenceManager } from "@/components/ObligationEvidenceManager";
 import { useObligationEvidence } from "@/hooks/useObligationEvidence";
 import { useAuth } from "@/hooks/useAuth";
+import { useEhdsiPublishedData, getKpisByCountry } from "@/hooks/useEhdsiKpis";
+import { useObligationStatusHistory } from "@/hooks/useObligationStatusHistory";
+import { format } from "date-fns";
 import { useCountryAssignments } from "@/hooks/useCountryAssignments";
 import { 
   DropdownMenu, 
@@ -113,6 +116,81 @@ interface CountryProgress {
   obligationStatuses: Record<string, ObligationStatus>;
 }
 
+// eHDSI KPI Panel component
+const EhdsiKpiPanel = ({ countryCode, countryName }: { countryCode: string; countryName: string }) => {
+  const { data: allKpis } = useEhdsiPublishedData();
+  const countryKpis = useMemo(() => {
+    if (!allKpis) return [];
+    return getKpisByCountry(allKpis, countryCode);
+  }, [allKpis, countryCode]);
+
+  if (!allKpis || countryKpis.length === 0) {
+    return (
+      <Card className="border-dashed">
+        <CardContent className="p-3 md:p-4 flex items-center gap-3">
+          <Globe className="h-5 w-5 text-muted-foreground" />
+          <div>
+            <p className="text-sm font-medium">MyHealth@EU (eHDSI) Data</p>
+            <p className="text-xs text-muted-foreground">No KPI data available for {countryName} yet.</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const ncpehStatus = countryKpis.find(k => k.kpi_id === 'KPI-1.1');
+  const isOperational = ncpehStatus?.value === 1;
+
+  return (
+    <Card>
+      <CardHeader className="p-3 md:p-4 pb-2">
+        <CardTitle className="text-sm md:text-base flex items-center gap-2">
+          <Globe className="h-4 w-4 text-primary" />
+          MyHealth@EU (eHDSI) — {countryName}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-3 md:p-4 pt-0">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
+          {/* NCPeH Status */}
+          {ncpehStatus && (
+            <div className="p-2 md:p-3 rounded-lg border bg-muted/30">
+              <p className="text-[10px] md:text-xs text-muted-foreground mb-1">NCPeH Status</p>
+              <div className="flex items-center gap-1.5">
+                {isOperational ? (
+                  <CheckCircle2 className="h-4 w-4 text-chart-4" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                )}
+                <span className="text-sm font-semibold">{isOperational ? 'Operational' : 'Not Active'}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Other KPIs */}
+          {countryKpis.filter(k => k.kpi_id !== 'KPI-1.1').map(kpi => (
+            <div key={kpi.kpi_id} className="p-2 md:p-3 rounded-lg border bg-muted/30">
+              <p className="text-[10px] md:text-xs text-muted-foreground mb-1 truncate" title={kpi.kpi_name}>
+                {kpi.kpi_name}
+              </p>
+              <div className="text-sm font-semibold">
+                {kpi.value != null ? kpi.value.toLocaleString() : '—'}
+                {kpi.unit && kpi.unit !== 'status' && (
+                  <span className="text-xs font-normal text-muted-foreground ml-1">{kpi.unit}</span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+        {ncpehStatus?.reference_date && (
+          <p className="text-[10px] text-muted-foreground mt-2">
+            Last updated: {new Date(ncpehStatus.reference_date).toLocaleDateString()}
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 interface ImplementationTimelineTrackerProps {
   showKeyDates?: boolean;
   keyDates?: Array<{ label: string; date: string; category?: string }>;
@@ -133,8 +211,13 @@ const ObligationCard = ({
     selectedCountry !== "all" ? selectedCountry : undefined, 
     obligation.id
   );
+  const { data: history } = useObligationStatusHistory(
+    selectedCountry !== "all" ? selectedCountry : undefined,
+    obligation.id
+  );
   
   const evidenceCount = evidence.length;
+  const historyCount = history?.length || 0;
 
   // Only show evidence panel when a specific country is selected
   const showEvidencePanel = selectedCountry !== "all";
@@ -175,13 +258,37 @@ const ObligationCard = ({
         {showEvidencePanel && (
           <CollapsibleContent>
             <div className="px-3 pb-3 border-t bg-muted/30">
-              <div className="pt-3">
+              <div className="pt-3 space-y-4">
                 <ObligationEvidenceManager
                   countryCode={selectedCountry}
                   obligationId={obligation.id}
                   obligationName={obligation.name}
                   canEdit={canEdit}
                 />
+                
+                {/* Status Change History */}
+                {historyCount > 0 && (
+                  <div>
+                    <p className="text-xs font-medium mb-2 flex items-center gap-1">
+                      <Clock className="h-3 w-3" /> Status History
+                    </p>
+                    <div className="space-y-1">
+                      {history!.slice(0, 5).map((entry) => (
+                        <div key={entry.id} className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                          <span className="shrink-0">{format(new Date(entry.changed_at), 'dd MMM yyyy')}</span>
+                          <span>→</span>
+                          {entry.old_status && (
+                            <>
+                              <Badge variant="outline" className="text-[10px] py-0">{STATUS_LABELS[entry.old_status as ObligationStatus] || entry.old_status}</Badge>
+                              <span>→</span>
+                            </>
+                          )}
+                          <Badge variant="secondary" className="text-[10px] py-0">{STATUS_LABELS[entry.new_status as ObligationStatus] || entry.new_status}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </CollapsibleContent>
@@ -446,7 +553,9 @@ export const ImplementationTimelineTracker = ({
         </Card>
       </div>
 
-      {/* Filters and Controls */}
+      {/* eHDSI KPI Data - shown when a specific country is selected */}
+      {selectedCountry !== "all" && <EhdsiKpiPanel countryCode={selectedCountry} countryName={EU_COUNTRIES.find(c => c.code === selectedCountry)?.name || selectedCountry} />}
+
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">
           <Select value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as typeof selectedCategory)}>

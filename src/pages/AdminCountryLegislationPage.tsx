@@ -29,6 +29,12 @@ import {
 } from '@/hooks/useCountryLegislation';
 import { useArticles } from '@/hooks/useArticles';
 import { useImplementingActs } from '@/hooks/useImplementingActs';
+import { useEhdsObligations } from '@/hooks/useEhdsObligations';
+import { 
+  useLegislationObligationLinks, 
+  useCreateLegislationObligationLink, 
+  useDeleteLegislationObligationLink 
+} from '@/hooks/useLegislationObligationLinks';
 import { 
   LEGISLATION_STATUSES, 
   LEGISLATION_TYPES, 
@@ -103,10 +109,15 @@ export default function AdminCountryLegislationPage() {
   const [selectedArticles, setSelectedArticles] = useState<number[]>([]);
   const [selectedActs, setSelectedActs] = useState<string[]>([]);
   const [selectedEnforcement, setSelectedEnforcement] = useState<string[]>([]);
+  const [selectedObligations, setSelectedObligations] = useState<string[]>([]);
 
   const { data: legislation, isLoading } = useCountryLegislation();
   const { data: articles } = useArticles();
   const { data: implementingActs } = useImplementingActs();
+  const { data: obligations } = useEhdsObligations();
+  const { data: allLinks } = useLegislationObligationLinks();
+  const createLinkMutation = useCreateLegislationObligationLink();
+  const deleteLinkMutation = useDeleteLegislationObligationLink();
   const createMutation = useCreateLegislation();
   const updateMutation = useUpdateLegislation();
   const deleteMutation = useDeleteLegislation();
@@ -170,12 +181,16 @@ export default function AdminCountryLegislationPage() {
       setSelectedArticles(leg.ehds_articles_referenced || []);
       setSelectedActs(leg.implementing_act_ids || []);
       setSelectedEnforcement(leg.enforcement_measures || []);
+      // Load existing obligation links
+      const legLinks = (allLinks || []).filter(l => l.legislation_id === leg.id);
+      setSelectedObligations(legLinks.map(l => l.obligation_id));
     } else {
       setEditingLegislation(null);
       form.reset();
       setSelectedArticles([]);
       setSelectedActs([]);
       setSelectedEnforcement([]);
+      setSelectedObligations([]);
     }
     setIsDialogOpen(true);
   };
@@ -205,11 +220,32 @@ export default function AdminCountryLegislationPage() {
     };
 
     try {
+      let legislationId: string;
       if (editingLegislation) {
         await updateMutation.mutateAsync({ id: editingLegislation.id, ...input });
+        legislationId = editingLegislation.id;
       } else {
-        await createMutation.mutateAsync(input);
+        const created = await createMutation.mutateAsync(input);
+        legislationId = created.id;
       }
+
+      // Sync obligation links
+      const existingLinks = (allLinks || []).filter(l => l.legislation_id === legislationId);
+      const existingObIds = existingLinks.map(l => l.obligation_id);
+      
+      // Delete removed links
+      for (const link of existingLinks) {
+        if (!selectedObligations.includes(link.obligation_id)) {
+          await deleteLinkMutation.mutateAsync(link.id);
+        }
+      }
+      // Add new links
+      for (const obId of selectedObligations) {
+        if (!existingObIds.includes(obId)) {
+          await createLinkMutation.mutateAsync({ legislation_id: legislationId, obligation_id: obId });
+        }
+      }
+
       setIsDialogOpen(false);
       form.reset();
     } catch (error) {
@@ -505,6 +541,35 @@ export default function AdminCountryLegislationPage() {
                         >
                           Art. {article.article_number}
                         </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Linked EHDS Obligations */}
+                  <div>
+                    <FormLabel>Linked EHDS Obligations</FormLabel>
+                    <FormDescription>Select obligations this legislation implements</FormDescription>
+                    <div className="mt-2 max-h-40 overflow-y-auto p-2 border rounded-md space-y-1">
+                      {obligations?.map((ob) => (
+                        <div key={ob.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`obligation-${ob.id}`}
+                            checked={selectedObligations.includes(ob.id)}
+                            onCheckedChange={(checked) => {
+                              setSelectedObligations(prev =>
+                                checked
+                                  ? [...prev, ob.id]
+                                  : prev.filter(o => o !== ob.id)
+                              );
+                            }}
+                          />
+                          <label
+                            htmlFor={`obligation-${ob.id}`}
+                            className="text-sm cursor-pointer leading-tight"
+                          >
+                            {ob.name}
+                          </label>
+                        </div>
                       ))}
                     </div>
                   </div>

@@ -1,0 +1,57 @@
+# EHDS Explorer
+
+> A comprehensive, open-access platform for exploring the European Health Data Space (EHDS) Regulation (EU) 2025/327.
+
+## About
+
+EHDS Explorer helps citizens, healthcare professionals, health-tech companies, researchers, and policymakers understand and navigate the EHDS regulation. It provides the full text of the regulation with structured navigation, plain-language explanations, definitions, cross-regulation references, and interactive learning tools.
+
+## Key Features
+
+- Full regulation text: all 98 articles, 85 recitals, and annexes with structured chapter/section navigation
+- Definitions glossary with source references
+- Plain-language translations of complex legal text
+- Cross-regulation reference mapping (GDPR, MDR, AI Act, Data Governance Act, etc.)
+- Country-level implementation tracking across EU/EEA Member States
+- Health authority directory
+- AI-powered assistant for regulation questions
+- Interactive learning games (quiz, flashcards, word search, true/false, who am I?)
+- Stakeholder-specific views (citizens, healthcare professionals, health-tech companies)
+- Implementing acts tracker
+- Multilingual support
+- Bookmarks, annotations, and note-taking
+- Accessibility controls and dark mode
+
+## Core Content
+
+- **Articles**: 98 articles organised across 11 chapters covering primary use, secondary use, governance, infrastructure, enforcement, and more
+- **Recitals**: 85 recitals providing interpretive context
+- **Definitions**: 40+ defined terms from Article 2
+- **Annexes**: Technical annexes on EHR categories, data categories, and more
+- **Implementing Acts**: Tracker for delegated and implementing acts required by the regulation
+
+## Primary Audiences
+
+- EU/EEA citizens and patients wanting to understand their health data rights
+- Healthcare professionals adapting workflows to EHDS requirements
+- Health-tech companies assessing compliance obligations
+- Researchers and policymakers working on health data governance
+
+## Important Disclaimers
+
+- This platform is an educational and informational tool, not a source of legal advice
+- Always refer to the Official Journal of the European Union for the authoritative regulation text
+- Content may be updated as implementing acts and national transposition measures are adopted
+
+## Links
+
+- Website: https://ehdsexplorer.lovable.app
+- Regulation full text: https://ehdsexplorer.lovable.app/articles
+- Definitions: https://ehdsexplorer.lovable.app/definitions
+- Country tracker: https://ehdsexplorer.lovable.app/overview
+- AI Assistant: available to registered users
+- Games: https://ehdsexplorer.lovable.app/games
+
+## Contact
+
+For questions or feedback, use the in-app feedback tools or visit the Help Center at https://ehdsexplorer.lovable.app/help

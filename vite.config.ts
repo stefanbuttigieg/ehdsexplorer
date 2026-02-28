@@ -4,13 +4,16 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
-// Generate build timestamp for automatic versioning
-const buildTimestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '.');
+// Generate build timestamp for automatic versioning (includes time for uniqueness)
+const now = new Date();
+const buildDate = now.toISOString().slice(0, 10);
+const buildHash = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}.${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   define: {
-    __BUILD_DATE__: JSON.stringify(buildTimestamp),
+    __BUILD_DATE__: JSON.stringify(buildDate),
+    __BUILD_HASH__: JSON.stringify(buildHash),
   },
   server: {
     host: "::",

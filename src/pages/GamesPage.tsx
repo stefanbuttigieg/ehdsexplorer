@@ -11,7 +11,8 @@ import {
   Zap,
   Trophy,
   Timer,
-  Target
+  Target,
+  UserSearch
 } from "lucide-react";
 import { useAchievements } from "@/hooks/useAchievements";
 
@@ -70,6 +71,15 @@ const games: GameInfo[] = [
     difficulty: "Medium",
     duration: "3-5 min",
     skills: ["Speed", "Knowledge"],
+  },
+  {
+    title: "Who Am I?",
+    description: "Guess the EHDS stakeholder or entity from progressive clues. Fewer clues used means more points!",
+    path: "/who-am-i",
+    icon: UserSearch,
+    difficulty: "Medium",
+    duration: "5-10 min",
+    skills: ["Reasoning", "Stakeholders"],
   },
 ];
 

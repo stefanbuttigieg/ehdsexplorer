@@ -114,6 +114,7 @@ const AdminTranslationImportPage = lazy(() => import("./pages/AdminTranslationIm
 const ToolsHubPage = lazy(() => import("./pages/ToolsHubPage"));
 const AdminToolkitQuestionsPage = lazy(() => import("./pages/AdminToolkitQuestionsPage"));
 const AdminAISettingsPage = lazy(() => import("./pages/AdminAISettingsPage"));
+const WhoAmIGamePage = lazy(() => import("./pages/WhoAmIGamePage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -180,6 +181,7 @@ const App = () => (
             <Route path="/quiz" element={<QuizGamePage />} />
             <Route path="/word-search" element={<WordSearchGamePage />} />
             <Route path="/true-false" element={<TrueFalseGamePage />} />
+            <Route path="/who-am-i" element={<WhoAmIGamePage />} />
             <Route path="/games" element={<GamesPage />} />
             <Route path="/api" element={<ApiDocsPage />} />
             <Route path="/news" element={<NewsPage />} />

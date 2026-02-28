@@ -37,6 +37,17 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
 
+    // Fetch configured AI model
+    let aiModel = "google/gemini-2.5-flash";
+    const { data: siteSettings } = await supabase
+      .from("site_settings")
+      .select("ai_model")
+      .eq("id", "default")
+      .single();
+    if (siteSettings?.ai_model) {
+      aiModel = siteSettings.ai_model;
+    }
+
     // Calculate current week dates
     const now = new Date();
     const weekStart = new Date(now);
@@ -94,7 +105,7 @@ Generate a title for this week's summary and the content. Make sure to include s
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: aiModel,
         messages: [
           { role: "system", content: "You are an expert on EU health data regulations, specifically the European Health Data Space (EHDS) Regulation." },
           { role: "user", content: fullPrompt }

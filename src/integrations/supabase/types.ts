@@ -3473,6 +3473,7 @@ export type Database = {
       }
       site_settings: {
         Row: {
+          ai_model: string
           id: string
           maintenance_message: string | null
           maintenance_mode: boolean
@@ -3480,6 +3481,7 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          ai_model?: string
           id?: string
           maintenance_message?: string | null
           maintenance_mode?: boolean
@@ -3487,6 +3489,7 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          ai_model?: string
           id?: string
           maintenance_message?: string | null
           maintenance_mode?: boolean
@@ -4079,22 +4082,28 @@ export type Database = {
     Views: {
       site_settings_public: {
         Row: {
+          ai_model: string | null
           id: string | null
           maintenance_message: string | null
           maintenance_mode: boolean | null
           updated_at: string | null
+          updated_by: string | null
         }
         Insert: {
+          ai_model?: string | null
           id?: string | null
           maintenance_message?: string | null
           maintenance_mode?: boolean | null
           updated_at?: string | null
+          updated_by?: string | null
         }
         Update: {
+          ai_model?: string | null
           id?: string | null
           maintenance_message?: string | null
           maintenance_mode?: boolean | null
           updated_at?: string | null
+          updated_by?: string | null
         }
         Relationships: []
       }

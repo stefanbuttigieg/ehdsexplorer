@@ -113,6 +113,7 @@ const AdminSecuritySettingsPage = lazy(() => import("./pages/AdminSecuritySettin
 const AdminTranslationImportPage = lazy(() => import("./pages/AdminTranslationImportPage"));
 const ToolsHubPage = lazy(() => import("./pages/ToolsHubPage"));
 const AdminToolkitQuestionsPage = lazy(() => import("./pages/AdminToolkitQuestionsPage"));
+const AdminAISettingsPage = lazy(() => import("./pages/AdminAISettingsPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -248,6 +249,7 @@ const App = () => (
             <Route path="/admin/translation-import" element={<AdminTranslationImportPage />} />
             <Route path="/admin/resources" element={<AdminResourcesPage />} />
             <Route path="/admin/toolkit-questions" element={<AdminToolkitQuestionsPage />} />
+            <Route path="/admin/ai-settings" element={<AdminAISettingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>

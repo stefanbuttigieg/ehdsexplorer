@@ -42,6 +42,17 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Fetch configured AI model
+    let aiModel = "google/gemini-2.5-flash";
+    const { data: siteSettings } = await supabase
+      .from("site_settings")
+      .select("ai_model")
+      .eq("id", "default")
+      .single();
+    if (siteSettings?.ai_model) {
+      aiModel = siteSettings.ai_model;
+    }
+
     // Fetch the content based on type
     let originalContent: string;
     let contentTitle: string;
@@ -122,7 +133,7 @@ ${originalContent}`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: aiModel,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },

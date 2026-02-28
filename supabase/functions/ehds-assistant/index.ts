@@ -392,7 +392,18 @@ ${implementingActsList}
 
 When users ask about specific topics, reference the most relevant articles and explain how they apply. For navigation requests, provide direct references to articles, chapters, or definitions that address their query. Always end your response with a Sources section listing the specific articles, recitals, or definitions you referenced.`;
 
-    console.log("Calling Lovable AI gateway...");
+    // Fetch configured AI model from site settings
+    let aiModel = "google/gemini-2.5-flash";
+    const { data: siteSettings } = await supabase
+      .from("site_settings")
+      .select("ai_model")
+      .eq("id", "default")
+      .single();
+    if (siteSettings?.ai_model) {
+      aiModel = siteSettings.ai_model;
+    }
+
+    console.log("Calling Lovable AI gateway with model:", aiModel);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -401,7 +412,7 @@ When users ask about specific topics, reference the most relevant articles and e
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: aiModel,
         messages: [
           { role: "system", content: systemPrompt },
           ...messages,

@@ -1,7 +1,7 @@
 import { ReactNode, useState, useEffect, useMemo } from "react";
 import { version } from '../../package.json';
 import { Link, useLocation } from "react-router-dom";
-import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText, Accessibility, Code, Newspaper, Settings, HelpCircle, StickyNote, Users, GitCompare, PanelLeftClose, PanelLeft, Trophy, MapPin, Brain, Network, Heart, Laptop, Stethoscope, Sparkles, Wrench } from "lucide-react";
+import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText, Accessibility, Code, Newspaper, Settings, HelpCircle, StickyNote, Users, GitCompare, PanelLeftClose, PanelLeft, Trophy, MapPin, Brain, Network, Heart, Laptop, Stethoscope, Sparkles, Wrench, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toRoman } from "@/lib/romanNumerals";
@@ -106,8 +106,8 @@ const Layout = ({
     label: "Implementing Acts"
   }, {
     path: "/health-authorities",
-    icon: MapPin,
-    label: "National Entities"
+    icon: Globe,
+    label: "EHDS Country Map"
   }, {
     path: "/cross-regulation-map",
     icon: Network,

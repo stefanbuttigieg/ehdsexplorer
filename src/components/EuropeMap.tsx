@@ -54,21 +54,42 @@ interface CountryDetails {
   };
 }
 
+export interface ProgressData {
+  [code: string]: {
+    overall: number;
+    primaryUse: number;
+    secondaryUse: number;
+    general: number;
+  };
+}
+
+type MapMode = 'count' | 'progress';
+
 interface EuropeMapProps {
   countryData: CountryData;
   countryDetails?: CountryDetails;
+  progressData?: ProgressData;
   selectedCountry: string | null;
   onCountryClick: (code: string | null) => void;
   isLegislationView: boolean;
+  mode?: MapMode;
   className?: string;
 }
+
+const getProgressColor = (pct: number): string => {
+  if (pct >= 70) return '#22c55e'; // green
+  if (pct >= 30) return '#f59e0b'; // amber
+  return '#ef4444'; // red
+};
 
 export function EuropeMap({ 
   countryData, 
   countryDetails,
+  progressData,
   selectedCountry, 
   onCountryClick, 
   isLegislationView,
+  mode = 'count',
   className 
 }: EuropeMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -76,18 +97,31 @@ export function EuropeMap({
   const markersRef = useRef<L.Marker[]>([]);
 
   const getMarkerSize = (code: string, isHovered = false) => {
-    const count = countryData[code] || 0;
     const isSelected = selectedCountry === code;
     let size = 28;
-    if (isSelected) size = 40;
-    else if (count > 0) size = 32 + Math.min(count * 2, 8);
+    if (mode === 'progress') {
+      const pct = progressData?.[code]?.overall ?? 0;
+      if (isSelected) size = 40;
+      else size = 30 + Math.min(pct / 10, 10);
+    } else {
+      const count = countryData[code] || 0;
+      if (isSelected) size = 40;
+      else if (count > 0) size = 32 + Math.min(count * 2, 8);
+    }
     return isHovered ? size * 1.2 : size;
   };
 
   const getBorderColor = (code: string) => {
-    const hasData = countryData[code] > 0;
     const isSelected = selectedCountry === code;
-    
+
+    if (mode === 'progress') {
+      const pct = progressData?.[code]?.overall ?? -1;
+      if (pct < 0) return '#9ca3af';
+      if (isSelected) return getProgressColor(pct);
+      return getProgressColor(pct);
+    }
+
+    const hasData = countryData[code] > 0;
     if (isSelected) {
       return isLegislationView ? '#059669' : '#3b82f6';
     }
@@ -98,12 +132,14 @@ export function EuropeMap({
   };
 
   const createIcon = (country: typeof EU_COUNTRIES[0], isHovered = false) => {
-    const count = countryData[country.code] || 0;
-    const hasData = count > 0;
     const isSelected = selectedCountry === country.code;
     const size = getMarkerSize(country.code, isHovered);
     const borderColor = getBorderColor(country.code);
     const flag = getFlagEmoji(country.code);
+
+    const hasData = mode === 'progress'
+      ? (progressData?.[country.code]?.overall ?? -1) >= 0
+      : (countryData[country.code] || 0) > 0;
 
     return L.divIcon({
       className: 'custom-flag-marker',
@@ -134,16 +170,57 @@ export function EuropeMap({
 
   const createTooltipContent = (
     country: typeof EU_COUNTRIES[0],
-    isLegView: boolean,
-    details: CountryDetails | undefined,
-    data: CountryData
   ) => {
-    const count = data[country.code] || 0;
     const flag = getFlagEmoji(country.code);
-    const countryDetailsData = details?.[country.code];
+
+    if (mode === 'progress') {
+      const pd = progressData?.[country.code];
+      if (!pd) {
+        return `
+          <div style="min-width: 160px;">
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+              <span style="font-size: 18px;">${flag}</span>
+              <strong style="font-size: 14px; color: #111827;">${country.name}</strong>
+            </div>
+            <div style="font-size: 12px; color: #9ca3af;">No data yet</div>
+          </div>
+        `;
+      }
+      const barHtml = (label: string, pct: number) => `
+        <div style="margin-bottom: 4px;">
+          <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 2px;">
+            <span style="color: #374151;">${label}</span>
+            <span style="font-weight: 600; color: ${getProgressColor(pct)};">${Math.round(pct)}%</span>
+          </div>
+          <div style="height: 4px; background: #e5e7eb; border-radius: 2px; overflow: hidden;">
+            <div style="height: 100%; width: ${Math.round(pct)}%; background: ${getProgressColor(pct)}; border-radius: 2px;"></div>
+          </div>
+        </div>
+      `;
+      return `
+        <div style="min-width: 180px; max-width: 220px;">
+          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+            <span style="font-size: 18px;">${flag}</span>
+            <strong style="font-size: 14px; color: #111827;">${country.name}</strong>
+          </div>
+          <div style="font-size: 13px; font-weight: 600; color: ${getProgressColor(pd.overall)}; margin-bottom: 8px;">
+            ${Math.round(pd.overall)}% overall
+          </div>
+          <div style="border-top: 1px solid #e5e7eb; padding-top: 8px;">
+            ${barHtml('Primary Use', pd.primaryUse)}
+            ${barHtml('Secondary Use', pd.secondaryUse)}
+            ${barHtml('General', pd.general)}
+          </div>
+          <div style="font-size: 10px; color: #9ca3af; margin-top: 6px; text-align: center;">Click to filter</div>
+        </div>
+      `;
+    }
+
+    // Count mode (existing behavior)
+    const count = countryData[country.code] || 0;
+    const countryDetailsData = countryDetails?.[country.code];
     
-    // Check if there's any data in countryDetails (unfiltered) for the current view
-    const hasDetailsData = isLegView 
+    const hasDetailsData = isLegislationView 
       ? (countryDetailsData?.legislation?.length ?? 0) > 0
       : (countryDetailsData?.entities?.length ?? 0) > 0;
     
@@ -152,7 +229,7 @@ export function EuropeMap({
     let detailsHtml = '';
     
     if (countryDetailsData) {
-      if (isLegView && countryDetailsData.legislation?.length) {
+      if (isLegislationView && countryDetailsData.legislation?.length) {
         const items = countryDetailsData.legislation.slice(0, 3);
         detailsHtml = `
           <div style="margin-top: 8px; border-top: 1px solid #e5e7eb; padding-top: 8px;">
@@ -170,7 +247,7 @@ export function EuropeMap({
             ${countryDetailsData.legislation.length > 3 ? `<div style="font-size: 10px; color: #9ca3af; margin-top: 4px;">+${countryDetailsData.legislation.length - 3} more</div>` : ''}
           </div>
         `;
-      } else if (!isLegView && countryDetailsData.entities?.length) {
+      } else if (!isLegislationView && countryDetailsData.entities?.length) {
         const items = countryDetailsData.entities.slice(0, 3);
         detailsHtml = `
           <div style="margin-top: 8px; border-top: 1px solid #e5e7eb; padding-top: 8px;">
@@ -191,8 +268,7 @@ export function EuropeMap({
       }
     }
 
-    // Get the count to display based on unfiltered data for the current view
-    const displayCount = isLegView 
+    const displayCount = isLegislationView 
       ? (countryDetailsData?.legislation?.length ?? 0)
       : (countryDetailsData?.entities?.length ?? 0);
 
@@ -204,7 +280,7 @@ export function EuropeMap({
         </div>
         <div style="font-size: 12px; color: #6b7280;">
           ${hasData 
-            ? `<span style="font-weight: 600; color: ${isLegView ? '#059669' : '#3b82f6'};">${displayCount}</span> ${isLegView ? (displayCount === 1 ? 'law' : 'laws') : (displayCount === 1 ? 'entity' : 'entities')}`
+            ? `<span style="font-weight: 600; color: ${isLegislationView ? '#059669' : '#3b82f6'};">${displayCount}</span> ${isLegislationView ? (displayCount === 1 ? 'law' : 'laws') : (displayCount === 1 ? 'entity' : 'entities')}`
             : '<span style="color: #9ca3af;">No data yet</span>'
           }
         </div>
@@ -257,15 +333,13 @@ export function EuropeMap({
         zIndexOffset: isSelected ? 1000 : 0
       });
 
-      // Add tooltip with details - pass all parameters explicitly to avoid closure issues
-      marker.bindTooltip(createTooltipContent(country, isLegislationView, countryDetails, countryData), {
+      marker.bindTooltip(createTooltipContent(country), {
         direction: 'top',
         offset: [0, -15],
         className: 'custom-leaflet-tooltip',
         opacity: 1,
       });
 
-      // Hover effects - enlarge marker
       marker.on('mouseover', function() {
         this.setIcon(createIcon(country, true));
         this.setZIndexOffset(500);
@@ -283,7 +357,7 @@ export function EuropeMap({
       marker.addTo(map);
       markersRef.current.push(marker);
     });
-  }, [countryData, countryDetails, selectedCountry, isLegislationView, onCountryClick]);
+  }, [countryData, countryDetails, progressData, selectedCountry, isLegislationView, onCountryClick, mode]);
 
   // Pan to selected country
   useEffect(() => {
@@ -299,6 +373,55 @@ export function EuropeMap({
       map.setView([54, 10], 4, { animate: true });
     }
   }, [selectedCountry]);
+
+  const renderLegend = () => {
+    if (mode === 'progress') {
+      return (
+        <div className="absolute bottom-4 left-4 bg-background/95 backdrop-blur-sm rounded-lg p-3 text-xs space-y-2 shadow-lg border z-[1000]">
+          <div className="font-medium text-foreground mb-1">Implementation Progress</div>
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-4 rounded-full border-2 border-white shadow" style={{ backgroundColor: '#22c55e' }} />
+            <span>≥ 70%</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-4 rounded-full border-2 border-white shadow" style={{ backgroundColor: '#f59e0b' }} />
+            <span>30–69%</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-4 rounded-full border-2 border-white shadow" style={{ backgroundColor: '#ef4444' }} />
+            <span>&lt; 30%</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-4 rounded-full bg-muted-foreground/40 border-2 border-white shadow" />
+            <span>No data</span>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="absolute bottom-4 left-4 bg-background/95 backdrop-blur-sm rounded-lg p-3 text-xs space-y-2 shadow-lg border z-[1000]">
+        <div className="font-medium text-foreground mb-1">Legend</div>
+        <div className="flex items-center gap-2">
+          <div 
+            className="h-4 w-4 rounded-full border-2 border-white shadow"
+            style={{ backgroundColor: isLegislationView ? '#10b981' : '#3b82f6' }}
+          />
+          <span>Has {isLegislationView ? 'legislation' : 'entities'}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-4 w-4 rounded-full bg-muted-foreground/40 border-2 border-white shadow" />
+          <span>No data yet</span>
+        </div>
+      </div>
+    );
+  };
+
+  const titleText = mode === 'progress'
+    ? 'EHDS Implementation Progress'
+    : isLegislationView
+      ? 'National EHDS Legislation'
+      : 'National EHDS Entities';
 
   return (
     <div className={cn("relative w-full h-[500px] rounded-lg overflow-hidden border", className)}>
@@ -321,27 +444,11 @@ export function EuropeMap({
       `}</style>
       <div ref={mapRef} className="h-full w-full z-0" style={{ background: '#e5e7eb' }} />
 
-      {/* Legend */}
-      <div className="absolute bottom-4 left-4 bg-background/95 backdrop-blur-sm rounded-lg p-3 text-xs space-y-2 shadow-lg border z-[1000]">
-        <div className="font-medium text-foreground mb-1">Legend</div>
-        <div className="flex items-center gap-2">
-          <div 
-            className="h-4 w-4 rounded-full border-2 border-white shadow"
-            style={{ backgroundColor: isLegislationView ? '#10b981' : '#3b82f6' }}
-          />
-          <span>Has {isLegislationView ? 'legislation' : 'entities'}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-4 w-4 rounded-full bg-muted-foreground/40 border-2 border-white shadow" />
-          <span>No data yet</span>
-        </div>
-      </div>
+      {renderLegend()}
 
       {/* Title */}
       <div className="absolute top-4 left-4 bg-background/95 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg border z-[1000]">
-        <span className="text-sm font-medium">
-          {isLegislationView ? 'National EHDS Legislation' : 'National EHDS Entities'}
-        </span>
+        <span className="text-sm font-medium">{titleText}</span>
       </div>
     </div>
   );

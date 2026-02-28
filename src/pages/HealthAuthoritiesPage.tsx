@@ -15,6 +15,7 @@ import { useImplementationTrackerConfig } from '@/hooks/useImplementationTracker
 import { CountryLegislationCard } from '@/components/CountryLegislationCard';
 import { LEGISLATION_STATUSES, LEGISLATION_TYPES, LegislationStatus, LegislationType } from '@/data/legislationConstants';
 import { EuropeMap, type ProgressData } from '@/components/EuropeMap';
+import { DisclaimerBanner } from '@/components/DisclaimerBanner';
 import { Search, MapPin, Globe, Mail, Phone, Building2, Shield, ExternalLink, Map as MapIcon, List, Gavel, BarChart3, TrendingUp, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -355,15 +356,7 @@ export default function HealthAuthoritiesPage() {
         {/* Info Cards — swap based on active tab */}
         {activeTab === 'implementation' ? (
           <div className="space-y-4">
-            <div className="flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-4">
-              <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5 shrink-0" />
-              <div>
-                <p className="text-sm font-medium">Data update in progress</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Implementation tracking data is currently being updated across all member states. You will be notified once the update is complete.
-                </p>
-              </div>
-            </div>
+            <DisclaimerBanner placement="country_map_implementation" />
             <div className="grid gap-4 md:grid-cols-3">
             <Card className="border-l-4 border-l-primary">
               <CardHeader className="pb-2">

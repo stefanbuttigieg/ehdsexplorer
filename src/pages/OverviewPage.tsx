@@ -6,6 +6,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { usePageContent } from "@/hooks/usePageContent";
 import { KeyDatesGantt } from "@/components/KeyDatesGantt";
 import { ImplementationTimelineTracker } from "@/components/ImplementationTimelineTracker";
+import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useIsFeatureEnabled } from "@/hooks/useFeatureFlags";
 
@@ -90,10 +91,13 @@ const OverviewPage = () => {
                 </TabsContent>
                 
                 <TabsContent value="implementation">
-                  <ImplementationTimelineTracker 
-                    showKeyDates={false}
-                    keyDates={content?.key_dates?.dates || []}
-                  />
+                  <div className="space-y-4">
+                    <DisclaimerBanner placement="implementation_tracker" />
+                    <ImplementationTimelineTracker 
+                      showKeyDates={false}
+                      keyDates={content?.key_dates?.dates || []}
+                    />
+                  </div>
                 </TabsContent>
               </Tabs>
             ) : (

@@ -1,177 +1,68 @@
 
-# Stakeholder-Specific Views & Scenario-Driven Guidance
 
-## Analysis Summary
+## Implementation Progress Map Tab + Sidebar Update
 
-The GitHub issue suggests enhancing the EHDS Explorer to better serve different stakeholder groups beyond the current "implementer/regulator" focus. The good news is that **significant foundational work already exists** that can be leveraged.
-
----
-
-## What Already Exists (Foundation to Build On)
-
-| Capability | Current State |
-|------------|---------------|
-| **AI Role System** | 6 personas (General, Healthcare, Legal, Researcher, Developer, Policy) in the AI Assistant |
-| **Explanation Levels** | 4 levels (Expert → Beginner) to adjust complexity |
-| **Plain Language** | AI-generated simplified versions of articles/recitals with feedback system |
-| **Context Suggestions** | Dynamic quick questions based on current page |
-| **Help Center FAQ** | Admin-manageable FAQ system with categories |
+### Summary
+Add a third "Implementation" tab to the National EHDS Entities page and update the sidebar navigation to reflect the page's broader scope -- it now covers entities, legislation, AND implementation progress.
 
 ---
 
-## Feature Breakdown & Quick Wins
+### 1. Sidebar Navigation Update
 
-### QUICK WIN 1: Stakeholder Landing Pages (Low Effort, High Impact)
-**Time estimate: 1-2 sessions**
+**File:** `src/components/Layout.tsx`
 
-Create dedicated "I am a..." landing pages that curate existing content for specific audiences:
+- Rename the nav item from **"National Entities"** to **"EHDS Country Map"** (or similar, e.g. "Country Hub")
+- Change the icon from `MapPin` to `MapIcon` (or `Globe`) to better represent the broader scope
+- The route stays `/health-authorities` to avoid breaking links
 
-- `/for/citizens` - Rights focus with plain language defaults
-- `/for/healthtech` - Compliance checklist, relevant articles grouped
-- `/for/healthcare-professionals` - Workflow-oriented guide
-
-**Implementation:**
-- New page component per stakeholder type
-- Curated links to existing articles grouped by relevance
-- Auto-enable plain language view for citizen-focused pages
-- No new data structures needed
+**File:** `src/components/MobileBottomNav.tsx`
+- Update any matching label/icon if this item appears in the mobile nav
 
 ---
 
-### QUICK WIN 2: "Your Rights at a Glance" Section for Citizens
-**Time estimate: 1 session**
+### 2. Page Title & Header Update
 
-Add a prominent section on the homepage or new citizen page that maps citizen rights to articles:
+**File:** `src/pages/HealthAuthoritiesPage.tsx`
 
-| Right | Article Reference |
-|-------|-------------------|
-| Access your health data | Art. 3 |
-| Request corrections | Art. 4 |
-| Portability to another provider | Art. 5 |
-| Know who accessed your data | Art. 12 |
-
-**Implementation:**
-- New reusable component: `CitizenRightsCard.tsx`
-- Static data mapping rights to articles (can be admin-managed later)
-- Links to articles with auto-enabled plain language toggle
+- Update the page `<title>` and heading from "National EHDS Entities" to **"EHDS Country Map"**
+- Update the subtitle to reflect all three tabs: entities, legislation, and implementation progress
 
 ---
 
-### QUICK WIN 3: Add "Citizen" Role to AI Assistant
-**Time estimate: 30 minutes**
+### 3. Implementation Progress Tab
 
-The AI role system currently lacks a dedicated "Citizen" persona. Add it with beginner-friendly prompts:
+**File:** `src/pages/HealthAuthoritiesPage.tsx`
 
-```typescript
-{
-  id: 'citizen',
-  label: 'Citizen / Patient',
-  description: 'My rights and how EHDS affects me',
-  icon: 'Heart',
-  promptAddition: `
-USER ROLE: Citizen / Patient
-Focus on explaining how the EHDS regulation protects and empowers individuals. Emphasize:
-- Your rights to access your own health data (Chapter II)
-- How to request, view, and share your electronic health records
-- Cross-border healthcare rights when traveling in the EU
-- What happens if your rights are violated
-- How to file complaints with health authorities
-Use simple, everyday language. Avoid legal jargon.`
-}
-```
+- Add a third `TabsTrigger` value `"implementation"` with a progress-related icon (e.g. `CheckCircle2` or `BarChart3`)
+- Import `useEhdsObligations` and related hooks already used by `ImplementationTimelineTracker`
+- Compute per-country overall progress percentages using the existing weighted obligation status formula
+- Pass progress data to `EuropeMap` when this tab is active
+- In list view: show a ranked table of countries with progress bars
+
+**Info cards** at the top will swap to show:
+- Average EU-wide implementation progress
+- Count of countries above/below 50%
+- Summary badges for primary use vs secondary use readiness
 
 ---
 
-### MEDIUM EFFORT: Scenario-Driven Guidance System
-**Time estimate: 3-5 sessions**
+### 4. EuropeMap Progress Mode
 
-Create a Q&A / scenario interface that helps users find relevant articles based on their situation.
+**File:** `src/components/EuropeMap.tsx`
 
-**User Flow:**
-1. User describes scenario in text (or selects from common examples)
-2. AI analyzes and identifies relevant articles/obligations
-3. Response includes:
-   - Why these articles apply
-   - What "compliant" looks like
-   - What evidence/documentation may be needed
-
-**Implementation Options:**
-
-**Option A: Enhance Existing AI Assistant**
-- Add a "Scenario Mode" toggle
-- Include structured response format (articles, obligations, compliance tips)
-- Add pre-built scenario templates as quick suggestions
-
-**Option B: Dedicated Scenario Finder Page**
-- New page: `/scenario-finder`
-- Guided form with common scenario types
-- AI-generated analysis with article citations
+- Add an optional `mode` prop: `'count'` (default, current behavior) or `'progress'`
+- In progress mode:
+  - Marker border colors use a green/amber/red gradient based on % (green > 70%, amber 30-70%, red < 30%)
+  - Tooltip shows overall progress % with a mini breakdown (primary use / secondary use / general)
+- Update the legend to show the progress color scale when in progress mode
+- Existing Entities and Legislation tabs are completely unaffected
 
 ---
 
-### MEDIUM EFFORT: Compliance Checklist for Health Tech
-**Time estimate: 2-3 sessions**
+### Technical Notes
 
-Create an interactive compliance checklist page for health tech companies:
+- No database migrations required -- all data comes from existing `country_obligation_status` and `ehdsi_kpi_data` tables via existing hooks
+- Progress calculation logic (~30 lines) will be extracted or kept inline, reusing the same formula from `ImplementationTimelineTracker`
+- The `EuropeMap` changes are backward-compatible via the optional `mode` prop
+- Files modified: `Layout.tsx`, `HealthAuthoritiesPage.tsx`, `EuropeMap.tsx`, possibly `MobileBottomNav.tsx`
 
-- Grouped by obligation type (EHR systems, wellness apps, data holders)
-- Each item links to relevant article
-- Progress tracking (localStorage or user account)
-- Export as PDF/CSV for documentation
-
-**Data structure:**
-```typescript
-interface ComplianceItem {
-  id: string;
-  category: 'ehr_system' | 'wellness_app' | 'data_holder';
-  requirement: string;
-  articleReferences: number[];
-  evidenceHint: string;
-}
-```
-
----
-
-### LARGER EFFORT: Stakeholder-Filtered Content Mode
-**Time estimate: 5-8 sessions**
-
-Add a global "View as..." filter that persists across the application:
-
-- Filters articles/recitals to show only those relevant to selected stakeholder
-- Highlights key provisions per stakeholder
-- Auto-adjusts AI assistant role and explanation level
-- Stored in user preferences (localStorage or profile)
-
-**Technical approach:**
-- Add stakeholder relevance tags to articles in database
-- Create context provider for global stakeholder filter
-- Filter content display based on active stakeholder view
-
----
-
-## Recommended Prioritization
-
-| Priority | Feature | Effort | Impact |
-|----------|---------|--------|--------|
-| 1 | Add "Citizen" role to AI Assistant | 30 min | Quick win, immediately useful |
-| 2 | Citizen Rights Card component | 1 session | High visibility for citizens |
-| 3 | `/for/citizens` landing page | 1-2 sessions | Dedicated citizen experience |
-| 4 | Scenario Mode for AI Assistant | 2-3 sessions | Addresses Q&A request directly |
-| 5 | Health Tech Compliance Checklist | 2-3 sessions | Valuable for companies |
-| 6 | Stakeholder Landing Pages (all) | 3-4 sessions | Complete stakeholder coverage |
-| 7 | Global Stakeholder Filter | 5-8 sessions | Comprehensive but complex |
-
----
-
-## Where to Start
-
-I recommend starting with **Quick Wins 1-3** as they:
-- Require minimal new infrastructure
-- Leverage existing systems (AI roles, plain language)
-- Provide immediate value to the stakeholder groups mentioned
-- Can be shipped incrementally
-
-Would you like me to implement any of these features? The fastest to implement would be:
-1. **Add Citizen role to AI Assistant** (can do right now)
-2. **Create a Citizen Rights Card component** (visual, high impact)
-3. **Build the `/for/citizens` landing page** (pulling it all together)

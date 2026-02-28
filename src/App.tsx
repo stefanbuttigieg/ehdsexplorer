@@ -48,6 +48,7 @@ const AdminOverviewPage = lazy(() => import("./pages/AdminOverviewPage"));
 const AdminJointActionDeliverablesPage = lazy(() => import("./pages/AdminJointActionDeliverablesPage"));
 const AdminPublishedWorksPage = lazy(() => import("./pages/AdminPublishedWorksPage"));
 const AdminNotificationsPage = lazy(() => import("./pages/AdminNotificationsPage"));
+const AdminDisclaimersPage = lazy(() => import("./pages/AdminDisclaimersPage"));
 const AdminResourcesPage = lazy(() => import("./pages/AdminResourcesPage"));
 const AdminUsersPage = lazy(() => import("./pages/AdminUsersPage"));
 const AdminFootnotesPage = lazy(() => import("./pages/AdminFootnotesPage"));
@@ -214,6 +215,7 @@ const App = () => (
             <Route path="/admin/joint-action-deliverables" element={<AdminJointActionDeliverablesPage />} />
             <Route path="/admin/published-works" element={<AdminPublishedWorksPage />} />
             <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
+            <Route path="/admin/disclaimers" element={<AdminDisclaimersPage />} />
             <Route path="/admin/users" element={<AdminUsersPage />} />
             <Route path="/admin/footnotes" element={<AdminFootnotesPage />} />
             <Route path="/admin/help" element={<AdminHelpCenterPage />} />

@@ -3438,6 +3438,39 @@ export type Database = {
           },
         ]
       }
+      site_disclaimers: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          message: string
+          placement: string[]
+          title: string
+          updated_at: string
+          variant: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          is_active?: boolean
+          message: string
+          placement?: string[]
+          title: string
+          updated_at?: string
+          variant?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          message?: string
+          placement?: string[]
+          title?: string
+          updated_at?: string
+          variant?: string
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           id: string

@@ -43,6 +43,17 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
 
+    // Fetch configured AI model
+    let aiModel = "google/gemini-2.5-flash";
+    const { data: siteSettings } = await supabase
+      .from("site_settings")
+      .select("ai_model")
+      .eq("id", "default")
+      .single();
+    if (siteSettings?.ai_model) {
+      aiModel = siteSettings.ai_model;
+    }
+
     // Parse request body to get optional changelog content
     let changelogContent = "";
     try {
@@ -121,7 +132,7 @@ Generate a user-friendly product updates summary based on the most recent change
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: aiModel,
         messages: [
           { role: "system", content: "You are a friendly product communications expert who creates engaging feature announcements for the EHDS Regulation Explorer platform." },
           { role: "user", content: fullPrompt }

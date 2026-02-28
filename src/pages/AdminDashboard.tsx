@@ -350,6 +350,18 @@ const AdminDashboard = () => {
                   </CardHeader>
                 </Card>
               </Link>
+              <Link to="/admin/ai-settings">
+                <Card className="hover:border-primary transition-colors h-full border-dashed">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <Bot className="h-8 w-8 text-primary" />
+                      <Badge>Admin Only</Badge>
+                    </div>
+                    <CardTitle className="mt-4">AI Settings</CardTitle>
+                    <CardDescription>Configure AI model for all AI-powered features</CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
               <Link to="/admin/country-assignments">
                 <Card className="hover:border-primary transition-colors h-full border-dashed">
                   <CardHeader>

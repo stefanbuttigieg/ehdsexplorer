@@ -5,6 +5,7 @@ interface SiteSettings {
   id: string;
   maintenance_mode: boolean;
   maintenance_message: string;
+  ai_model: string;
   updated_at: string;
   updated_by: string | null;
 }
@@ -27,6 +28,7 @@ export const useSiteSettings = () => {
           id: 'default',
           maintenance_mode: false,
           maintenance_message: '',
+          ai_model: 'google/gemini-2.5-flash',
           updated_at: new Date().toISOString(),
           updated_by: null
         } as SiteSettings;

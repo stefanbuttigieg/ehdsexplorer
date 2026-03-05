@@ -29,6 +29,34 @@ import ReloadPrompt from "@/components/ReloadPrompt";
 import { StakeholderFilter } from "@/components/StakeholderFilter";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { MFAReminderBanner } from "@/components/mfa/MFAReminderBanner";
+import { DisclaimerBanner } from "@/components/DisclaimerBanner";
+
+const ROUTE_TO_PLACEMENT: Record<string, string> = {
+  '/': 'home',
+  '/articles': 'articles',
+  '/recitals': 'recitals',
+  '/definitions': 'definitions',
+  '/implementing-acts': 'implementing_acts',
+  '/annexes': 'annexes',
+  '/news': 'news',
+  '/for-citizens': 'for_citizens',
+  '/for-healthcare': 'for_healthcare',
+  '/for-healthtech': 'for_healthtech',
+  '/health-authorities': 'health_authorities',
+  '/cross-regulation': 'cross_regulation',
+  '/games': 'games',
+  '/tools': 'tools',
+};
+
+function LayoutDisclaimers({ pathname }: { pathname: string }) {
+  const placement = ROUTE_TO_PLACEMENT[pathname];
+  if (!placement) return null;
+  return (
+    <div className="px-4 pt-2">
+      <DisclaimerBanner placement={placement} />
+    </div>
+  );
+}
 
 interface LayoutProps {
   children: ReactNode;
@@ -385,6 +413,7 @@ const Layout = ({
           <div className="p-4">
             <NotificationsBanner />
           </div>
+          <LayoutDisclaimers pathname={location.pathname} />
           {children}
         </div>
       </main>

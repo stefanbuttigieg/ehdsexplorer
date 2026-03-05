@@ -27,7 +27,9 @@ export function useDisclaimers(placement?: string) {
 
       const disclaimers = (data as unknown as SiteDisclaimer[]) || [];
       if (placement) {
-        return disclaimers.filter(d => d.placement.includes(placement));
+        return disclaimers.filter(d =>
+          d.placement.includes(placement) || d.placement.includes('global')
+        );
       }
       return disclaimers;
     },

@@ -11,28 +11,55 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const PLACEMENT_OPTIONS = [
-  { value: 'implementation_tracker', label: 'Overview — Implementation Tab' },
-  { value: 'country_map_implementation', label: 'Country Map — Implementation Tab' },
-  { value: 'home', label: 'Home Page' },
-  { value: 'articles', label: 'Articles List' },
-  { value: 'recitals', label: 'Recitals List' },
-  { value: 'definitions', label: 'Definitions Page' },
-  { value: 'implementing_acts', label: 'Implementing Acts List' },
-  { value: 'annexes', label: 'Annexes Page' },
-  { value: 'news', label: 'News Page' },
-  { value: 'for_citizens', label: 'For Citizens Page' },
-  { value: 'for_healthcare', label: 'For Healthcare Professionals' },
-  { value: 'for_healthtech', label: 'For Health Tech' },
-  { value: 'health_authorities', label: 'Health Authorities Page' },
-  { value: 'cross_regulation', label: 'Cross-Regulation Map' },
-  { value: 'games', label: 'Games Hub' },
-  { value: 'tools', label: 'Tools Hub' },
-  { value: 'global', label: 'All Pages (Global Banner)' },
+const PLACEMENT_GROUPS = [
+  {
+    label: 'Main Pages',
+    options: [
+      { value: 'home', label: 'Home Page' },
+      { value: 'articles', label: 'Articles List' },
+      { value: 'recitals', label: 'Recitals List' },
+      { value: 'definitions', label: 'Definitions Page' },
+      { value: 'implementing_acts', label: 'Implementing Acts List' },
+      { value: 'annexes', label: 'Annexes Page' },
+      { value: 'news', label: 'News Page' },
+    ],
+  },
+  {
+    label: 'Audience Pages',
+    options: [
+      { value: 'for_citizens', label: 'For Citizens' },
+      { value: 'for_healthcare', label: 'For Healthcare Professionals' },
+      { value: 'for_healthtech', label: 'For Health Tech' },
+    ],
+  },
+  {
+    label: 'Tools & Features',
+    options: [
+      { value: 'health_authorities', label: 'Health Authorities' },
+      { value: 'cross_regulation', label: 'Cross-Regulation Map' },
+      { value: 'games', label: 'Games Hub' },
+      { value: 'tools', label: 'Tools Hub' },
+      { value: 'implementation_tracker', label: 'Overview — Implementation Tab' },
+      { value: 'country_map_implementation', label: 'Country Map — Implementation Tab' },
+    ],
+  },
+  {
+    label: 'Special',
+    options: [
+      { value: 'global', label: '🌐 All Pages (Global Banner)' },
+    ],
+  },
 ];
+
+const ALL_PLACEMENT_OPTIONS = PLACEMENT_GROUPS.flatMap(g => g.options);
+
+function PlacementLabel({ value }: { value: string }) {
+  const opt = ALL_PLACEMENT_OPTIONS.find(o => o.value === value);
+  return <>{opt?.label || value}</>;
+}
 
 export default function AdminDisclaimersPage() {
   const { isLoading: isChecking } = useAdminGuard();
@@ -55,6 +82,25 @@ export default function AdminDisclaimersPage() {
   const save = () => {
     if (!editing?.id || !editing.title || !editing.message) return;
     upsert.mutate(editing as SiteDisclaimer, { onSuccess: () => setEditing(null) });
+  };
+
+  const togglePlacement = (val: string) => {
+    if (!editing) return;
+    const placements = editing.placement || [];
+    setEditing({
+      ...editing,
+      placement: placements.includes(val)
+        ? placements.filter(p => p !== val)
+        : [...placements, val],
+    });
+  };
+
+  const removePlacement = (val: string) => {
+    if (!editing) return;
+    setEditing({
+      ...editing,
+      placement: (editing.placement || []).filter(p => p !== val),
+    });
   };
 
   return (
@@ -86,7 +132,7 @@ export default function AdminDisclaimersPage() {
                 <div className="flex flex-wrap gap-1 mt-2">
                   {d.placement.map(p => (
                     <Badge key={p} variant="secondary" className="text-[10px]">
-                      {PLACEMENT_OPTIONS.find(o => o.value === p)?.label || p}
+                      <PlacementLabel value={p} />
                     </Badge>
                   ))}
                 </div>
@@ -106,7 +152,7 @@ export default function AdminDisclaimersPage() {
 
       {/* Edit / Create Dialog */}
       <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editing?.created_at ? 'Edit Disclaimer' : 'New Disclaimer'}</DialogTitle>
           </DialogHeader>
@@ -147,33 +193,64 @@ export default function AdminDisclaimersPage() {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Placement Section */}
               <div>
-                <Label>Placement</Label>
-                <div className="space-y-2 mt-1 max-h-48 overflow-y-auto border rounded-md p-2">
-                  {PLACEMENT_OPTIONS.map(opt => (
-                    <label key={opt.value} className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={editing.placement?.includes(opt.value) || false}
-                        onChange={e => {
-                          const placements = editing.placement || [];
-                          setEditing({
-                            ...editing,
-                            placement: e.target.checked
-                              ? [...placements, opt.value]
-                              : placements.filter(p => p !== opt.value),
-                          });
-                        }}
-                        className="rounded"
-                      />
-                      {opt.label}
-                    </label>
+                <Label>Where to show this disclaimer</Label>
+
+                {/* Selected placements as removable badges */}
+                {(editing.placement?.length ?? 0) > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2 mb-3">
+                    {editing.placement!.map(p => (
+                      <Badge key={p} variant="default" className="gap-1 pr-1">
+                        <PlacementLabel value={p} />
+                        <button
+                          type="button"
+                          onClick={() => removePlacement(p)}
+                          className="ml-0.5 rounded-full hover:bg-primary-foreground/20 p-0.5"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+
+                {/* Grouped checkboxes */}
+                <div className="border rounded-md max-h-56 overflow-y-auto">
+                  {PLACEMENT_GROUPS.map(group => (
+                    <div key={group.label}>
+                      <div className="px-3 py-1.5 bg-muted/50 text-xs font-semibold text-muted-foreground sticky top-0">
+                        {group.label}
+                      </div>
+                      {group.options.map(opt => (
+                        <label
+                          key={opt.value}
+                          className={cn(
+                            "flex items-center gap-2 px-3 py-1.5 text-sm cursor-pointer hover:bg-accent/50 transition-colors",
+                            editing.placement?.includes(opt.value) && "bg-accent/30"
+                          )}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={editing.placement?.includes(opt.value) || false}
+                            onChange={() => togglePlacement(opt.value)}
+                            className="rounded"
+                          />
+                          {opt.label}
+                        </label>
+                      ))}
+                    </div>
                   ))}
                 </div>
-                <div className="mt-2">
-                  <Label className="text-xs text-muted-foreground">Custom placement (e.g. implementing_act:art-92-1)</Label>
+
+                {/* Custom placement input */}
+                <div className="mt-3">
+                  <Label className="text-xs text-muted-foreground">
+                    Target a specific page (e.g. implementing_act:art-92-1)
+                  </Label>
                   <Input
-                    placeholder="implementing_act:art-92-1"
+                    placeholder="implementing_act:art-92-1 then press Enter"
                     onKeyDown={e => {
                       if (e.key === 'Enter') {
                         e.preventDefault();
@@ -188,6 +265,7 @@ export default function AdminDisclaimersPage() {
                   />
                 </div>
               </div>
+
               <div className="flex items-center gap-2">
                 <Switch
                   checked={editing.is_active ?? true}

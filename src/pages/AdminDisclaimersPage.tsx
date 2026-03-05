@@ -17,6 +17,21 @@ import { cn } from '@/lib/utils';
 const PLACEMENT_OPTIONS = [
   { value: 'implementation_tracker', label: 'Overview — Implementation Tab' },
   { value: 'country_map_implementation', label: 'Country Map — Implementation Tab' },
+  { value: 'home', label: 'Home Page' },
+  { value: 'articles', label: 'Articles List' },
+  { value: 'recitals', label: 'Recitals List' },
+  { value: 'definitions', label: 'Definitions Page' },
+  { value: 'implementing_acts', label: 'Implementing Acts List' },
+  { value: 'annexes', label: 'Annexes Page' },
+  { value: 'news', label: 'News Page' },
+  { value: 'for_citizens', label: 'For Citizens Page' },
+  { value: 'for_healthcare', label: 'For Healthcare Professionals' },
+  { value: 'for_healthtech', label: 'For Health Tech' },
+  { value: 'health_authorities', label: 'Health Authorities Page' },
+  { value: 'cross_regulation', label: 'Cross-Regulation Map' },
+  { value: 'games', label: 'Games Hub' },
+  { value: 'tools', label: 'Tools Hub' },
+  { value: 'global', label: 'All Pages (Global Banner)' },
 ];
 
 export default function AdminDisclaimersPage() {
@@ -134,7 +149,7 @@ export default function AdminDisclaimersPage() {
               </div>
               <div>
                 <Label>Placement</Label>
-                <div className="space-y-2 mt-1">
+                <div className="space-y-2 mt-1 max-h-48 overflow-y-auto border rounded-md p-2">
                   {PLACEMENT_OPTIONS.map(opt => (
                     <label key={opt.value} className="flex items-center gap-2 text-sm">
                       <input
@@ -154,6 +169,23 @@ export default function AdminDisclaimersPage() {
                       {opt.label}
                     </label>
                   ))}
+                </div>
+                <div className="mt-2">
+                  <Label className="text-xs text-muted-foreground">Custom placement (e.g. implementing_act:art-92-1)</Label>
+                  <Input
+                    placeholder="implementing_act:art-92-1"
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const val = (e.target as HTMLInputElement).value.trim();
+                        if (val && !editing.placement?.includes(val)) {
+                          setEditing({ ...editing, placement: [...(editing.placement || []), val] });
+                          (e.target as HTMLInputElement).value = '';
+                        }
+                      }
+                    }}
+                    className="mt-1"
+                  />
                 </div>
               </div>
               <div className="flex items-center gap-2">

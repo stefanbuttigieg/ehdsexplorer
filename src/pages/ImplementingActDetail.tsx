@@ -16,6 +16,7 @@ import ImplementingActContent from "@/components/ImplementingActContent";
 import { SubscribeAlertButton } from "@/components/SubscribeAlertButton";
 import { CompareButton } from "@/components/CompareButton";
 import LinkedInPostsSection from "@/components/LinkedInPostsSection";
+import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 
 const parseFeedbackDeadline = (deadline: string) => {
   const parts = deadline.split(" - ");
@@ -127,6 +128,8 @@ const ImplementingActDetail = () => {
             </Button>
           </div>
         </div>
+
+        <DisclaimerBanner placement={`implementing_act:${act.id}`} className="mb-6" />
 
         <Card className="mb-6">
           <CardContent className="p-6">

@@ -84,27 +84,8 @@ const ImplementingActsPage = () => {
         </div>
         <p className="text-muted-foreground mb-4">Track the progress of delegated and implementing acts required by the EHDS Regulation</p>
 
-        {/* Comitology Register Link */}
-        <Card className="mb-6 border-primary/20 bg-primary/5">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between gap-4 flex-wrap">
-              <div className="flex items-center gap-2">
-                <ExternalLink className="h-5 w-5 text-primary" />
-                <span className="font-medium">Follow developments on the EU Comitology Register</span>
-              </div>
-              <a 
-                href="https://ec.europa.eu/transparency/comitology-register/screen/committees/C131500" 
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
-                <Button variant="outline" size="sm">
-                  View C131500 Register
-                  <ExternalLink className="h-4 w-4 ml-2" />
-                </Button>
-              </a>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Comitology Register Updates */}
+        <ComitologyUpdatesCard />
 
         {/* Stats - now with 5 columns including feedback-closed */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">

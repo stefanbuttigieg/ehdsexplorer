@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Linkedin } from "lucide-react";
-import { Plus, Trash2, Edit, Save, X, ArrowLeft } from "lucide-react";
+import { Plus, Trash2, Edit, Save, X, ArrowLeft, Upload, Loader2, Check } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,10 @@ import { useLinkedInPosts, useCreateLinkedInPost, useDeleteLinkedInPost, LinkedI
 import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import MarkdownEditor from "@/components/MarkdownEditor";
+import { useImplementingActImport } from "@/hooks/useImplementingActImport";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
 
 const AdminImplementingActContentPage = () => {
   const { id } = useParams();
@@ -56,6 +60,39 @@ const AdminImplementingActContentPage = () => {
   const [newLinkedInPost, setNewLinkedInPost] = useState({ post_url: "", title: "", description: "", author_name: "", posted_at: "" });
 
   const isLoading = loadingAct || loadingRecitals || loadingSections || loadingArticles;
+
+  // Import functionality
+  const {
+    isParsing: isImportParsing,
+    isImporting: isImportRunning,
+    parsedContent: importParsed,
+    parseDocument: importParse,
+    importToImplementingAct,
+    reset: resetImport,
+  } = useImplementingActImport();
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [importText, setImportText] = useState("");
+
+  const handleImportParse = useCallback(async () => {
+    if (importText.trim()) {
+      await importParse(importText);
+    }
+  }, [importText, importParse]);
+
+  const handleImportConfirm = useCallback(async () => {
+    if (!importParsed || !id) return;
+    const articleNums = importParsed.articles.map(a => a.articleNumber);
+    const recitalNums = importParsed.recitals.map(r => r.recitalNumber);
+    const result = await importToImplementingAct(id, articleNums, recitalNums);
+    if (result) {
+      setShowImportDialog(false);
+      setImportText("");
+      resetImport();
+      queryClient.invalidateQueries({ queryKey: ["implementing-act-recitals", id] });
+      queryClient.invalidateQueries({ queryKey: ["implementing-act-articles", id] });
+      queryClient.invalidateQueries({ queryKey: ["implementing-act-sections", id] });
+    }
+  }, [importParsed, id, importToImplementingAct, resetImport, queryClient]);
 
   // Mutations
   const addRecitalMutation = useMutation({
@@ -239,10 +276,69 @@ const AdminImplementingActContentPage = () => {
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
-          <div>
+          <div className="flex-1">
             <h1 className="text-2xl font-bold">{act.title}</h1>
             <p className="text-muted-foreground">{act.articleReference}</p>
           </div>
+          <Dialog open={showImportDialog} onOpenChange={(open) => { setShowImportDialog(open); if (!open) { resetImport(); setImportText(""); } }}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Upload className="h-4 w-4 mr-2" />
+                Import from Document
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Import Implementing Act Content</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                {!importParsed ? (
+                  <>
+                    <Textarea
+                      placeholder="Paste the full text of the implementing act here..."
+                      value={importText}
+                      onChange={(e) => setImportText(e.target.value)}
+                      className="h-64 font-mono text-sm"
+                      disabled={isImportParsing}
+                    />
+                    <Button
+                      className="w-full"
+                      onClick={handleImportParse}
+                      disabled={isImportParsing || !importText.trim()}
+                    >
+                      {isImportParsing ? (
+                        <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Parsing...</>
+                      ) : (
+                        "Parse Content"
+                      )}
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Alert>
+                      <Check className="h-4 w-4" />
+                      <AlertDescription>
+                        Found {importParsed.articles.length} articles, {importParsed.recitals.length} recitals.
+                        This will replace all existing content for this implementing act.
+                      </AlertDescription>
+                    </Alert>
+                    <div className="flex gap-2">
+                      <Button variant="outline" onClick={() => { resetImport(); setImportText(""); }} className="flex-1">
+                        Cancel
+                      </Button>
+                      <Button onClick={handleImportConfirm} disabled={isImportRunning} className="flex-1">
+                        {isImportRunning ? (
+                          <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Importing...</>
+                        ) : (
+                          <><Check className="h-4 w-4 mr-2" />Import Content</>
+                        )}
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <Tabs defaultValue="articles" className="space-y-6">

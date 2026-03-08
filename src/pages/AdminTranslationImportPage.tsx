@@ -446,11 +446,15 @@ const AdminTranslationImportPage = () => {
         {!parsedContent ? (
           /* Import Method Selection */
           <div className="space-y-6">
-            <Tabs value={importMethod} onValueChange={(v) => setImportMethod(v as "upload" | "url")}>
-              <TabsList className="grid w-full grid-cols-2">
+            <Tabs value={importMethod} onValueChange={(v) => setImportMethod(v as "upload" | "url" | "batch")}>
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="url" className="gap-2">
                   <Globe className="h-4 w-4" />
                   EUR-Lex URL
+                </TabsTrigger>
+                <TabsTrigger value="batch" className="gap-2">
+                  <Languages className="h-4 w-4" />
+                  Batch All
                 </TabsTrigger>
                 <TabsTrigger value="upload" className="gap-2">
                   <Upload className="h-4 w-4" />
@@ -462,6 +466,10 @@ const AdminTranslationImportPage = () => {
                 <EurLexImporter onContentFetched={handleEurLexContent} />
               </TabsContent>
 
+              <TabsContent value="batch" className="mt-4">
+                <BatchEurLexImporter />
+              </TabsContent>
+
               <TabsContent value="upload" className="mt-4">
                 <Card>
                   <CardHeader>
@@ -470,7 +478,7 @@ const AdminTranslationImportPage = () => {
                       Upload Translated Document
                     </CardTitle>
                     <CardDescription>
-                      Upload a PDF or paste text content from a translated version of the EHDS Regulation
+                      Upload a PDF or paste text content from a translated version of the EHDS Regulation or an Implementing Act
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">

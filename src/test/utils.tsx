@@ -30,5 +30,6 @@ const customRender = (
   options?: Omit<RenderOptions, 'wrapper'>
 ) => render(ui, { wrapper: AllTheProviders, ...options });
 
+// @ts-ignore - types resolve at runtime via vitest
 export { screen, waitFor, fireEvent, within, act } from '@testing-library/react';
 export { customRender as render };

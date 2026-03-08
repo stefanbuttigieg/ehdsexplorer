@@ -276,10 +276,69 @@ const AdminImplementingActContentPage = () => {
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
-          <div>
+          <div className="flex-1">
             <h1 className="text-2xl font-bold">{act.title}</h1>
             <p className="text-muted-foreground">{act.articleReference}</p>
           </div>
+          <Dialog open={showImportDialog} onOpenChange={(open) => { setShowImportDialog(open); if (!open) { resetImport(); setImportText(""); } }}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Upload className="h-4 w-4 mr-2" />
+                Import from Document
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Import Implementing Act Content</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                {!importParsed ? (
+                  <>
+                    <Textarea
+                      placeholder="Paste the full text of the implementing act here..."
+                      value={importText}
+                      onChange={(e) => setImportText(e.target.value)}
+                      className="h-64 font-mono text-sm"
+                      disabled={isImportParsing}
+                    />
+                    <Button
+                      className="w-full"
+                      onClick={handleImportParse}
+                      disabled={isImportParsing || !importText.trim()}
+                    >
+                      {isImportParsing ? (
+                        <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Parsing...</>
+                      ) : (
+                        "Parse Content"
+                      )}
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Alert>
+                      <Check className="h-4 w-4" />
+                      <AlertDescription>
+                        Found {importParsed.articles.length} articles, {importParsed.recitals.length} recitals.
+                        This will replace all existing content for this implementing act.
+                      </AlertDescription>
+                    </Alert>
+                    <div className="flex gap-2">
+                      <Button variant="outline" onClick={() => { resetImport(); setImportText(""); }} className="flex-1">
+                        Cancel
+                      </Button>
+                      <Button onClick={handleImportConfirm} disabled={isImportRunning} className="flex-1">
+                        {isImportRunning ? (
+                          <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Importing...</>
+                        ) : (
+                          <><Check className="h-4 w-4 mr-2" />Import Content</>
+                        )}
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <Tabs defaultValue="articles" className="space-y-6">

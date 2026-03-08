@@ -100,7 +100,7 @@ const AdminTranslationImportPage = () => {
   const [parseStatus, setParseStatus] = useState<"idle" | "extracting" | "parsing" | "done" | "error">("idle");
   const [parseError, setParseError] = useState<string | null>(null);
   const [extractedText, setExtractedText] = useState("");
-  const [importMethod, setImportMethod] = useState<"upload" | "url">("url");
+  const [importMethod, setImportMethod] = useState<"upload" | "url" | "batch">("url");
   const [structureAnalysis, setStructureAnalysis] = useState<StructureAnalysis | null>(null);
   const [showExtractionPreview, setShowExtractionPreview] = useState(false);
   const [sourceUrl, setSourceUrl] = useState<string>("");

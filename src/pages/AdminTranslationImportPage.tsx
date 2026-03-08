@@ -25,6 +25,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLanguages } from "@/hooks/useLanguages";
 import { useTranslationImport } from "@/hooks/useTranslationImport";
 import { TranslationDiffPreview } from "@/components/admin/TranslationDiffPreview";
+import { BatchEurLexImporter } from "@/components/admin/BatchEurLexImporter";
 import { EurLexImporter } from "@/components/admin/EurLexImporter";
 import { ExtractionPreviewViewer } from "@/components/admin/ExtractionPreviewViewer";
 import type { StructureAnalysis, ParsedContent } from "@/hooks/useAdaptiveParser";

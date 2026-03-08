@@ -61,6 +61,39 @@ const AdminImplementingActContentPage = () => {
 
   const isLoading = loadingAct || loadingRecitals || loadingSections || loadingArticles;
 
+  // Import functionality
+  const {
+    isParsing: isImportParsing,
+    isImporting: isImportRunning,
+    parsedContent: importParsed,
+    parseDocument: importParse,
+    importToImplementingAct,
+    reset: resetImport,
+  } = useImplementingActImport();
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [importText, setImportText] = useState("");
+
+  const handleImportParse = useCallback(async () => {
+    if (importText.trim()) {
+      await importParse(importText);
+    }
+  }, [importText, importParse]);
+
+  const handleImportConfirm = useCallback(async () => {
+    if (!importParsed || !id) return;
+    const articleNums = importParsed.articles.map(a => a.articleNumber);
+    const recitalNums = importParsed.recitals.map(r => r.recitalNumber);
+    const result = await importToImplementingAct(id, articleNums, recitalNums);
+    if (result) {
+      setShowImportDialog(false);
+      setImportText("");
+      resetImport();
+      queryClient.invalidateQueries({ queryKey: ["implementing-act-recitals", id] });
+      queryClient.invalidateQueries({ queryKey: ["implementing-act-articles", id] });
+      queryClient.invalidateQueries({ queryKey: ["implementing-act-sections", id] });
+    }
+  }, [importParsed, id, importToImplementingAct, resetImport, queryClient]);
+
   // Mutations
   const addRecitalMutation = useMutation({
     mutationFn: async (data: typeof newRecital) => {

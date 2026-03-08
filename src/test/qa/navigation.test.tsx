@@ -1,6 +1,4 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@/test/utils";
-import { MemoryRouter } from "react-router-dom";
 
 // Mock supabase
 vi.mock("@/integrations/supabase/client", () => ({

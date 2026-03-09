@@ -116,8 +116,8 @@ const ImplementingActsPage = () => {
             <div className="space-y-3">
               {acts.map(act => (
                 <Link key={act.id} to={`/implementing-acts/${act.id}`}>
-                  <Card className="hover:border-primary transition-colors cursor-pointer">
-                    <CardContent className="p-4">
+                   <Card className="hover:border-primary transition-colors cursor-pointer">
+                    <CardContent className="p-3 sm:p-4">
                       <div className="flex items-start justify-between gap-2 sm:gap-4">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 sm:gap-2 mb-1 flex-wrap">

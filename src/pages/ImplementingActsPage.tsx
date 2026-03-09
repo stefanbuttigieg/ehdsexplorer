@@ -118,29 +118,31 @@ const ImplementingActsPage = () => {
                 <Link key={act.id} to={`/implementing-acts/${act.id}`}>
                   <Card className="hover:border-primary transition-colors cursor-pointer">
                     <CardContent className="p-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <Badge variant="outline">{act.articleReference}</Badge>
-                            <Badge variant={act.type === 'delegated' ? 'secondary' : 'outline'}>{act.type}</Badge>
-                            <span className={`status-badge status-${act.status}`}>{statusLabels[act.status]}</span>
+                      <div className="flex items-start justify-between gap-2 sm:gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 sm:gap-2 mb-1 flex-wrap">
+                            <Badge variant="outline" className="text-xs">{act.articleReference}</Badge>
+                            <Badge variant={act.type === 'delegated' ? 'secondary' : 'outline'} className="text-xs">{act.type}</Badge>
+                            <span className={`status-badge status-${act.status} text-xs`}>{statusLabels[act.status]}</span>
                             
-                            {/* With/Without Deadline Tag */}
-                            {act.feedbackDeadline ? (
-                              <Badge variant="outline" className="text-primary border-primary/50">
-                                <CalendarClock className="h-3 w-3 mr-1" />
-                                With Deadline
-                              </Badge>
-                            ) : (
-                              <Badge variant="outline" className="text-muted-foreground">
-                                <CalendarX className="h-3 w-3 mr-1" />
-                                No Deadline
-                              </Badge>
-                            )}
+                            {/* Deadline & Live badges - hidden on mobile to reduce clutter */}
+                            <span className="hidden sm:contents">
+                              {act.feedbackDeadline ? (
+                                <Badge variant="outline" className="text-primary border-primary/50">
+                                  <CalendarClock className="h-3 w-3 mr-1" />
+                                  With Deadline
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-muted-foreground">
+                                  <CalendarX className="h-3 w-3 mr-1" />
+                                  No Deadline
+                                </Badge>
+                              )}
+                            </span>
                             
                             {act.deliverableLink && (
-                              <Badge variant="outline" className="text-primary border-primary/50">
-                                <Globe className="h-3 w-3 mr-1" />
+                              <Badge variant="outline" className="text-primary border-primary/50 text-xs">
+                                <Globe className="h-3 w-3 mr-0.5 sm:mr-1" />
                                 Live
                               </Badge>
                             )}
@@ -149,16 +151,16 @@ const ImplementingActsPage = () => {
                               return feedbackStatus ? (
                                 <Badge 
                                   variant={feedbackStatus.status === 'active' ? 'default' : 'outline'}
-                                  className={feedbackStatus.status === 'active' ? 'bg-primary' : ''}
+                                  className={`text-xs ${feedbackStatus.status === 'active' ? 'bg-primary' : ''}`}
                                 >
-                                  <Clock className="h-3 w-3 mr-1" />
+                                  <Clock className="h-3 w-3 mr-0.5 sm:mr-1" />
                                   {feedbackStatus.label}
                                 </Badge>
                               ) : null;
                             })()}
                           </div>
-                          <h3 className="font-medium">{act.title}</h3>
-                          <p className="text-sm text-muted-foreground line-clamp-1">{act.description}</p>
+                          <h3 className="font-medium text-sm sm:text-base leading-snug">{act.title}</h3>
+                          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1 mt-0.5">{act.description}</p>
                           {/* Display multiple themes */}
                           {act.themes.length > 1 && (
                             <div className="flex gap-1 mt-2 flex-wrap">

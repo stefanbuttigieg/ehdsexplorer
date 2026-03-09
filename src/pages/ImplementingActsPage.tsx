@@ -76,7 +76,7 @@ const ImplementingActsPage = () => {
 
   return (
     <Layout>
-      <div className="max-w-5xl mx-auto p-6 animate-fade-in">
+      <div className="max-w-5xl mx-auto px-4 py-4 sm:p-6 animate-fade-in pb-20 md:pb-6">
         <Breadcrumbs items={[{ label: "Implementing Acts" }]} />
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4 mb-2">
           <h1 className="text-2xl sm:text-3xl font-bold font-serif">Implementing Acts Tracker</h1>

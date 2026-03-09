@@ -78,32 +78,32 @@ const ImplementingActsPage = () => {
     <Layout>
       <div className="max-w-5xl mx-auto p-6 animate-fade-in">
         <Breadcrumbs items={[{ label: "Implementing Acts" }]} />
-        <div className="flex items-start justify-between gap-4 mb-2">
-          <h1 className="text-3xl font-bold font-serif">Implementing Acts Tracker</h1>
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4 mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold font-serif">Implementing Acts Tracker</h1>
           <SubscribeAlertButton implementingActId="" implementingActTitle="All Implementing Acts" />
         </div>
-        <p className="text-muted-foreground mb-4">Track the progress of delegated and implementing acts required by the EHDS Regulation</p>
+        <p className="text-sm sm:text-base text-muted-foreground mb-4">Track the progress of delegated and implementing acts required by the EHDS Regulation</p>
 
         {/* Comitology Register Updates */}
         <ComitologyUpdatesCard />
 
-        {/* Stats - now with 5 columns including feedback-closed */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        {/* Stats - scrollable on mobile */}
+        <div className="flex gap-3 mb-8 overflow-x-auto pb-2 -mx-2 px-2 snap-x snap-mandatory md:grid md:grid-cols-5 md:overflow-visible md:pb-0 md:mx-0 md:px-0">
           {(['pending', 'feedback', 'feedback-closed', 'progress', 'adopted'] as ActStatus[]).map(status => (
-            <Card key={status} className={`cursor-pointer ${filterStatus === status ? 'border-primary' : ''}`} onClick={() => setFilterStatus(filterStatus === status ? 'all' : status)}>
-              <CardContent className="p-4 text-center">
-                <div className={`text-3xl font-bold status-${status}`}>{stats[status] || 0}</div>
-                <div className="text-sm text-muted-foreground">{statusLabels[status]}</div>
+            <Card key={status} className={`cursor-pointer min-w-[120px] snap-start flex-shrink-0 md:min-w-0 md:flex-shrink ${filterStatus === status ? 'border-primary' : ''}`} onClick={() => setFilterStatus(filterStatus === status ? 'all' : status)}>
+              <CardContent className="p-3 sm:p-4 text-center">
+                <div className={`text-2xl sm:text-3xl font-bold status-${status}`}>{stats[status] || 0}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">{statusLabels[status]}</div>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          <Button variant={filterTheme === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setFilterTheme('all')}>All Themes</Button>
+        {/* Filters - horizontally scrollable on mobile */}
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-2 -mx-2 px-2 md:flex-wrap md:overflow-visible md:pb-0 md:mx-0 md:px-0">
+          <Button variant={filterTheme === 'all' ? 'default' : 'outline'} size="sm" className="flex-shrink-0" onClick={() => setFilterTheme('all')}>All Themes</Button>
           {(Object.keys(themeLabels) as ActTheme[]).map(theme => (
-            <Button key={theme} variant={filterTheme === theme ? 'default' : 'outline'} size="sm" onClick={() => setFilterTheme(filterTheme === theme ? 'all' : theme)}>
+            <Button key={theme} variant={filterTheme === theme ? 'default' : 'outline'} size="sm" className="flex-shrink-0 whitespace-nowrap" onClick={() => setFilterTheme(filterTheme === theme ? 'all' : theme)}>
               {themeLabels[theme]}
             </Button>
           ))}

@@ -1462,7 +1462,7 @@ export function getArticleById(id: number): Article | undefined {
   return articles.find((a) => a.id === id);
 }
 
-export function getArticlesByChapter(chapterId: number): Article[] {
+export async function getArticlesByChapter(chapterId: number): Promise<Article[]> {
   const { chapters } = await import('./chapters');
   const chapter = chapters.find((ch: any) => ch.id === chapterId);
   if (!chapter) return [];

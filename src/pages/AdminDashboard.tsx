@@ -246,7 +246,7 @@ const AdminDashboard = () => {
       icon: FileText,
       href: '/admin/implementing-act-content',
     },
-  ];
+  ], []);
 
   const adminOnlySections = isAdmin ? [
     {

@@ -140,10 +140,14 @@ export function ComitologyUpdatesCard() {
           </div>
         ) : (
           <div className="text-center py-4 text-sm text-muted-foreground">
-            <p>No committee meetings loaded yet.</p>
-            <Button variant="link" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
-              Click to fetch latest updates
-            </Button>
+            {isRefreshing || isLoading ? (
+              <div className="flex items-center justify-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Loading committee meetings…</span>
+              </div>
+            ) : (
+              <p>No committee meetings found. <Button variant="link" size="sm" onClick={handleRefresh} className="px-0">Refresh</Button></p>
+            )}
           </div>
         )}
       </CardContent>

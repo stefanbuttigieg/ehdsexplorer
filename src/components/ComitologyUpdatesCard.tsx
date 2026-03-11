@@ -32,21 +32,10 @@ export function ComitologyUpdatesCard() {
     },
   });
 
-  // Auto-fetch if no data or data is older than 24 hours
   const isStale = updates.length === 0 || 
     (updates.length > 0 && new Date(updates[0].scraped_at).getTime() < Date.now() - 24 * 60 * 60 * 1000);
 
-  useState(() => {
-    // This runs once on mount
-  });
-
-  // Auto-refresh if stale, but only once per mount
-  if (isStale && !isRefreshing && !autoFetched && !isLoading) {
-    setAutoFetched(true);
-    handleRefreshSilent();
-  }
-
-  async function handleRefreshSilent() {
+  const handleRefreshSilent = useCallback(async () => {
     setIsRefreshing(true);
     try {
       const { data, error } = await supabase.functions.invoke('scrape-comitology');
@@ -58,7 +47,15 @@ export function ComitologyUpdatesCard() {
     } finally {
       setIsRefreshing(false);
     }
-  }
+  }, [refetch]);
+
+  // Auto-refresh if stale, only once per mount
+  useEffect(() => {
+    if (isStale && !isRefreshing && !autoFetched && !isLoading) {
+      setAutoFetched(true);
+      handleRefreshSilent();
+    }
+  }, [isStale, isRefreshing, autoFetched, isLoading, handleRefreshSilent]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);

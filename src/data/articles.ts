@@ -1465,8 +1465,7 @@ export function getArticleById(id: number): Article | undefined {
 }
 
 export function getArticlesByChapter(chapterId: number): Article[] {
-  const { chapters } = require('./chapters') as { chapters: any[] };
-  const chapter = chapters.find((ch: any) => ch.id === chapterId);
+  const chapter = chapterData.find((ch: any) => ch.id === chapterId);
   if (!chapter) return [];
   return articles.filter(
     (a) => a.id >= chapter.articleRange[0] && a.id <= chapter.articleRange[1]

@@ -396,182 +396,108 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8" data-tour="admin-content-sections">
-          {contentSections.map((section) => {
-            // Add specific data-tour attributes for key sections
-            const tourAttr = section.title === 'Articles' ? { 'data-tour': 'admin-articles' } :
-                           section.title === 'Recitals' ? { 'data-tour': 'admin-recitals' } :
-                           section.title === 'Implementing Acts' ? { 'data-tour': 'admin-implementing-acts' } : {};
-            
-            return (
-              <Link key={section.title} to={section.href} {...tourAttr}>
-                <Card className="hover:border-primary transition-colors h-full">
+        {/* Search */}
+        <div className="relative mb-6">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search admin sections…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 rounded-lg border bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {filteredSections ? (
+          /* Search results view */
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
+            {filteredSections.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-muted-foreground">
+                No sections matching "{searchQuery}"
+              </div>
+            ) : (
+              filteredSections.map((section) => (
+                <Link key={section.title} to={section.href}>
+                  <Card className={`hover:border-primary transition-colors h-full ${section.badge ? 'border-dashed' : ''} ${section.badge === 'Super Admin' ? 'border-primary/50' : ''}`}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <section.icon className="h-8 w-8 text-primary" />
+                        {section.badge ? (
+                          <Badge variant={section.badge === 'Super Admin' ? 'destructive' : 'default'}>{section.badge}</Badge>
+                        ) : section.count ? (
+                          <Badge variant="outline">{section.count} items</Badge>
+                        ) : null}
+                      </div>
+                      <CardTitle className="mt-4">{section.title}</CardTitle>
+                      <CardDescription>{section.description}</CardDescription>
+                    </CardHeader>
+                  </Card>
+                </Link>
+              ))
+            )}
+          </div>
+        ) : (
+          /* Default grouped view */
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8" data-tour="admin-content-sections">
+            {contentSections.map((section) => {
+              const tourAttr = section.title === 'Articles' ? { 'data-tour': 'admin-articles' } :
+                             section.title === 'Recitals' ? { 'data-tour': 'admin-recitals' } :
+                             section.title === 'Implementing Acts' ? { 'data-tour': 'admin-implementing-acts' } : {};
+              return (
+                <Link key={section.title} to={section.href} {...tourAttr}>
+                  <Card className="hover:border-primary transition-colors h-full">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <section.icon className="h-8 w-8 text-primary" />
+                        {section.count && <Badge variant="outline">{section.count} items</Badge>}
+                      </div>
+                      <CardTitle className="mt-4">{section.title}</CardTitle>
+                      <CardDescription>{section.description}</CardDescription>
+                    </CardHeader>
+                  </Card>
+                </Link>
+              );
+            })}
+
+            {adminOnlySections.map((section) => (
+              <Link key={section.title} to={section.href} {...(section.title === 'User Management' ? { 'data-tour': 'admin-user-management' } : {})}>
+                <Card className="hover:border-primary transition-colors h-full border-dashed">
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <section.icon className="h-8 w-8 text-primary" />
-                      {section.count && <Badge variant="outline">{section.count} items</Badge>}
+                      <Badge>Admin Only</Badge>
                     </div>
                     <CardTitle className="mt-4">{section.title}</CardTitle>
                     <CardDescription>{section.description}</CardDescription>
                   </CardHeader>
                 </Card>
               </Link>
-            );
-          })}
+            ))}
 
-          {isAdmin && (
-            <>
-              <Link to="/admin/users" data-tour="admin-user-management">
-                <Card className="hover:border-primary transition-colors h-full border-dashed">
+            {superAdminSections.map((section) => (
+              <Link key={section.title} to={section.href}>
+                <Card className="hover:border-primary transition-colors h-full border-dashed border-primary/50">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <Users className="h-8 w-8 text-primary" />
-                      <Badge>Admin Only</Badge>
+                      <section.icon className="h-8 w-8 text-primary" />
+                      <Badge variant="destructive">Super Admin</Badge>
                     </div>
-                    <CardTitle className="mt-4">User Management</CardTitle>
-                    <CardDescription>Manage admin and editor access</CardDescription>
+                    <CardTitle className="mt-4">{section.title}</CardTitle>
+                    <CardDescription>{section.description}</CardDescription>
                   </CardHeader>
                 </Card>
               </Link>
-              <Link to="/admin/subscriptions">
-                <Card className="hover:border-primary transition-colors h-full border-dashed">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <Bell className="h-8 w-8 text-primary" />
-                      <Badge>Admin Only</Badge>
-                    </div>
-                    <CardTitle className="mt-4">Email Subscriptions</CardTitle>
-                    <CardDescription>Manage implementing act alert subscriptions</CardDescription>
-                  </CardHeader>
-                </Card>
-              </Link>
-              <Link to="/admin/email-templates">
-                <Card className="hover:border-primary transition-colors h-full border-dashed">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <Mail className="h-8 w-8 text-primary" />
-                      <Badge>Admin Only</Badge>
-                    </div>
-                    <CardTitle className="mt-4">Email Templates</CardTitle>
-                    <CardDescription>Customize invitation and notification emails</CardDescription>
-                  </CardHeader>
-                </Card>
-              </Link>
-              <Link to="/admin/ai-feedback">
-                <Card className="hover:border-primary transition-colors h-full border-dashed">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <Bot className="h-8 w-8 text-primary" />
-                      <Badge>Admin Only</Badge>
-                    </div>
-                    <CardTitle className="mt-4">AI Feedback</CardTitle>
-                    <CardDescription>Analyze AI assistant response quality</CardDescription>
-                  </CardHeader>
-                </Card>
-              </Link>
-              <Link to="/admin/ai-settings">
-                <Card className="hover:border-primary transition-colors h-full border-dashed">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <Bot className="h-8 w-8 text-primary" />
-                      <Badge>Admin Only</Badge>
-                    </div>
-                    <CardTitle className="mt-4">AI Settings</CardTitle>
-                    <CardDescription>Configure AI model for all AI-powered features</CardDescription>
-                  </CardHeader>
-                </Card>
-              </Link>
-              <Link to="/admin/country-assignments">
-                <Card className="hover:border-primary transition-colors h-full border-dashed">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <UserCog className="h-8 w-8 text-primary" />
-                      <Badge>Admin Only</Badge>
-                    </div>
-                    <CardTitle className="mt-4">Country Assignments</CardTitle>
-                    <CardDescription>Assign users to manage country implementation tracking</CardDescription>
-                  </CardHeader>
-                </Card>
-              </Link>
-              {isSuperAdmin && (
-                <>
-                  <Link to="/admin/role-permissions">
-                    <Card className="hover:border-primary transition-colors h-full border-dashed border-primary/50">
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <Gavel className="h-8 w-8 text-primary" />
-                          <Badge variant="destructive">Super Admin</Badge>
-                        </div>
-                        <CardTitle className="mt-4">Role Permissions</CardTitle>
-                        <CardDescription>Configure granular permissions for each role</CardDescription>
-                      </CardHeader>
-                    </Card>
-                  </Link>
-                  <Link to="/admin/feature-flags">
-                    <Card className="hover:border-primary transition-colors h-full border-dashed border-primary/50">
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <ToggleRight className="h-8 w-8 text-primary" />
-                          <Badge variant="destructive">Super Admin</Badge>
-                        </div>
-                        <CardTitle className="mt-4">Feature Flags</CardTitle>
-                        <CardDescription>Toggle features on/off across the site</CardDescription>
-                      </CardHeader>
-                    </Card>
-                  </Link>
-                  <Link to="/admin/api-logs">
-                    <Card className="hover:border-primary transition-colors h-full border-dashed border-primary/50">
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <Key className="h-8 w-8 text-primary" />
-                          <Badge variant="destructive">Super Admin</Badge>
-                        </div>
-                        <CardTitle className="mt-4">API Keys & Logs</CardTitle>
-                        <CardDescription>View API keys and request logs from country managers</CardDescription>
-                      </CardHeader>
-                    </Card>
-                  </Link>
-                  <Link to="/admin/api-docs">
-                    <Card className="hover:border-primary transition-colors h-full border-dashed border-primary/50">
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <Code className="h-8 w-8 text-primary" />
-                          <Badge variant="destructive">Super Admin</Badge>
-                        </div>
-                        <CardTitle className="mt-4">API Documentation</CardTitle>
-                        <CardDescription>Complete reference for all GET and POST API endpoints</CardDescription>
-                      </CardHeader>
-                    </Card>
-                  </Link>
-                  <Link to="/admin/seo">
-                    <Card className="hover:border-primary transition-colors h-full border-dashed border-primary/50">
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <Search className="h-8 w-8 text-primary" />
-                          <Badge variant="destructive">Super Admin</Badge>
-                        </div>
-                        <CardTitle className="mt-4">SEO Management</CardTitle>
-                        <CardDescription>Manage meta tags, schemas, and search optimization</CardDescription>
-                      </CardHeader>
-                    </Card>
-                  </Link>
-                  <Link to="/admin/security">
-                    <Card className="hover:border-primary transition-colors h-full border-dashed border-primary/50">
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <ShieldCheck className="h-8 w-8 text-primary" />
-                          <Badge variant="destructive">Super Admin</Badge>
-                        </div>
-                        <CardTitle className="mt-4">Security Settings</CardTitle>
-                        <CardDescription>Configure two-factor authentication and enforcement policies</CardDescription>
-                      </CardHeader>
-                    </Card>
-                  </Link>
-                </>
-              )}
-            </>
-          )}
-        </div>
+            ))}
+          </div>
+        )
 
         {isAdmin && (
           <Card className="mb-8" data-tour="admin-maintenance">

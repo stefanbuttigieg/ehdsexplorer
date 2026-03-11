@@ -17,8 +17,9 @@ interface ComitologyMeeting {
 
 export function ComitologyUpdatesCard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [autoFetched, setAutoFetched] = useState(false);
 
-  const { data: updates = [], refetch } = useQuery({
+  const { data: updates = [], refetch, isLoading } = useQuery({
     queryKey: ['comitology-updates'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -30,6 +31,34 @@ export function ComitologyUpdatesCard() {
       return data || [];
     },
   });
+
+  // Auto-fetch if no data or data is older than 24 hours
+  const isStale = updates.length === 0 || 
+    (updates.length > 0 && new Date(updates[0].scraped_at).getTime() < Date.now() - 24 * 60 * 60 * 1000);
+
+  useState(() => {
+    // This runs once on mount
+  });
+
+  // Auto-refresh if stale, but only once per mount
+  if (isStale && !isRefreshing && !autoFetched && !isLoading) {
+    setAutoFetched(true);
+    handleRefreshSilent();
+  }
+
+  async function handleRefreshSilent() {
+    setIsRefreshing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('scrape-comitology');
+      if (!error && data?.success) {
+        await refetch();
+      }
+    } catch {
+      // Silent fail for auto-fetch
+    } finally {
+      setIsRefreshing(false);
+    }
+  }
 
   const handleRefresh = async () => {
     setIsRefreshing(true);

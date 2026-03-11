@@ -242,7 +242,125 @@ const AdminDashboard = () => {
       icon: ClipboardCheck,
       href: '/admin/toolkit-questions',
     },
+    {
+      title: 'Translation Import',
+      description: 'Bulk import translations from EUR-Lex for all EU languages',
+      icon: Upload,
+      href: '/admin/translation-import',
+    },
+    {
+      title: 'Bulk Import',
+      description: 'Import articles, recitals, and definitions in bulk',
+      icon: Upload,
+      href: '/admin/bulk-import',
+    },
+    {
+      title: 'Implementing Act Content',
+      description: 'Manage implementing act recitals, articles, and sections',
+      icon: FileText,
+      href: '/admin/implementing-act-content',
+    },
   ];
+
+  const adminOnlySections = isAdmin ? [
+    {
+      title: 'User Management',
+      description: 'Manage admin and editor access',
+      icon: Users,
+      href: '/admin/users',
+      badge: 'Admin Only',
+    },
+    {
+      title: 'Email Subscriptions',
+      description: 'Manage implementing act alert subscriptions',
+      icon: Bell,
+      href: '/admin/subscriptions',
+      badge: 'Admin Only',
+    },
+    {
+      title: 'Email Templates',
+      description: 'Customize invitation and notification emails',
+      icon: Mail,
+      href: '/admin/email-templates',
+      badge: 'Admin Only',
+    },
+    {
+      title: 'AI Feedback',
+      description: 'Analyze AI assistant response quality',
+      icon: Bot,
+      href: '/admin/ai-feedback',
+      badge: 'Admin Only',
+    },
+    {
+      title: 'AI Settings',
+      description: 'Configure AI model for all AI-powered features',
+      icon: Bot,
+      href: '/admin/ai-settings',
+      badge: 'Admin Only',
+    },
+    {
+      title: 'Country Assignments',
+      description: 'Assign users to manage country implementation tracking',
+      icon: UserCog,
+      href: '/admin/country-assignments',
+      badge: 'Admin Only',
+    },
+  ] : [];
+
+  const superAdminSections = isSuperAdmin ? [
+    {
+      title: 'Role Permissions',
+      description: 'Configure granular permissions for each role',
+      icon: Gavel,
+      href: '/admin/role-permissions',
+      badge: 'Super Admin',
+    },
+    {
+      title: 'Feature Flags',
+      description: 'Toggle features on/off across the site',
+      icon: ToggleRight,
+      href: '/admin/feature-flags',
+      badge: 'Super Admin',
+    },
+    {
+      title: 'API Keys & Logs',
+      description: 'View API keys and request logs from country managers',
+      icon: Key,
+      href: '/admin/api-logs',
+      badge: 'Super Admin',
+    },
+    {
+      title: 'API Documentation',
+      description: 'Complete reference for all GET and POST API endpoints',
+      icon: Code,
+      href: '/admin/api-docs',
+      badge: 'Super Admin',
+    },
+    {
+      title: 'SEO Management',
+      description: 'Manage meta tags, schemas, and search optimization',
+      icon: Search,
+      href: '/admin/seo',
+      badge: 'Super Admin',
+    },
+    {
+      title: 'Security Settings',
+      description: 'Configure two-factor authentication and enforcement policies',
+      icon: ShieldCheck,
+      href: '/admin/security',
+      badge: 'Super Admin',
+    },
+  ] : [];
+
+  const allSections = [...contentSections, ...adminOnlySections, ...superAdminSections];
+
+  const filteredSections = useMemo(() => {
+    if (!searchQuery.trim()) return null; // null means show default grouped layout
+    const q = searchQuery.toLowerCase();
+    return allSections.filter(
+      (s) => s.title.toLowerCase().includes(q) || s.description.toLowerCase().includes(q)
+    );
+  }, [searchQuery, allSections]);
 
   return (
     <Layout>

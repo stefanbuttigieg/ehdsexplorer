@@ -21,6 +21,7 @@ const AdminDashboard = () => {
   const { data: settings } = useSiteSettings();
   const updateSettings = useUpdateSiteSettings();
   const [maintenanceMessage, setMaintenanceMessage] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const { isTourOpen, startTour, completeTour, closeTour } = useAdminTour();
 
   useEffect(() => {

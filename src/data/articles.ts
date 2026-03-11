@@ -1463,7 +1463,7 @@ export function getArticleById(id: number): Article | undefined {
 }
 
 export function getArticlesByChapter(chapterId: number): Article[] {
-  const { chapters } = require('./chapters');
+  const { chapters } = await import('./chapters');
   const chapter = chapters.find((ch: any) => ch.id === chapterId);
   if (!chapter) return [];
   return articles.filter(

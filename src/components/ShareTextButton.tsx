@@ -91,7 +91,7 @@ export const ShareTextButton = () => {
 
   // Hide on scroll with delay
   useEffect(() => {
-    let scrollTimeout: NodeJS.Timeout;
+    let scrollTimeout: ReturnType<typeof setTimeout>;
     const handleScroll = () => {
       if (position) {
         clearTimeout(scrollTimeout);

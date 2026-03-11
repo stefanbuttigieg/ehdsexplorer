@@ -201,7 +201,7 @@ const WordSearchGamePage = () => {
 
   // Timer effect
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (isPlaying && !gameComplete) {
       interval = setInterval(() => {
         setTimer((prev) => prev + 1);

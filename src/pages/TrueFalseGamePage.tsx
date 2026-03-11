@@ -154,7 +154,7 @@ const TrueFalseGamePage = () => {
 
   // Timer effect
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (isPlaying && !showResult && !gameComplete && timeLeft > 0) {
       interval = setInterval(() => {
         setTimeLeft((prev) => {

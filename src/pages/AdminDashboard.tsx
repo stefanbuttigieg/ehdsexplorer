@@ -338,10 +338,17 @@ const AdminDashboard = () => {
     },
   ] : [];
 
-  const allSections = [...contentSections, ...adminOnlySections, ...superAdminSections];
+  const allSections = [...contentSections, ...adminOnlySections, ...superAdminSections] as Array<{
+    title: string;
+    description: string;
+    icon: any;
+    href: string;
+    count?: number;
+    badge?: string;
+  }>;
 
   const filteredSections = useMemo(() => {
-    if (!searchQuery.trim()) return null; // null means show default grouped layout
+    if (!searchQuery.trim()) return null;
     const q = searchQuery.toLowerCase();
     return allSections.filter(
       (s) => s.title.toLowerCase().includes(q) || s.description.toLowerCase().includes(q)

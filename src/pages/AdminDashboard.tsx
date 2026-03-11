@@ -48,21 +48,7 @@ const AdminDashboard = () => {
     navigate('/');
   };
 
-  if (loading) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <p>Loading...</p>
-        </div>
-      </Layout>
-    );
-  }
-
-  if (!user || !isEditor) {
-    return null;
-  }
-
-  const contentSections = [
+  const contentSections = useMemo(() => [
     {
       title: 'Overview Page',
       description: 'Manage the overview page content',

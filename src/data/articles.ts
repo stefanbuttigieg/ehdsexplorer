@@ -1,3 +1,5 @@
+import { chapters as chapterData } from './chapters';
+
 export interface Article {
   id: number;
   title: string;

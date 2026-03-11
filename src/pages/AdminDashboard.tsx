@@ -497,7 +497,7 @@ const AdminDashboard = () => {
               </Link>
             ))}
           </div>
-        )
+        )}
 
         {isAdmin && (
           <Card className="mb-8" data-tour="admin-maintenance">

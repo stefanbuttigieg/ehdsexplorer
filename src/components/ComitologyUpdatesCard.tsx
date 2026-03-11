@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ExternalLink, RefreshCw, Calendar, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,8 +17,9 @@ interface ComitologyMeeting {
 
 export function ComitologyUpdatesCard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [autoFetched, setAutoFetched] = useState(false);
 
-  const { data: updates = [], refetch } = useQuery({
+  const { data: updates = [], refetch, isLoading } = useQuery({
     queryKey: ['comitology-updates'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -30,6 +31,31 @@ export function ComitologyUpdatesCard() {
       return data || [];
     },
   });
+
+  const isStale = updates.length === 0 || 
+    (updates.length > 0 && new Date(updates[0].scraped_at).getTime() < Date.now() - 24 * 60 * 60 * 1000);
+
+  const handleRefreshSilent = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('scrape-comitology');
+      if (!error && data?.success) {
+        await refetch();
+      }
+    } catch {
+      // Silent fail for auto-fetch
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [refetch]);
+
+  // Auto-refresh if stale, only once per mount
+  useEffect(() => {
+    if (isStale && !isRefreshing && !autoFetched && !isLoading) {
+      setAutoFetched(true);
+      handleRefreshSilent();
+    }
+  }, [isStale, isRefreshing, autoFetched, isLoading, handleRefreshSilent]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -114,10 +140,14 @@ export function ComitologyUpdatesCard() {
           </div>
         ) : (
           <div className="text-center py-4 text-sm text-muted-foreground">
-            <p>No committee meetings loaded yet.</p>
-            <Button variant="link" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
-              Click to fetch latest updates
-            </Button>
+            {isRefreshing || isLoading ? (
+              <div className="flex items-center justify-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Loading committee meetings…</span>
+              </div>
+            ) : (
+              <p>No committee meetings found. <Button variant="link" size="sm" onClick={handleRefresh} className="px-0">Refresh</Button></p>
+            )}
           </div>
         )}
       </CardContent>

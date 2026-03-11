@@ -56,7 +56,7 @@ const QuizGamePage = () => {
   const [gameStarted, setGameStarted] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(QUESTION_TIME_LIMIT);
   const [totalTime, setTotalTime] = useState(0);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<number>(0);
 
   const generateQuestions = useCallback((): Question[] => {

@@ -13,6 +13,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.6] - 2026-03-12
+
+### Added
+
+#### Admin Dashboard Search
+- **Search functionality** in Admin Dashboard for quick discovery of admin tools and settings
+- Real-time filtering across all admin sections by title or description
+- Flat grid results view when searching, grouped layout when browsing
+- Added missing navigation cards for Translation Import, Bulk Import, and Implementing Act Content
+
+### Fixed
+
+#### Smart Legal Reference Linking
+- **External regulation detection** - Article/Recital references followed by "of Directive", "of Regulation", "of Decision", "of Commission", "of Council", or "of European" are no longer incorrectly hyperlinked to EHDS articles
+- References to articles in external EU legislation (GDPR, AI Act, MDR, etc.) now render as plain text
+- Internal EHDS article/recital references continue to be linked as before
+
+---
+
 ## [2.0.5] - 2026-02-12
 
 ### Added

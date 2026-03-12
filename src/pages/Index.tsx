@@ -257,7 +257,7 @@ const Index = () => {
         {/* Quick Links */}
         <section className="py-8 px-4 border-b border-border bg-muted/30">
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
               <Link to="/overview">
                 <Card className="hover:border-primary transition-colors cursor-pointer h-full">
                   <CardContent className="p-4 flex items-center gap-3">

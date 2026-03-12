@@ -6,7 +6,7 @@ const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 interface VerificationRequest {
@@ -38,7 +38,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Get subscription details
     const { data: subscription, error: fetchError } = await supabase
       .from("implementing_act_subscriptions")
-      .select("email, verification_token, subscribe_all, implementing_act_id, implementing_acts(title)")
+      .select("email, verification_token, subscribe_all, implementing_act_id")
       .eq("id", subscription_id)
       .single();
 
@@ -50,15 +50,28 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const baseUrl = Deno.env.get("SITE_URL") || "https://ehdsexplorer.eu";
-    const verifyUrl = `${baseUrl}/verify-subscription?token=${subscription.verification_token}`;
+    // Get implementing act title separately to avoid join issues
+    let actTitle = "an implementing act";
+    if (!subscription.subscribe_all && subscription.implementing_act_id) {
+      const { data: actData } = await supabase
+        .from("implementing_acts")
+        .select("title")
+        .eq("id", subscription.implementing_act_id)
+        .single();
+      if (actData) {
+        actTitle = actData.title;
+      }
+    }
 
-    const actTitle = subscription.implementing_acts?.[0]?.title || 'an implementing act';
     const subscriptionType = subscription.subscribe_all 
       ? "all implementing act updates" 
       : `updates for "${actTitle}"`;
+
+    const baseUrl = Deno.env.get("SITE_URL") || "https://ehdsexplorer.eu";
+    const verifyUrl = `${baseUrl}/verify-subscription?token=${subscription.verification_token}`;
+
     try {
-      await resend.emails.send({
+      const emailResponse = await resend.emails.send({
         from: "EHDS Explorer <notifications@ehdsexplorer.eu>",
         to: [subscription.email],
         subject: "Verify your EHDS Explorer subscription",
@@ -97,7 +110,16 @@ const handler = async (req: Request): Promise<Response> => {
           </html>
         `,
       });
-      console.log(`Verification email sent to ${subscription.email}`);
+
+      if (emailResponse.error) {
+        console.error(`Resend API error for verification email:`, JSON.stringify(emailResponse.error));
+        return new Response(
+          JSON.stringify({ error: "Failed to send email", details: emailResponse.error }),
+          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        );
+      }
+
+      console.log(`Verification email sent to ${subscription.email}, Resend ID: ${emailResponse.data?.id}`);
     } catch (emailError) {
       console.error(`Failed to send verification email:`, emailError);
       return new Response(

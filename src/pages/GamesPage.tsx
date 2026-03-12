@@ -12,7 +12,8 @@ import {
   Trophy,
   Timer,
   Target,
-  UserSearch
+  UserSearch,
+  BookOpen
 } from "lucide-react";
 import { useAchievements } from "@/hooks/useAchievements";
 
@@ -183,8 +184,30 @@ const GamesPage = () => {
           ))}
         </div>
 
+        {/* Kids Corner CTA */}
+        <Card className="mt-8 bg-gradient-to-br from-accent/10 to-accent/20 border-accent/30">
+          <CardContent className="py-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <BookOpen className="h-10 w-10 text-primary" />
+                <div>
+                  <h3 className="font-semibold">Kids Corner — EHDS Comics</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Fun comic book stories that teach children and teens about health data rights with AI-generated illustrations.
+                  </p>
+                </div>
+              </div>
+              <Link to="/kids">
+                <Badge variant="default" className="cursor-pointer text-sm px-4 py-2">
+                  Read Comics →
+                </Badge>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Achievements CTA */}
-        <Card className="mt-8 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+        <Card className="mt-4 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
           <CardContent className="py-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">

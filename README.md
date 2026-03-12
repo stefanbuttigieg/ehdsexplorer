@@ -29,6 +29,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **4 Annexes** with detailed technical requirements and specifications
 - **170+ Definitions** from Article 2, EU EHR Glossary, and Xt-EHR with multi-source support
 - **Multi-source definitions** - See how the same term is defined across EHDS Regulation, EU EHR Glossary, and Xt-EHR
+- **Smart legal reference linking** - Internal article/recital references are auto-linked; external regulation references (e.g., "Article 6 of Regulation (EU) 2016/679") are correctly left as plain text
 
 ### 🔍 Advanced Search
 - **Fuzzy search** powered by Fuse.js across all content types
@@ -250,6 +251,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Downloadable resources** - Upload and manage files with visibility and email-gating controls
 - **Toolkit questions** - Manage Starter Kit and Readiness Assessment wizard Q&A content
 - **Feature flags** - Toggle major features (AI Assistant, Teams, Tools Hub, Implementation Tracker) without code changes
+- **Dashboard search** - Search across all admin tools and settings for quick discovery
 
 ### 📜 Legal & Compliance
 - **Privacy Policy** page

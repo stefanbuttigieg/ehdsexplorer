@@ -257,80 +257,80 @@ const Index = () => {
         {/* Quick Links */}
         <section className="py-8 px-4 border-b border-border bg-muted/30">
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
               <Link to="/overview">
                 <Card className="hover:border-primary transition-colors cursor-pointer h-full">
-                  <CardContent className="p-4 flex items-center gap-3">
-                    <Book className="h-8 w-8 text-primary" />
+                  <CardContent className="p-4 flex flex-col items-center text-center gap-2">
+                    <Book className="h-7 w-7 text-primary shrink-0" />
                     <div>
-                      <p className="font-semibold">Overview</p>
-                      <p className="text-sm text-muted-foreground">Quick summary</p>
+                      <p className="font-semibold text-sm">Overview</p>
+                      <p className="text-xs text-muted-foreground">Quick summary</p>
                     </div>
                   </CardContent>
                 </Card>
               </Link>
               <Link to="/definitions">
                 <Card className="hover:border-primary transition-colors cursor-pointer h-full">
-                  <CardContent className="p-4 flex items-center gap-3">
-                    <FileText className="h-8 w-8 text-primary" />
+                  <CardContent className="p-4 flex flex-col items-center text-center gap-2">
+                    <FileText className="h-7 w-7 text-primary shrink-0" />
                     <div>
-                      <p className="font-semibold">Definitions</p>
-                      <p className="text-sm text-muted-foreground">{definitions.length} terms</p>
+                      <p className="font-semibold text-sm">Definitions</p>
+                      <p className="text-xs text-muted-foreground">{definitions.length} terms</p>
                     </div>
                   </CardContent>
                 </Card>
               </Link>
               <Link to="/annexes">
                 <Card className="hover:border-primary transition-colors cursor-pointer h-full">
-                  <CardContent className="p-4 flex items-center gap-3">
-                    <Files className="h-8 w-8 text-primary" />
+                  <CardContent className="p-4 flex flex-col items-center text-center gap-2">
+                    <Files className="h-7 w-7 text-primary shrink-0" />
                     <div>
-                      <p className="font-semibold">Annexes</p>
-                      <p className="text-sm text-muted-foreground">4 annexes</p>
+                      <p className="font-semibold text-sm">Annexes</p>
+                      <p className="text-xs text-muted-foreground">4 annexes</p>
                     </div>
                   </CardContent>
                 </Card>
               </Link>
               <Link to="/implementing-acts" data-tour="implementing-acts">
                 <Card className="hover:border-primary transition-colors cursor-pointer h-full">
-                  <CardContent className="p-4 flex items-center gap-3">
-                    <ListChecks className="h-8 w-8 text-secondary" />
+                  <CardContent className="p-4 flex flex-col items-center text-center gap-2">
+                    <ListChecks className="h-7 w-7 text-secondary shrink-0" />
                     <div>
-                      <p className="font-semibold">Impl. Acts</p>
-                      <p className="text-sm text-muted-foreground">{actStats.feedback || 0} open for feedback</p>
+                      <p className="font-semibold text-sm">Impl. Acts</p>
+                      <p className="text-xs text-muted-foreground">{actStats.feedback || 0} feedback</p>
                     </div>
                   </CardContent>
                 </Card>
               </Link>
               <Link to="/bookmarks">
                 <Card className="hover:border-primary transition-colors cursor-pointer h-full">
-                  <CardContent className="p-4 flex items-center gap-3">
-                    <Bookmark className="h-8 w-8 text-primary" />
+                  <CardContent className="p-4 flex flex-col items-center text-center gap-2">
+                    <Bookmark className="h-7 w-7 text-primary shrink-0" />
                     <div>
-                      <p className="font-semibold">Bookmarks</p>
-                      <p className="text-sm text-muted-foreground">Saved items</p>
+                      <p className="font-semibold text-sm">Bookmarks</p>
+                      <p className="text-xs text-muted-foreground">Saved items</p>
                     </div>
                   </CardContent>
                 </Card>
               </Link>
               <Link to="/notes">
                 <Card className="hover:border-primary transition-colors cursor-pointer h-full">
-                  <CardContent className="p-4 flex items-center gap-3">
-                    <StickyNote className="h-8 w-8 text-primary" />
+                  <CardContent className="p-4 flex flex-col items-center text-center gap-2">
+                    <StickyNote className="h-7 w-7 text-primary shrink-0" />
                     <div>
-                      <p className="font-semibold">Notes</p>
-                      <p className="text-sm text-muted-foreground">Annotations</p>
+                      <p className="font-semibold text-sm">Notes</p>
+                      <p className="text-xs text-muted-foreground">Annotations</p>
                     </div>
                   </CardContent>
                 </Card>
               </Link>
               <Link to="/games">
                 <Card className="hover:border-primary transition-colors cursor-pointer h-full">
-                  <CardContent className="p-4 flex items-center gap-3">
-                    <Gamepad2 className="h-8 w-8 text-primary" />
+                  <CardContent className="p-4 flex flex-col items-center text-center gap-2">
+                    <Gamepad2 className="h-7 w-7 text-primary shrink-0" />
                     <div>
-                      <p className="font-semibold">Learning Games</p>
-                      <p className="text-sm text-muted-foreground">5 games to play</p>
+                      <p className="font-semibold text-sm">Games</p>
+                      <p className="text-xs text-muted-foreground">5 to play</p>
                     </div>
                   </CardContent>
                 </Card>

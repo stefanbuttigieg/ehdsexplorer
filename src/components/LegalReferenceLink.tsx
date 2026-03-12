@@ -115,6 +115,9 @@ export const LegalReferenceLink = ({ type, number, children }: LegalReferenceLin
   );
 };
 
+// Pattern to detect external regulation references following an article/recital mention
+const EXTERNAL_REF_PATTERN = /^\s+of\s+(?:Directive|Regulation|Decision|Delegated|Implementing|Commission|Council|European)/i;
+
 // Utility to parse text and replace article/recital references with links
 export const parseAndLinkReferences = (text: string): React.ReactNode[] => {
   // Regex to match "Article X", "Articles X", "Recital X", "Recitals X" (case insensitive)
@@ -126,12 +129,19 @@ export const parseAndLinkReferences = (text: string): React.ReactNode[] => {
   let match;
   
   while ((match = referencePattern.exec(text)) !== null) {
+    const matchText = match[0];
+    const afterMatch = text.slice(match.index + matchText.length);
+    
+    // Skip if followed by "of Directive/Regulation/..." — it's an external reference
+    if (EXTERNAL_REF_PATTERN.test(afterMatch)) {
+      continue;
+    }
+
     // Add text before the match
     if (match.index > lastIndex) {
       parts.push(text.slice(lastIndex, match.index));
     }
     
-    const matchText = match[0];
     const isArticle = matchText.toLowerCase().startsWith('article');
     
     // Extract the first number from the reference

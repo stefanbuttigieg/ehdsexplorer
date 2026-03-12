@@ -12,7 +12,8 @@ import {
   Trophy,
   Timer,
   Target,
-  UserSearch
+  UserSearch,
+  BookOpen
 } from "lucide-react";
 import { useAchievements } from "@/hooks/useAchievements";
 

@@ -184,6 +184,7 @@ const App = () => (
             <Route path="/true-false" element={<TrueFalseGamePage />} />
             <Route path="/who-am-i" element={<WhoAmIGamePage />} />
             <Route path="/games" element={<GamesPage />} />
+            <Route path="/kids" element={<KidsCornerPage />} />
             <Route path="/api" element={<ApiDocsPage />} />
             <Route path="/news" element={<NewsPage />} />
             <Route path="/news/:id" element={<NewsDetailPage />} />

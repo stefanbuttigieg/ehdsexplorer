@@ -115,6 +115,7 @@ const ToolsHubPage = lazy(() => import("./pages/ToolsHubPage"));
 const AdminToolkitQuestionsPage = lazy(() => import("./pages/AdminToolkitQuestionsPage"));
 const AdminAISettingsPage = lazy(() => import("./pages/AdminAISettingsPage"));
 const WhoAmIGamePage = lazy(() => import("./pages/WhoAmIGamePage"));
+const KidsCornerPage = lazy(() => import("./pages/KidsCornerPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {

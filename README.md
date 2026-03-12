@@ -250,6 +250,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Downloadable resources** - Upload and manage files with visibility and email-gating controls
 - **Toolkit questions** - Manage Starter Kit and Readiness Assessment wizard Q&A content
 - **Feature flags** - Toggle major features (AI Assistant, Teams, Tools Hub, Implementation Tracker) without code changes
+- **Dashboard search** - Search across all admin tools and settings for quick discovery
 
 ### 📜 Legal & Compliance
 - **Privacy Policy** page

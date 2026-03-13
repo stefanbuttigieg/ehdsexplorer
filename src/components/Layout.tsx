@@ -307,8 +307,8 @@ const Layout = ({
                 </Link>)}
             </div>
 
-            {/* Chapters Accordion - Only when expanded */}
-            {!sidebarCollapsed && <Collapsible open={chaptersOpen} onOpenChange={setChaptersOpen} className="mt-4" data-tour="sidebar-chapters">
+            {/* Chapters Accordion - Only when expanded and not in Kids Mode */}
+            {!sidebarCollapsed && !isKidsMode && <Collapsible open={chaptersOpen} onOpenChange={setChaptersOpen} className="mt-4" data-tour="sidebar-chapters">
                 <CollapsibleTrigger asChild>
                   <Button variant="ghost" className="w-full justify-between">
                     <span className="font-semibold">Chapters</span>

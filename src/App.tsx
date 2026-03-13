@@ -159,6 +159,7 @@ const App = () => (
                 <AchievementToastWrapper />
                 <LevelUpModalWrapper />
                 <MaintenanceGuard>
+                <KidsModeGuard />
           <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<Index />} />

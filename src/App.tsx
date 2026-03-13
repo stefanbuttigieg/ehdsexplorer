@@ -147,7 +147,8 @@ const App = () => (
       <LanguageProvider>
         <StakeholderProvider>
           <ComparisonProvider>
-            <AchievementProvider>
+             <AchievementProvider>
+            <KidsModeProvider>
             <TooltipProvider>
               <Toaster />
               <Sonner />

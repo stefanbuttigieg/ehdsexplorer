@@ -30,6 +30,8 @@ import { StakeholderFilter } from "@/components/StakeholderFilter";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { MFAReminderBanner } from "@/components/mfa/MFAReminderBanner";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
+import { KidsModeToggle } from "@/components/KidsModeToggle";
+import { useKidsMode } from "@/contexts/KidsModeContext";
 
 const ROUTE_TO_PLACEMENT: Record<string, string> = {
   '/': 'home',
@@ -89,7 +91,7 @@ const Layout = ({
     loading: authLoading
   } = useAuth();
   const { isFeatureEnabled } = useFeatureFlags();
-
+  const { isKidsMode, isKidsFriendlyRoute } = useKidsMode();
   // Initialize text highlight hook for URL-based highlighting
   useTextHighlight();
 
@@ -201,7 +203,6 @@ const Layout = ({
     
     // Add Teams only if enabled
     if (isFeatureEnabled('teams')) {
-      // Insert Teams before Compare
       const compareIndex = items.findIndex(item => item.path === '/compare');
       items.splice(compareIndex, 0, {
         path: "/teams",
@@ -209,9 +210,22 @@ const Layout = ({
         label: "Teams"
       });
     }
+
+    // Filter to kid-friendly routes when Kids Mode is active
+    if (isKidsMode) {
+      items = items.filter(item => isKidsFriendlyRoute(item.path));
+      // Add Kids Corner to nav if not already present
+      if (!items.find(item => item.path === '/kids')) {
+        items.splice(1, 0, {
+          path: "/kids",
+          icon: Heart,
+          label: "Kids Corner"
+        });
+      }
+    }
     
     return items;
-  }, [isFeatureEnabled]);
+  }, [isFeatureEnabled, isKidsMode, isKidsFriendlyRoute]);
   return <div className="min-h-screen flex w-full">
       {/* Mobile Header - simplified, removed menu button since we have bottom nav */}
       <header className="fixed top-0 left-0 right-0 bg-card border-b border-border flex items-center justify-between px-4 md:hidden z-50" style={{
@@ -225,6 +239,7 @@ const Layout = ({
           <span className="font-serif font-bold text-base">EHDS Explorer</span>
         </Link>
         <div className="flex items-center gap-1" data-tour="accessibility">
+          <KidsModeToggle compact />
           <StakeholderFilter compact />
           <LanguageSelector variant="compact" />
           <AccessibilityControls />
@@ -255,6 +270,7 @@ const Layout = ({
 
         {/* Toolbar Row - Only when expanded */}
         {!sidebarCollapsed && <div className="hidden gap-1 px-3 py-2 border-b border-sidebar-border md:flex items-center justify-center flex-wrap" data-tour="accessibility">
+            <KidsModeToggle compact />
             <StakeholderFilter />
             <UserMenu />
             <LanguageSelector variant="compact" />
@@ -291,8 +307,8 @@ const Layout = ({
                 </Link>)}
             </div>
 
-            {/* Chapters Accordion - Only when expanded */}
-            {!sidebarCollapsed && <Collapsible open={chaptersOpen} onOpenChange={setChaptersOpen} className="mt-4" data-tour="sidebar-chapters">
+            {/* Chapters Accordion - Only when expanded and not in Kids Mode */}
+            {!sidebarCollapsed && !isKidsMode && <Collapsible open={chaptersOpen} onOpenChange={setChaptersOpen} className="mt-4" data-tour="sidebar-chapters">
                 <CollapsibleTrigger asChild>
                   <Button variant="ghost" className="w-full justify-between">
                     <span className="font-semibold">Chapters</span>

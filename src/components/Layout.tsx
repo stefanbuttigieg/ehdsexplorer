@@ -239,6 +239,7 @@ const Layout = ({
           <span className="font-serif font-bold text-base">EHDS Explorer</span>
         </Link>
         <div className="flex items-center gap-1" data-tour="accessibility">
+          <KidsModeToggle compact />
           <StakeholderFilter compact />
           <LanguageSelector variant="compact" />
           <AccessibilityControls />

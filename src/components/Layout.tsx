@@ -91,7 +91,7 @@ const Layout = ({
     loading: authLoading
   } = useAuth();
   const { isFeatureEnabled } = useFeatureFlags();
-
+  const { isKidsMode, isKidsFriendlyRoute } = useKidsMode();
   // Initialize text highlight hook for URL-based highlighting
   useTextHighlight();
 

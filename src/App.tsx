@@ -264,6 +264,7 @@ const App = () => (
           </MaintenanceGuard>
           </BrowserRouter>
             </TooltipProvider>
+            </KidsModeProvider>
             </AchievementProvider>
           </ComparisonProvider>
         </StakeholderProvider>

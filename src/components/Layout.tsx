@@ -203,7 +203,6 @@ const Layout = ({
     
     // Add Teams only if enabled
     if (isFeatureEnabled('teams')) {
-      // Insert Teams before Compare
       const compareIndex = items.findIndex(item => item.path === '/compare');
       items.splice(compareIndex, 0, {
         path: "/teams",
@@ -211,9 +210,22 @@ const Layout = ({
         label: "Teams"
       });
     }
+
+    // Filter to kid-friendly routes when Kids Mode is active
+    if (isKidsMode) {
+      items = items.filter(item => isKidsFriendlyRoute(item.path));
+      // Add Kids Corner to nav if not already present
+      if (!items.find(item => item.path === '/kids')) {
+        items.splice(1, 0, {
+          path: "/kids",
+          icon: Heart,
+          label: "Kids Corner"
+        });
+      }
+    }
     
     return items;
-  }, [isFeatureEnabled]);
+  }, [isFeatureEnabled, isKidsMode, isKidsFriendlyRoute]);
   return <div className="min-h-screen flex w-full">
       {/* Mobile Header - simplified, removed menu button since we have bottom nav */}
       <header className="fixed top-0 left-0 right-0 bg-card border-b border-border flex items-center justify-between px-4 md:hidden z-50" style={{

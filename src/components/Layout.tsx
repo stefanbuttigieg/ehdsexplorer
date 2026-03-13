@@ -30,6 +30,8 @@ import { StakeholderFilter } from "@/components/StakeholderFilter";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { MFAReminderBanner } from "@/components/mfa/MFAReminderBanner";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
+import { KidsModeToggle } from "@/components/KidsModeToggle";
+import { useKidsMode } from "@/contexts/KidsModeContext";
 
 const ROUTE_TO_PLACEMENT: Record<string, string> = {
   '/': 'home',

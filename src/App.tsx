@@ -9,6 +9,8 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ComparisonProvider } from "@/contexts/ComparisonContext";
 import { AchievementProvider } from "@/contexts/AchievementContext";
 import { StakeholderProvider } from "@/contexts/StakeholderContext";
+import { KidsModeProvider } from "@/contexts/KidsModeContext";
+import KidsModeGuard from "@/components/KidsModeGuard";
 import MaintenanceGuard from "@/components/MaintenanceGuard";
 import UmamiAnalytics from "@/components/UmamiAnalytics";
 import { ComparisonBar } from "@/components/ComparisonBar";

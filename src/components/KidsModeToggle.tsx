@@ -36,7 +36,7 @@ export const KidsModeToggle = ({ compact = false }: { compact?: boolean }) => {
       onClick={toggleKidsMode}
       className={cn(
         "gap-2 transition-all",
-        isKidsMode && "bg-orange-500 hover:bg-orange-600 text-white border-orange-500"
+        isKidsMode && "bg-primary hover:bg-primary/90 text-primary-foreground border-primary"
       )}
     >
       <Baby className="h-4 w-4" />

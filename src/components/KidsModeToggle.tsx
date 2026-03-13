@@ -17,7 +17,7 @@ export const KidsModeToggle = ({ compact = false }: { compact?: boolean }) => {
             onClick={toggleKidsMode}
             className={cn(
               "h-8 w-8 transition-all",
-              isKidsMode && "bg-orange-500 hover:bg-orange-600 text-white"
+              isKidsMode && "bg-primary hover:bg-primary/90 text-primary-foreground"
             )}
             aria-label={isKidsMode ? "Disable Kids Mode" : "Enable Kids Mode"}
           >

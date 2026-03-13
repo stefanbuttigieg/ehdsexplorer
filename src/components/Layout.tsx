@@ -270,6 +270,7 @@ const Layout = ({
 
         {/* Toolbar Row - Only when expanded */}
         {!sidebarCollapsed && <div className="hidden gap-1 px-3 py-2 border-b border-sidebar-border md:flex items-center justify-center flex-wrap" data-tour="accessibility">
+            <KidsModeToggle compact />
             <StakeholderFilter />
             <UserMenu />
             <LanguageSelector variant="compact" />

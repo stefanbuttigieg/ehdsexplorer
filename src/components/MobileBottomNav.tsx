@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Book, FileText, ListChecks, Search, Menu } from "lucide-react";
+import { Home, Book, FileText, ListChecks, Search, Menu, Heart, Brain } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useKidsMode } from "@/contexts/KidsModeContext";
 
 interface MobileBottomNavProps {
   onMenuClick: () => void;
@@ -9,18 +10,27 @@ interface MobileBottomNavProps {
 
 const MobileBottomNav = ({ onMenuClick, onSearchClick }: MobileBottomNavProps) => {
   const location = useLocation();
+  const { isKidsMode } = useKidsMode();
   
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/";
     return location.pathname.startsWith(path);
   };
 
-  const navItems = [
+  const defaultItems = [
     { path: "/", icon: Home, label: "Home" },
     { path: "/overview", icon: Book, label: "Overview" },
     { path: "/articles", icon: FileText, label: "Articles" },
     { path: "/implementing-acts", icon: ListChecks, label: "Acts" },
   ];
+
+  const kidsItems = [
+    { path: "/", icon: Home, label: "Home" },
+    { path: "/kids", icon: Heart, label: "Kids" },
+    { path: "/games", icon: Brain, label: "Games" },
+  ];
+
+  const navItems = isKidsMode ? kidsItems : defaultItems;
 
   return (
     <nav 

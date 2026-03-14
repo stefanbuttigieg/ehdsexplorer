@@ -37,7 +37,20 @@ export const KidsModeProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     localStorage.setItem("ehds-kids-mode", String(isKidsMode));
+    // Toggle the kids-mode CSS class on the root element
+    if (isKidsMode) {
+      document.documentElement.classList.add("kids-mode");
+    } else {
+      document.documentElement.classList.remove("kids-mode");
+    }
   }, [isKidsMode]);
+
+  // Also apply on mount in case of page refresh
+  useEffect(() => {
+    if (localStorage.getItem("ehds-kids-mode") === "true") {
+      document.documentElement.classList.add("kids-mode");
+    }
+  }, []);
 
   const toggleKidsMode = () => setIsKidsMode((prev) => !prev);
 

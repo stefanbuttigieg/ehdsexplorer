@@ -52,6 +52,20 @@ const Index = () => {
   const { data: definitions = [] } = useDefinitions();
   const { data: newsSummaries = [] } = useNewsSummaries(true);
   const actStats = getActStats(implementingActs);
+  const { isKidsMode } = useKidsMode();
+
+  if (isKidsMode) {
+    return (
+      <Layout>
+        <SEOHead
+          title="EHDS Explorer for Kids — Learn About Health Data"
+          description="A fun, kid-friendly guide to the European Health Data Space. Explore comics, games, and learn about your health data rights."
+          url="/"
+        />
+        <KidsHomePage />
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

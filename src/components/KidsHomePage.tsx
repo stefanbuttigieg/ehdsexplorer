@@ -7,6 +7,29 @@ import { useHealthAuthorities } from "@/hooks/useHealthAuthorities";
 
 export function KidsHomePage() {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const { authorities } = useHealthAuthorities();
+
+  const countryData = useMemo(() => {
+    const data: Record<string, number> = {};
+    authorities?.forEach(a => { data[a.country_code] = (data[a.country_code] || 0) + 1; });
+    return data;
+  }, [authorities]);
+
+  const countryDetails = useMemo(() => {
+    const details: Record<string, { entities?: Array<{ name: string; type: string; status: string }> }> = {};
+    authorities?.forEach(a => {
+      if (!details[a.country_code]) details[a.country_code] = { entities: [] };
+      details[a.country_code].entities!.push({
+        name: a.name,
+        type: a.authority_type === 'digital_health_authority' ? 'DHA' : 'HDAB',
+        status: a.status.charAt(0).toUpperCase() + a.status.slice(1),
+      });
+    });
+    return details;
+  }, [authorities]);
+
+  const entityCount = authorities?.length ?? 0;
+  const countriesWithEntities = Object.keys(countryData).length;
 
   return (
     <div className="animate-fade-in">

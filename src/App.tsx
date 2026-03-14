@@ -259,6 +259,7 @@ const App = () => (
             <Route path="/admin/resources" element={<AdminResourcesPage />} />
             <Route path="/admin/toolkit-questions" element={<AdminToolkitQuestionsPage />} />
             <Route path="/admin/ai-settings" element={<AdminAISettingsPage />} />
+            <Route path="/admin/comic-panels" element={<AdminComicPanelsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>

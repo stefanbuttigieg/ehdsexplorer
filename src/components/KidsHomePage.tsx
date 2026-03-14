@@ -59,24 +59,24 @@ export function KidsHomePage() {
           <div className="text-center mb-6">
             <div className="inline-flex items-center gap-2 mb-3">
               <Globe className="h-6 w-6 text-primary" />
-              <h2 className="text-2xl font-bold">Countries Are Still Choosing! 🗳️</h2>
+              <h2 className="text-2xl font-bold">Who's Building the EHDS? 🏗️</h2>
             </div>
             <p className="text-muted-foreground max-w-2xl mx-auto text-base">
-              Each country in the EU is deciding <strong>how</strong> to use the EHDS. 
-              Some are further ahead (green), and some are just getting started (red). 
-              Click on a country to see how they're doing!
+              Countries across the EU are setting up special organisations to make the EHDS work.
+              The <strong className="text-primary">blue dots</strong> show countries that already have entities — 
+              click on one to learn more!
             </p>
           </div>
 
           <Card className="overflow-hidden border-2 border-primary/20 shadow-lg">
             <CardContent className="p-0">
               <EuropeMap
-                countryData={emptyCountryData}
-                progressData={KIDS_PROGRESS_DATA}
+                countryData={countryData}
+                countryDetails={countryDetails}
                 selectedCountry={selectedCountry}
                 onCountryClick={setSelectedCountry}
                 isLegislationView={false}
-                mode="progress"
+                mode="count"
                 className="border-0 rounded-none"
               />
             </CardContent>
@@ -86,14 +86,14 @@ export function KidsHomePage() {
             <Card className="mt-4 border-2 border-primary/30 bg-primary/5">
               <CardContent className="p-4 text-center">
                 <p className="text-lg font-semibold">
-                  🎯 This country is at{" "}
+                  🏛️ This country has{" "}
                   <span className="text-primary text-xl">
-                    {KIDS_PROGRESS_DATA[selectedCountry]?.overall ?? 0}%
+                    {countryData[selectedCountry] ?? 0}
                   </span>{" "}
-                  progress
+                  {(countryData[selectedCountry] ?? 0) === 1 ? 'entity' : 'entities'}
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  They're working hard to set up rules for sharing health data safely!
+                  These are the organisations helping to build the health data space!
                 </p>
               </CardContent>
             </Card>

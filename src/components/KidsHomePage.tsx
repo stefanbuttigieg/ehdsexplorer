@@ -1,43 +1,9 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { BookOpen, Gamepad2, Heart, Globe, Shield, Sparkles, Star, MapPin } from "lucide-react";
-import { EuropeMap, type ProgressData } from "@/components/EuropeMap";
-import { useState } from "react";
-
-// Simple mock progress data showing countries are "still choosing"
-const KIDS_PROGRESS_DATA: ProgressData = {
-  AT: { overall: 25, primaryUse: 30, secondaryUse: 20, general: 25 },
-  BE: { overall: 35, primaryUse: 40, secondaryUse: 30, general: 35 },
-  BG: { overall: 10, primaryUse: 15, secondaryUse: 5, general: 10 },
-  HR: { overall: 15, primaryUse: 20, secondaryUse: 10, general: 15 },
-  CY: { overall: 5, primaryUse: 10, secondaryUse: 0, general: 5 },
-  CZ: { overall: 20, primaryUse: 25, secondaryUse: 15, general: 20 },
-  DK: { overall: 45, primaryUse: 50, secondaryUse: 40, general: 45 },
-  EE: { overall: 55, primaryUse: 60, secondaryUse: 50, general: 55 },
-  FI: { overall: 50, primaryUse: 55, secondaryUse: 45, general: 50 },
-  FR: { overall: 30, primaryUse: 35, secondaryUse: 25, general: 30 },
-  DE: { overall: 40, primaryUse: 45, secondaryUse: 35, general: 40 },
-  GR: { overall: 15, primaryUse: 20, secondaryUse: 10, general: 15 },
-  HU: { overall: 20, primaryUse: 25, secondaryUse: 15, general: 20 },
-  IE: { overall: 35, primaryUse: 40, secondaryUse: 30, general: 35 },
-  IT: { overall: 25, primaryUse: 30, secondaryUse: 20, general: 25 },
-  LV: { overall: 30, primaryUse: 35, secondaryUse: 25, general: 30 },
-  LT: { overall: 25, primaryUse: 30, secondaryUse: 20, general: 25 },
-  LU: { overall: 40, primaryUse: 45, secondaryUse: 35, general: 40 },
-  MT: { overall: 10, primaryUse: 15, secondaryUse: 5, general: 10 },
-  NL: { overall: 50, primaryUse: 55, secondaryUse: 45, general: 50 },
-  PL: { overall: 20, primaryUse: 25, secondaryUse: 15, general: 20 },
-  PT: { overall: 30, primaryUse: 35, secondaryUse: 25, general: 30 },
-  RO: { overall: 15, primaryUse: 20, secondaryUse: 10, general: 15 },
-  SK: { overall: 20, primaryUse: 25, secondaryUse: 15, general: 20 },
-  SI: { overall: 25, primaryUse: 30, secondaryUse: 20, general: 25 },
-  ES: { overall: 35, primaryUse: 40, secondaryUse: 30, general: 35 },
-  SE: { overall: 55, primaryUse: 60, secondaryUse: 50, general: 55 },
-};
-
-const emptyCountryData: Record<string, number> = {};
+import { BookOpen, Gamepad2, Heart, Globe, Shield, Sparkles, Star } from "lucide-react";
+import { EuropeMap } from "@/components/EuropeMap";
+import { useState, useMemo } from "react";
+import { useHealthAuthorities } from "@/hooks/useHealthAuthorities";
 
 export function KidsHomePage() {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);

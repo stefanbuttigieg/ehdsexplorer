@@ -246,6 +246,12 @@ const AdminDashboard = () => {
       icon: FileText,
       href: '/admin/implementing-act-content',
     },
+    {
+      title: 'Comic Panel Images',
+      description: 'Pre-generate and manage AI comic panel artwork for Kids Corner',
+      icon: Sparkles,
+      href: '/admin/comic-panels',
+    },
   ], []);
 
   const adminOnlySections = isAdmin ? [

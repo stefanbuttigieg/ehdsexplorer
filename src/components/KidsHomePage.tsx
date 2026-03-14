@@ -1,46 +1,35 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { BookOpen, Gamepad2, Heart, Globe, Shield, Sparkles, Star, MapPin } from "lucide-react";
-import { EuropeMap, type ProgressData } from "@/components/EuropeMap";
-import { useState } from "react";
-
-// Simple mock progress data showing countries are "still choosing"
-const KIDS_PROGRESS_DATA: ProgressData = {
-  AT: { overall: 25, primaryUse: 30, secondaryUse: 20, general: 25 },
-  BE: { overall: 35, primaryUse: 40, secondaryUse: 30, general: 35 },
-  BG: { overall: 10, primaryUse: 15, secondaryUse: 5, general: 10 },
-  HR: { overall: 15, primaryUse: 20, secondaryUse: 10, general: 15 },
-  CY: { overall: 5, primaryUse: 10, secondaryUse: 0, general: 5 },
-  CZ: { overall: 20, primaryUse: 25, secondaryUse: 15, general: 20 },
-  DK: { overall: 45, primaryUse: 50, secondaryUse: 40, general: 45 },
-  EE: { overall: 55, primaryUse: 60, secondaryUse: 50, general: 55 },
-  FI: { overall: 50, primaryUse: 55, secondaryUse: 45, general: 50 },
-  FR: { overall: 30, primaryUse: 35, secondaryUse: 25, general: 30 },
-  DE: { overall: 40, primaryUse: 45, secondaryUse: 35, general: 40 },
-  GR: { overall: 15, primaryUse: 20, secondaryUse: 10, general: 15 },
-  HU: { overall: 20, primaryUse: 25, secondaryUse: 15, general: 20 },
-  IE: { overall: 35, primaryUse: 40, secondaryUse: 30, general: 35 },
-  IT: { overall: 25, primaryUse: 30, secondaryUse: 20, general: 25 },
-  LV: { overall: 30, primaryUse: 35, secondaryUse: 25, general: 30 },
-  LT: { overall: 25, primaryUse: 30, secondaryUse: 20, general: 25 },
-  LU: { overall: 40, primaryUse: 45, secondaryUse: 35, general: 40 },
-  MT: { overall: 10, primaryUse: 15, secondaryUse: 5, general: 10 },
-  NL: { overall: 50, primaryUse: 55, secondaryUse: 45, general: 50 },
-  PL: { overall: 20, primaryUse: 25, secondaryUse: 15, general: 20 },
-  PT: { overall: 30, primaryUse: 35, secondaryUse: 25, general: 30 },
-  RO: { overall: 15, primaryUse: 20, secondaryUse: 10, general: 15 },
-  SK: { overall: 20, primaryUse: 25, secondaryUse: 15, general: 20 },
-  SI: { overall: 25, primaryUse: 30, secondaryUse: 20, general: 25 },
-  ES: { overall: 35, primaryUse: 40, secondaryUse: 30, general: 35 },
-  SE: { overall: 55, primaryUse: 60, secondaryUse: 50, general: 55 },
-};
-
-const emptyCountryData: Record<string, number> = {};
+import { BookOpen, Gamepad2, Heart, Globe, Shield, Sparkles, Star } from "lucide-react";
+import { EuropeMap } from "@/components/EuropeMap";
+import { useState, useMemo } from "react";
+import { useHealthAuthorities } from "@/hooks/useHealthAuthorities";
 
 export function KidsHomePage() {
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const { authorities } = useHealthAuthorities();
+
+  const countryData = useMemo(() => {
+    const data: Record<string, number> = {};
+    authorities?.forEach(a => { data[a.country_code] = (data[a.country_code] || 0) + 1; });
+    return data;
+  }, [authorities]);
+
+  const countryDetails = useMemo(() => {
+    const details: Record<string, { entities?: Array<{ name: string; type: string; status: string }> }> = {};
+    authorities?.forEach(a => {
+      if (!details[a.country_code]) details[a.country_code] = { entities: [] };
+      details[a.country_code].entities!.push({
+        name: a.name,
+        type: a.authority_type === 'digital_health_authority' ? 'DHA' : 'HDAB',
+        status: a.status.charAt(0).toUpperCase() + a.status.slice(1),
+      });
+    });
+    return details;
+  }, [authorities]);
+
+  const entityCount = authorities?.length ?? 0;
+  const countriesWithEntities = Object.keys(countryData).length;
 
   return (
     <div className="animate-fade-in">
@@ -70,24 +59,24 @@ export function KidsHomePage() {
           <div className="text-center mb-6">
             <div className="inline-flex items-center gap-2 mb-3">
               <Globe className="h-6 w-6 text-primary" />
-              <h2 className="text-2xl font-bold">Countries Are Still Choosing! 🗳️</h2>
+              <h2 className="text-2xl font-bold">Who's Building the EHDS? 🏗️</h2>
             </div>
             <p className="text-muted-foreground max-w-2xl mx-auto text-base">
-              Each country in the EU is deciding <strong>how</strong> to use the EHDS. 
-              Some are further ahead (green), and some are just getting started (red). 
-              Click on a country to see how they're doing!
+              Countries across the EU are setting up special organisations to make the EHDS work.
+              The <strong className="text-primary">blue dots</strong> show countries that already have entities — 
+              click on one to learn more!
             </p>
           </div>
 
           <Card className="overflow-hidden border-2 border-primary/20 shadow-lg">
             <CardContent className="p-0">
               <EuropeMap
-                countryData={emptyCountryData}
-                progressData={KIDS_PROGRESS_DATA}
+                countryData={countryData}
+                countryDetails={countryDetails}
                 selectedCountry={selectedCountry}
                 onCountryClick={setSelectedCountry}
                 isLegislationView={false}
-                mode="progress"
+                mode="count"
                 className="border-0 rounded-none"
               />
             </CardContent>
@@ -97,14 +86,14 @@ export function KidsHomePage() {
             <Card className="mt-4 border-2 border-primary/30 bg-primary/5">
               <CardContent className="p-4 text-center">
                 <p className="text-lg font-semibold">
-                  🎯 This country is at{" "}
+                  🏛️ This country has{" "}
                   <span className="text-primary text-xl">
-                    {KIDS_PROGRESS_DATA[selectedCountry]?.overall ?? 0}%
+                    {countryData[selectedCountry] ?? 0}
                   </span>{" "}
-                  progress
+                  {(countryData[selectedCountry] ?? 0) === 1 ? 'entity' : 'entities'}
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  They're working hard to set up rules for sharing health data safely!
+                  These are the organisations helping to build the health data space!
                 </p>
               </CardContent>
             </Card>

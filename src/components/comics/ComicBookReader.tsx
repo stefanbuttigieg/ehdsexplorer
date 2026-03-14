@@ -4,8 +4,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft, ChevronRight, BookOpen, Sparkles } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import type { ComicStory } from "@/data/comicStories";
+import { useComicPanelImages } from "@/hooks/useComicPanelImages";
 
 interface ComicBookReaderProps {
   story: ComicStory;
@@ -14,55 +14,17 @@ interface ComicBookReaderProps {
 
 export const ComicBookReader = ({ story, onBack }: ComicBookReaderProps) => {
   const [currentPanel, setCurrentPanel] = useState(-1); // -1 = cover
-  const [panelImages, setPanelImages] = useState<Record<number, string>>({});
-  const [loadingPanel, setLoadingPanel] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { imageMap, isLoading: imagesLoading } = useComicPanelImages(story.id);
 
   const totalPanels = story.panels.length;
   const isOnCover = currentPanel === -1;
   const panel = !isOnCover ? story.panels[currentPanel] : null;
 
-  const generateImage = async (panelIndex: number) => {
-    if (panelImages[panelIndex]) return;
-
-    setLoadingPanel(panelIndex);
-    setError(null);
-
-    try {
-      const prompt =
-        panelIndex === -1
-          ? story.coverPrompt
-          : story.panels[panelIndex].imagePrompt;
-
-      const { data, error: fnError } = await supabase.functions.invoke(
-        "generate-comic-panel",
-        {
-          body: { imagePrompt: prompt, storyTitle: story.title },
-        }
-      );
-
-      if (fnError) throw new Error(fnError.message);
-      if (data?.error) throw new Error(data.error);
-
-      if (data?.imageUrl) {
-        setPanelImages((prev) => ({ ...prev, [panelIndex]: data.imageUrl }));
-      }
-    } catch (err) {
-      console.error("Failed to generate panel:", err);
-      setError(
-        err instanceof Error ? err.message : "Failed to generate image"
-      );
-    } finally {
-      setLoadingPanel(null);
-    }
-  };
+  // Get the pre-generated image for a panel index (-1 = cover)
+  const getImage = (panelIndex: number) => imageMap[panelIndex] ?? null;
 
   const goToPanel = (index: number) => {
     setCurrentPanel(index);
-    setError(null);
-    if (!panelImages[index]) {
-      generateImage(index);
-    }
   };
 
   const handleNext = () => {
@@ -72,9 +34,11 @@ export const ComicBookReader = ({ story, onBack }: ComicBookReaderProps) => {
   const handlePrev = () => {
     if (currentPanel > -1) {
       setCurrentPanel(currentPanel - 1);
-      setError(null);
     }
   };
+
+  const coverImage = getImage(-1);
+  const currentImage = getImage(currentPanel);
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -94,14 +58,14 @@ export const ComicBookReader = ({ story, onBack }: ComicBookReaderProps) => {
       {isOnCover && (
         <Card className="overflow-hidden">
           <div className="relative aspect-[3/4] sm:aspect-[16/10] bg-gradient-to-br from-primary/20 via-secondary/10 to-accent/20 flex flex-col items-center justify-center p-8 text-center">
-            {panelImages[-1] ? (
+            {imagesLoading ? (
+              <Skeleton className="absolute inset-0 w-full h-full" />
+            ) : coverImage ? (
               <img
-                src={panelImages[-1]}
+                src={coverImage}
                 alt={story.title}
                 className="absolute inset-0 w-full h-full object-cover"
               />
-            ) : loadingPanel === -1 ? (
-              <Skeleton className="absolute inset-0 w-full h-full" />
             ) : null}
 
             <div className="relative z-10 bg-background/80 backdrop-blur-sm rounded-xl p-8 max-w-lg">
@@ -122,20 +86,9 @@ export const ComicBookReader = ({ story, onBack }: ComicBookReaderProps) => {
                   </Badge>
                 ))}
               </div>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button onClick={() => goToPanel(0)} className="gap-2">
-                  <Sparkles className="h-4 w-4" /> Start Reading
-                </Button>
-                {!panelImages[-1] && loadingPanel !== -1 && (
-                  <Button
-                    variant="outline"
-                    onClick={() => generateImage(-1)}
-                    className="gap-2"
-                  >
-                    Generate Cover Art
-                  </Button>
-                )}
-              </div>
+              <Button onClick={() => goToPanel(0)} className="gap-2">
+                <Sparkles className="h-4 w-4" /> Start Reading
+              </Button>
             </div>
           </div>
         </Card>
@@ -146,31 +99,19 @@ export const ComicBookReader = ({ story, onBack }: ComicBookReaderProps) => {
         <Card className="overflow-hidden">
           {/* Panel image */}
           <div className="relative aspect-[16/10] bg-muted">
-            {panelImages[currentPanel] ? (
+            {imagesLoading ? (
+              <Skeleton className="absolute inset-0 w-full h-full" />
+            ) : currentImage ? (
               <img
-                src={panelImages[currentPanel]}
+                src={currentImage}
                 alt={`Panel ${currentPanel + 1}`}
                 className="w-full h-full object-cover"
               />
-            ) : loadingPanel === currentPanel ? (
-              <div className="flex flex-col items-center justify-center h-full gap-3">
-                <Skeleton className="absolute inset-0 w-full h-full" />
-                <div className="relative z-10 flex flex-col items-center gap-3">
-                  <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                  <p className="text-sm text-muted-foreground">
-                    Generating panel artwork...
-                  </p>
-                </div>
-              </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-full gap-3">
-                <Button
-                  onClick={() => generateImage(currentPanel)}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <Sparkles className="h-4 w-4" /> Generate Artwork
-                </Button>
+                <p className="text-sm text-muted-foreground">
+                  Illustration coming soon ✨
+                </p>
               </div>
             )}
           </div>
@@ -198,12 +139,6 @@ export const ComicBookReader = ({ story, onBack }: ComicBookReaderProps) => {
                 ))}
               </div>
             )}
-
-            {error && (
-              <div className="mt-4 p-3 bg-destructive/10 text-destructive text-sm rounded-lg">
-                {error}
-              </div>
-            )}
           </div>
 
           {/* Navigation */}
@@ -226,7 +161,7 @@ export const ComicBookReader = ({ story, onBack }: ComicBookReaderProps) => {
                   className={`w-2.5 h-2.5 rounded-full transition-colors ${
                     i === currentPanel
                       ? "bg-primary"
-                      : panelImages[i]
+                      : getImage(i)
                         ? "bg-primary/40"
                         : "bg-muted-foreground/30"
                   }`}

@@ -118,6 +118,7 @@ const AdminToolkitQuestionsPage = lazy(() => import("./pages/AdminToolkitQuestio
 const AdminAISettingsPage = lazy(() => import("./pages/AdminAISettingsPage"));
 const WhoAmIGamePage = lazy(() => import("./pages/WhoAmIGamePage"));
 const KidsCornerPage = lazy(() => import("./pages/KidsCornerPage"));
+const AdminComicPanelsPage = lazy(() => import("./pages/AdminComicPanelsPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -258,6 +259,7 @@ const App = () => (
             <Route path="/admin/resources" element={<AdminResourcesPage />} />
             <Route path="/admin/toolkit-questions" element={<AdminToolkitQuestionsPage />} />
             <Route path="/admin/ai-settings" element={<AdminAISettingsPage />} />
+            <Route path="/admin/comic-panels" element={<AdminComicPanelsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>

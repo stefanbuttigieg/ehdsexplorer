@@ -707,6 +707,33 @@ export type Database = {
         }
         Relationships: []
       }
+      comic_panel_images: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          panel_index: number
+          story_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          panel_index: number
+          story_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          panel_index?: number
+          story_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       comitology_updates: {
         Row: {
           created_at: string

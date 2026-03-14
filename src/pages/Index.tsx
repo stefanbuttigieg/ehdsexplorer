@@ -19,6 +19,8 @@ import { ContinueReading } from "@/components/ContinueReading";
 import { differenceInDays, parse, isAfter, isBefore, format } from "date-fns";
 import { SEOHead, WebsiteSchema } from "@/components/seo";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
+import { useKidsMode } from "@/contexts/KidsModeContext";
+import { KidsHomePage } from "@/components/KidsHomePage";
 
 const getFeedbackStatus = (deadline: string) => {
   const parts = deadline.split(" - ");

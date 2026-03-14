@@ -64,6 +64,49 @@
     --font-sans: 'Inter', system-ui, sans-serif;
   }
 
+  /* Kids Mode Theme Override */
+  .kids-mode {
+    --background: 45 100% 97%;
+    --foreground: 270 40% 20%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 270 40% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 270 40% 20%;
+
+    --primary: 280 70% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 340 80% 60%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 45 60% 92%;
+    --muted-foreground: 270 20% 40%;
+
+    --accent: 160 60% 88%;
+    --accent-foreground: 160 70% 25%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 45 40% 85%;
+    --input: 45 40% 85%;
+    --ring: 280 70% 55%;
+
+    --sidebar-background: 280 50% 97%;
+    --sidebar-foreground: 270 40% 25%;
+    --sidebar-primary: 280 70% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 280 60% 92%;
+    --sidebar-accent-foreground: 280 70% 35%;
+    --sidebar-border: 280 30% 90%;
+    --sidebar-ring: 280 70% 55%;
+
+    --font-serif: 'Nunito', 'Comic Sans MS', cursive, sans-serif;
+    --font-sans: 'Nunito', 'Comic Sans MS', cursive, sans-serif;
+  }
+
   .dark {
     --background: 215 25% 10%;
     --foreground: 210 20% 95%;

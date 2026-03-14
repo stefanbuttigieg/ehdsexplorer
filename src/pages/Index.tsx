@@ -19,6 +19,8 @@ import { ContinueReading } from "@/components/ContinueReading";
 import { differenceInDays, parse, isAfter, isBefore, format } from "date-fns";
 import { SEOHead, WebsiteSchema } from "@/components/seo";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
+import { useKidsMode } from "@/contexts/KidsModeContext";
+import { KidsHomePage } from "@/components/KidsHomePage";
 
 const getFeedbackStatus = (deadline: string) => {
   const parts = deadline.split(" - ");
@@ -50,6 +52,20 @@ const Index = () => {
   const { data: definitions = [] } = useDefinitions();
   const { data: newsSummaries = [] } = useNewsSummaries(true);
   const actStats = getActStats(implementingActs);
+  const { isKidsMode } = useKidsMode();
+
+  if (isKidsMode) {
+    return (
+      <Layout>
+        <SEOHead
+          title="EHDS Explorer for Kids — Learn About Health Data"
+          description="A fun, kid-friendly guide to the European Health Data Space. Explore comics, games, and learn about your health data rights."
+          url="/"
+        />
+        <KidsHomePage />
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

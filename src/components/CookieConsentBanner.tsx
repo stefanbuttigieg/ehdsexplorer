@@ -61,6 +61,8 @@ const CookieConsentBanner = () => {
     localStorage.setItem(COOKIE_CONSENT_KEY, 'true');
     localStorage.setItem(COOKIE_PREFERENCES_KEY, JSON.stringify(prefs));
     setPreferences(prefs);
+    // Notify PostHog and other analytics of preference change
+    window.dispatchEvent(new CustomEvent('cookie-preferences-updated'));
     setIsAnimating(false);
     setTimeout(() => setIsVisible(false), 300);
   };

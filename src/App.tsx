@@ -17,6 +17,7 @@ import { ComparisonBar } from "@/components/ComparisonBar";
 import { AchievementUnlockedToast } from "@/components/achievements/AchievementUnlockedToast";
 import { LevelUpModal } from "@/components/achievements/LevelUpModal";
 import CookieConsentBanner from "./components/CookieConsentBanner";
+import PostHogProvider from "./components/PostHogProvider";
 
 // Eagerly load Index for fastest FCP/LCP on homepage
 import Index from "./pages/Index";
@@ -155,6 +156,7 @@ const App = () => (
               <Sonner />
               <BrowserRouter>
                 <UmamiAnalytics />
+                <PostHogProvider />
                 <CookieConsentBanner />
                 <ComparisonBar />
                 <AchievementToastWrapper />

@@ -29,6 +29,7 @@ export const comicStories: ComicStory[] = [
     ageGroup: "10-13",
     ehdsThemes: ["Patient rights", "Data protection", "Electronic health records"],
     articleReferences: [1, 3, 7],
+    characterDescriptions: "Alex: 12-year-old boy, short brown curly hair, light brown skin, wearing a blue hoodie with a digital shield emblem, green sneakers. Mia: 12-year-old girl, long black straight hair in a ponytail, dark skin, wearing a purple jacket with a lock emblem, yellow sneakers. Professor Byte: friendly silver robot with round glasses, small antenna, kind blue LED eyes, bow tie.",
     coverPrompt: "A vibrant comic book cover showing two diverse teenage superheroes (a boy and a girl, age 12) in futuristic suits with shield emblems, standing protectively in front of a glowing digital health record hologram, with a map of Europe in the background. Bold title 'THE DATA GUARDIANS'. Colorful, kid-friendly comic style, no text.",
     panels: [
       {

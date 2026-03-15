@@ -17,7 +17,7 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const { imagePrompt, storyTitle, panelIndex, totalPanels, characterDescriptions, previousPanelSummaries } = await req.json();
+    const { imagePrompt, storyTitle, panelIndex, totalPanels, characterDescriptions, previousPanelSummaries, referenceImageUrls } = await req.json();
 
     if (!imagePrompt) {
       return new Response(
@@ -26,18 +26,56 @@ serve(async (req) => {
       );
     }
 
+    // Build character continuity context
     let continuityContext = "";
     if (characterDescriptions) {
-      continuityContext += `\n\nIMPORTANT — Character consistency: Maintain these EXACT character designs throughout ALL panels:\n${characterDescriptions}`;
+      continuityContext += `\n\nCRITICAL CHARACTER CONSISTENCY RULES:\nYou MUST draw these characters EXACTLY as described. Every detail matters — hair style, hair color, skin tone, clothing, accessories. Do NOT change any aspect of their appearance:\n${characterDescriptions}`;
     }
     if (previousPanelSummaries && previousPanelSummaries.length > 0) {
-      continuityContext += `\n\nPrevious panels for visual continuity (keep same art style, colors, character designs):\n${previousPanelSummaries.map((s: string, i: number) => `Panel ${i + 1}: ${s}`).join("\n")}`;
+      continuityContext += `\n\nPrevious panel descriptions for visual continuity (maintain IDENTICAL character appearances, art style, and color palette):\n${previousPanelSummaries.map((s: string, i: number) => `Panel ${i + 1}: ${s}`).join("\n")}`;
     }
     if (panelIndex !== undefined && totalPanels) {
-      continuityContext += `\n\nThis is panel ${panelIndex + 1} of ${totalPanels}. Maintain consistent art style across all panels.`;
+      continuityContext += `\n\nThis is panel ${panelIndex + 1} of ${totalPanels}. Characters MUST look identical to previous panels.`;
     }
 
-    const fullPrompt = `Create a vibrant, colorful comic book panel illustration. Style: clean lines, bright colors, child-friendly, European setting, consistent character designs. No text, speech bubbles, or written words in the image. Story: "${storyTitle}". Scene: ${imagePrompt}${continuityContext}`;
+    const systemInstruction = `You are a comic book artist creating panels for a children's educational comic. Your absolute top priority is CHARACTER CONSISTENCY — every character must look EXACTLY the same across all panels. Same face shape, same hair, same skin tone, same clothes, same proportions. Style: clean lines, bright colors, child-friendly, European setting. NEVER include any text, speech bubbles, captions, or written words in the image.`;
+
+    const fullPrompt = `Create a comic book panel illustration for the story "${storyTitle}".\n\nScene: ${imagePrompt}${continuityContext}`;
+
+    // Build message content array with reference images for character consistency
+    const contentParts: Array<{ type: string; text?: string; image_url?: { url: string } }> = [];
+
+    // Include reference images from previously generated panels
+    if (referenceImageUrls && referenceImageUrls.length > 0) {
+      contentParts.push({
+        type: "text",
+        text: "REFERENCE IMAGES — These are previously generated panels from the same story. You MUST match the exact character appearances, art style, line work, and color palette shown in these images:"
+      });
+
+      for (let i = 0; i < referenceImageUrls.length; i++) {
+        const url = referenceImageUrls[i];
+        if (url) {
+          contentParts.push({
+            type: "image_url",
+            image_url: { url }
+          });
+          contentParts.push({
+            type: "text",
+            text: `(Above: Panel ${i + 1} — use this as a visual reference for character consistency)`
+          });
+        }
+      }
+
+      contentParts.push({
+        type: "text",
+        text: `\n\nNow generate the NEW panel below. Characters MUST look identical to the reference images above.\n\n${fullPrompt}`
+      });
+    } else {
+      contentParts.push({
+        type: "text",
+        text: fullPrompt
+      });
+    }
 
     const response = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
@@ -51,8 +89,12 @@ serve(async (req) => {
           model: "google/gemini-3.1-flash-image-preview",
           messages: [
             {
+              role: "system",
+              content: systemInstruction
+            },
+            {
               role: "user",
-              content: fullPrompt,
+              content: contentParts,
             },
           ],
           modalities: ["image", "text"],

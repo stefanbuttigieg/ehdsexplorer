@@ -35,7 +35,7 @@ const KidsCornerPage = () => {
   return (
     <Layout>
       <Helmet>
-        <title>Kids Corner — Learn About EHDS | EHDS Explorer</title>
+        <title>Comics — Learn About EHDS | EHDS Explorer</title>
         <meta
           name="description"
           content="Fun comic books and stories to help children and teens understand the European Health Data Space regulation."

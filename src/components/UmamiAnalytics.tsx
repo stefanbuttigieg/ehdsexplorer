@@ -7,17 +7,54 @@ interface UmamiConfig {
   scriptUrl: string;
 }
 
+const COOKIE_PREFERENCES_KEY = 'ehds-cookie-preferences';
+
+const getAnalyticsConsent = (): boolean => {
+  try {
+    const prefs = localStorage.getItem(COOKIE_PREFERENCES_KEY);
+    if (prefs) {
+      const parsed = JSON.parse(prefs);
+      return parsed.analytics === true;
+    }
+  } catch {
+    // ignore
+  }
+  return false;
+};
+
 /**
  * Umami Analytics integration component.
  * 
  * Fetches Umami configuration from edge function and loads the tracking script.
+ * Respects cookie consent — only loads when analytics cookies are accepted.
  */
 const UmamiAnalytics = () => {
   const location = useLocation();
   const [config, setConfig] = useState<UmamiConfig | null>(null);
+  const [hasConsent, setHasConsent] = useState(getAnalyticsConsent);
 
-  // Fetch Umami config from edge function
+  // Listen for cookie preference changes
   useEffect(() => {
+    const handleUpdate = () => {
+      setTimeout(() => setHasConsent(getAnalyticsConsent()), 100);
+    };
+    window.addEventListener('cookie-preferences-updated', handleUpdate);
+    window.addEventListener('storage', () => setHasConsent(getAnalyticsConsent()));
+    return () => {
+      window.removeEventListener('cookie-preferences-updated', handleUpdate);
+      window.removeEventListener('storage', () => setHasConsent(getAnalyticsConsent()));
+    };
+  }, []);
+
+  // Fetch Umami config from edge function (only when consent given)
+  useEffect(() => {
+    if (!hasConsent) {
+      // Remove script if consent revoked
+      const existingScript = document.querySelector('script[data-website-id]');
+      if (existingScript) existingScript.remove();
+      return;
+    }
+
     const fetchConfig = async () => {
       try {
         const { data, error } = await supabase.functions.invoke('get-umami-config');
@@ -32,12 +69,12 @@ const UmamiAnalytics = () => {
     };
 
     fetchConfig();
-  }, []);
+  }, [hasConsent]);
 
-  // Load Umami script once config is available
+  // Load Umami script once config is available and consent given
   useEffect(() => {
-    if (!config?.websiteId) {
-      if (config) {
+    if (!hasConsent || !config?.websiteId) {
+      if (config && !config.websiteId) {
         console.log('Umami Analytics: No website ID configured');
       }
       return;
@@ -61,16 +98,16 @@ const UmamiAnalytics = () => {
         scriptElement.remove();
       }
     };
-  }, [config]);
+  }, [config, hasConsent]);
 
   // Track page views on route change
   useEffect(() => {
-    if (!config?.websiteId) return;
+    if (!hasConsent || !config?.websiteId) return;
 
     if (typeof window !== 'undefined' && (window as any).umami) {
       (window as any).umami.track();
     }
-  }, [location.pathname, config]);
+  }, [location.pathname, config, hasConsent]);
 
   return null;
 };

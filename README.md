@@ -255,10 +255,12 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Dashboard search** - Search across all admin tools and settings for quick discovery
 
 ### 📜 Legal & Compliance
-- **Privacy Policy** page
-- **Cookies Policy** page
+- **Privacy Policy** page with detailed data collection disclosures
+- **Cookies Policy** page with full cookie inventory table
 - **Terms of Service** page
 - **Accessibility Statement** page
+- **Consent-based analytics** - Umami and PostHog only activate when users opt in to analytics cookies
+- **PostHog UX analytics** - Heatmaps, session recordings, and click tracking (EU-hosted, consent-gated)
 
 ## 🚀 Completed Features
 - [X] Search result highlighting showing matched text

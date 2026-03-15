@@ -12,6 +12,7 @@ A comprehensive digital platform for exploring **Regulation (EU) 2025/327** - th
 [![BuyMeACoffee](https://raw.githubusercontent.com/pachadotdev/buymeacoffee-badges/main/bmc-yellow.svg)](https://buymeacoffee.com/stefanbuttigieg)
 ![Lovable Credits](https://img.shields.io/badge/Lovable%20Credits-600%20credits%20used-blue)
 ![Analytics](https://img.shields.io/badge/Analytics-Umami-brightgreen)
+![UX Analytics](https://img.shields.io/badge/UX%20Analytics-PostHog-blue)
 
 
 ## 🎯 Overview

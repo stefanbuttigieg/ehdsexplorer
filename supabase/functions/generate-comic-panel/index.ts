@@ -17,7 +17,7 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const { imagePrompt, storyTitle } = await req.json();
+    const { imagePrompt, storyTitle, panelIndex, totalPanels, characterDescriptions, previousPanelSummaries } = await req.json();
 
     if (!imagePrompt) {
       return new Response(
@@ -26,7 +26,18 @@ serve(async (req) => {
       );
     }
 
-    const fullPrompt = `Create a vibrant, colorful comic book panel illustration. Style: clean lines, bright colors, child-friendly, European setting. No text or speech bubbles in the image. Story: "${storyTitle}". Scene: ${imagePrompt}`;
+    let continuityContext = "";
+    if (characterDescriptions) {
+      continuityContext += `\n\nIMPORTANT — Character consistency: Maintain these EXACT character designs throughout ALL panels:\n${characterDescriptions}`;
+    }
+    if (previousPanelSummaries && previousPanelSummaries.length > 0) {
+      continuityContext += `\n\nPrevious panels for visual continuity (keep same art style, colors, character designs):\n${previousPanelSummaries.map((s: string, i: number) => `Panel ${i + 1}: ${s}`).join("\n")}`;
+    }
+    if (panelIndex !== undefined && totalPanels) {
+      continuityContext += `\n\nThis is panel ${panelIndex + 1} of ${totalPanels}. Maintain consistent art style across all panels.`;
+    }
+
+    const fullPrompt = `Create a vibrant, colorful comic book panel illustration. Style: clean lines, bright colors, child-friendly, European setting, consistent character designs. No text, speech bubbles, or written words in the image. Story: "${storyTitle}". Scene: ${imagePrompt}${continuityContext}`;
 
     const response = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",

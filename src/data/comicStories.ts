@@ -15,6 +15,7 @@ export interface ComicStory {
   ageGroup: AgeGroup;
   ehdsThemes: string[];
   articleReferences: number[];
+  characterDescriptions?: string;
   coverPrompt: string;
   panels: ComicPanel[];
 }
@@ -28,6 +29,7 @@ export const comicStories: ComicStory[] = [
     ageGroup: "10-13",
     ehdsThemes: ["Patient rights", "Data protection", "Electronic health records"],
     articleReferences: [1, 3, 7],
+    characterDescriptions: "Alex: 12-year-old boy, short brown curly hair, light brown skin, wearing a blue hoodie with a digital shield emblem, green sneakers. Mia: 12-year-old girl, long black straight hair in a ponytail, dark skin, wearing a purple jacket with a lock emblem, yellow sneakers. Professor Byte: friendly silver robot with round glasses, small antenna, kind blue LED eyes, bow tie.",
     coverPrompt: "A vibrant comic book cover showing two diverse teenage superheroes (a boy and a girl, age 12) in futuristic suits with shield emblems, standing protectively in front of a glowing digital health record hologram, with a map of Europe in the background. Bold title 'THE DATA GUARDIANS'. Colorful, kid-friendly comic style, no text.",
     panels: [
       {
@@ -84,6 +86,7 @@ export const comicStories: ComicStory[] = [
     ageGroup: "10-13",
     ehdsThemes: ["Cross-border healthcare", "EHR access", "Emergency care"],
     articleReferences: [7, 8, 14],
+    characterDescriptions: "Sofia: 12-year-old girl, shoulder-length wavy auburn hair, fair skin with freckles, wearing a red and yellow striped shirt (Spanish colors), denim jacket, carrying a green backpack. Mom: mid-30s woman, same auburn hair but longer, warm smile, wearing a cream blouse. Teacher: tall man with glasses, short blond hair, navy sweater. German Doctor: woman with short grey hair, white coat, kind smile, stethoscope.",
     coverPrompt: "A comic book cover showing a teenage girl with a backpack traveling across Europe (landmarks in background), with a glowing digital health card in her hand. Medical cross symbols and data streams connecting countries. Title 'MYHEALTH JOURNEY'. Warm, adventurous comic style, no text.",
     panels: [
       {
@@ -139,6 +142,7 @@ export const comicStories: ComicStory[] = [
     ageGroup: "14-17",
     ehdsThemes: ["Secondary use of data", "Research", "Privacy", "Health data access bodies"],
     articleReferences: [33, 34, 46, 50],
+    characterDescriptions: "Dr. Chen: mid-40s East Asian woman professor, long black hair in a bun, round silver glasses, wearing a white lab coat over a teal blouse. Kai: 16-year-old boy, tall, dark skin, short fade haircut, wearing an orange tech-pattern hoodie. Luna: 16-year-old girl, light skin, long curly red hair, green eyes, wearing a green turtleneck and denim overalls.",
     coverPrompt: "A comic book cover showing diverse teenage students in a futuristic research lab, analyzing holographic health data patterns. DNA helix and molecular structures float around them. A privacy shield emblem is prominent. Title 'THE RESEARCH HEROES'. Modern, sci-fi comic style, no text.",
     panels: [
       {
@@ -195,6 +199,7 @@ export const comicStories: ComicStory[] = [
     ageGroup: "14-17",
     ehdsThemes: ["Digital rights", "Data portability", "Consent", "Transparency"],
     articleReferences: [3, 5, 7, 8],
+    characterDescriptions: "Zara: 16-year-old girl, short asymmetric black hair with a purple streak, medium brown skin, wearing a black graphic t-shirt with a digital rights fist logo, ripped jeans, chunky boots. Friend: 16-year-old non-binary teen, sandy blond shaggy hair, pale skin, round glasses, wearing a pastel blue button-up shirt.",
     coverPrompt: "A comic book cover showing a determined teenage girl with a smartphone displaying health data rights, standing against a backdrop of tech company buildings. Digital rights symbols and EU flag elements. Title 'DIGITAL RIGHTS REVOLUTION'. Bold, modern protest-art comic style, no text.",
     panels: [
       {

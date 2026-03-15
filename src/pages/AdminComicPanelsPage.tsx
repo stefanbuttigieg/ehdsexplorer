@@ -22,8 +22,20 @@ export default function AdminComicPanelsPage() {
     try {
       const prompt = panelIndex === -1 ? story.coverPrompt : story.panels[panelIndex].imagePrompt;
 
+      // Collect previous panel summaries for continuity
+      const previousPanelSummaries = panelIndex > 0
+        ? story.panels.slice(0, panelIndex).map(p => p.imagePrompt)
+        : undefined;
+
       const { data, error } = await supabase.functions.invoke('generate-comic-panel', {
-        body: { imagePrompt: prompt, storyTitle: story.title },
+        body: {
+          imagePrompt: prompt,
+          storyTitle: story.title,
+          panelIndex,
+          totalPanels: story.panels.length,
+          characterDescriptions: story.characterDescriptions,
+          previousPanelSummaries,
+        },
       });
 
       if (error) throw new Error(error.message);

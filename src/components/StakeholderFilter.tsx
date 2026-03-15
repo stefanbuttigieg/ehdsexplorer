@@ -1,4 +1,4 @@
-import { X, Heart, Stethoscope, Scale, FlaskConical, Code, Landmark, Eye, ChevronDown } from 'lucide-react';
+import { X, Heart, Stethoscope, Scale, FlaskConical, Code, Landmark, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,

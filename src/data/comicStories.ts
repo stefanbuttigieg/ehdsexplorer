@@ -142,6 +142,7 @@ export const comicStories: ComicStory[] = [
     ageGroup: "14-17",
     ehdsThemes: ["Secondary use of data", "Research", "Privacy", "Health data access bodies"],
     articleReferences: [33, 34, 46, 50],
+    characterDescriptions: "Dr. Chen: mid-40s East Asian woman professor, long black hair in a bun, round silver glasses, wearing a white lab coat over a teal blouse. Kai: 16-year-old boy, tall, dark skin, short fade haircut, wearing an orange tech-pattern hoodie. Luna: 16-year-old girl, light skin, long curly red hair, green eyes, wearing a green turtleneck and denim overalls.",
     coverPrompt: "A comic book cover showing diverse teenage students in a futuristic research lab, analyzing holographic health data patterns. DNA helix and molecular structures float around them. A privacy shield emblem is prominent. Title 'THE RESEARCH HEROES'. Modern, sci-fi comic style, no text.",
     panels: [
       {

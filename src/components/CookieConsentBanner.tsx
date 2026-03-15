@@ -22,7 +22,7 @@ const CookieConsentBanner = () => {
   const [preferences, setPreferences] = useState<CookiePreferences>({
     essential: true,
     functional: true,
-    analytics: false,
+    analytics: true,
   });
   const isMobile = useIsMobile();
 

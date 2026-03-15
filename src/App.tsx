@@ -156,6 +156,7 @@ const App = () => (
               <Sonner />
               <BrowserRouter>
                 <UmamiAnalytics />
+                <PostHogProvider />
                 <CookieConsentBanner />
                 <ComparisonBar />
                 <AchievementToastWrapper />

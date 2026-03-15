@@ -12,6 +12,7 @@ A comprehensive digital platform for exploring **Regulation (EU) 2025/327** - th
 [![BuyMeACoffee](https://raw.githubusercontent.com/pachadotdev/buymeacoffee-badges/main/bmc-yellow.svg)](https://buymeacoffee.com/stefanbuttigieg)
 ![Lovable Credits](https://img.shields.io/badge/Lovable%20Credits-600%20credits%20used-blue)
 ![Analytics](https://img.shields.io/badge/Analytics-Umami-brightgreen)
+![UX Analytics](https://img.shields.io/badge/UX%20Analytics-PostHog-blue)
 
 
 ## 🎯 Overview
@@ -254,10 +255,12 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Dashboard search** - Search across all admin tools and settings for quick discovery
 
 ### 📜 Legal & Compliance
-- **Privacy Policy** page
-- **Cookies Policy** page
+- **Privacy Policy** page with detailed data collection disclosures
+- **Cookies Policy** page with full cookie inventory table
 - **Terms of Service** page
 - **Accessibility Statement** page
+- **Consent-based analytics** - Umami and PostHog only activate when users opt in to analytics cookies
+- **PostHog UX analytics** - Heatmaps, session recordings, and click tracking (EU-hosted, consent-gated)
 
 ## 🚀 Completed Features
 - [X] Search result highlighting showing matched text

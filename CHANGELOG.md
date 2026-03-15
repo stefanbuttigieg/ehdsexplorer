@@ -13,6 +13,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.7] - 2026-03-15
+
+### Added
+
+#### PostHog UX Analytics Integration
+- **Heatmaps** - Visual click and scroll patterns across all pages to identify UI improvement areas
+- **Session Recordings** - Anonymized replays of user interactions for UX debugging
+- **Click Tracking** - Autocapture of button clicks, form interactions, and navigation events
+- **EU-hosted** - All data processed at eu.i.posthog.com for GDPR compliance
+- **Consent-gated** - PostHog only initializes when users opt in to analytics cookies via the cookie banner; opt-out immediately stops all tracking
+
+#### Consent-Gated Analytics
+- **Umami Analytics** now respects cookie consent - tracking script only loads when analytics cookies are accepted
+- **PostHog** initializes only after explicit opt-in; `opt_out_capturing()` called when consent revoked
+- Both analytics tools listen for real-time cookie preference changes and respond immediately
+
+### Changed
+
+#### Privacy & Cookie Policy Updates
+- **Privacy Policy** updated with new Section 3.3 (UX Analytics Data) detailing PostHog data collection
+- **Privacy Policy** Section 7 (Third-Party Services) expanded with PostHog details and privacy policy link
+- **Cookies Policy** updated with new Section 2.4 (PostHog UX Analytics Cookies)
+- **Cookies Policy** cookie table expanded with `ph_*` PostHog cookie entries
+- **Cookies Policy** Section 5 (Third-Party Cookies) updated with PostHog details
+- All policy last-updated dates set to 2026-03-15
+
+#### PWA Service Worker Updates
+- Fixed `ReloadPrompt` component to properly register service worker and poll for updates every 60 seconds
+- Auto-reload when new version detected instead of requiring manual refresh
+- Navigation requests now use NetworkFirst caching strategy for fresh `index.html` on each visit
+
 ## [2.0.6] - 2026-03-12
 
 ### Added

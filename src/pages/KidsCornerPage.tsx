@@ -23,7 +23,7 @@ const KidsCornerPage = () => {
     return (
       <Layout>
         <Helmet>
-          <title>{selectedStory.title} | EHDS Kids Corner</title>
+          <title>{selectedStory.title} | EHDS Comics</title>
         </Helmet>
         <div className="container max-w-5xl mx-auto px-4 py-8">
           <ComicBookReader story={selectedStory} onBack={() => setSelectedStory(null)} />

@@ -44,31 +44,20 @@ export function StakeholderFilter({ compact = false, className }: StakeholderFil
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button 
-          variant={activeStakeholder ? "default" : "outline"} 
-          size="sm" 
+          variant={activeStakeholder ? "default" : "ghost"} 
+          size="icon" 
           className={cn(
-            "gap-1.5 transition-all",
+            "h-8 w-8 transition-all",
             activeStakeholder && "bg-primary text-primary-foreground",
             className
           )}
           aria-label={activeConfig ? `View as ${activeConfig.shortLabel}` : "Select stakeholder view"}
         >
           {activeConfig ? (
-            <>
-              <span className={cn("flex items-center", !compact && "gap-1.5")}>
-                {iconMap[activeConfig.icon]}
-                {!compact && (
-                  <span className="hidden sm:inline">{activeConfig.shortLabel}</span>
-                )}
-              </span>
-            </>
+            iconMap[activeConfig.icon]
           ) : (
-            <>
-              <Eye className="h-4 w-4" />
-              {!compact && <span className="hidden sm:inline">View as...</span>}
-            </>
+            <Eye className="h-4 w-4" />
           )}
-          <ChevronDown className="h-3 w-3 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">

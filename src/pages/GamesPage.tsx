@@ -184,14 +184,14 @@ const GamesPage = () => {
           ))}
         </div>
 
-        {/* Kids Corner CTA */}
+        {/* Comics CTA */}
         <Card className="mt-8 bg-gradient-to-br from-accent/10 to-accent/20 border-accent/30">
           <CardContent className="py-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <BookOpen className="h-10 w-10 text-primary" />
                 <div>
-                  <h3 className="font-semibold">Kids Corner — EHDS Comics</h3>
+                  <h3 className="font-semibold">Comics — EHDS Stories</h3>
                   <p className="text-sm text-muted-foreground">
                     Fun comic book stories that teach children and teens about health data rights with AI-generated illustrations.
                   </p>

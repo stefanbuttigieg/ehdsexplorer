@@ -23,7 +23,7 @@ const KidsCornerPage = () => {
     return (
       <Layout>
         <Helmet>
-          <title>{selectedStory.title} | EHDS Kids Corner</title>
+          <title>{selectedStory.title} | EHDS Comics</title>
         </Helmet>
         <div className="container max-w-5xl mx-auto px-4 py-8">
           <ComicBookReader story={selectedStory} onBack={() => setSelectedStory(null)} />
@@ -35,7 +35,7 @@ const KidsCornerPage = () => {
   return (
     <Layout>
       <Helmet>
-        <title>Kids Corner — Learn About EHDS | EHDS Explorer</title>
+        <title>Comics — Learn About EHDS | EHDS Explorer</title>
         <meta
           name="description"
           content="Fun comic books and stories to help children and teens understand the European Health Data Space regulation."
@@ -51,7 +51,7 @@ const KidsCornerPage = () => {
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold mb-3 font-serif flex items-center justify-center gap-3">
             <BookOpen className="h-8 w-8 text-primary" />
-            Kids Corner
+            Comics
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
             Discover the European Health Data Space through exciting comic book stories! 

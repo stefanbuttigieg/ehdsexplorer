@@ -214,12 +214,12 @@ const Layout = ({
     // Filter to kid-friendly routes when Kids Mode is active
     if (isKidsMode) {
       items = items.filter(item => isKidsFriendlyRoute(item.path));
-      // Add Kids Corner to nav if not already present
+      // Add Comics to nav if not already present
       if (!items.find(item => item.path === '/kids')) {
         items.splice(1, 0, {
           path: "/kids",
           icon: Heart,
-          label: "Kids Corner"
+          label: "Comics"
         });
       }
     }

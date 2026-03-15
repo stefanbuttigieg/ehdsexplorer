@@ -15,6 +15,7 @@ export interface ComicStory {
   ageGroup: AgeGroup;
   ehdsThemes: string[];
   articleReferences: number[];
+  characterDescriptions?: string;
   coverPrompt: string;
   panels: ComicPanel[];
 }

@@ -86,6 +86,7 @@ export const comicStories: ComicStory[] = [
     ageGroup: "10-13",
     ehdsThemes: ["Cross-border healthcare", "EHR access", "Emergency care"],
     articleReferences: [7, 8, 14],
+    characterDescriptions: "Sofia: 12-year-old girl, shoulder-length wavy auburn hair, fair skin with freckles, wearing a red and yellow striped shirt (Spanish colors), denim jacket, carrying a green backpack. Mom: mid-30s woman, same auburn hair but longer, warm smile, wearing a cream blouse. Teacher: tall man with glasses, short blond hair, navy sweater. German Doctor: woman with short grey hair, white coat, kind smile, stethoscope.",
     coverPrompt: "A comic book cover showing a teenage girl with a backpack traveling across Europe (landmarks in background), with a glowing digital health card in her hand. Medical cross symbols and data streams connecting countries. Title 'MYHEALTH JOURNEY'. Warm, adventurous comic style, no text.",
     panels: [
       {

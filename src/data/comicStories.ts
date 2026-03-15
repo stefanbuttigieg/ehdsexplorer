@@ -199,6 +199,7 @@ export const comicStories: ComicStory[] = [
     ageGroup: "14-17",
     ehdsThemes: ["Digital rights", "Data portability", "Consent", "Transparency"],
     articleReferences: [3, 5, 7, 8],
+    characterDescriptions: "Zara: 16-year-old girl, short asymmetric black hair with a purple streak, medium brown skin, wearing a black graphic t-shirt with a digital rights fist logo, ripped jeans, chunky boots. Friend: 16-year-old non-binary teen, sandy blond shaggy hair, pale skin, round glasses, wearing a pastel blue button-up shirt.",
     coverPrompt: "A comic book cover showing a determined teenage girl with a smartphone displaying health data rights, standing against a backdrop of tech company buildings. Digital rights symbols and EU flag elements. Title 'DIGITAL RIGHTS REVOLUTION'. Bold, modern protest-art comic style, no text.",
     panels: [
       {

@@ -51,7 +51,7 @@ const KidsCornerPage = () => {
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold mb-3 font-serif flex items-center justify-center gap-3">
             <BookOpen className="h-8 w-8 text-primary" />
-            Kids Corner
+            Comics
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
             Discover the European Health Data Space through exciting comic book stories! 

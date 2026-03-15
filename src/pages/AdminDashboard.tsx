@@ -248,7 +248,7 @@ const AdminDashboard = () => {
     },
     {
       title: 'Comic Panel Images',
-      description: 'Pre-generate and manage AI comic panel artwork for Kids Corner',
+      description: 'Pre-generate and manage AI comic panel artwork for Comics section',
       icon: Sparkles,
       href: '/admin/comic-panels',
     },

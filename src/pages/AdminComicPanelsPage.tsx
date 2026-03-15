@@ -27,6 +27,21 @@ export default function AdminComicPanelsPage() {
         ? story.panels.slice(0, panelIndex).map(p => p.imagePrompt)
         : undefined;
 
+      // Collect reference image URLs from already-generated panels for visual consistency
+      const referenceImageUrls: (string | null)[] = [];
+      if (panelIndex !== -1) {
+        // Include cover image as first reference if available
+        if (imageMap[-1]) {
+          referenceImageUrls.push(imageMap[-1]);
+        }
+        // Include all previously generated panel images
+        for (let i = 0; i < panelIndex; i++) {
+          if (imageMap[i]) {
+            referenceImageUrls.push(imageMap[i]);
+          }
+        }
+      }
+
       const { data, error } = await supabase.functions.invoke('generate-comic-panel', {
         body: {
           imagePrompt: prompt,
@@ -35,6 +50,7 @@ export default function AdminComicPanelsPage() {
           totalPanels: story.panels.length,
           characterDescriptions: story.characterDescriptions,
           previousPanelSummaries,
+          referenceImageUrls: referenceImageUrls.length > 0 ? referenceImageUrls : undefined,
         },
       });
 

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCallback, useEffect, useRef } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 export interface CountryScore {
   country_code: string;
@@ -13,8 +14,27 @@ export interface CountryScore {
   contributor_count: number;
 }
 
-// Detect user's country using free API
-async function detectUserCountry(): Promise<{ code: string; name: string } | null> {
+// Detect user's country: prefer profile setting, fallback to IP
+async function detectUserCountry(userId?: string): Promise<{ code: string; name: string } | null> {
+  // Check if user has a profile country set
+  if (userId) {
+    try {
+      const { data } = await supabase
+        .from("profiles")
+        .select("leaderboard_country_code, leaderboard_country_name")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (data?.leaderboard_country_code) {
+        const result = { code: data.leaderboard_country_code, name: data.leaderboard_country_name || data.leaderboard_country_code };
+        sessionStorage.setItem("user-country", JSON.stringify(result));
+        return result;
+      }
+    } catch {
+      // fallback
+    }
+  }
+
   const cached = sessionStorage.getItem("user-country");
   if (cached) return JSON.parse(cached);
 
@@ -108,19 +128,19 @@ export function useLeaderboard(timeRange: "all" | "month" | "week" = "all") {
 }
 
 export function useTrackLeaderboard() {
+  const { user } = useAuth();
   const countryRef = useRef<{ code: string; name: string } | null>(null);
 
   useEffect(() => {
-    detectUserCountry().then((c) => {
+    detectUserCountry(user?.id).then((c) => {
       countryRef.current = c;
     });
-  }, []);
+  }, [user?.id]);
 
   const track = useCallback(
     async (category: string, points = 1, sourceDetail?: string) => {
       try {
         const country = countryRef.current;
-        const { data: { session } } = await supabase.auth.getSession();
 
         await supabase.functions.invoke("track-leaderboard", {
           body: {

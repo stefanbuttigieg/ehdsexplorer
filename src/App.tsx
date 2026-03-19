@@ -211,6 +211,7 @@ const App = () => (
             <Route path="/scenario-finder" element={<ScenarioFinderPage />} />
             <Route path="/topic-index" element={<TopicIndexPage />} />
             <Route path="/tools" element={<ToolsHubPage />} />
+            <Route path="/leaderboard" element={<LeaderboardPage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin/set-password" element={<AdminSetPasswordPage />} />
             <Route path="/profile" element={<ProfilePage />} />

@@ -187,6 +187,10 @@ const Layout = ({
     icon: GitCompare,
     label: "Compare"
   }, {
+    path: "/leaderboard",
+    icon: Medal,
+    label: "Leaderboard"
+  }, {
     path: "/games",
     icon: Brain,
     label: "Games"

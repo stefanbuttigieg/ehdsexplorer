@@ -20,6 +20,7 @@ import {
 import { useArticles } from "@/hooks/useArticles";
 import { useDefinitions } from "@/hooks/useDefinitions";
 import { useAchievements } from "@/hooks/useAchievements";
+import { useGameLeaderboardTracker } from "@/components/LeaderboardTracker";
 import { cn } from "@/lib/utils";
 
 interface Question {

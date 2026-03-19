@@ -46,6 +46,7 @@ const QuizGamePage = () => {
   const { data: articles, isLoading: articlesLoading } = useArticles();
   const { data: definitions, isLoading: definitionsLoading } = useDefinitions();
   const { checkAndUnlock } = useAchievements();
+  const { trackGameScore } = useGameLeaderboardTracker();
   
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);

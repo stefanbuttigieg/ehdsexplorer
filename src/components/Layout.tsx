@@ -144,6 +144,10 @@ const Layout = ({
     icon: Network,
     label: "Regulatory Map"
   }, {
+    path: "/article-dependencies",
+    icon: GitCompare,
+    label: "Article Dependencies"
+  }, {
     path: "/for/citizens",
     icon: Heart,
     label: "For Citizens"

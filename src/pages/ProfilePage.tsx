@@ -19,6 +19,7 @@ import { AchievementBadge } from "@/components/achievements/AchievementBadge";
 import { useAchievements } from "@/hooks/useAchievements";
 import { AchievementTier } from "@/data/achievements";
 import { MFASecuritySection } from "@/components/mfa/MFASecuritySection";
+import { LeaderboardCountrySelector } from "@/components/LeaderboardCountrySelector";
 
 const ProfilePage = () => {
   const { user, session, loading, isAdmin, isEditor } = useAuth();
@@ -316,6 +317,9 @@ const ProfilePage = () => {
               </form>
             </CardContent>
           </Card>
+
+          {/* Leaderboard Country */}
+          <LeaderboardCountrySelector />
 
           {/* Change Email Card */}
           <Card>

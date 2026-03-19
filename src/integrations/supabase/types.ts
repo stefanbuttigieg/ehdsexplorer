@@ -2882,6 +2882,8 @@ export type Database = {
           display_name: string | null
           email: string | null
           id: string
+          leaderboard_country_code: string | null
+          leaderboard_country_name: string | null
           preferred_ai_role: string | null
           preferred_explain_level: string | null
           stakeholder_filter: string | null
@@ -2893,6 +2895,8 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
+          leaderboard_country_code?: string | null
+          leaderboard_country_name?: string | null
           preferred_ai_role?: string | null
           preferred_explain_level?: string | null
           stakeholder_filter?: string | null
@@ -2904,6 +2908,8 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
+          leaderboard_country_code?: string | null
+          leaderboard_country_name?: string | null
           preferred_ai_role?: string | null
           preferred_explain_level?: string | null
           stakeholder_filter?: string | null

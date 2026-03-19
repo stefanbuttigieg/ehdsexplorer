@@ -121,6 +121,7 @@ const WhoAmIGamePage = lazy(() => import("./pages/WhoAmIGamePage"));
 const KidsCornerPage = lazy(() => import("./pages/KidsCornerPage"));
 const AdminComicPanelsPage = lazy(() => import("./pages/AdminComicPanelsPage"));
 const LeaderboardPage = lazy(() => import("./pages/LeaderboardPage"));
+const ArticleDependencyGraphPage = lazy(() => import("./pages/ArticleDependencyGraphPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -212,6 +213,7 @@ const App = () => (
             <Route path="/topic-index" element={<TopicIndexPage />} />
             <Route path="/tools" element={<ToolsHubPage />} />
             <Route path="/leaderboard" element={<LeaderboardPage />} />
+            <Route path="/article-dependencies" element={<ArticleDependencyGraphPage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin/set-password" element={<AdminSetPasswordPage />} />
             <Route path="/profile" element={<ProfilePage />} />

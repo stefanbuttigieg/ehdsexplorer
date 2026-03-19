@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### Article Dependency Graph
+- **Interactive dependency visualization** showing how all 105 EHDS articles reference each other
+- **Spiral node layout** with size and color encoding based on connection degree (in/out references)
+- **Click-to-explore** — select any article node to highlight its incoming and outgoing references
+- **Filter modes** — view all articles, most referenced (≥3), most referencing (≥3), or isolated articles
+- **Detail side panel** with article title, connection counts, and clickable badges to navigate between articles
+- **Pan & zoom controls** for exploring the full graph on any device
+- **Stats bar** showing total links, most referenced article, and most referencing article
+- **Accessible from sidebar** under "Article Dependencies" navigation item
+
 ### Planned
 - Enhanced search with advanced filtering options
 - Comparative view between regulation versions

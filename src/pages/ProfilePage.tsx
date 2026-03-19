@@ -318,6 +318,9 @@ const ProfilePage = () => {
             </CardContent>
           </Card>
 
+          {/* Leaderboard Country */}
+          <LeaderboardCountrySelector />
+
           {/* Change Email Card */}
           <Card>
             <CardHeader>

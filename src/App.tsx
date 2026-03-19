@@ -121,6 +121,7 @@ const WhoAmIGamePage = lazy(() => import("./pages/WhoAmIGamePage"));
 const KidsCornerPage = lazy(() => import("./pages/KidsCornerPage"));
 const AdminComicPanelsPage = lazy(() => import("./pages/AdminComicPanelsPage"));
 const LeaderboardPage = lazy(() => import("./pages/LeaderboardPage"));
+const ArticleDependencyGraphPage = lazy(() => import("./pages/ArticleDependencyGraphPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {

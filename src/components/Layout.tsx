@@ -430,6 +430,7 @@ const Layout = ({
       paddingTop: 'calc(3.5rem + env(safe-area-inset-top))'
     }}>
         <div className="flex-1">
+          <LeaderboardTracker />
           <MFAReminderBanner />
           <div className="p-4">
             <NotificationsBanner />

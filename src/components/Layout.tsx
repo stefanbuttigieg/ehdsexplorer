@@ -32,6 +32,7 @@ import { MFAReminderBanner } from "@/components/mfa/MFAReminderBanner";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { KidsModeToggle } from "@/components/KidsModeToggle";
 import { useKidsMode } from "@/contexts/KidsModeContext";
+import { LeaderboardTracker } from "@/components/LeaderboardTracker";
 
 const ROUTE_TO_PLACEMENT: Record<string, string> = {
   '/': 'home',

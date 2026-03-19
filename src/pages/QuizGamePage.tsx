@@ -20,6 +20,7 @@ import {
 import { useArticles } from "@/hooks/useArticles";
 import { useDefinitions } from "@/hooks/useDefinitions";
 import { useAchievements } from "@/hooks/useAchievements";
+import { useGameLeaderboardTracker } from "@/components/LeaderboardTracker";
 import { cn } from "@/lib/utils";
 
 interface Question {
@@ -45,6 +46,7 @@ const QuizGamePage = () => {
   const { data: articles, isLoading: articlesLoading } = useArticles();
   const { data: definitions, isLoading: definitionsLoading } = useDefinitions();
   const { checkAndUnlock } = useAchievements();
+  const { trackGameScore } = useGameLeaderboardTracker();
   
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -211,6 +213,9 @@ const QuizGamePage = () => {
       setTotalTime(Math.round((Date.now() - startTimeRef.current) / 1000));
       // Track quiz completion
       checkAndUnlock('quiz_completed', results.length + 1);
+      // Track leaderboard
+      const correct = [...results, { isCorrect: selectedOption === currentQuestion?.correctIndex }].filter(r => r.isCorrect).length;
+      trackGameScore("quiz", Math.max(1, correct * 5));
     }
   };
 

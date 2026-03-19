@@ -2308,6 +2308,42 @@ export type Database = {
         }
         Relationships: []
       }
+      leaderboard_contributions: {
+        Row: {
+          category: string
+          country_code: string
+          country_name: string
+          created_at: string
+          id: string
+          points: number
+          session_id: string | null
+          source_detail: string | null
+          user_id: string | null
+        }
+        Insert: {
+          category: string
+          country_code: string
+          country_name: string
+          created_at?: string
+          id?: string
+          points?: number
+          session_id?: string | null
+          source_detail?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          category?: string
+          country_code?: string
+          country_name?: string
+          created_at?: string
+          id?: string
+          points?: number
+          session_id?: string | null
+          source_detail?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       legislation_obligation_links: {
         Row: {
           created_at: string

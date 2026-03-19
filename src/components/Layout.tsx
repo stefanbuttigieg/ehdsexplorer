@@ -1,7 +1,7 @@
 import { ReactNode, useState, useEffect, useMemo } from "react";
 import { version } from '../../package.json';
 import { Link, useLocation } from "react-router-dom";
-import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText, Accessibility, Code, Newspaper, Settings, HelpCircle, StickyNote, Users, GitCompare, PanelLeftClose, PanelLeft, Trophy, MapPin, Brain, Network, Heart, Laptop, Stethoscope, Sparkles, Wrench, Globe } from "lucide-react";
+import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText, Accessibility, Code, Newspaper, Settings, HelpCircle, StickyNote, Users, GitCompare, PanelLeftClose, PanelLeft, Trophy, MapPin, Brain, Network, Heart, Laptop, Stethoscope, Sparkles, Wrench, Globe, Medal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toRoman } from "@/lib/romanNumerals";
@@ -32,6 +32,7 @@ import { MFAReminderBanner } from "@/components/mfa/MFAReminderBanner";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { KidsModeToggle } from "@/components/KidsModeToggle";
 import { useKidsMode } from "@/contexts/KidsModeContext";
+import { LeaderboardTracker } from "@/components/LeaderboardTracker";
 
 const ROUTE_TO_PLACEMENT: Record<string, string> = {
   '/': 'home',
@@ -186,6 +187,10 @@ const Layout = ({
     path: "/compare",
     icon: GitCompare,
     label: "Compare"
+  }, {
+    path: "/leaderboard",
+    icon: Medal,
+    label: "Leaderboard"
   }, {
     path: "/games",
     icon: Brain,
@@ -425,6 +430,7 @@ const Layout = ({
       paddingTop: 'calc(3.5rem + env(safe-area-inset-top))'
     }}>
         <div className="flex-1">
+          <LeaderboardTracker />
           <MFAReminderBanner />
           <div className="p-4">
             <NotificationsBanner />

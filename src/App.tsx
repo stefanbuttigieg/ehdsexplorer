@@ -120,6 +120,7 @@ const AdminAISettingsPage = lazy(() => import("./pages/AdminAISettingsPage"));
 const WhoAmIGamePage = lazy(() => import("./pages/WhoAmIGamePage"));
 const KidsCornerPage = lazy(() => import("./pages/KidsCornerPage"));
 const AdminComicPanelsPage = lazy(() => import("./pages/AdminComicPanelsPage"));
+const LeaderboardPage = lazy(() => import("./pages/LeaderboardPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -210,6 +211,7 @@ const App = () => (
             <Route path="/scenario-finder" element={<ScenarioFinderPage />} />
             <Route path="/topic-index" element={<TopicIndexPage />} />
             <Route path="/tools" element={<ToolsHubPage />} />
+            <Route path="/leaderboard" element={<LeaderboardPage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin/set-password" element={<AdminSetPasswordPage />} />
             <Route path="/profile" element={<ProfilePage />} />

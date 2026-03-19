@@ -26,6 +26,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 ### 📖 Content Navigation
 - **9 Chapters** with expandable table of contents using Roman numerals, sections, and article navigation
 - **105 Articles** with full text, cross-references, related recitals, and implementing acts
+- **Article Dependency Graph** — interactive visualization showing how articles reference each other, with spiral layout, pan/zoom, filtering, and detail panel
 - **115 Recitals** with individual detail pages and related article links
 - **4 Annexes** with detailed technical requirements and specifications
 - **170+ Definitions** from Article 2, EU EHR Glossary, and Xt-EHR with multi-source support

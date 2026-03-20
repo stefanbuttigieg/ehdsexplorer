@@ -30,16 +30,19 @@ function StatBar({
   label,
   value,
   max,
+  total,
   icon: Icon,
   color,
 }: {
   label: string;
   value: number;
   max: number;
+  total: number;
   icon: React.ElementType;
   color: string;
 }) {
   const pct = max > 0 ? Math.round((value / max) * 100) : 0;
+  const share = total > 0 ? Math.round((value / total) * 100) : 0;
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between text-sm">
@@ -47,7 +50,9 @@ function StatBar({
           <Icon className="h-3.5 w-3.5" />
           {label}
         </span>
-        <span className="font-medium">{value.toLocaleString()}</span>
+        <span className="font-medium tabular-nums">
+          {value.toLocaleString()} <span className="text-muted-foreground text-xs">({share}%)</span>
+        </span>
       </div>
       <div className="h-2 bg-muted rounded-full overflow-hidden">
         <div

@@ -110,8 +110,80 @@ function CountryCard({ score, rank, maxPoints }: { score: CountryScore; rank: nu
     </Card>
   );
 }
+const POINTS_DATA = [
+  { activity: "Read an Article", category: "Reading", points: "3", icon: BookOpen },
+  { activity: "Read a Recital", category: "Reading", points: "2", icon: BookOpen },
+  { activity: "Read an Annex", category: "Reading", points: "2", icon: BookOpen },
+  { activity: "Read an Implementing Act", category: "Reading", points: "2", icon: BookOpen },
+  { activity: "Quiz — per correct answer", category: "Games", points: "5", icon: Gamepad2 },
+  { activity: "Flashcards, Match, True/False, etc.", category: "Games", points: "1–10", icon: Gamepad2 },
+  { activity: "Visit Definitions page", category: "Exploration", points: "1", icon: Compass },
+  { activity: "Visit Overview page", category: "Exploration", points: "1", icon: Compass },
+  { activity: "Visit a 'For…' page", category: "Exploration", points: "1", icon: Compass },
+  { activity: "Visit Health Authorities", category: "Exploration", points: "1", icon: Compass },
+  { activity: "Visit Cross-Regulation Map", category: "Exploration", points: "1", icon: Compass },
+  { activity: "Visit Topic Index", category: "Exploration", points: "1", icon: Compass },
+  { activity: "Unlock achievements", category: "Achievements", points: "Varies", icon: Award },
+];
 
-function LeaderboardSkeleton() {
+function PointsScoringGuide() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <Card>
+        <CollapsibleTrigger asChild>
+          <button className="w-full text-left">
+            <CardHeader className="flex flex-row items-center justify-between p-4">
+              <div className="flex items-center gap-2">
+                <Info className="h-4 w-4 text-primary" />
+                <CardTitle className="text-base">How are points calculated?</CardTitle>
+              </div>
+              {open ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+            </CardHeader>
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <CardContent className="px-4 pb-4 pt-0">
+            <p className="text-sm text-muted-foreground mb-3">
+              Points are earned automatically as you use EHDS Explorer. Each page visit or game completion is tracked once per session to keep things fair. Your country is detected by IP or can be set in your profile.
+            </p>
+            <div className="rounded-md border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-xs">Activity</TableHead>
+                    <TableHead className="text-xs">Category</TableHead>
+                    <TableHead className="text-xs text-right">Points</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {POINTS_DATA.map((row, i) => (
+                    <TableRow key={i}>
+                      <TableCell className="text-sm py-2">{row.activity}</TableCell>
+                      <TableCell className="py-2">
+                        <Badge variant="outline" className="text-xs">
+                          <row.icon className="h-3 w-3 mr-1" />
+                          {row.category}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-right tabular-nums font-medium py-2">{row.points}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              Each page visit counts once per session. Game scores reflect your performance (e.g. 5 pts × correct answers in Quiz). Logged-in users can choose their country from their Profile page.
+            </p>
+          </CardContent>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
+  );
+}
+
+
   return (
     <div className="space-y-4">
       {[1, 2, 3, 4, 5].map((i) => (

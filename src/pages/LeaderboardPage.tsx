@@ -193,6 +193,9 @@ export default function LeaderboardPage() {
           </Card>
         </div>
 
+        {/* Points Scoring Explainer */}
+        <PointsScoringGuide />
+
         {/* Time Filter */}
         <Tabs value={timeRange} onValueChange={(v) => setTimeRange(v as typeof timeRange)}>
           <TabsList className="grid w-full grid-cols-3">

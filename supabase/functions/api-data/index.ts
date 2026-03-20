@@ -263,6 +263,18 @@ Deno.serve(async (req) => {
 
     console.log(`API request: resource=${resource}, format=${format}, id=${id}, lang=${lang}, fields=${fieldsParam}`);
 
+    // Log the API request
+    const userAgent = req.headers.get("user-agent") || null;
+    const logEntry = {
+      endpoint: `/api-data?resource=${resource || ""}${id ? `&id=${id}` : ""}${lang !== "en" ? `&lang=${lang}` : ""}`,
+      method: "GET",
+      status_code: 200, // Will be updated on error
+      ip_address: clientIp,
+      user_agent: userAgent,
+      request_body: { resource, format, id, lang, fields: fieldsParam } as any,
+      response_message: null as string | null,
+    };
+
     let data: any = null;
     let error: any = null;
 
@@ -737,6 +749,14 @@ Deno.serve(async (req) => {
 
     if (error) {
       console.error("Database error:", error);
+      // Log the failed request
+      try {
+        await supabase.from("api_logs").insert({
+          ...logEntry,
+          status_code: 500,
+          response_message: "Database error",
+        });
+      } catch { /* non-critical */ }
       return new Response(
         JSON.stringify({ error: "Unable to retrieve data" }),
         { status: 500, headers: corsHeaders }
@@ -750,6 +770,11 @@ Deno.serve(async (req) => {
 
     // Build response
     const response = buildFairResponse(resource!, data);
+    const recordCount = Array.isArray(data) ? data.length : 1;
+
+    // Log successful request (non-blocking)
+    logEntry.response_message = `${recordCount} record(s) returned`;
+    supabase.from("api_logs").insert(logEntry).then(() => {}).catch(() => {});
 
     if (format === "csv" && Array.isArray(data) && data.length > 0) {
       return new Response(toCSV(data), {

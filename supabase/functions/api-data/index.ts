@@ -749,6 +749,14 @@ Deno.serve(async (req) => {
 
     if (error) {
       console.error("Database error:", error);
+      // Log the failed request
+      try {
+        await supabase.from("api_logs").insert({
+          ...logEntry,
+          status_code: 500,
+          response_message: "Database error",
+        });
+      } catch { /* non-critical */ }
       return new Response(
         JSON.stringify({ error: "Unable to retrieve data" }),
         { status: 500, headers: corsHeaders }

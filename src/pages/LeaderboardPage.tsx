@@ -30,16 +30,19 @@ function StatBar({
   label,
   value,
   max,
+  total,
   icon: Icon,
   color,
 }: {
   label: string;
   value: number;
   max: number;
+  total: number;
   icon: React.ElementType;
   color: string;
 }) {
   const pct = max > 0 ? Math.round((value / max) * 100) : 0;
+  const share = total > 0 ? Math.round((value / total) * 100) : 0;
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between text-sm">
@@ -47,7 +50,9 @@ function StatBar({
           <Icon className="h-3.5 w-3.5" />
           {label}
         </span>
-        <span className="font-medium">{value.toLocaleString()}</span>
+        <span className="font-medium tabular-nums">
+          {value.toLocaleString()} <span className="text-muted-foreground text-xs">({share}%)</span>
+        </span>
       </div>
       <div className="h-2 bg-muted rounded-full overflow-hidden">
         <div
@@ -60,6 +65,10 @@ function StatBar({
 }
 
 function CountryCard({ score, rank, maxPoints }: { score: CountryScore; rank: number; maxPoints: number }) {
+  const ptsPerContributor = score.contributor_count > 0
+    ? Math.round(score.total_points / score.contributor_count)
+    : 0;
+
   return (
     <Card className={cn(
       "transition-all hover:shadow-md",
@@ -78,15 +87,20 @@ function CountryCard({ score, rank, maxPoints }: { score: CountryScore; rank: nu
                 {score.total_points.toLocaleString()} pts
               </Badge>
             </div>
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <Users className="h-3.5 w-3.5" />
-              {score.contributor_count} contributor{score.contributor_count !== 1 ? "s" : ""}
+            <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
+              <span className="flex items-center gap-1">
+                <Users className="h-3.5 w-3.5" />
+                {score.contributor_count} contributor{score.contributor_count !== 1 ? "s" : ""}
+              </span>
+              <span className="tabular-nums">
+                ~{ptsPerContributor} pts/contributor
+              </span>
             </div>
             <div className="grid gap-2">
-              <StatBar label="Reading" value={score.reading_points} max={maxPoints} icon={BookOpen} color="bg-blue-500" />
-              <StatBar label="Games" value={score.games_points} max={maxPoints} icon={Gamepad2} color="bg-green-500" />
-              <StatBar label="Exploration" value={score.exploration_points} max={maxPoints} icon={Compass} color="bg-purple-500" />
-              <StatBar label="Achievements" value={score.achievements_points} max={maxPoints} icon={Award} color="bg-orange-500" />
+              <StatBar label="Reading" value={score.reading_points} max={maxPoints} total={score.total_points} icon={BookOpen} color="bg-blue-500" />
+              <StatBar label="Games" value={score.games_points} max={maxPoints} total={score.total_points} icon={Gamepad2} color="bg-green-500" />
+              <StatBar label="Exploration" value={score.exploration_points} max={maxPoints} total={score.total_points} icon={Compass} color="bg-purple-500" />
+              <StatBar label="Achievements" value={score.achievements_points} max={maxPoints} total={score.total_points} icon={Award} color="bg-orange-500" />
             </div>
           </div>
         </div>

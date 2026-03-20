@@ -263,6 +263,18 @@ Deno.serve(async (req) => {
 
     console.log(`API request: resource=${resource}, format=${format}, id=${id}, lang=${lang}, fields=${fieldsParam}`);
 
+    // Log the API request
+    const userAgent = req.headers.get("user-agent") || null;
+    const logEntry = {
+      endpoint: `/api-data?resource=${resource || ""}${id ? `&id=${id}` : ""}${lang !== "en" ? `&lang=${lang}` : ""}`,
+      method: "GET",
+      status_code: 200, // Will be updated on error
+      ip_address: clientIp,
+      user_agent: userAgent,
+      request_body: { resource, format, id, lang, fields: fieldsParam } as any,
+      response_message: null as string | null,
+    };
+
     let data: any = null;
     let error: any = null;
 

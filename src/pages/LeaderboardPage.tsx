@@ -69,7 +69,7 @@ function StatBar({
   );
 }
 
-function CountryCard({ score, rank, maxPoints }: { score: CountryScore; rank: number; maxPoints: number }) {
+function CountryCard({ score, rank, maxPoints, weighted }: { score: CountryScore; rank: number; maxPoints: number; weighted: boolean }) {
   const ptsPerContributor = score.contributor_count > 0
     ? Math.round(score.total_points / score.contributor_count)
     : 0;
@@ -88,9 +88,26 @@ function CountryCard({ score, rank, maxPoints }: { score: CountryScore; rank: nu
             <div className="flex items-center gap-2 flex-wrap">
               <CountryFlag countryCode={score.country_code} size="md" />
               <h3 className="font-semibold text-lg truncate">{score.country_name}</h3>
-              <Badge variant="secondary" className="ml-auto shrink-0">
-                {score.total_points.toLocaleString()} pts
-              </Badge>
+              <div className="ml-auto flex items-center gap-2 shrink-0">
+                {weighted && score.population > 0 && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge variant="outline" className="text-xs gap-1">
+                          <Scale className="h-3 w-3" />
+                          {score.weighted_score.toLocaleString()} pts/M
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Points per million inhabitants (pop: {score.population}M)</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+                <Badge variant="secondary">
+                  {score.total_points.toLocaleString()} pts
+                </Badge>
+              </div>
             </div>
             <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
               <span className="flex items-center gap-1">
@@ -100,6 +117,11 @@ function CountryCard({ score, rank, maxPoints }: { score: CountryScore; rank: nu
               <span className="tabular-nums">
                 ~{ptsPerContributor} pts/contributor
               </span>
+              {score.population > 0 && (
+                <span className="tabular-nums text-xs">
+                  Pop: {score.population}M
+                </span>
+              )}
             </div>
             <div className="grid gap-2">
               <StatBar label="Reading" value={score.reading_points} max={maxPoints} total={score.total_points} icon={BookOpen} color="bg-blue-500" />

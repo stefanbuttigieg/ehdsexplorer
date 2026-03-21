@@ -236,7 +236,14 @@ function LeaderboardSkeleton() {
 
 export default function LeaderboardPage() {
   const [timeRange, setTimeRange] = useState<"all" | "month" | "week">("all");
+  const [weighted, setWeighted] = useState(false);
   const { data: scores, isLoading } = useLeaderboard(timeRange);
+
+  const sortedScores = useMemo(() => {
+    if (!scores) return [];
+    if (!weighted) return [...scores].sort((a, b) => b.total_points - a.total_points);
+    return [...scores].sort((a, b) => b.weighted_score - a.weighted_score);
+  }, [scores, weighted]);
 
   const maxCategoryPoints = scores?.reduce(
     (max, s) => Math.max(max, s.reading_points, s.games_points, s.exploration_points, s.achievements_points),
@@ -290,6 +297,29 @@ export default function LeaderboardPage() {
           </Card>
         </div>
 
+        {/* Population Weighting Toggle */}
+        <Card>
+          <CardContent className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Scale className="h-4 w-4 text-primary" />
+              <Label htmlFor="weighted-toggle" className="font-medium cursor-pointer">
+                Population-weighted ranking
+              </Label>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p>Ranks countries by points per million inhabitants, giving smaller countries a fairer chance against larger ones.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <Switch id="weighted-toggle" checked={weighted} onCheckedChange={setWeighted} />
+          </CardContent>
+        </Card>
+
         {/* Points Scoring Explainer */}
         <PointsScoringGuide />
 
@@ -304,14 +334,15 @@ export default function LeaderboardPage() {
           <TabsContent value={timeRange} className="mt-4">
             {isLoading ? (
               <LeaderboardSkeleton />
-            ) : scores && scores.length > 0 ? (
+            ) : sortedScores.length > 0 ? (
               <div className="space-y-3">
-                {scores.map((score, i) => (
+                {sortedScores.map((score, i) => (
                   <CountryCard
                     key={score.country_code}
                     score={score}
                     rank={i + 1}
                     maxPoints={maxCategoryPoints}
+                    weighted={weighted}
                   />
                 ))}
               </div>

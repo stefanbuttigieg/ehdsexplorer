@@ -1,16 +1,19 @@
 import Layout from "@/components/Layout";
 import { useLeaderboard, CountryScore } from "@/hooks/useLeaderboard";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, BookOpen, Gamepad2, Compass, Award, Users, Globe, Medal, Info, ChevronDown, ChevronUp } from "lucide-react";
+import { Trophy, BookOpen, Gamepad2, Compass, Award, Users, Globe, Medal, Info, ChevronDown, ChevronUp, Scale } from "lucide-react";
 import { CountryFlag } from "@/components/CountryFlag";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const MEDAL_COLORS = ["text-yellow-500", "text-gray-400", "text-amber-700"];
 const MEDAL_ICONS = [Trophy, Medal, Medal];

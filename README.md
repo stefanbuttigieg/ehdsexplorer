@@ -195,6 +195,12 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
   - Confetti effects and toast notifications when achievements unlock
   - Points-based leveling system with 5 tiers
   - Achievements page accessible from user profile
+- **Country Leaderboard** - Compete nationally by reading, playing games, and exploring
+  - Automatic point tracking across reading, games, exploration, and achievements
+  - **Population-weighted ranking** — toggle to rank by points per million inhabitants for fair cross-country comparison
+  - IP-based country detection with manual override in user profile
+  - Collapsible points scoring guide explaining exact point values
+  - Time-range filters (All Time, This Month, This Week)
 
 ### 📝 Footnotes System
 - **Inline footnote markers** in article and recital content (e.g., [^1], *, †)

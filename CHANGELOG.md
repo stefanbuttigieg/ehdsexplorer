@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Population-Weighted Leaderboard
+- **Fair country ranking** with population-weighted scoring (points per million inhabitants)
+- **Toggle switch** to switch between raw points and weighted ranking
+- **Population data** for all 27 EU + 3 EEA countries (2024 Eurostat estimates)
+- **Weighted score badge** on each country card showing pts/M with population tooltip
+- Smaller countries can now compete fairly against larger ones
+
 #### Article Dependency Graph
 - **Interactive dependency visualization** showing how all 105 EHDS articles reference each other
 - **Spiral node layout** with size and color encoding based on connection degree (in/out references)

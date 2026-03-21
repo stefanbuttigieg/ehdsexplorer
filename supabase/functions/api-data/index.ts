@@ -772,9 +772,11 @@ Deno.serve(async (req) => {
     const response = buildFairResponse(resource!, data);
     const recordCount = Array.isArray(data) ? data.length : 1;
 
-    // Log successful request (non-blocking)
+    // Log successful request
     logEntry.response_message = `${recordCount} record(s) returned`;
-    supabase.from("api_logs").insert(logEntry).then(() => {}).catch(() => {});
+    try {
+      await supabase.from("api_logs").insert(logEntry);
+    } catch { /* non-critical */ }
 
     if (format === "csv" && Array.isArray(data) && data.length > 0) {
       return new Response(toCSV(data), {

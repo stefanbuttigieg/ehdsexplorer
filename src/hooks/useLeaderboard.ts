@@ -99,6 +99,8 @@ export function useLeaderboard(timeRange: "all" | "month" | "week" = "all") {
             exploration_points: 0,
             achievements_points: 0,
             contributor_count: 0,
+            population: COUNTRY_POPULATIONS[row.country_code] ?? 0,
+            weighted_score: 0,
           });
         }
         const entry = countryMap.get(key)!;

@@ -1,16 +1,19 @@
 import Layout from "@/components/Layout";
 import { useLeaderboard, CountryScore } from "@/hooks/useLeaderboard";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, BookOpen, Gamepad2, Compass, Award, Users, Globe, Medal, Info, ChevronDown, ChevronUp } from "lucide-react";
+import { Trophy, BookOpen, Gamepad2, Compass, Award, Users, Globe, Medal, Info, ChevronDown, ChevronUp, Scale } from "lucide-react";
 import { CountryFlag } from "@/components/CountryFlag";
 import { SEOHead } from "@/components/seo/SEOHead";
 import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const MEDAL_COLORS = ["text-yellow-500", "text-gray-400", "text-amber-700"];
 const MEDAL_ICONS = [Trophy, Medal, Medal];
@@ -66,7 +69,7 @@ function StatBar({
   );
 }
 
-function CountryCard({ score, rank, maxPoints }: { score: CountryScore; rank: number; maxPoints: number }) {
+function CountryCard({ score, rank, maxPoints, weighted }: { score: CountryScore; rank: number; maxPoints: number; weighted: boolean }) {
   const ptsPerContributor = score.contributor_count > 0
     ? Math.round(score.total_points / score.contributor_count)
     : 0;
@@ -85,9 +88,26 @@ function CountryCard({ score, rank, maxPoints }: { score: CountryScore; rank: nu
             <div className="flex items-center gap-2 flex-wrap">
               <CountryFlag countryCode={score.country_code} size="md" />
               <h3 className="font-semibold text-lg truncate">{score.country_name}</h3>
-              <Badge variant="secondary" className="ml-auto shrink-0">
-                {score.total_points.toLocaleString()} pts
-              </Badge>
+              <div className="ml-auto flex items-center gap-2 shrink-0">
+                {weighted && score.population > 0 && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge variant="outline" className="text-xs gap-1">
+                          <Scale className="h-3 w-3" />
+                          {score.weighted_score.toLocaleString()} pts/M
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Points per million inhabitants (pop: {score.population}M)</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+                <Badge variant="secondary">
+                  {score.total_points.toLocaleString()} pts
+                </Badge>
+              </div>
             </div>
             <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
               <span className="flex items-center gap-1">
@@ -97,6 +117,11 @@ function CountryCard({ score, rank, maxPoints }: { score: CountryScore; rank: nu
               <span className="tabular-nums">
                 ~{ptsPerContributor} pts/contributor
               </span>
+              {score.population > 0 && (
+                <span className="tabular-nums text-xs">
+                  Pop: {score.population}M
+                </span>
+              )}
             </div>
             <div className="grid gap-2">
               <StatBar label="Reading" value={score.reading_points} max={maxPoints} total={score.total_points} icon={BookOpen} color="bg-blue-500" />
@@ -211,7 +236,14 @@ function LeaderboardSkeleton() {
 
 export default function LeaderboardPage() {
   const [timeRange, setTimeRange] = useState<"all" | "month" | "week">("all");
+  const [weighted, setWeighted] = useState(false);
   const { data: scores, isLoading } = useLeaderboard(timeRange);
+
+  const sortedScores = useMemo(() => {
+    if (!scores) return [];
+    if (!weighted) return [...scores].sort((a, b) => b.total_points - a.total_points);
+    return [...scores].sort((a, b) => b.weighted_score - a.weighted_score);
+  }, [scores, weighted]);
 
   const maxCategoryPoints = scores?.reduce(
     (max, s) => Math.max(max, s.reading_points, s.games_points, s.exploration_points, s.achievements_points),
@@ -265,6 +297,29 @@ export default function LeaderboardPage() {
           </Card>
         </div>
 
+        {/* Population Weighting Toggle */}
+        <Card>
+          <CardContent className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Scale className="h-4 w-4 text-primary" />
+              <Label htmlFor="weighted-toggle" className="font-medium cursor-pointer">
+                Population-weighted ranking
+              </Label>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p>Ranks countries by points per million inhabitants, giving smaller countries a fairer chance against larger ones.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <Switch id="weighted-toggle" checked={weighted} onCheckedChange={setWeighted} />
+          </CardContent>
+        </Card>
+
         {/* Points Scoring Explainer */}
         <PointsScoringGuide />
 
@@ -279,14 +334,15 @@ export default function LeaderboardPage() {
           <TabsContent value={timeRange} className="mt-4">
             {isLoading ? (
               <LeaderboardSkeleton />
-            ) : scores && scores.length > 0 ? (
+            ) : sortedScores.length > 0 ? (
               <div className="space-y-3">
-                {scores.map((score, i) => (
+                {sortedScores.map((score, i) => (
                   <CountryCard
                     key={score.country_code}
                     score={score}
                     rank={i + 1}
                     maxPoints={maxCategoryPoints}
+                    weighted={weighted}
                   />
                 ))}
               </div>

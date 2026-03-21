@@ -12,7 +12,20 @@ export interface CountryScore {
   exploration_points: number;
   achievements_points: number;
   contributor_count: number;
+  population: number;
+  weighted_score: number; // points per million inhabitants
 }
+
+// EU/EEA country populations (millions, 2024 Eurostat estimates)
+const COUNTRY_POPULATIONS: Record<string, number> = {
+  DE: 84.4, FR: 68.2, IT: 58.9, ES: 48.1, PL: 37.6, RO: 19.0, NL: 17.9,
+  BE: 11.7, CZ: 10.9, GR: 10.4, SE: 10.5, PT: 10.3, HU: 9.6, AT: 9.1,
+  BG: 6.4, DK: 5.9, FI: 5.6, SK: 5.4, IE: 5.3, HR: 3.9, LT: 2.9,
+  SI: 2.1, LV: 1.8, EE: 1.4, CY: 0.9, LU: 0.67, MT: 0.54,
+  // EEA
+  NO: 5.5, IS: 0.38, LI: 0.04,
+  // Fallback for others
+};
 
 // Detect user's country: prefer profile setting, fallback to IP
 async function detectUserCountry(userId?: string): Promise<{ code: string; name: string } | null> {
@@ -86,6 +99,8 @@ export function useLeaderboard(timeRange: "all" | "month" | "week" = "all") {
             exploration_points: 0,
             achievements_points: 0,
             contributor_count: 0,
+            population: COUNTRY_POPULATIONS[row.country_code] ?? 0,
+            weighted_score: 0,
           });
         }
         const entry = countryMap.get(key)!;
@@ -117,6 +132,13 @@ export function useLeaderboard(timeRange: "all" | "month" | "week" = "all") {
       for (const [key, set] of contributorSets) {
         const entry = countryMap.get(key);
         if (entry) entry.contributor_count = set.size;
+      }
+
+      // Calculate weighted score (points per million inhabitants)
+      for (const entry of countryMap.values()) {
+        entry.weighted_score = entry.population > 0
+          ? Math.round((entry.total_points / entry.population) * 100) / 100
+          : 0;
       }
 
       return Array.from(countryMap.values()).sort(

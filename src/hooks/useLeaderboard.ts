@@ -134,6 +134,13 @@ export function useLeaderboard(timeRange: "all" | "month" | "week" = "all") {
         if (entry) entry.contributor_count = set.size;
       }
 
+      // Calculate weighted score (points per million inhabitants)
+      for (const entry of countryMap.values()) {
+        entry.weighted_score = entry.population > 0
+          ? Math.round((entry.total_points / entry.population) * 100) / 100
+          : 0;
+      }
+
       return Array.from(countryMap.values()).sort(
         (a, b) => b.total_points - a.total_points
       );

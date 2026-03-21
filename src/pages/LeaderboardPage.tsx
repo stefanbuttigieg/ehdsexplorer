@@ -236,7 +236,7 @@ function LeaderboardSkeleton() {
 
 export default function LeaderboardPage() {
   const [timeRange, setTimeRange] = useState<"all" | "month" | "week">("all");
-  const [weighted, setWeighted] = useState(false);
+  const [weighted, setWeighted] = useState(true);
   const { data: scores, isLoading } = useLeaderboard(timeRange);
 
   const sortedScores = useMemo(() => {

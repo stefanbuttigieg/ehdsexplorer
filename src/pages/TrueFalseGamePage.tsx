@@ -44,6 +44,7 @@ const TrueFalseGamePage = () => {
   const { data: definitions = [], isLoading: defsLoading } = useDefinitions();
   const { data: articles = [], isLoading: articlesLoading } = useArticles();
   const { checkAndUnlock } = useAchievements();
+  const { isKidsMode } = useKidsMode();
   
   const [statements, setStatements] = useState<Statement[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);

@@ -420,7 +420,7 @@ const QuizGamePage = () => {
                 </Badge>
                 
                 {/* Question */}
-                <h2 className="text-lg font-semibold mb-6">{currentQuestion.question}</h2>
+                <h2 className={cn("font-semibold mb-6", isKidsMode ? "text-xl sm:text-2xl" : "text-lg")}>{currentQuestion.question}</h2>
                 
                 {/* Options */}
                 <div className="space-y-3">

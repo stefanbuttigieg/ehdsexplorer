@@ -145,12 +145,15 @@ export const AchievementProvider = ({ children }: { children: ReactNode }) => {
       }
     },
     onSuccess: (result) => {
-      if (result) {
+      if (result && !shownThisSession.has(result.definition.id)) {
+        shownThisSession.add(result.definition.id);
         console.log('Achievement unlocked, setting recentUnlock:', result.definition.name);
         setRecentUnlock({ definition: result.definition, points: result.definition.points });
         if (user) {
           queryClient.invalidateQueries({ queryKey: ['user-achievements'] });
         }
+      } else if (result && user) {
+        queryClient.invalidateQueries({ queryKey: ['user-achievements'] });
       }
     },
   });

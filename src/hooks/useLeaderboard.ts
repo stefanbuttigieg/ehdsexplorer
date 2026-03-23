@@ -65,6 +65,17 @@ async function detectUserCountry(userId?: string): Promise<{ code: string; name:
   return null;
 }
 
+interface LeaderboardRow {
+  id: string;
+  contributor_hash: string;
+  country_code: string;
+  country_name: string;
+  category: string;
+  points: number;
+  source_detail: string | null;
+  created_at: string;
+}
+
 export function useLeaderboard(timeRange: "all" | "month" | "week" = "all") {
   return useQuery({
     queryKey: ["leaderboard", timeRange],

@@ -32,6 +32,7 @@ const FlashcardGamePage = () => {
   const navigate = useNavigate();
   const { data: definitions, isLoading } = useDefinitions();
   const { checkAndUnlock } = useAchievements();
+  const { isKidsMode } = useKidsMode();
   
   const [cards, setCards] = useState<Array<{ id: number; term: string; definition: string }>>([]);
   const [currentIndex, setCurrentIndex] = useState(0);

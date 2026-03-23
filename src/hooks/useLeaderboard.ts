@@ -95,10 +95,12 @@ export function useLeaderboard(timeRange: "all" | "month" | "week" = "all") {
       const { data, error } = await query;
       if (error) throw error;
 
+      const rows = (data ?? []) as unknown as LeaderboardRow[];
+
       // Aggregate by country
       const countryMap = new Map<string, CountryScore>();
 
-      for (const row of data ?? []) {
+      for (const row of rows) {
         const key = row.country_code;
         if (!countryMap.has(key)) {
           countryMap.set(key, {

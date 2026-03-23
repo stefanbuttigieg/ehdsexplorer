@@ -260,7 +260,9 @@ const FlashcardGamePage = () => {
                   style={{ backfaceVisibility: "hidden" }}
                 >
                   <Badge className="mb-4">Term</Badge>
-                  <h2 className="text-xl sm:text-2xl font-bold text-center">{currentCard.term}</h2>
+                  <h2 className={cn("font-bold text-center", isKidsMode ? "text-2xl sm:text-3xl" : "text-xl sm:text-2xl")}>
+                    {isKidsMode ? `${getTermEmoji(currentCard.term)} ${currentCard.term}` : currentCard.term}
+                  </h2>
                   <p className="text-sm text-muted-foreground mt-4">Click to reveal definition</p>
                 </Card>
 

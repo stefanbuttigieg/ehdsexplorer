@@ -474,7 +474,8 @@ const WordSearchGamePage = () => {
                   <button
                     key={idx}
                     className={cn(
-                      "aspect-square flex items-center justify-center text-sm sm:text-base font-bold rounded transition-all",
+                      "aspect-square flex items-center justify-center font-bold rounded transition-all",
+                      isKidsMode ? "text-base sm:text-lg" : "text-sm sm:text-base",
                       "border border-border/50",
                       isFound && "bg-accent/50 text-accent-foreground border-accent",
                       isSelected && !isFound && "bg-primary/20 text-primary border-primary/50",

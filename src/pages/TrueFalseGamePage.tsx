@@ -392,7 +392,7 @@ const TrueFalseGamePage = () => {
               showResult && lastAnswer?.correct && "border-accent bg-accent/10",
               showResult && !lastAnswer?.correct && "border-destructive bg-destructive/10"
             )}>
-              <p className="text-lg sm:text-xl text-center leading-relaxed">
+              <p className={cn("text-center leading-relaxed", isKidsMode ? "text-xl sm:text-2xl font-medium" : "text-lg sm:text-xl")}>
                 {currentStatement.text}
               </p>
               

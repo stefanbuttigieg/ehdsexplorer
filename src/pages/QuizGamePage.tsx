@@ -456,7 +456,7 @@ const QuizGamePage = () => {
                              showIncorrect ? <XCircle className="h-4 w-4" /> : 
                              String.fromCharCode(65 + index)}
                           </div>
-                          <span className="text-sm leading-relaxed">{option}</span>
+                          <span className={cn("leading-relaxed", isKidsMode ? "text-base" : "text-sm")}>{option}</span>
                         </div>
                       </button>
                     );

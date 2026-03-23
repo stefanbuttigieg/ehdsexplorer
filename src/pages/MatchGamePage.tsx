@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, RotateCcw, Trophy, Sparkles, Timer, CheckCircle2 } from "lucide-react";
 import { useDefinitions } from "@/hooks/useDefinitions";
 import { useAchievements } from "@/hooks/useAchievements";
+import { useKidsMode } from "@/contexts/KidsModeContext";
+import { getTermEmoji, simplifyDefinition } from "@/lib/kidsGameHelpers";
 import { cn } from "@/lib/utils";
 
 interface GameCard {

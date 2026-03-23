@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { useDefinitions } from "@/hooks/useDefinitions";
 import { useAchievements } from "@/hooks/useAchievements";
+import { useKidsMode } from "@/contexts/KidsModeContext";
+import { getTermEmoji } from "@/lib/kidsGameHelpers";
 import { cn } from "@/lib/utils";
 
 interface FlashcardResult {

@@ -69,7 +69,7 @@ export function useLeaderboard(timeRange: "all" | "month" | "week" = "all") {
   return useQuery({
     queryKey: ["leaderboard", timeRange],
     queryFn: async () => {
-      let query = supabase.from("leaderboard_contributions").select("*");
+      let query = supabase.from("leaderboard_contributions_public" as any).select("*");
 
       if (timeRange === "month") {
         const d = new Date();

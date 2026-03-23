@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, BookOpen, Sparkles } from "lucide-react";
 import type { ComicStory } from "@/data/comicStories";
 import { useComicPanelImages } from "@/hooks/useComicPanelImages";
 import { ComicPanelOverlay } from "./ComicPanelOverlay";
+import { ComicTextReader } from "./ComicTextReader";
 
 interface ComicBookReaderProps {
   story: ComicStory;

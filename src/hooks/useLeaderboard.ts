@@ -65,11 +65,22 @@ async function detectUserCountry(userId?: string): Promise<{ code: string; name:
   return null;
 }
 
+interface LeaderboardRow {
+  id: string;
+  contributor_hash: string;
+  country_code: string;
+  country_name: string;
+  category: string;
+  points: number;
+  source_detail: string | null;
+  created_at: string;
+}
+
 export function useLeaderboard(timeRange: "all" | "month" | "week" = "all") {
   return useQuery({
     queryKey: ["leaderboard", timeRange],
     queryFn: async () => {
-      let query = supabase.from("leaderboard_contributions").select("*");
+      let query = supabase.from("leaderboard_contributions_public" as any).select("*");
 
       if (timeRange === "month") {
         const d = new Date();
@@ -84,10 +95,12 @@ export function useLeaderboard(timeRange: "all" | "month" | "week" = "all") {
       const { data, error } = await query;
       if (error) throw error;
 
+      const rows = (data ?? []) as unknown as LeaderboardRow[];
+
       // Aggregate by country
       const countryMap = new Map<string, CountryScore>();
 
-      for (const row of data ?? []) {
+      for (const row of rows) {
         const key = row.country_code;
         if (!countryMap.has(key)) {
           countryMap.set(key, {
@@ -124,10 +137,10 @@ export function useLeaderboard(timeRange: "all" | "month" | "week" = "all") {
 
       // Count unique contributors per country
       const contributorSets = new Map<string, Set<string>>();
-      for (const row of data ?? []) {
+      for (const row of rows) {
         const key = row.country_code;
         if (!contributorSets.has(key)) contributorSets.set(key, new Set());
-        contributorSets.get(key)!.add(row.user_id || row.session_id || "anon");
+        contributorSets.get(key)!.add(row.contributor_hash);
       }
       for (const [key, set] of contributorSets) {
         const entry = countryMap.get(key);

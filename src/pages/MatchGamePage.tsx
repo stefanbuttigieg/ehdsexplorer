@@ -59,9 +59,9 @@ const MatchGamePage = () => {
         isMatched: false,
       });
       
-      // Definition card (shorter + emoji in kids mode)
+      // Definition card — full text in kids mode, truncated otherwise
       const truncatedDef = isKidsMode
-        ? `${getTermEmoji(def.term)} ${simplifyDefinition(def.definition, 60)}`
+        ? `${getTermEmoji(def.term)} ${def.definition}`
         : def.definition.length > 80
           ? def.definition.substring(0, 80) + "..."
           : def.definition;

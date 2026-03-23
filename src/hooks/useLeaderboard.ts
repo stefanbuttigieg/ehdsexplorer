@@ -137,10 +137,10 @@ export function useLeaderboard(timeRange: "all" | "month" | "week" = "all") {
 
       // Count unique contributors per country
       const contributorSets = new Map<string, Set<string>>();
-      for (const row of data ?? []) {
+      for (const row of rows) {
         const key = row.country_code;
         if (!contributorSets.has(key)) contributorSets.set(key, new Set());
-        contributorSets.get(key)!.add(row.user_id || row.session_id || "anon");
+        contributorSets.get(key)!.add(row.contributor_hash);
       }
       for (const [key, set] of contributorSets) {
         const entry = countryMap.get(key);

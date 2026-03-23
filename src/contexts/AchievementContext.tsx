@@ -67,6 +67,8 @@ export const AchievementProvider = ({ children }: { children: ReactNode }) => {
   const queryClient = useQueryClient();
   const [localAchievements, setLocalAchievementsState] = useState<UserAchievement[]>(getLocalAchievements);
   const [recentUnlock, setRecentUnlock] = useState<RecentUnlock | null>(null);
+  // Track achievements already shown this session to prevent repeated popups on login/re-render
+  const [shownThisSession] = useState<Set<string>>(() => new Set());
 
   // Fetch achievement definitions
   const { data: definitions = [] } = useQuery({

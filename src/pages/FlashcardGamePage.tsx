@@ -279,7 +279,7 @@ const FlashcardGamePage = () => {
                   }}
                 >
                   <Badge variant="secondary" className="mb-4 shrink-0">Definition</Badge>
-                  <p className="text-sm sm:text-base text-center leading-relaxed">{currentCard.definition}</p>
+                  <p className={cn("text-center leading-relaxed", isKidsMode ? "text-base sm:text-lg" : "text-sm sm:text-base")}>{currentCard.definition}</p>
                 </Card>
               </div>
             </div>

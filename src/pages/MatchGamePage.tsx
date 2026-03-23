@@ -22,6 +22,7 @@ const MatchGamePage = () => {
   const navigate = useNavigate();
   const { data: definitions, isLoading } = useDefinitions();
   const { checkAndUnlock } = useAchievements();
+  const { isKidsMode } = useKidsMode();
   
   const [cards, setCards] = useState<GameCard[]>([]);
   const [selectedCards, setSelectedCards] = useState<GameCard[]>([]);

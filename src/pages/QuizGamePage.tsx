@@ -21,6 +21,7 @@ import { useArticles } from "@/hooks/useArticles";
 import { useDefinitions } from "@/hooks/useDefinitions";
 import { useAchievements } from "@/hooks/useAchievements";
 import { useGameLeaderboardTracker } from "@/components/LeaderboardTracker";
+import { useKidsMode } from "@/contexts/KidsModeContext";
 import { cn } from "@/lib/utils";
 
 interface Question {

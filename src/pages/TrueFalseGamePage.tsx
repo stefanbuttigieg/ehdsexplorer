@@ -20,6 +20,7 @@ import {
 import { useDefinitions } from "@/hooks/useDefinitions";
 import { useArticles } from "@/hooks/useArticles";
 import { useAchievements } from "@/hooks/useAchievements";
+import { useKidsMode } from "@/contexts/KidsModeContext";
 import { cn } from "@/lib/utils";
 
 interface Statement {

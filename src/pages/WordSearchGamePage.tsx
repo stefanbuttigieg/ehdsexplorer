@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useDefinitions } from "@/hooks/useDefinitions";
 import { useAchievements } from "@/hooks/useAchievements";
+import { useKidsMode } from "@/contexts/KidsModeContext";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,

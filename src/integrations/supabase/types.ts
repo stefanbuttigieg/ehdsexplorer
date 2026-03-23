@@ -4149,6 +4149,39 @@ export type Database = {
       }
     }
     Views: {
+      leaderboard_contributions_public: {
+        Row: {
+          category: string | null
+          contributor_hash: string | null
+          country_code: string | null
+          country_name: string | null
+          created_at: string | null
+          id: string | null
+          points: number | null
+          source_detail: string | null
+        }
+        Insert: {
+          category?: string | null
+          contributor_hash?: never
+          country_code?: string | null
+          country_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          points?: number | null
+          source_detail?: string | null
+        }
+        Update: {
+          category?: string | null
+          contributor_hash?: never
+          country_code?: string | null
+          country_name?: string | null
+          created_at?: string | null
+          id?: string | null
+          points?: number | null
+          source_detail?: string | null
+        }
+        Relationships: []
+      }
       site_settings_public: {
         Row: {
           ai_model: string | null

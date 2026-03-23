@@ -313,13 +313,14 @@ const MatchGamePage = () => {
                 <div className="h-full flex flex-col">
                   <Badge
                     variant={card.type === "term" ? "default" : "secondary"}
-                    className="w-fit text-xs mb-2"
+                    className={cn("w-fit mb-2", isKidsMode ? "text-sm" : "text-xs")}
                   >
                     {card.type === "term" ? "Term" : "Definition"}
                   </Badge>
                   <p
                     className={cn(
-                      "text-sm leading-snug flex-1",
+                      "leading-snug flex-1",
+                      isKidsMode ? "text-base font-medium" : "text-sm",
                       card.type === "term" && "font-semibold"
                     )}
                   >

@@ -10,8 +10,9 @@ interface ComicTextReaderProps {
 
 // Voice mapping – pick voices that best approximate young characters
 const CHARACTER_VOICES: Record<string, string> = {
-  alex: "iP95p4xoKVk53GoZ742B",   // Chris – lighter male voice for a boy
-  mia: "pFZP5JQG7iQjIQuC4Bku",    // Lily – lighter female voice for a girl
+  alex: "iP95p4xoKVk53GoZ742B",            // Chris – lighter male voice for a boy
+  mia: "pFZP5JQG7iQjIQuC4Bku",             // Lily – lighter female voice for a girl
+  "professor byte": "kPtEHAvRnjUJFv7SK9WI", // Glitch – robotic/digital voice
 };
 const NARRATOR_VOICE = "JBFqnCBsd6RMkjVDRZzb"; // George – warm narrator
 

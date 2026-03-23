@@ -43,20 +43,26 @@ const MatchGamePage = () => {
     const gameCards: GameCard[] = [];
     
     selected.forEach((def, index) => {
-      // Term card
+      // Term card — add emoji prefix in kids mode
+      const termContent = isKidsMode
+        ? `${getTermEmoji(def.term)} ${def.term}`
+        : def.term;
+
       gameCards.push({
         id: `term-${def.id}`,
-        content: def.term,
+        content: termContent,
         type: "term",
         matchId: index,
         isFlipped: false,
         isMatched: false,
       });
       
-      // Definition card (truncated for display)
-      const truncatedDef = def.definition.length > 80 
-        ? def.definition.substring(0, 80) + "..." 
-        : def.definition;
+      // Definition card (shorter + emoji in kids mode)
+      const truncatedDef = isKidsMode
+        ? `${getTermEmoji(def.term)} ${simplifyDefinition(def.definition, 60)}`
+        : def.definition.length > 80
+          ? def.definition.substring(0, 80) + "..."
+          : def.definition;
       
       gameCards.push({
         id: `def-${def.id}`,

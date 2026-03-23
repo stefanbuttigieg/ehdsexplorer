@@ -97,8 +97,11 @@ export const ComicBookReader = ({ story, onBack }: ComicBookReaderProps) => {
             )}
           </div>
 
-          {/* Narration & dialogue below (fallback/expanded view) */}
+          {/* Text reader + narration & dialogue below */}
           <div className="p-6">
+            <div className="flex justify-end mb-4">
+              <ComicTextReader panel={panel} />
+            </div>
             {panel.narration && (
               <p className="italic text-muted-foreground text-sm mb-4 border-l-2 border-primary pl-4">
                 {panel.narration}

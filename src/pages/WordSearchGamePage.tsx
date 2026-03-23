@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useDefinitions } from "@/hooks/useDefinitions";
 import { useAchievements } from "@/hooks/useAchievements";
+import { useKidsMode } from "@/contexts/KidsModeContext";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -46,6 +47,7 @@ const WordSearchGamePage = () => {
   const navigate = useNavigate();
   const { data: definitions, isLoading } = useDefinitions();
   const { checkAndUnlock } = useAchievements();
+  const { isKidsMode } = useKidsMode();
   
   const [grid, setGrid] = useState<string[][]>([]);
   const [placedWords, setPlacedWords] = useState<PlacedWord[]>([]);
@@ -472,7 +474,8 @@ const WordSearchGamePage = () => {
                   <button
                     key={idx}
                     className={cn(
-                      "aspect-square flex items-center justify-center text-sm sm:text-base font-bold rounded transition-all",
+                      "aspect-square flex items-center justify-center font-bold rounded transition-all",
+                      isKidsMode ? "text-base sm:text-lg" : "text-sm sm:text-base",
                       "border border-border/50",
                       isFound && "bg-accent/50 text-accent-foreground border-accent",
                       isSelected && !isFound && "bg-primary/20 text-primary border-primary/50",

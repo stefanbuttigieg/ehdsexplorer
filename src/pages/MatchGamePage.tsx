@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, RotateCcw, Trophy, Sparkles, Timer, CheckCircle2 } from "lucide-react";
 import { useDefinitions } from "@/hooks/useDefinitions";
 import { useAchievements } from "@/hooks/useAchievements";
+import { useKidsMode } from "@/contexts/KidsModeContext";
+import { getTermEmoji, simplifyDefinition } from "@/lib/kidsGameHelpers";
 import { cn } from "@/lib/utils";
 
 interface GameCard {
@@ -22,6 +24,7 @@ const MatchGamePage = () => {
   const navigate = useNavigate();
   const { data: definitions, isLoading } = useDefinitions();
   const { checkAndUnlock } = useAchievements();
+  const { isKidsMode } = useKidsMode();
   
   const [cards, setCards] = useState<GameCard[]>([]);
   const [selectedCards, setSelectedCards] = useState<GameCard[]>([]);
@@ -42,20 +45,26 @@ const MatchGamePage = () => {
     const gameCards: GameCard[] = [];
     
     selected.forEach((def, index) => {
-      // Term card
+      // Term card — add emoji prefix in kids mode
+      const termContent = isKidsMode
+        ? `${getTermEmoji(def.term)} ${def.term}`
+        : def.term;
+
       gameCards.push({
         id: `term-${def.id}`,
-        content: def.term,
+        content: termContent,
         type: "term",
         matchId: index,
         isFlipped: false,
         isMatched: false,
       });
       
-      // Definition card (truncated for display)
-      const truncatedDef = def.definition.length > 80 
-        ? def.definition.substring(0, 80) + "..." 
-        : def.definition;
+      // Definition card (shorter + emoji in kids mode)
+      const truncatedDef = isKidsMode
+        ? `${getTermEmoji(def.term)} ${simplifyDefinition(def.definition, 60)}`
+        : def.definition.length > 80
+          ? def.definition.substring(0, 80) + "..."
+          : def.definition;
       
       gameCards.push({
         id: `def-${def.id}`,
@@ -306,13 +315,14 @@ const MatchGamePage = () => {
                 <div className="h-full flex flex-col">
                   <Badge
                     variant={card.type === "term" ? "default" : "secondary"}
-                    className="w-fit text-xs mb-2"
+                    className={cn("w-fit mb-2", isKidsMode ? "text-sm" : "text-xs")}
                   >
                     {card.type === "term" ? "Term" : "Definition"}
                   </Badge>
                   <p
                     className={cn(
-                      "text-sm leading-snug flex-1",
+                      "leading-snug flex-1",
+                      isKidsMode ? "text-base font-medium" : "text-sm",
                       card.type === "term" && "font-semibold"
                     )}
                   >

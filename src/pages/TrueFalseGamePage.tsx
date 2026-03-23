@@ -20,6 +20,7 @@ import {
 import { useDefinitions } from "@/hooks/useDefinitions";
 import { useArticles } from "@/hooks/useArticles";
 import { useAchievements } from "@/hooks/useAchievements";
+import { useKidsMode } from "@/contexts/KidsModeContext";
 import { cn } from "@/lib/utils";
 
 interface Statement {
@@ -43,6 +44,7 @@ const TrueFalseGamePage = () => {
   const { data: definitions = [], isLoading: defsLoading } = useDefinitions();
   const { data: articles = [], isLoading: articlesLoading } = useArticles();
   const { checkAndUnlock } = useAchievements();
+  const { isKidsMode } = useKidsMode();
   
   const [statements, setStatements] = useState<Statement[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -390,7 +392,7 @@ const TrueFalseGamePage = () => {
               showResult && lastAnswer?.correct && "border-accent bg-accent/10",
               showResult && !lastAnswer?.correct && "border-destructive bg-destructive/10"
             )}>
-              <p className="text-lg sm:text-xl text-center leading-relaxed">
+              <p className={cn("text-center leading-relaxed", isKidsMode ? "text-xl sm:text-2xl font-medium" : "text-lg sm:text-xl")}>
                 {currentStatement.text}
               </p>
               

@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { useDefinitions } from "@/hooks/useDefinitions";
 import { useAchievements } from "@/hooks/useAchievements";
+import { useKidsMode } from "@/contexts/KidsModeContext";
+import { getTermEmoji } from "@/lib/kidsGameHelpers";
 import { cn } from "@/lib/utils";
 
 interface FlashcardResult {
@@ -30,6 +32,7 @@ const FlashcardGamePage = () => {
   const navigate = useNavigate();
   const { data: definitions, isLoading } = useDefinitions();
   const { checkAndUnlock } = useAchievements();
+  const { isKidsMode } = useKidsMode();
   
   const [cards, setCards] = useState<Array<{ id: number; term: string; definition: string }>>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -257,7 +260,9 @@ const FlashcardGamePage = () => {
                   style={{ backfaceVisibility: "hidden" }}
                 >
                   <Badge className="mb-4">Term</Badge>
-                  <h2 className="text-xl sm:text-2xl font-bold text-center">{currentCard.term}</h2>
+                  <h2 className={cn("font-bold text-center", isKidsMode ? "text-2xl sm:text-3xl" : "text-xl sm:text-2xl")}>
+                    {isKidsMode ? `${getTermEmoji(currentCard.term)} ${currentCard.term}` : currentCard.term}
+                  </h2>
                   <p className="text-sm text-muted-foreground mt-4">Click to reveal definition</p>
                 </Card>
 
@@ -274,7 +279,7 @@ const FlashcardGamePage = () => {
                   }}
                 >
                   <Badge variant="secondary" className="mb-4 shrink-0">Definition</Badge>
-                  <p className="text-sm sm:text-base text-center leading-relaxed">{currentCard.definition}</p>
+                  <p className={cn("text-center leading-relaxed", isKidsMode ? "text-base sm:text-lg" : "text-sm sm:text-base")}>{currentCard.definition}</p>
                 </Card>
               </div>
             </div>

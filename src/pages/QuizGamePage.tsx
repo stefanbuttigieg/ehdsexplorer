@@ -21,6 +21,7 @@ import { useArticles } from "@/hooks/useArticles";
 import { useDefinitions } from "@/hooks/useDefinitions";
 import { useAchievements } from "@/hooks/useAchievements";
 import { useGameLeaderboardTracker } from "@/components/LeaderboardTracker";
+import { useKidsMode } from "@/contexts/KidsModeContext";
 import { cn } from "@/lib/utils";
 
 interface Question {
@@ -47,6 +48,7 @@ const QuizGamePage = () => {
   const { data: definitions, isLoading: definitionsLoading } = useDefinitions();
   const { checkAndUnlock } = useAchievements();
   const { trackGameScore } = useGameLeaderboardTracker();
+  const { isKidsMode } = useKidsMode();
   
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -418,7 +420,7 @@ const QuizGamePage = () => {
                 </Badge>
                 
                 {/* Question */}
-                <h2 className="text-lg font-semibold mb-6">{currentQuestion.question}</h2>
+                <h2 className={cn("font-semibold mb-6", isKidsMode ? "text-xl sm:text-2xl" : "text-lg")}>{currentQuestion.question}</h2>
                 
                 {/* Options */}
                 <div className="space-y-3">
@@ -454,7 +456,7 @@ const QuizGamePage = () => {
                              showIncorrect ? <XCircle className="h-4 w-4" /> : 
                              String.fromCharCode(65 + index)}
                           </div>
-                          <span className="text-sm leading-relaxed">{option}</span>
+                          <span className={cn("leading-relaxed", isKidsMode ? "text-base" : "text-sm")}>{option}</span>
                         </div>
                       </button>
                     );

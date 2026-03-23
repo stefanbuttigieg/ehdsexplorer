@@ -312,13 +312,16 @@ const MatchGamePage = () => {
               )}
             >
               {card.isFlipped || card.isMatched ? (
-                <div className="h-full flex flex-col">
+                <div className="h-full flex flex-col overflow-y-auto">
                   <Badge
                     variant={card.type === "term" ? "default" : "secondary"}
-                    className={cn("w-fit mb-2", isKidsMode ? "text-sm" : "text-xs")}
+                    className={cn("w-fit mb-2 shrink-0", isKidsMode ? "text-sm" : "text-xs")}
                   >
                     {card.type === "term" ? "Term" : "Definition"}
                   </Badge>
+                  {isKidsMode && card.content.match(/^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/u) && (
+                    <span className="text-4xl mb-1 shrink-0">{card.content.split(" ")[0]}</span>
+                  )}
                   <p
                     className={cn(
                       "leading-snug flex-1",
@@ -326,7 +329,7 @@ const MatchGamePage = () => {
                       card.type === "term" && "font-semibold"
                     )}
                   >
-                    {card.content}
+                    {isKidsMode ? card.content.replace(/^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)\s*/u, "") : card.content}
                   </p>
                 </div>
               ) : (

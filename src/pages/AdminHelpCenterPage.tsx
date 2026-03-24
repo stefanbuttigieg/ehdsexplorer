@@ -76,6 +76,10 @@ const AdminHelpCenterPage = () => {
                 <Mail className="h-4 w-4 text-primary" />
                 <span className="text-sm font-medium">Communications</span>
               </a>
+              <a href="#kids-comics" className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors">
+                <Baby className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Kids & Comics</span>
+              </a>
               <a href="#best-practices" className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors">
                 <CheckCircle2 className="h-4 w-4 text-primary" />
                 <span className="text-sm font-medium">Best Practices</span>

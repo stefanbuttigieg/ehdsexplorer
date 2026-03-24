@@ -3,7 +3,7 @@ import {
   BookOpen, FileText, Scale, Files, ListChecks, Search, Bookmark,
   ArrowLeft, ChevronRight, Info, Keyboard, HelpCircle, ExternalLink,
   Home, MessageCircle, Eye, Accessibility as AccessibilityIcon, UserPlus, Sparkles, Loader2,
-  Bot, Users, StickyNote, Trophy, Globe, Highlighter, Map, Newspaper
+  Bot, Users, StickyNote, Trophy, Globe, Highlighter, Map, Newspaper, Baby, Gamepad2, BookImage, Volume2
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

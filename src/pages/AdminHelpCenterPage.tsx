@@ -4,7 +4,7 @@ import {
   Bell, Link2, BookMarked, StickyNote, Layers, LayoutDashboard,
   ArrowLeft, ChevronRight, CheckCircle2, AlertCircle, Info,
   Edit, Trash2, Plus, Save, Eye, Search, Construction, Bot, Globe,
-  Highlighter, Trophy, HelpCircle, Map, Newspaper, Shield, Mail
+  Highlighter, Trophy, HelpCircle, Map, Newspaper, Shield, Mail, Baby, BookImage, Gamepad2, Volume2
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

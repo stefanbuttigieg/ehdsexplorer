@@ -115,6 +115,10 @@ const HelpCenterPage = () => {
                 <AccessibilityIcon className="h-4 w-4 text-primary" />
                 <span className="text-sm font-medium">Accessibility</span>
               </a>
+              <a href="#kids-mode" className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors">
+                <Baby className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Kids Mode</span>
+              </a>
               <a href="#faq" className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors">
                 <HelpCircle className="h-4 w-4 text-primary" />
                 <span className="text-sm font-medium">FAQ</span>

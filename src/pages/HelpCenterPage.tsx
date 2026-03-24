@@ -3,7 +3,7 @@ import {
   BookOpen, FileText, Scale, Files, ListChecks, Search, Bookmark,
   ArrowLeft, ChevronRight, Info, Keyboard, HelpCircle, ExternalLink,
   Home, MessageCircle, Eye, Accessibility as AccessibilityIcon, UserPlus, Sparkles, Loader2,
-  Bot, Users, StickyNote, Trophy, Globe, Highlighter, Map, Newspaper
+  Bot, Users, StickyNote, Trophy, Globe, Highlighter, Map, Newspaper, Baby, Gamepad2, BookImage, Volume2
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -114,6 +114,10 @@ const HelpCenterPage = () => {
               <a href="#accessibility" className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors">
                 <AccessibilityIcon className="h-4 w-4 text-primary" />
                 <span className="text-sm font-medium">Accessibility</span>
+              </a>
+              <a href="#kids-mode" className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors">
+                <Baby className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Kids Mode</span>
               </a>
               <a href="#faq" className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors">
                 <HelpCircle className="h-4 w-4 text-primary" />
@@ -689,6 +693,104 @@ const HelpCenterPage = () => {
                   <li>Track progress with visual indicators</li>
                   <li>Play flashcard and quiz games to test knowledge</li>
                 </ul>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </section>
+
+        <Separator className="my-8" />
+
+        {/* Kids Mode & Comics */}
+        <section id="kids-mode" className="mb-12">
+          <h2 className="text-2xl font-bold font-serif mb-4 flex items-center gap-2">
+            <Baby className="h-6 w-6 text-primary" />
+            Kids Mode & Comics
+          </h2>
+
+          <Accordion type="multiple" className="space-y-4">
+            <AccordionItem value="kids-toggle" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <Baby className="h-5 w-5 text-primary" />
+                  <span className="font-semibold">Enabling Kids Mode</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-4">
+                <p className="text-muted-foreground">
+                  Kids Mode transforms the platform into a child-friendly experience designed for ages 10–17:
+                </p>
+                <ul className="space-y-2 text-muted-foreground ml-4">
+                  <li>Click the <strong>Baby icon</strong> (👶) in the header toolbar to toggle Kids Mode on/off</li>
+                  <li>A playful visual theme is applied with the Nunito font and a custom color palette</li>
+                  <li>Navigation is simplified to only show kid-friendly routes (Home, Kids Corner, Games, Citizens page)</li>
+                  <li>The homepage changes to a dedicated kids landing page with an interactive map</li>
+                  <li>Your preference is saved in your browser for future visits</li>
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="comics" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <BookImage className="h-5 w-5 text-primary" />
+                  <span className="font-semibold">Interactive Comics</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-4">
+                <p className="text-muted-foreground">
+                  Learn about EHDS through interactive comic stories:
+                </p>
+                <ul className="space-y-2 text-muted-foreground ml-4">
+                  <li>Access comics from the <Link to="/kids" className="text-primary hover:underline">Comics page</Link></li>
+                  <li>Stories like "The Data Guardians" explain health data concepts through characters</li>
+                  <li>AI-generated artwork with speech bubbles and narration overlays</li>
+                  <li>Navigate between panels using arrows or swipe gestures</li>
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="comic-tts" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <Volume2 className="h-5 w-5 text-primary" />
+                  <span className="font-semibold">Read Aloud (Text-to-Speech)</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-4">
+                <p className="text-muted-foreground">
+                  Comics include a text-to-speech reader for improved accessibility:
+                </p>
+                <ul className="space-y-2 text-muted-foreground ml-4">
+                  <li>Click the <strong>"Read Aloud"</strong> button on any comic panel</li>
+                  <li>Each character has a unique voice — Alex has a boyish voice, Mia a girl's voice, and Professor Byte a robotic voice</li>
+                  <li>Narration and dialogue are read aloud automatically</li>
+                  <li>Great for younger readers or those who prefer listening</li>
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="learning-games" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <Gamepad2 className="h-5 w-5 text-primary" />
+                  <span className="font-semibold">Learning Games</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-4">
+                <p className="text-muted-foreground">
+                  Test your knowledge of EHDS concepts through fun, interactive games:
+                </p>
+                <ul className="space-y-2 text-muted-foreground ml-4">
+                  <li><strong>Match Game:</strong> Match EHDS terms with their definitions using large emoji symbols</li>
+                  <li><strong>Flashcards:</strong> Study key terms and definitions</li>
+                  <li><strong>Quiz:</strong> Multiple-choice questions about the regulation</li>
+                  <li><strong>Word Search:</strong> Find EHDS terms hidden in a grid</li>
+                  <li><strong>True or False:</strong> Test your understanding of key provisions</li>
+                  <li><strong>Who Am I?:</strong> Guess the EHDS concept from clues</li>
+                </ul>
+                <p className="text-muted-foreground">
+                  In Kids Mode, games are enhanced with larger text, big emoji icons, and full (non-truncated) definitions for better readability.
+                </p>
               </AccordionContent>
             </AccordionItem>
           </Accordion>

@@ -4,7 +4,7 @@ import {
   Bell, Link2, BookMarked, StickyNote, Layers, LayoutDashboard,
   ArrowLeft, ChevronRight, CheckCircle2, AlertCircle, Info,
   Edit, Trash2, Plus, Save, Eye, Search, Construction, Bot, Globe,
-  Highlighter, Trophy, HelpCircle, Map, Newspaper, Shield, Mail
+  Highlighter, Trophy, HelpCircle, Map, Newspaper, Shield, Mail, Baby, BookImage, Gamepad2, Volume2
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -75,6 +75,10 @@ const AdminHelpCenterPage = () => {
               <a href="#communications" className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors">
                 <Mail className="h-4 w-4 text-primary" />
                 <span className="text-sm font-medium">Communications</span>
+              </a>
+              <a href="#kids-comics" className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors">
+                <Baby className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Kids & Comics</span>
               </a>
               <a href="#best-practices" className="flex items-center gap-2 p-3 rounded-lg border hover:bg-accent transition-colors">
                 <CheckCircle2 className="h-4 w-4 text-primary" />
@@ -863,6 +867,125 @@ const AdminHelpCenterPage = () => {
               </ul>
             </CardContent>
           </Card>
+        </section>
+
+        <Separator className="my-8" />
+
+        {/* Kids Mode & Comics */}
+        <section id="kids-comics" className="mb-12">
+          <h2 className="text-2xl font-bold font-serif mb-4 flex items-center gap-2">
+            <Baby className="h-6 w-6 text-primary" />
+            Kids Mode & Comics
+          </h2>
+
+          <Card className="mb-4">
+            <CardHeader>
+              <CardTitle>Kids Mode Overview</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">
+                Kids Mode is a child-friendly experience designed for ages 10–17. When enabled via the Baby icon (👶) in the toolbar:
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-center gap-2">
+                  <ChevronRight className="h-4 w-4 text-primary" />
+                  A playful visual theme is applied (Nunito font, custom color palette)
+                </li>
+                <li className="flex items-center gap-2">
+                  <ChevronRight className="h-4 w-4 text-primary" />
+                  Navigation is restricted to kid-friendly routes only
+                </li>
+                <li className="flex items-center gap-2">
+                  <ChevronRight className="h-4 w-4 text-primary" />
+                  The homepage is replaced with a dedicated kids landing page
+                </li>
+                <li className="flex items-center gap-2">
+                  <ChevronRight className="h-4 w-4 text-primary" />
+                  Learning games display larger text, big emoji symbols, and full definitions
+                </li>
+              </ul>
+              <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+                <p className="text-sm flex items-start gap-2">
+                  <Info className="h-4 w-4 mt-0.5 text-primary" />
+                  <span><strong>Note:</strong> Kids Mode is a client-side toggle stored in localStorage. Admin routes are always accessible regardless of Kids Mode state.</span>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Accordion type="multiple" className="space-y-4">
+            <AccordionItem value="comic-panels" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <BookImage className="h-5 w-5 text-primary" />
+                  <span className="font-semibold">Managing Comic Panels</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-4">
+                <p className="text-muted-foreground">
+                  Comic panels are AI-generated illustrations with overlaid dialogue and narration:
+                </p>
+                <ul className="space-y-2 text-muted-foreground ml-4">
+                  <li>Go to <strong>Admin → Comic Panels</strong> to manage panel images</li>
+                  <li>Each panel is linked to a story ID and has a panel index for ordering</li>
+                  <li>Panels are pre-generated and cached in the <code className="bg-muted px-1 rounded">comic_panel_images</code> table to control AI costs</li>
+                  <li>Override generated panels by uploading custom images</li>
+                  <li>Dialogue and narration are rendered as colored speech bubbles and boxes overlaid on the artwork</li>
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="comic-tts" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <Volume2 className="h-5 w-5 text-primary" />
+                  <span className="font-semibold">Comic Text-to-Speech</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-4">
+                <p className="text-muted-foreground">
+                  Each comic story includes a "Read Aloud" feature powered by ElevenLabs TTS:
+                </p>
+                <ul className="space-y-2 text-muted-foreground ml-4">
+                  <li>Characters have distinct voices — Alex (boyish, 10–13), Mia (girl, 10–13), Professor Byte (robotic)</li>
+                  <li>Narration text uses a neutral voice</li>
+                  <li>The TTS requires the <strong>ELEVENLABS_API_KEY</strong> secret to be configured</li>
+                  <li>Audio is generated on-demand via the <code className="bg-muted px-1 rounded">elevenlabs-tts</code> backend function</li>
+                </ul>
+                <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                  <p className="text-sm flex items-start gap-2">
+                    <AlertCircle className="h-4 w-4 mt-0.5 text-amber-600" />
+                    <span><strong>Cost note:</strong> Each TTS request consumes ElevenLabs API credits. Monitor usage if traffic to comics is high.</span>
+                  </p>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="learning-games" className="border rounded-lg px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <Gamepad2 className="h-5 w-5 text-primary" />
+                  <span className="font-semibold">Learning Games</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-4 space-y-4">
+                <p className="text-muted-foreground">
+                  The platform includes six interactive games that test EHDS knowledge:
+                </p>
+                <ul className="space-y-2 text-muted-foreground ml-4">
+                  <li><strong>Match Game:</strong> Match terms with definitions (uses emoji symbols in Kids Mode)</li>
+                  <li><strong>Flashcards:</strong> Study term/definition pairs</li>
+                  <li><strong>Quiz:</strong> Multiple-choice questions</li>
+                  <li><strong>Word Search:</strong> Find terms in a letter grid</li>
+                  <li><strong>True or False:</strong> Evaluate statements about the regulation</li>
+                  <li><strong>Who Am I?:</strong> Guess concepts from descriptive clues</li>
+                </ul>
+                <p className="text-muted-foreground">
+                  Games pull content from the definitions database. In Kids Mode, games render with scaled-up typography (text-4xl emoji), full untruncated definitions, and enhanced visual cues for younger users.
+                </p>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </section>
 
         <Separator className="my-8" />

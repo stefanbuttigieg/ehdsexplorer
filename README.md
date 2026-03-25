@@ -10,7 +10,7 @@ A comprehensive digital platform for exploring **Regulation (EU) 2025/327** - th
 ![Leaflet](https://img.shields.io/badge/Leaflet-1.9-199900?logo=leaflet)
 ![Capacitor](https://img.shields.io/badge/Capacitor-8.0-119EFF?logo=capacitor)
 [![BuyMeACoffee](https://raw.githubusercontent.com/pachadotdev/buymeacoffee-badges/main/bmc-yellow.svg)](https://buymeacoffee.com/stefanbuttigieg)
-![Lovable Credits](https://img.shields.io/badge/Lovable%20Credits-600%20credits%20used-blue)
+![Lovable Credits](https://img.shields.io/badge/Lovable%20Credits-650%20credits%20used-blue)
 ![Analytics](https://img.shields.io/badge/Analytics-Umami-brightgreen)
 ![UX Analytics](https://img.shields.io/badge/UX%20Analytics-PostHog-blue)
 
@@ -180,6 +180,17 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **For Health Tech** page - Interactive compliance checklist with progress tracking
 - **For Healthcare Professionals** page - Workflow-oriented clinical scenarios
 
+### 👶 Kids Mode & Interactive Comics
+- **Kids Mode toggle** - Simplified, child-friendly interface accessible from the header
+- **Interactive Comics** - "Data Guardians" comic series teaching EHDS concepts through storytelling
+  - Panel-by-panel navigation with comic book layout
+  - **Read Aloud (TTS)** - ElevenLabs-powered text-to-speech with character-specific voices
+    - Alex: boyish voice (10-13 year old character)
+    - Mia: girl's voice (10-13 year old character)
+    - Professor Byte: robotic/sci-fi voice
+  - AI-generated comic panels via admin dashboard
+- **Kids Corner** - Dedicated landing page with comics and learning games
+
 ### 🎮 Learning Tools & Gamification
 - **Match Game** - Card-matching game to learn EHDS terminology by pairing terms with definitions
   - Selectable difficulty levels (4, 6, or 8 pairs)
@@ -189,6 +200,10 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
   - Flip cards to reveal definitions
   - Self-assessment marking (knew it / didn't know)
   - Progress tracking and shuffle functionality
+- **Quiz Game** - Multiple-choice questions testing EHDS knowledge
+- **True/False Game** - Quick-fire statements about the regulation
+- **Who Am I? Game** - Guess the EHDS concept from clues
+- **Word Search Game** - Find EHDS terms in a letter grid
 - **Achievement System** - Gamified progress tracking for logged-in users
   - Unlock achievements for bookmarking, note-taking, and game completion
   - Level-up modals with celebratory animations (Newcomer to EHDS Master)

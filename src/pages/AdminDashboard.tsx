@@ -615,40 +615,24 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        <Card data-tour="admin-quick-actions">
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent className="flex gap-2 md:gap-4 flex-wrap">
-            <Link to="/">
-              <Button variant="outline">View Public Site</Button>
-            </Link>
-            <Link to="/admin/articles">
-              <Button>Edit Articles</Button>
-            </Link>
-            <Link to="/admin/recitals">
-              <Button>Edit Recitals</Button>
-            </Link>
-            <Link to="/admin/bulk-import">
-              <Button variant="secondary">
-                <Upload className="h-4 w-4 mr-2" />
-                Bulk Import
-              </Button>
-            </Link>
-            <Link to="/admin/help">
-              <Button variant="outline">
-                <BookOpenCheck className="h-4 w-4 mr-2" />
-                Help Center
-              </Button>
-            </Link>
-            <Link to="/admin/qa">
-              <Button variant="outline">
-                <ClipboardCheck className="h-4 w-4 mr-2" />
-                QA Checklist
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+        {/* Quick Links Row */}
+        <div className="flex gap-2 flex-wrap" data-tour="admin-quick-actions">
+          <Link to="/">
+            <Button variant="outline" size="sm">View Public Site</Button>
+          </Link>
+          <Link to="/admin/help">
+            <Button variant="outline" size="sm">
+              <BookOpenCheck className="h-4 w-4 mr-1" />
+              Help Center
+            </Button>
+          </Link>
+          <Link to="/admin/qa">
+            <Button variant="outline" size="sm">
+              <ClipboardCheck className="h-4 w-4 mr-1" />
+              QA Checklist
+            </Button>
+          </Link>
+        </div>
 
         {/* Admin Tour */}
         <AdminTour run={isTourOpen} onComplete={completeTour} onClose={closeTour} />

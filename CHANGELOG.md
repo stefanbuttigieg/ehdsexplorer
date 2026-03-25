@@ -5,6 +5,53 @@ All notable changes to the EHDS Regulation Explorer will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.8] - 2026-03-25
+
+### Added
+
+#### Custom Analytics Date Filtering
+- **Date range presets** in admin analytics widget (Today, 7 days, 30 days, 90 days, This month)
+- **Custom date range picker** with calendar popover for flexible reporting periods
+- Analytics chart and stats dynamically update based on selected date range
+
+#### Kids Mode & Comics Help Center Documentation
+- **Public Help Center** updated with "Kids Mode & Comics" section covering mode activation, comic navigation, Read Aloud (TTS), and all 6 learning games
+- **Admin Help Center** updated with "Kids & Comics" section covering Kids Mode internals, comic panel management, and TTS configuration
+
+#### Comic Character Voice Customization
+- **Alex** uses a boyish voice (George, ElevenLabs) for authentic 10-13 year old character portrayal
+- **Mia** uses a girl's voice (Lily, ElevenLabs) matching her 10-13 year old character
+- **Professor Byte** uses a robotic/processed voice (Arnold, ElevenLabs) with sci-fi style settings
+- Character-specific voice mapping with per-character stability and style settings
+
+### Changed
+
+#### Admin Dashboard Streamlined
+- **Removed Quick Actions card** — utility links (View Public Site, Help Center, QA Checklist) moved to compact button row at bottom
+- Cleaner dashboard layout with more space for content tiles
+
+#### PWA Update Flow Hardened
+- Service worker update polling reduced from 60s to **30 seconds**
+- Added `visibilitychange`, `focus`, and `online` event listeners to trigger immediate update checks
+- Auto-reload on new version detection without user prompt
+- Proper cleanup of intervals and event listeners
+
+### Fixed
+
+#### Achievement Modal Spam on Login
+- Fixed achievement unlock modal appearing on every login instead of only for new achievements
+- Added `hasBeenNotified` flag to prevent re-triggering toasts and modals for previously unlocked achievements
+- Level-up modal now only shows when user actually levels up, not on session restore
+
+### Security
+
+#### Leaderboard User ID Anonymization
+- Replaced raw `user_id` UUIDs in public leaderboard queries with anonymized identifiers
+- Public SELECT policy no longer exposes internal user identifiers alongside behavioral data
+- Country-level aggregation preserved without linking to specific user accounts
+
+---
+
 ## [Unreleased]
 
 ### Added

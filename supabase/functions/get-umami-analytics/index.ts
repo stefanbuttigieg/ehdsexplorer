@@ -15,14 +15,22 @@ serve(async (req) => {
     const websiteId = Deno.env.get("VITE_UMAMI_WEBSITE_ID");
     
     if (!apiToken || !websiteId) {
-      console.log("Missing Umami configuration", { hasToken: !!apiToken, hasWebsiteId: !!websiteId });
       return new Response(
-        JSON.stringify({ 
-          error: "Umami not configured",
-          configured: false 
-        }),
+        JSON.stringify({ error: "Umami not configured", configured: false }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // Parse optional custom date range from request body
+    let customStartAt: number | null = null;
+    let customEndAt: number | null = null;
+    
+    if (req.method === "POST") {
+      try {
+        const body = await req.json();
+        if (body.startAt) customStartAt = body.startAt;
+        if (body.endAt) customEndAt = body.endAt;
+      } catch { /* ignore parse errors, use defaults */ }
     }
 
     const now = new Date();
@@ -31,50 +39,40 @@ serve(async (req) => {
     startOfWeek.setDate(startOfDay.getDate() - 7);
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    // Helper to extract stat values - Umami API returns { pageviews: 5 } not { pageviews: { value: 5 } }
+    // Custom range defaults to last 7 days if not provided
+    const rangeStart = customStartAt ?? startOfWeek.getTime();
+    const rangeEnd = customEndAt ?? now.getTime();
+
     const extractStats = (stats: unknown) => {
       if (!stats || typeof stats !== 'object') {
         return { pageviews: 0, visitors: 0, visits: 0, bounces: 0, totaltime: 0 };
       }
       const s = stats as Record<string, unknown>;
+      const extract = (key: string) => {
+        const v = s[key];
+        if (typeof v === 'object' && v !== null) return ((v as Record<string, number>).value ?? 0);
+        return typeof v === 'number' ? v : 0;
+      };
       return {
-        pageviews: typeof s.pageviews === 'object' && s.pageviews !== null 
-          ? ((s.pageviews as Record<string, number>).value ?? 0)
-          : (typeof s.pageviews === 'number' ? s.pageviews : 0),
-        visitors: typeof s.visitors === 'object' && s.visitors !== null 
-          ? ((s.visitors as Record<string, number>).value ?? 0)
-          : (typeof s.visitors === 'number' ? s.visitors : 0),
-        visits: typeof s.visits === 'object' && s.visits !== null 
-          ? ((s.visits as Record<string, number>).value ?? 0)
-          : (typeof s.visits === 'number' ? s.visits : 0),
-        bounces: typeof s.bounces === 'object' && s.bounces !== null 
-          ? ((s.bounces as Record<string, number>).value ?? 0)
-          : (typeof s.bounces === 'number' ? s.bounces : 0),
-        totaltime: typeof s.totaltime === 'object' && s.totaltime !== null 
-          ? ((s.totaltime as Record<string, number>).value ?? 0)
-          : (typeof s.totaltime === 'number' ? s.totaltime : 0),
+        pageviews: extract('pageviews'),
+        visitors: extract('visitors'),
+        visits: extract('visits'),
+        bounces: extract('bounces'),
+        totaltime: extract('totaltime'),
       };
     };
 
-    // Helper to safely fetch with error handling
     const safeFetch = async (url: string, label: string) => {
       try {
         const response = await fetch(url, {
           headers: { "Authorization": `Bearer ${apiToken}`, "Content-Type": "application/json" }
         });
-        
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error(`${label} failed with status ${response.status}: ${errorText}`);
+          console.error(`${label} failed: ${response.status}`);
           return null;
         }
-        
         const text = await response.text();
-        if (!text) {
-          console.error(`${label} returned empty response`);
-          return null;
-        }
-        
+        if (!text) return null;
         return JSON.parse(text);
       } catch (e) {
         console.error(`Error fetching ${label}:`, e);
@@ -82,27 +80,22 @@ serve(async (req) => {
       }
     };
 
-    // Get stats for different periods
-    const [todayStats, weekStats, monthStats, activeVisitors] = await Promise.all([
+    // Determine appropriate unit for chart based on range size
+    const rangeDays = (rangeEnd - rangeStart) / (1000 * 60 * 60 * 24);
+    const unit = rangeDays > 90 ? 'month' : rangeDays > 14 ? 'week' : 'day';
+
+    const [todayStats, weekStats, monthStats, activeVisitors, rangeStats] = await Promise.all([
       safeFetch(`https://api.umami.is/v1/websites/${websiteId}/stats?startAt=${startOfDay.getTime()}&endAt=${now.getTime()}`, "today stats"),
       safeFetch(`https://api.umami.is/v1/websites/${websiteId}/stats?startAt=${startOfWeek.getTime()}&endAt=${now.getTime()}`, "week stats"),
       safeFetch(`https://api.umami.is/v1/websites/${websiteId}/stats?startAt=${startOfMonth.getTime()}&endAt=${now.getTime()}`, "month stats"),
-      safeFetch(`https://api.umami.is/v1/websites/${websiteId}/active`, "active visitors")
+      safeFetch(`https://api.umami.is/v1/websites/${websiteId}/active`, "active visitors"),
+      safeFetch(`https://api.umami.is/v1/websites/${websiteId}/stats?startAt=${rangeStart}&endAt=${rangeEnd}`, "custom range stats"),
     ]);
 
-    // Get pageviews data for chart (last 7 days)
-    const pageviewsData = await safeFetch(
-      `https://api.umami.is/v1/websites/${websiteId}/pageviews?startAt=${startOfWeek.getTime()}&endAt=${now.getTime()}&unit=day`,
-      "pageviews"
-    );
-
-    // Get top pages
-    const topPages = await safeFetch(
-      `https://api.umami.is/v1/websites/${websiteId}/metrics?startAt=${startOfWeek.getTime()}&endAt=${now.getTime()}&type=url`,
-      "top pages"
-    );
-
-    console.log("Umami API raw responses:", JSON.stringify({ todayStats, weekStats, monthStats, activeVisitors }));
+    const [pageviewsData, topPages] = await Promise.all([
+      safeFetch(`https://api.umami.is/v1/websites/${websiteId}/pageviews?startAt=${rangeStart}&endAt=${rangeEnd}&unit=${unit}`, "pageviews"),
+      safeFetch(`https://api.umami.is/v1/websites/${websiteId}/metrics?startAt=${rangeStart}&endAt=${rangeEnd}&type=url`, "top pages"),
+    ]);
 
     return new Response(
       JSON.stringify({
@@ -110,9 +103,9 @@ serve(async (req) => {
         today: extractStats(todayStats),
         week: extractStats(weekStats),
         month: extractStats(monthStats),
-        activeVisitors: typeof activeVisitors === 'object' && activeVisitors !== null 
-          ? (activeVisitors.x ?? activeVisitors.visitors ?? 0) 
-          : 0,
+        custom: extractStats(rangeStats),
+        activeVisitors: typeof activeVisitors === 'object' && activeVisitors !== null
+          ? (activeVisitors.x ?? activeVisitors.visitors ?? 0) : 0,
         pageviewsChart: pageviewsData?.pageviews ?? [],
         sessionsChart: pageviewsData?.sessions ?? [],
         topPages: (topPages ?? []).slice(0, 10),

@@ -25,14 +25,22 @@ export const LevelUpModal = () => {
     if (!isLoggedIn) return;
     
     const storedLevel = localStorage.getItem('ehds-user-level');
-    const storedLevelNum = storedLevel ? parseInt(storedLevel, 10) : null;
-    
-    if (storedLevelNum !== null && currentLevel.level > storedLevelNum) {
+    const parsedLevel = storedLevel ? parseInt(storedLevel, 10) : null;
+    const storedLevelNum = Number.isFinite(parsedLevel) ? parsedLevel : null;
+
+    // First login/session bootstrap: persist current level without showing modal.
+    if (storedLevelNum === null) {
+      localStorage.setItem('ehds-user-level', currentLevel.level.toString());
+      return;
+    }
+
+    // Only react to actual level increases. Avoid writing lower levels during initial
+    // async hydration, which caused repeated "level up" modals on page reload.
+    if (currentLevel.level > storedLevelNum) {
       setPreviousLevel(storedLevelNum);
       setShowModal(true);
+      localStorage.setItem('ehds-user-level', currentLevel.level.toString());
     }
-    
-    localStorage.setItem('ehds-user-level', currentLevel.level.toString());
   }, [currentLevel.level, isLoggedIn]);
 
   const handleClose = () => {

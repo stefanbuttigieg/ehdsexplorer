@@ -448,16 +448,19 @@ const AdminImplementingActsPage = () => {
               <DialogTitle>{isCreating ? 'Create New Implementing Act' : `Edit ${editingAct?.id}`}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-4">
-              {isCreating && (
-                <div className="space-y-2">
-                  <Label>ID (unique identifier)*</Label>
-                  <Input
-                    value={editedId}
-                    onChange={(e) => setEditedId(e.target.value)}
-                    placeholder="e.g., ia-new-act"
-                  />
-                </div>
-              )}
+              <div className="space-y-2">
+                <Label>ID (unique identifier)*</Label>
+                <Input
+                  value={editedId}
+                  onChange={(e) => setEditedId(e.target.value)}
+                  placeholder="e.g., ia-new-act"
+                />
+                {editingAct && editedId !== editingAct.id && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400">
+                    ⚠️ Changing the ID will re-create this act with the new ID. Related content links may need updating.
+                  </p>
+                )}
+              </div>
               <div className="space-y-2">
                 <Label>Title*</Label>
                 <Input

@@ -220,6 +220,30 @@ const AdminImplementingActsPage = () => {
 
   const handleSave = async () => {
     if (!editingAct) return;
+
+    if (!editedId.trim()) {
+      toast({
+        title: 'Validation Error',
+        description: 'ID is required.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const idChanged = editedId.trim() !== editingAct.id;
+
+    // Check for duplicate ID if changed
+    if (idChanged) {
+      const existingAct = implementingActs?.find(act => act.id === editedId.trim() && act.id !== editingAct.id);
+      if (existingAct) {
+        toast({
+          title: 'Duplicate ID',
+          description: 'An implementing act with this ID already exists.',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
     
     setIsSaving(true);
     try {
@@ -231,32 +255,48 @@ const AdminImplementingActsPage = () => {
       const oldStatus = editingAct.status;
       const statusChanged = oldStatus !== editedStatus;
 
-      const { error } = await supabase
-        .from('implementing_acts')
-        .update({ 
-          title: editedTitle,
-          description: editedDescription,
-          article_reference: editedArticleReference,
-          type: editedType,
-          theme: editedThemes[0] || 'primary-use', // Keep primary theme for backward compatibility
-          themes: editedThemes,
-          status: editedStatus,
-          official_link: editedOfficialLink || null,
-          deliverable_link: editedDeliverableLink || null,
-          feedback_deadline: editedFeedbackDeadline || null,
-          related_articles: relatedArticlesArray.length > 0 ? relatedArticlesArray : null,
-          previous_status: statusChanged ? oldStatus : editingAct.status
-        })
-        .eq('id', editingAct.id);
+      const actData = {
+        id: editedId.trim(),
+        title: editedTitle,
+        description: editedDescription,
+        article_reference: editedArticleReference,
+        type: editedType,
+        theme: editedThemes[0] || 'primary-use',
+        themes: editedThemes,
+        status: editedStatus,
+        official_link: editedOfficialLink || null,
+        deliverable_link: editedDeliverableLink || null,
+        feedback_deadline: editedFeedbackDeadline || null,
+        related_articles: relatedArticlesArray.length > 0 ? relatedArticlesArray : null,
+        previous_status: statusChanged ? oldStatus : editingAct.status
+      };
 
-      if (error) throw error;
+      if (idChanged) {
+        // ID changed: insert new row then delete old one
+        const { error: insertError } = await supabase
+          .from('implementing_acts')
+          .insert(actData);
+        if (insertError) throw insertError;
+
+        const { error: deleteError } = await supabase
+          .from('implementing_acts')
+          .delete()
+          .eq('id', editingAct.id);
+        if (deleteError) throw deleteError;
+      } else {
+        const { error } = await supabase
+          .from('implementing_acts')
+          .update(actData)
+          .eq('id', editingAct.id);
+        if (error) throw error;
+      }
 
       // Send email alerts if status changed
       if (statusChanged) {
         try {
           const { error: alertError } = await supabase.functions.invoke('send-status-alert', {
             body: {
-              implementing_act_id: editingAct.id,
+              implementing_act_id: editedId.trim(),
               old_status: oldStatus,
               new_status: editedStatus,
               title: editedTitle
@@ -284,6 +324,9 @@ const AdminImplementingActsPage = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-implementing-acts'] });
       queryClient.invalidateQueries({ queryKey: ['implementing-acts'] });
       queryClient.invalidateQueries({ queryKey: ['implementing-act', editingAct.id] });
+      if (idChanged) {
+        queryClient.invalidateQueries({ queryKey: ['implementing-act', editedId.trim()] });
+      }
       handleCloseDialog();
     } catch (error: any) {
       toast({

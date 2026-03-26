@@ -283,6 +283,7 @@ const AdminImplementingActsPage = () => {
       
       queryClient.invalidateQueries({ queryKey: ['admin-implementing-acts'] });
       queryClient.invalidateQueries({ queryKey: ['implementing-acts'] });
+      queryClient.invalidateQueries({ queryKey: ['implementing-act', editingAct.id] });
       handleCloseDialog();
     } catch (error: any) {
       toast({
@@ -409,7 +410,8 @@ const AdminImplementingActsPage = () => {
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 sm:gap-2 mb-1 flex-wrap">
-                        <Badge variant="outline" className="text-xs">{act.id}</Badge>
+                        <Badge variant="outline" className="text-xs font-mono">{act.article_reference}</Badge>
+                        <Badge variant="outline" className="text-xs hidden sm:inline-flex">{act.id}</Badge>
                         <Badge className={`text-xs ${getStatusColor(act.status)}`}>{act.status}</Badge>
                         <Badge variant="secondary" className="text-xs hidden sm:inline-flex">{act.theme}</Badge>
                       </div>

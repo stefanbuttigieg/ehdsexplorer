@@ -30,6 +30,9 @@ interface LanguageStatus {
   status: 'pending' | 'fetching' | 'parsing' | 'importing' | 'done' | 'error' | 'skipped';
   articles: number;
   recitals: number;
+  definitions: number;
+  annexes: number;
+  footnotes: number;
   error?: string;
 }
 
@@ -80,7 +83,7 @@ export function BatchEurLexImporter({ celexNumber = '32025R0327', onComplete }: 
     langCode: string,
     parsed: ParsedContent,
     source: EnglishSource
-  ): Promise<{ articles: number; recitals: number }> => {
+  ): Promise<{ articles: number; recitals: number; definitions: number; annexes: number; footnotes: number }> => {
     // Map articles
     const articleTranslations = parsed.articles
       .map(article => {
@@ -110,6 +113,88 @@ export function BatchEurLexImporter({ celexNumber = '32025R0327', onComplete }: 
       })
       .filter(Boolean);
 
+    // Map definitions
+    const definitionTranslations = parsed.definitions
+      .map(def => {
+        const src = source.definitions.find(d => d.id === def.definitionNumber);
+        if (!src) return null;
+        return {
+          definition_id: src.id,
+          language_code: langCode,
+          term: def.term,
+          definition: def.definition,
+          is_published: false,
+        };
+      })
+      .filter(Boolean);
+
+    // Map annexes
+    const annexTranslations = parsed.annexes
+      .map(annex => {
+        const src = source.annexes.find(a =>
+          a.id.toLowerCase().includes(annex.romanNumeral.toLowerCase()) ||
+          a.title.toLowerCase().includes(annex.romanNumeral.toLowerCase())
+        );
+        if (!src) return null;
+        return {
+          annex_id: src.id,
+          language_code: langCode,
+          title: annex.title,
+          content: annex.content,
+          is_published: false,
+        };
+      })
+      .filter(Boolean);
+
+    // Handle footnotes
+    let footnoteCount = 0;
+    if (parsed.footnotes.length > 0) {
+      const { data: existingFootnotes } = await supabase
+        .from('footnotes')
+        .select('id, marker');
+
+      // Create missing base footnotes
+      const missingFootnotes = parsed.footnotes.filter(
+        fn => !existingFootnotes?.find(ef => ef.marker === fn.marker)
+      );
+
+      let newFootnoteMap: Record<string, string> = {};
+      if (missingFootnotes.length > 0) {
+        const { data: created } = await supabase
+          .from('footnotes')
+          .insert(missingFootnotes.map(fn => ({
+            marker: fn.marker,
+            content: fn.content,
+            article_id: null,
+            recital_id: null,
+          })))
+          .select('id, marker');
+        created?.forEach(fn => { newFootnoteMap[fn.marker] = fn.id; });
+      }
+
+      const footnoteTranslations = parsed.footnotes
+        .map(fn => {
+          const existing = existingFootnotes?.find(ef => ef.marker === fn.marker);
+          const footnoteId = existing?.id || newFootnoteMap[fn.marker];
+          if (!footnoteId) return null;
+          return {
+            footnote_id: footnoteId,
+            language_code: langCode,
+            content: fn.content,
+            is_published: false,
+          };
+        })
+        .filter(Boolean);
+
+      if (footnoteTranslations.length > 0) {
+        const { error } = await supabase
+          .from('footnote_translations')
+          .upsert(footnoteTranslations as any[], { onConflict: 'footnote_id,language_code' });
+        if (error) console.error('Footnote import error:', error);
+        else footnoteCount = footnoteTranslations.length;
+      }
+    }
+
     if (articleTranslations.length > 0) {
       const { error } = await supabase
         .from('article_translations')
@@ -124,7 +209,27 @@ export function BatchEurLexImporter({ celexNumber = '32025R0327', onComplete }: 
       if (error) throw error;
     }
 
-    return { articles: articleTranslations.length, recitals: recitalTranslations.length };
+    if (definitionTranslations.length > 0) {
+      const { error } = await supabase
+        .from('definition_translations')
+        .upsert(definitionTranslations as any[], { onConflict: 'definition_id,language_code' });
+      if (error) console.error('Definition import error:', error);
+    }
+
+    if (annexTranslations.length > 0) {
+      const { error } = await supabase
+        .from('annex_translations')
+        .upsert(annexTranslations as any[], { onConflict: 'annex_id,language_code' });
+      if (error) console.error('Annex import error:', error);
+    }
+
+    return {
+      articles: articleTranslations.length,
+      recitals: recitalTranslations.length,
+      definitions: definitionTranslations.length,
+      annexes: annexTranslations.length,
+      footnotes: footnoteCount,
+    };
   };
 
   const checkExistingTranslations = async (langCode: string): Promise<boolean> => {
@@ -147,6 +252,9 @@ export function BatchEurLexImporter({ celexNumber = '32025R0327', onComplete }: 
       status: 'pending',
       articles: 0,
       recitals: 0,
+      definitions: 0,
+      annexes: 0,
+      footnotes: 0,
     }));
     setStatuses(initialStatuses);
 
@@ -222,7 +330,7 @@ export function BatchEurLexImporter({ celexNumber = '32025R0327', onComplete }: 
 
         setStatuses(prev => prev.map(s =>
           s.code === langCode
-            ? { ...s, status: 'done', articles: result.articles, recitals: result.recitals }
+            ? { ...s, status: 'done', articles: result.articles, recitals: result.recitals, definitions: result.definitions, annexes: result.annexes, footnotes: result.footnotes }
             : s
         ));
       } catch (err) {
@@ -338,7 +446,7 @@ export function BatchEurLexImporter({ celexNumber = '32025R0327', onComplete }: 
                     {s.status === 'done' && (
                       <Badge className="text-xs bg-green-600">
                         <Check className="h-3 w-3 mr-1" />
-                        {s.articles}A / {s.recitals}R
+                        {s.articles}A / {s.recitals}R{s.definitions > 0 ? ` / ${s.definitions}D` : ''}{s.annexes > 0 ? ` / ${s.annexes}X` : ''}{s.footnotes > 0 ? ` / ${s.footnotes}F` : ''}
                       </Badge>
                     )}
                     {s.status === 'error' && (

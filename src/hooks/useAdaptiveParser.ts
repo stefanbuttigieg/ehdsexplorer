@@ -356,14 +356,21 @@ export function adaptivePreprocess(text: string, analysis: StructureAnalysis): s
   processed = processed.replace(/^\s*-{3,}\s*$/gm, '');
   
   // Step 10: Add line breaks before structural markers
+  // IMPORTANT: Only add newlines when the marker appears to be a heading, not an inline reference.
+  // We check that it's preceded by a sentence-ending punctuation, newline, or start of string.
   const articleWords = 'Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu';
-  processed = processed.replace(new RegExp(`(${articleWords})\\s+(\\d+)`, 'gi'), '\n$1 $2');
+  // Only break before "Article N" if preceded by period+space, newline, or start — NOT mid-sentence
+  processed = processed.replace(new RegExp(`(?<=^|\\n|[.;:!?]\\s*)(${articleWords})\\s+(\\d+)`, 'gim'), '\n$1 $2');
+  
+  // For number-first languages (Hungarian, Finnish, Latvian, Lithuanian, Slovenian)
+  const numberFirstArticle = '(?<=^|\\n|[.;:!?]\\s*)(\\d+)\\.\\s*(cikk|artikla|pants|straipsnis|člen)';
+  processed = processed.replace(new RegExp(numberFirstArticle, 'gim'), '\n$1. $2');
   
   const chapterWords = 'CHAPTER|KAPITEL|CHAPITRE|CAPÍTULO|CAPO|HOOFDSTUK|ROZDZIAŁ|KAPITOLA|CAPITOLUL|ГЛАВА|ΚΕΦΑΛΑΙΟ|PEATÜKK|NODAĻA|SKYRIUS|POGLAVJE|POGLAVLJE|KAPITOLU|CAIBIDIL';
-  processed = processed.replace(new RegExp(`(${chapterWords})\\s+([IVXLCDM]+)`, 'gi'), '\n$1 $2');
+  processed = processed.replace(new RegExp(`(?<=^|\\n)(${chapterWords})\\s+([IVXLCDM]+)`, 'gim'), '\n$1 $2');
   
   const annexWords = 'ANNEX|ANHANG|ANNEXE|ANEXO|ALLEGATO|BIJLAGE|ZAŁĄCZNIK|PŘÍLOHA|PRÍLOHA|ANEXA|ПРИЛОЖЕНИЕ|ΠΑΡΑΡΤΗΜΑ|BILAGA|BILAG|LIITE|LISA|PIELIKUMS|PRIEDAS|PRILOGA|PRILOG|ANNESS|IARSCRÍBHINN';
-  processed = processed.replace(new RegExp(`(${annexWords})\\s+([IVXLCDM]+)`, 'gi'), '\n$1 $2');
+  processed = processed.replace(new RegExp(`(?<=^|\\n)(${annexWords})\\s+([IVXLCDM]+)`, 'gim'), '\n$1 $2');
   
   // Step 11: Ensure recitals are on new lines
   processed = processed.replace(/([.;:])(\s*)\((\d{1,3})\)\s+/g, '$1\n($3) ');
@@ -383,6 +390,7 @@ export function parseRecitals(lines: string[], lang: string, endLine: number): P
   
   let currentRecital: ParsedRecital | null = null;
   let contentLines: string[] = [];
+  let lastRecitalNumber = 0;
   
   const recitalPattern = /^\((\d+)\)\s*/;
   
@@ -392,6 +400,20 @@ export function parseRecitals(lines: string[], lang: string, endLine: number): P
     
     const match = trimmedLine.match(recitalPattern);
     if (match) {
+      const num = parseInt(match[1], 10);
+      
+      // Validate: recital numbers should be roughly sequential
+      // Skip if number is way out of order (likely a numbered sub-point inside content)
+      const isSequential = num === lastRecitalNumber + 1 || 
+                           (num > lastRecitalNumber && num <= lastRecitalNumber + 5) ||
+                           lastRecitalNumber === 0;
+      
+      if (!isSequential && currentRecital) {
+        // This is likely a numbered point inside content, not a new recital
+        contentLines.push(trimmedLine);
+        continue;
+      }
+      
       // Save previous recital
       if (currentRecital && !seenNumbers.has(currentRecital.recitalNumber)) {
         currentRecital.content = (currentRecital.content + ' ' + contentLines.join(' ')).trim();
@@ -401,7 +423,7 @@ export function parseRecitals(lines: string[], lang: string, endLine: number): P
         }
       }
       
-      const num = parseInt(match[1], 10);
+      lastRecitalNumber = num;
       currentRecital = {
         recitalNumber: num,
         content: trimmedLine.replace(recitalPattern, '').trim(),
@@ -443,9 +465,20 @@ export function parseArticles(lines: string[], lang: string, startLine: number, 
       continue;
     }
     
-    // Check for article
+    // Check for article - only match if line STARTS with article pattern (not inline references)
     const articleMatch = trimmedLine.match(pattern);
     if (articleMatch) {
+      const articleNumber = parseInt(articleMatch[1], 10);
+      
+      // Validate: skip if this looks like an inline reference (line has too much text after the match)
+      const afterMatch = trimmedLine.replace(pattern, '').trim();
+      const isInlineReference = afterMatch.length > 200; // Headings are short, inline references have surrounding text
+      
+      if (isInlineReference && currentArticle) {
+        contentLines.push(lines[i]);
+        continue;
+      }
+      
       // Save previous article
       if (currentArticle && !seenNumbers.has(currentArticle.articleNumber)) {
         currentArticle.content = contentLines.join('\n').trim();
@@ -453,19 +486,32 @@ export function parseArticles(lines: string[], lang: string, startLine: number, 
         seenNumbers.add(currentArticle.articleNumber);
       }
       
-      const articleNumber = parseInt(articleMatch[1], 10);
-      const titlePart = trimmedLine.replace(pattern, '').trim();
+      const titlePart = afterMatch;
+      
+      // Build a language-aware default title
+      const articleWord = Object.entries(ARTICLE_PATTERNS).find(([k]) => k === lang)?.[0] || 'en';
+      const defaultTitleWords: Record<string, string> = {
+        en: 'Article', de: 'Artikel', fr: 'Article', es: 'Artículo', it: 'Articolo',
+        pt: 'Artigo', nl: 'Artikel', pl: 'Artykuł', cs: 'Článek', sk: 'Článok',
+        hu: 'cikk', ro: 'Articolul', bg: 'Член', el: 'Άρθρο', sv: 'Artikel',
+        da: 'Artikel', fi: 'artikla', et: 'Artikkel', lv: 'pants', lt: 'straipsnis',
+        sl: 'člen', hr: 'Članak', mt: 'Artikolu', ga: 'Airteagal',
+      };
+      const defaultTitle = `${defaultTitleWords[lang] || 'Article'} ${articleNumber}`;
       
       currentArticle = {
         articleNumber,
-        title: titlePart || `Article ${articleNumber}`,
+        title: titlePart || defaultTitle,
         content: '',
         chapterNumber: currentChapter || undefined,
       };
       contentLines = [];
     } else if (currentArticle) {
-      // Check if this is the title line
-      if (currentArticle.title === `Article ${currentArticle.articleNumber}` && trimmedLine && contentLines.length === 0) {
+      // Check if this is the title line (first non-empty line after header that was just the article number)
+      const defaultTitlePattern = new RegExp(`^(Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu|cikk|artikla|pants|straipsnis|člen|Članak)\\s*${currentArticle.articleNumber}$`, 'i');
+      const isTitlePlaceholder = defaultTitlePattern.test(currentArticle.title) || currentArticle.title === `Article ${currentArticle.articleNumber}`;
+      
+      if (isTitlePlaceholder && trimmedLine && contentLines.length === 0) {
         currentArticle.title = trimmedLine;
       } else {
         contentLines.push(lines[i]);

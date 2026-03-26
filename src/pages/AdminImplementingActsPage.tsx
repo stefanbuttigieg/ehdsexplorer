@@ -283,6 +283,7 @@ const AdminImplementingActsPage = () => {
       
       queryClient.invalidateQueries({ queryKey: ['admin-implementing-acts'] });
       queryClient.invalidateQueries({ queryKey: ['implementing-acts'] });
+      queryClient.invalidateQueries({ queryKey: ['implementing-act', editingAct.id] });
       handleCloseDialog();
     } catch (error: any) {
       toast({

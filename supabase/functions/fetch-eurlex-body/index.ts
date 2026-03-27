@@ -3,46 +3,14 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const SHELL_MARKERS = /Official Journal of the European Union|available languages and formats|Display all languages|Choose language|multilingual display|language selector|Official Journal|Amtsblatt|Journal officiel/i;
-
-const DOCUMENT_MARKERS = /\b(Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu)\s+\d+|(?:^|\n)\s*\d+\.\s*(?:cikk|artikla|pants|straipsnis|člen)\b|(?:^|\n)\s*\(\d+\)\s+/im;
-
 const LANGUAGE_CODE_PATTERN = /^[a-z]{2}$/i;
-const CELEX_PATTERN = /^\d{4}[A-Z]\d{4}$/i;
+const CELEX_PATTERN = /^\d{5}[A-Z]\d{4}$/i;
 
-const extractTextFromHtml = (html: string): string => {
-  const withoutNoise = html
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<noscript[\s\S]*?<\/noscript>/gi, ' ')
-    .replace(/<template[\s\S]*?<\/template>/gi, ' ')
-    .replace(/<svg[\s\S]*?<\/svg>/gi, ' ')
-    .replace(/<(br|p|div|li|tr|h1|h2|h3|h4|h5|h6|section|article|header|footer|table|tbody|thead|td|th)\b[^>]*>/gi, '\n')
-    .replace(/<\/\w+>/g, ' ')
-    .replace(/<[^>]+>/g, ' ');
+// Shell-page markers — these appear on navigation/index pages, not the regulation body
+const SHELL_MARKERS = /Official Journal of the European Union|available languages and formats|Display all languages|Choose language|multilingual display|language selector/i;
 
-  const decoded = withoutNoise
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&lt;/gi, '<')
-    .replace(/&gt;/gi, '>')
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
-    .replace(/&#(\d+);/g, (_, code) => {
-      const value = Number(code);
-      return Number.isFinite(value) ? String.fromCharCode(value) : '';
-    });
-
-  return decoded
-    .replace(/\r/g, '')
-    .replace(/[ \t]+/g, ' ')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
-};
-
-const isShellPage = (html: string, text: string): boolean => {
-  return SHELL_MARKERS.test(html) && !DOCUMENT_MARKERS.test(text);
-};
+// Real document body markers — at least one article heading should be present
+const ARTICLE_MARKERS = /\b(?:Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu)\s+\d+|(?:^|\n)\s*\d+\.\s*(?:cikk|artikla|pants|straipsnis|člen)\b/im;
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -52,9 +20,10 @@ Deno.serve(async (req) => {
   try {
     const { celexNumber, languageCode } = await req.json();
 
-    if (!celexNumber || !CELEX_PATTERN.test(String(celexNumber))) {
+    const rawCelex = String(celexNumber ?? '').trim().toUpperCase().replace(/^CELEX:/, '');
+    if (!rawCelex || !CELEX_PATTERN.test(rawCelex)) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Invalid CELEX number format' }),
+        JSON.stringify({ success: false, error: `Invalid CELEX number format: "${rawCelex}"` }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -67,55 +36,81 @@ Deno.serve(async (req) => {
     }
 
     const lang = String(languageCode).toUpperCase();
-    const langLower = String(languageCode).toLowerCase();
-    const celex = String(celexNumber).toUpperCase();
+    const celex = rawCelex;
 
+    const firecrawlKey = Deno.env.get('FIRECRAWL_API_KEY');
+    if (!firecrawlKey) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Firecrawl API key not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // EUR-Lex URL variants to try — TXT/HTML is usually the full rendered doc
     const urls = [
-      `https://eur-lex.europa.eu/legal-content/${lang}/ALL/?uri=CELEX:${celex}`,
-      `https://eur-lex.europa.eu/legal-content/${lang}/TXT/?uri=CELEX:${celex}`,
       `https://eur-lex.europa.eu/legal-content/${lang}/TXT/HTML/?uri=CELEX:${celex}`,
+      `https://eur-lex.europa.eu/legal-content/${lang}/TXT/?uri=CELEX:${celex}`,
+      `https://eur-lex.europa.eu/legal-content/${lang}/ALL/?uri=CELEX:${celex}`,
     ];
 
     let lastError = 'No successful EUR-Lex response';
 
     for (const url of urls) {
-      const response = await fetch(url, {
-        redirect: 'follow',
+      console.log(`Fetching ${url} via Firecrawl...`);
+
+      const fcResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
+        method: 'POST',
         headers: {
-          'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
-          'accept-language': `${langLower},en;q=0.8`,
-          accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'cache-control': 'no-cache',
+          'Authorization': `Bearer ${firecrawlKey}`,
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          url,
+          formats: ['markdown', 'html'],
+          onlyMainContent: false, // Get full page to avoid missing regulation body
+          waitFor: 5000, // EUR-Lex uses JS rendering, wait longer
+        }),
       });
 
-      if (!response.ok) {
-        lastError = `HTTP ${response.status} for ${url}`;
+      const fcData = await fcResponse.json();
+
+      if (!fcResponse.ok || !fcData.success) {
+        lastError = `Firecrawl error for ${url}: ${fcData.error || `HTTP ${fcResponse.status}`}`;
+        console.log(lastError);
         continue;
       }
 
-      const html = await response.text();
-      if (!html || html.length < 1000) {
-        lastError = `Response too short from ${url}`;
+      const markdown = fcData.data?.markdown || '';
+      const html = fcData.data?.html || '';
+
+      if (markdown.length < 1000 && html.length < 1000) {
+        lastError = `Content too short from ${url} (md: ${markdown.length}, html: ${html.length})`;
+        console.log(lastError);
         continue;
       }
 
-      const text = extractTextFromHtml(html);
-      if (!text || text.length < 1000) {
-        lastError = `Extracted text too short from ${url}`;
+      // Check if this is a shell/navigation page rather than the document body
+      const contentToCheck = markdown || html;
+      if (SHELL_MARKERS.test(contentToCheck) && !ARTICLE_MARKERS.test(contentToCheck)) {
+        lastError = `Shell page detected from ${url}`;
+        console.log(lastError);
         continue;
       }
 
-      if (isShellPage(html, text)) {
-        lastError = `Fetched EUR-Lex shell page instead of document body: ${url}`;
+      // Verify we have actual article content
+      if (!ARTICLE_MARKERS.test(contentToCheck)) {
+        lastError = `No article markers found in content from ${url}`;
+        console.log(lastError);
         continue;
       }
+
+      console.log(`Success: ${markdown.length} chars markdown, ${html.length} chars html from ${url}`);
 
       return new Response(
         JSON.stringify({
           success: true,
-          content: text,
-          html,
+          content: markdown,
+          html: html,
           urlUsed: url,
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

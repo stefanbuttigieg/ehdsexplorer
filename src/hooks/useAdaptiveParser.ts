@@ -205,9 +205,10 @@ export function analyzeStructure(text: string): StructureAnalysis {
   const tableRecitalMatches = text.match(/^\|\s*\((\d+)\)\s*\|/gm) || [];
   const recitalCount = Math.max(recitalMatches.length, tableRecitalMatches.length);
   
-  // Count articles
+  // Count articles - include both word-first and number-first patterns
   const articleMatches = text.match(/(?:^|\n)(?:Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu)\s+\d+/gi) || [];
-  const articleCount = articleMatches.length;
+  const numberFirstMatches = text.match(/(?:^|\n)\d+\.\s*(?:cikk|artikla|pants|straipsnis|člen)/gi) || [];
+  const articleCount = articleMatches.length + numberFirstMatches.length;
   
   // Detect footnote format
   let footnoteFormat: 'eurlex-link' | 'numbered-paren' | 'caret' | 'none' = 'none';
@@ -356,21 +357,23 @@ export function adaptivePreprocess(text: string, analysis: StructureAnalysis): s
   processed = processed.replace(/^\s*-{3,}\s*$/gm, '');
   
   // Step 10: Add line breaks before structural markers
-  // IMPORTANT: Only add newlines when the marker appears to be a heading, not an inline reference.
-  // We check that it's preceded by a sentence-ending punctuation, newline, or start of string.
+  // Use a simpler approach that doesn't need variable-length lookbehinds
   const articleWords = 'Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu';
-  // Only break before "Article N" if preceded by period+space, newline, or start — NOT mid-sentence
-  processed = processed.replace(new RegExp(`(?<=^|\\n|[.;:!?]\\s*)(${articleWords})\\s+(\\d+)`, 'gim'), '\n$1 $2');
+  // Break before "Article N" when NOT already at start of line
+  processed = processed.replace(new RegExp(`([.;:!?])\\s*((?:${articleWords})\\s+\\d+)`, 'gim'), '$1\n$2');
   
   // For number-first languages (Hungarian, Finnish, Latvian, Lithuanian, Slovenian)
-  const numberFirstArticle = '(?<=^|\\n|[.;:!?]\\s*)(\\d+)\\.\\s*(cikk|artikla|pants|straipsnis|člen)';
-  processed = processed.replace(new RegExp(numberFirstArticle, 'gim'), '\n$1. $2');
+  processed = processed.replace(/([.;:!?])\s*(\d+)\.\s*(cikk|artikla|pants|straipsnis|člen)/gim, '$1\n$2. $3');
   
-  const chapterWords = 'CHAPTER|KAPITEL|CHAPITRE|CAPÍTULO|CAPO|HOOFDSTUK|ROZDZIAŁ|KAPITOLA|CAPITOLUL|ГЛАВА|ΚΕΦΑΛΑΙΟ|PEATÜKK|NODAĻA|SKYRIUS|POGLAVJE|POGLAVLJE|KAPITOLU|CAIBIDIL';
-  processed = processed.replace(new RegExp(`(?<=^|\\n)(${chapterWords})\\s+([IVXLCDM]+)`, 'gim'), '\n$1 $2');
+  const chapterWords = 'CHAPTER|KAPITEL|CHAPITRE|CAPÍTULO|CAPO|HOOFDSTUK|ROZDZIAŁ|KAPITOLA|CAPITOLUL|ГЛАВА|ΚΕΦΑΛΑΙΟ|PEATÜKK|NODAĻA|SKYRIUS|POGLAVJE|POGLAVLJE|KAPITOLU|CAIBIDIL|FEJEZET|LUKU';
+  processed = processed.replace(new RegExp(`([.;:!?\\n])\\s*((?:${chapterWords})\\s+[IVXLCDM]+)`, 'gim'), '$1\n$2');
+  // Also handle number-first chapter patterns
+  processed = processed.replace(/([.;:!?\n])\s*([IVXLCDM]+)\.\s*(FEJEZET|LUKU|PEATÜKK|NODAĻA|SKYRIUS|POGLAVJE)/gim, '$1\n$2. $3');
   
-  const annexWords = 'ANNEX|ANHANG|ANNEXE|ANEXO|ALLEGATO|BIJLAGE|ZAŁĄCZNIK|PŘÍLOHA|PRÍLOHA|ANEXA|ПРИЛОЖЕНИЕ|ΠΑΡΑΡΤΗΜΑ|BILAGA|BILAG|LIITE|LISA|PIELIKUMS|PRIEDAS|PRILOGA|PRILOG|ANNESS|IARSCRÍBHINN';
-  processed = processed.replace(new RegExp(`(?<=^|\\n)(${annexWords})\\s+([IVXLCDM]+)`, 'gim'), '\n$1 $2');
+  const annexWords = 'ANNEX|ANHANG|ANNEXE|ANEXO|ALLEGATO|BIJLAGE|ZAŁĄCZNIK|PŘÍLOHA|PRÍLOHA|ANEXA|ПРИЛОЖЕНИЕ|ΠΑΡΑΡΤΗΜΑ|BILAGA|BILAG|LIITE|LISA|PIELIKUMS|PRIEDAS|PRILOGA|PRILOG|ANNESS|IARSCRÍBHINN|MELLÉKLET';
+  processed = processed.replace(new RegExp(`([.;:!?\\n])\\s*((?:${annexWords})\\s+[IVXLCDM]+)`, 'gim'), '$1\n$2');
+  // Number-first annex patterns
+  processed = processed.replace(/([.;:!?\n])\s*([IVXLCDM]+)\.\s*(MELLÉKLET|PIELIKUMS|PRIEDAS)/gim, '$1\n$2. $3');
   
   // Step 11: Ensure recitals are on new lines
   processed = processed.replace(/([.;:])(\s*)\((\d{1,3})\)\s+/g, '$1\n($3) ');
@@ -470,9 +473,17 @@ export function parseArticles(lines: string[], lang: string, startLine: number, 
     if (articleMatch) {
       const articleNumber = parseInt(articleMatch[1], 10);
       
-      // Validate: skip if this looks like an inline reference (line has too much text after the match)
+      // Validate: skip if this looks like an inline reference
+      // An article heading line should be relatively short and not contain sentence-like text before the article word
+      const fullLine = trimmedLine;
+      const matchIndex = fullLine.search(pattern);
+      const beforeMatch = fullLine.substring(0, matchIndex).trim();
       const afterMatch = trimmedLine.replace(pattern, '').trim();
-      const isInlineReference = afterMatch.length > 200; // Headings are short, inline references have surrounding text
+      
+      // It's an inline reference if there's significant text before the article keyword
+      // or the line is excessively long with running text
+      const isInlineReference = beforeMatch.length > 20 || 
+        (afterMatch.length > 300 && /[.;,]/.test(afterMatch));
       
       if (isInlineReference && currentArticle) {
         contentLines.push(lines[i]);
@@ -701,7 +712,7 @@ export async function parseDocumentAdaptive(text: string): Promise<{
   
   // Step 3: Find boundaries
   let recitalsEnd = analysis.adoptionLineIndex > 0 ? analysis.adoptionLineIndex : lines.length;
-  let articlesStart = 0;
+  let articlesStart = -1;
   let annexesStart = lines.length;
   
   // Re-find boundaries in processed text
@@ -717,7 +728,7 @@ export async function parseDocumentAdaptive(text: string): Promise<{
       }
     }
     
-    if (articlesStart === 0) {
+    if (articlesStart === -1) {
       for (const pattern of Object.values(ARTICLE_PATTERNS)) {
         if (pattern.test(line)) {
           articlesStart = i;
@@ -734,6 +745,11 @@ export async function parseDocumentAdaptive(text: string): Promise<{
         }
       }
     }
+  }
+  
+  // If no article start found, default to after recitals
+  if (articlesStart === -1) {
+    articlesStart = recitalsEnd > 0 && recitalsEnd < lines.length ? recitalsEnd : 0;
   }
   
   const lang = analysis.detectedLanguage === 'unknown' ? 'en' : analysis.detectedLanguage;

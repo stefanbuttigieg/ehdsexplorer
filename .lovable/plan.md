@@ -1,68 +1,63 @@
 
+You’re hitting **two separate issues at once**:
 
-## Implementation Progress Map Tab + Sidebar Update
+1) **Wrong content is being fetched in Batch All**  
+- The batch fetch URL currently uses:  
+  `https://eur-lex.europa.eu/legal-content/{LANG}/TXT/HTML/?uri=CELEX:...`  
+- In your logs, this returns an **Official Journal shell page** (cookie/header/chrome + language table), not the regulation body.  
+- That’s why structure analysis shows:
+  - `hasMarkdownTables: true`
+  - `articleCount: 0`
+  - `recitalCount: 0`
+  - `firstArticleIndex: -1`
 
-### Summary
-Add a third "Implementation" tab to the National EHDS Entities page and update the sidebar navigation to reflect the page's broader scope -- it now covers entities, legislation, AND implementation progress.
+2) **Language in the error is misleading (`en`)**  
+- In `parseDocumentAdaptive`, when language detection is `unknown`, it hard-falls back to `'en'`.
+- Batch error text uses that fallback value, so failures for `fr`, `es`, `it`, etc. all report detected lang `en`.
 
----
+Implementation plan (after your approval):
 
-### 1. Sidebar Navigation Update
+1. **Fix misleading language reporting first (quick win)**
+- In `BatchEurLexImporter`, keep `effectiveLang = requested langCode` and use that in all low-parse errors.
+- Error format becomes e.g.  
+  `Low parse count for FR: 0 articles, 0 recitals (parser detected: unknown)`  
+  instead of falsely showing `en`.
 
-**File:** `src/components/Layout.tsx`
+2. **Stop forcing `unknown -> en` as a displayed detected language**
+- In `useAdaptiveParser`, keep `detectedLanguage` as `unknown` in output when detection fails.
+- Use a separate internal parsing fallback language only for regex selection (not for reporting).
 
-- Rename the nav item from **"National Entities"** to **"EHDS Country Map"** (or similar, e.g. "Country Hub")
-- Change the icon from `MapPin` to `MapIcon` (or `Globe`) to better represent the broader scope
-- The route stays `/health-authorities` to avoid breaking links
+3. **Add a fetch quality gate before parsing**
+- In `BatchEurLexImporter`, detect “page shell / wrong document” responses by checking markers like:
+  - “Official Journal of the European Union”
+  - giant language matrix table
+  - no article/adoption markers
+- If detected, throw a specific error like:
+  `Fetched EUR-Lex shell page instead of CELEX text`
 
-**File:** `src/components/MobileBottomNav.tsx`
-- Update any matching label/icon if this item appears in the mobile nav
+4. **Add URL fallback strategy for EUR-Lex fetch**
+- Retry with alternate EUR-Lex URL variants when shell content is detected.
+- Keep only the variant that reliably returns regulation body text for CELEX pages.
 
----
+5. **Improve diagnostics in UI row errors**
+- Include:
+  - requested language
+  - URL variant used
+  - parser detected language
+  - reason (`shell page`, `empty text`, `low parse`)
+- This makes Batch All failures actionable without opening console logs.
 
-### 2. Page Title & Header Update
+Technical details
+- Files to update:
+  - `src/components/admin/BatchEurLexImporter.tsx`
+  - `src/hooks/useAdaptiveParser.ts`
+- Key logic adjustment:
+  - `requestedLanguage` drives validation/error context.
+  - `detectedLanguage` is informational only; never overwrite with `'en'` for user-facing errors.
+- No database schema changes needed.
 
-**File:** `src/pages/HealthAuthoritiesPage.tsx`
-
-- Update the page `<title>` and heading from "National EHDS Entities" to **"EHDS Country Map"**
-- Update the subtitle to reflect all three tabs: entities, legislation, and implementation progress
-
----
-
-### 3. Implementation Progress Tab
-
-**File:** `src/pages/HealthAuthoritiesPage.tsx`
-
-- Add a third `TabsTrigger` value `"implementation"` with a progress-related icon (e.g. `CheckCircle2` or `BarChart3`)
-- Import `useEhdsObligations` and related hooks already used by `ImplementationTimelineTracker`
-- Compute per-country overall progress percentages using the existing weighted obligation status formula
-- Pass progress data to `EuropeMap` when this tab is active
-- In list view: show a ranked table of countries with progress bars
-
-**Info cards** at the top will swap to show:
-- Average EU-wide implementation progress
-- Count of countries above/below 50%
-- Summary badges for primary use vs secondary use readiness
-
----
-
-### 4. EuropeMap Progress Mode
-
-**File:** `src/components/EuropeMap.tsx`
-
-- Add an optional `mode` prop: `'count'` (default, current behavior) or `'progress'`
-- In progress mode:
-  - Marker border colors use a green/amber/red gradient based on % (green > 70%, amber 30-70%, red < 30%)
-  - Tooltip shows overall progress % with a mini breakdown (primary use / secondary use / general)
-- Update the legend to show the progress color scale when in progress mode
-- Existing Entities and Legislation tabs are completely unaffected
-
----
-
-### Technical Notes
-
-- No database migrations required -- all data comes from existing `country_obligation_status` and `ehdsi_kpi_data` tables via existing hooks
-- Progress calculation logic (~30 lines) will be extracted or kept inline, reusing the same formula from `ImplementationTimelineTracker`
-- The `EuropeMap` changes are backward-compatible via the optional `mode` prop
-- Files modified: `Layout.tsx`, `HealthAuthoritiesPage.tsx`, `EuropeMap.tsx`, possibly `MobileBottomNav.tsx`
-
+Validation plan
+1. Run Batch on 3 languages first (`fr`, `es`, `it`).
+2. Confirm errors (if any) no longer say detected `en` unless truly detected.
+3. Confirm parser receives real regulation text (non-zero article/recital candidates).
+4. Run full Batch All and verify stable counts + clearer per-language error reporting.

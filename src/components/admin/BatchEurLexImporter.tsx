@@ -433,29 +433,34 @@ export function BatchEurLexImporter({ celexNumber = '32025R0327', onComplete }: 
           <ScrollArea className="h-[300px]">
             <div className="space-y-1">
               {statuses.map(s => (
-                <div key={s.code} className="flex items-center justify-between py-1.5 px-2 rounded text-sm hover:bg-muted/50">
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 font-mono text-xs">{s.code.toUpperCase()}</span>
-                    <span className="text-muted-foreground">{LANG_NAMES[s.code]}</span>
+                <div key={s.code} className="flex flex-col py-1.5 px-2 rounded text-sm hover:bg-muted/50 gap-0.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 font-mono text-xs">{s.code.toUpperCase()}</span>
+                      <span className="text-muted-foreground">{LANG_NAMES[s.code]}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {s.status === 'pending' && <Badge variant="outline" className="text-xs">Pending</Badge>}
+                      {s.status === 'fetching' && <Badge className="text-xs bg-blue-500"><Loader2 className="h-3 w-3 animate-spin mr-1" />Fetching</Badge>}
+                      {s.status === 'parsing' && <Badge className="text-xs bg-amber-500"><Loader2 className="h-3 w-3 animate-spin mr-1" />Parsing</Badge>}
+                      {s.status === 'importing' && <Badge className="text-xs bg-purple-500"><Loader2 className="h-3 w-3 animate-spin mr-1" />Importing</Badge>}
+                      {s.status === 'done' && (
+                        <Badge className="text-xs bg-green-600">
+                          <Check className="h-3 w-3 mr-1" />
+                          {s.articles}A / {s.recitals}R{s.definitions > 0 ? ` / ${s.definitions}D` : ''}{s.annexes > 0 ? ` / ${s.annexes}X` : ''}{s.footnotes > 0 ? ` / ${s.footnotes}F` : ''}
+                        </Badge>
+                      )}
+                      {s.status === 'error' && (
+                        <Badge variant="destructive" className="text-xs">
+                          <X className="h-3 w-3 mr-1" />Error
+                        </Badge>
+                      )}
+                      {s.status === 'skipped' && <Badge variant="outline" className="text-xs">Skipped</Badge>}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {s.status === 'pending' && <Badge variant="outline" className="text-xs">Pending</Badge>}
-                    {s.status === 'fetching' && <Badge className="text-xs bg-blue-500"><Loader2 className="h-3 w-3 animate-spin mr-1" />Fetching</Badge>}
-                    {s.status === 'parsing' && <Badge className="text-xs bg-amber-500"><Loader2 className="h-3 w-3 animate-spin mr-1" />Parsing</Badge>}
-                    {s.status === 'importing' && <Badge className="text-xs bg-purple-500"><Loader2 className="h-3 w-3 animate-spin mr-1" />Importing</Badge>}
-                    {s.status === 'done' && (
-                      <Badge className="text-xs bg-green-600">
-                        <Check className="h-3 w-3 mr-1" />
-                        {s.articles}A / {s.recitals}R{s.definitions > 0 ? ` / ${s.definitions}D` : ''}{s.annexes > 0 ? ` / ${s.annexes}X` : ''}{s.footnotes > 0 ? ` / ${s.footnotes}F` : ''}
-                      </Badge>
-                    )}
-                    {s.status === 'error' && (
-                      <Badge variant="destructive" className="text-xs" title={s.error}>
-                        <X className="h-3 w-3 mr-1" />Error
-                      </Badge>
-                    )}
-                    {s.status === 'skipped' && <Badge variant="outline" className="text-xs">Skipped</Badge>}
-                  </div>
+                  {s.status === 'error' && s.error && (
+                    <p className="text-xs text-destructive pl-8 break-all">{s.error}</p>
+                  )}
                 </div>
               ))}
             </div>

@@ -9,6 +9,7 @@ export interface Article {
   title: string;
   content: string;
   chapter_id: number | null;
+  section_id: number | null;
   stakeholder_tags: string[] | null;
   is_key_provision: boolean | null;
 }
@@ -19,7 +20,7 @@ export const useArticles = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("articles")
-        .select("id, article_number, title, content, chapter_id, stakeholder_tags, is_key_provision")
+.select("id, article_number, title, content, chapter_id, section_id, stakeholder_tags, is_key_provision")
         .order("article_number", { ascending: true });
 
       if (error) throw error;

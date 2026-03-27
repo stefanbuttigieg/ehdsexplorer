@@ -52,9 +52,10 @@ Deno.serve(async (req) => {
   try {
     const { celexNumber, languageCode } = await req.json();
 
-    if (!celexNumber || !CELEX_PATTERN.test(String(celexNumber))) {
+    const rawCelex = String(celexNumber ?? '').trim().toUpperCase().replace(/^CELEX:/, '');
+    if (!rawCelex || !CELEX_PATTERN.test(rawCelex)) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Invalid CELEX number format' }),
+        JSON.stringify({ success: false, error: `Invalid CELEX number format: "${rawCelex}"` }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

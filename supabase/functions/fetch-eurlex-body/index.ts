@@ -8,7 +8,7 @@ const SHELL_MARKERS = /Official Journal of the European Union|available language
 const DOCUMENT_MARKERS = /\b(Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu)\s+\d+|(?:^|\n)\s*\d+\.\s*(?:cikk|artikla|pants|straipsnis|člen)\b|(?:^|\n)\s*\(\d+\)\s+/im;
 
 const LANGUAGE_CODE_PATTERN = /^[a-z]{2}$/i;
-const CELEX_PATTERN = /^\d{4}[A-Z]\d{4}$/i;
+const CELEX_PATTERN = /^\d{5}[A-Z]\d{4}$/i;
 
 const extractTextFromHtml = (html: string): string => {
   const withoutNoise = html

@@ -338,21 +338,8 @@ export function BatchEurLexImporter({ celexNumber = '32025R0327', onComplete }: 
           s.code === langCode ? { ...s, status: 'fetching' } : s
         ));
 
-        const url = generateUrl(langCode);
-        const response = await firecrawlApi.scrape(url, {
-          formats: ['markdown'],
-          onlyMainContent: true,
-          waitFor: 2000,
-        });
-
-        if (!response.success || !response.data?.markdown) {
-          throw new Error(response.error || 'Empty content');
-        }
-
-        const content = response.data.markdown;
-        if (content.length < 1000) {
-          throw new Error('Content too short - page may not have loaded');
-        }
+        const { content, urlUsed } = await fetchWithFallback(langCode);
+        console.log(`[${langCode}] Fetched ${content.length} chars from ${urlUsed}`);
 
         // Parse
         setStatuses(prev => prev.map(s =>
@@ -372,7 +359,7 @@ export function BatchEurLexImporter({ celexNumber = '32025R0327', onComplete }: 
         });
 
         if (parsed.articles.length < 10 || parsed.recitals.length < 10) {
-          throw new Error(`Low parse count: ${parsed.articles.length} articles, ${parsed.recitals.length} recitals (detected lang: ${parsed.detectedLanguage})`);
+          throw new Error(`Low parse count for ${langCode.toUpperCase()}: ${parsed.articles.length} articles, ${parsed.recitals.length} recitals (parser detected: ${parsed.detectedLanguage}, url: ${urlUsed})`);
         }
 
         // Import

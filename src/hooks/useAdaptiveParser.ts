@@ -703,7 +703,7 @@ export async function parseDocumentAdaptive(text: string): Promise<{
   
   // Step 3: Find boundaries
   let recitalsEnd = analysis.adoptionLineIndex > 0 ? analysis.adoptionLineIndex : lines.length;
-  let articlesStart = 0;
+  let articlesStart = -1;
   let annexesStart = lines.length;
   
   // Re-find boundaries in processed text
@@ -719,7 +719,7 @@ export async function parseDocumentAdaptive(text: string): Promise<{
       }
     }
     
-    if (articlesStart === 0) {
+    if (articlesStart === -1) {
       for (const pattern of Object.values(ARTICLE_PATTERNS)) {
         if (pattern.test(line)) {
           articlesStart = i;
@@ -736,6 +736,11 @@ export async function parseDocumentAdaptive(text: string): Promise<{
         }
       }
     }
+  }
+  
+  // If no article start found, default to after recitals
+  if (articlesStart === -1) {
+    articlesStart = recitalsEnd > 0 && recitalsEnd < lines.length ? recitalsEnd : 0;
   }
   
   const lang = analysis.detectedLanguage === 'unknown' ? 'en' : analysis.detectedLanguage;

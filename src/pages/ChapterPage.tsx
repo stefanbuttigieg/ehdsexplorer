@@ -4,7 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getChapterById } from "@/data/chapters";
+import { useChapter } from "@/hooks/useChapters";
+import { useSectionsByChapter } from "@/hooks/useSections";
 import { useArticles } from "@/hooks/useArticles";
 import Layout from "@/components/Layout";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
@@ -14,11 +15,14 @@ import PrintButton from "@/components/PrintButton";
 const ChapterPage = () => {
   const { id } = useParams();
   const chapterId = parseInt(id || "1");
-  const chapter = getChapterById(chapterId);
-  const { data: articles, isLoading } = useArticles();
+  const { data: chapter, isLoading: chapterLoading } = useChapter(chapterId);
+  const { data: sections } = useSectionsByChapter(chapterId);
+  const { data: articles, isLoading: articlesLoading } = useArticles();
   const { isRead, getChapterProgress } = useReadingProgress();
 
-  if (!chapter) {
+  const isLoading = chapterLoading || articlesLoading;
+
+  if (!isLoading && !chapter) {
     return (
       <Layout>
         <div className="p-8 text-center">
@@ -44,27 +48,38 @@ const ChapterPage = () => {
     );
   }
 
+  // Filter articles by chapter_id from the database
   const chapterArticles = articles?.filter(
-    (a) => a.article_number >= chapter.articleRange[0] && a.article_number <= chapter.articleRange[1]
-  ) || [];
+    (a) => a.chapter_id === chapterId
+  ).sort((a, b) => a.article_number - b.article_number) || [];
+
+  // Compute article range for reading progress
+  const articleNumbers = chapterArticles.map(a => a.article_number);
+  const articleRange: [number, number] = articleNumbers.length > 0
+    ? [Math.min(...articleNumbers), Math.max(...articleNumbers)]
+    : [0, 0];
+
+  const hasSections = sections && sections.length > 0;
 
   return (
     <Layout>
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
-        <Breadcrumbs items={[{ label: `Chapter ${chapter.id}` }]} />
+        <Breadcrumbs items={[{ label: `Chapter ${chapter!.chapter_number}` }]} />
 
         <div className="flex items-start justify-between gap-4 mb-4">
           <div>
-            <Badge variant="outline" className="mb-2">Chapter {chapter.id}</Badge>
-            <h1 className="text-3xl font-bold font-serif">{chapter.title}</h1>
+            <Badge variant="outline" className="mb-2">Chapter {chapter!.chapter_number}</Badge>
+            <h1 className="text-3xl font-bold font-serif">{chapter!.title}</h1>
           </div>
           <PrintButton />
         </div>
-        <p className="text-muted-foreground mb-4">{chapter.description}</p>
+        {chapter!.description && (
+          <p className="text-muted-foreground mb-4">{chapter!.description}</p>
+        )}
         
         {/* Reading Progress */}
         {(() => {
-          const progress = getChapterProgress(chapter.articleRange);
+          const progress = getChapterProgress(articleRange);
           return (
             <div className="mb-8 p-4 rounded-lg bg-muted/50">
               <div className="flex items-center justify-between mb-2">
@@ -78,13 +93,14 @@ const ChapterPage = () => {
           );
         })()}
 
-        {chapter.sections ? (
-          chapter.sections.map((section, idx) => {
+        {hasSections ? (
+          sections.map((section) => {
             const sectionArticles = chapterArticles.filter(
-              (a) => a.article_number >= section.articleRange[0] && a.article_number <= section.articleRange[1]
+              (a) => a.section_id === section.id
             );
+            if (sectionArticles.length === 0) return null;
             return (
-              <div key={idx} className="mb-8">
+              <div key={section.id} className="mb-8">
                 <h2 className="text-xl font-semibold mb-4">{section.title}</h2>
                 <div className="space-y-3">
                   {sectionArticles.map((article) => (

@@ -472,9 +472,17 @@ export function parseArticles(lines: string[], lang: string, startLine: number, 
     if (articleMatch) {
       const articleNumber = parseInt(articleMatch[1], 10);
       
-      // Validate: skip if this looks like an inline reference (line has too much text after the match)
+      // Validate: skip if this looks like an inline reference
+      // An article heading line should be relatively short and not contain sentence-like text before the article word
+      const fullLine = trimmedLine;
+      const matchIndex = fullLine.search(pattern);
+      const beforeMatch = fullLine.substring(0, matchIndex).trim();
       const afterMatch = trimmedLine.replace(pattern, '').trim();
-      const isInlineReference = afterMatch.length > 200; // Headings are short, inline references have surrounding text
+      
+      // It's an inline reference if there's significant text before the article keyword
+      // or the line is excessively long with running text
+      const isInlineReference = beforeMatch.length > 20 || 
+        (afterMatch.length > 300 && /[.;,]/.test(afterMatch));
       
       if (isInlineReference && currentArticle) {
         contentLines.push(lines[i]);

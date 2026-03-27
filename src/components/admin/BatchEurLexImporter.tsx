@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { firecrawlApi } from '@/lib/api/firecrawl';
 import { toast } from 'sonner';
 import { parseDocumentAdaptive, type ParsedContent } from '@/hooks/useAdaptiveParser';
 import { supabase } from '@/integrations/supabase/client';
@@ -57,53 +56,42 @@ export function BatchEurLexImporter({ celexNumber = '32025R0327', onComplete }: 
   const cancelRef = useRef(false);
   const pauseRef = useRef(false);
 
-  // URL variants to try — the TXT/HTML variant often returns a shell/language-matrix page
-  const EUR_LEX_URL_VARIANTS = [
-    (lang: string, celex: string) => `https://eur-lex.europa.eu/legal-content/${lang}/TXT/?uri=CELEX:${celex}`,
-    (lang: string, celex: string) => `https://eur-lex.europa.eu/legal-content/${lang}/TXT/HTML/?uri=CELEX:${celex}`,
-    (lang: string, celex: string) => `https://eur-lex.europa.eu/legal-content/${lang}/ALL/?uri=CELEX:${celex}`,
-  ];
+  const fetchWithFallback = async (langCode: string): Promise<{ content: string; htmlContent?: string; urlUsed: string }> => {
+    const { data, error } = await supabase.functions.invoke('fetch-eurlex-body', {
+      body: {
+        celexNumber,
+        languageCode: langCode,
+      },
+    });
 
-  const isShellPage = (content: string): boolean => {
-    // Shell pages have language matrices and navigation but no actual regulation text
-    const hasShellMarkers = /Official Journal of the European Union|Choose language|multilingual display|Diario Oficial|Journal officiel|Amtsblatt/i.test(content);
-    const hasArticleContent = /\bArticle\s+\d+|\bArtikel\s+\d+|\bArticolo\s+\d+|\bArtículo\s+\d+|\bArtigo\s+\d+|\bArtykuł\s+\d+|^\d+\.\s*cikk/im.test(content);
-    return hasShellMarkers && !hasArticleContent;
-  };
-
-  const fetchWithFallback = async (langCode: string): Promise<{ content: string; urlUsed: string }> => {
-    const eurLexLang = LANG_MAP[langCode] || 'EN';
-    
-    for (const urlFn of EUR_LEX_URL_VARIANTS) {
-      const url = urlFn(eurLexLang, celexNumber);
-      console.log(`[${langCode}] Trying URL: ${url}`);
-      
-      const response = await firecrawlApi.scrape(url, {
-        formats: ['markdown'],
-        onlyMainContent: true,
-        waitFor: 2000,
-      });
-
-      if (!response.success || !response.data?.markdown) {
-        console.log(`[${langCode}] Fetch failed for ${url}: ${response.error || 'empty'}`);
-        continue;
-      }
-
-      const content = response.data.markdown;
-      if (content.length < 1000) {
-        console.log(`[${langCode}] Content too short (${content.length} chars) from ${url}`);
-        continue;
-      }
-
-      if (isShellPage(content)) {
-        console.log(`[${langCode}] Shell page detected from ${url}, trying next variant...`);
-        continue;
-      }
-
-      return { content, urlUsed: url };
+    if (error) {
+      throw new Error(`Backend fetch failed for ${langCode.toUpperCase()}: ${error.message}`);
     }
 
-    throw new Error(`All EUR-Lex URL variants returned shell pages or empty content for ${langCode.toUpperCase()}`);
+    const payload = data as {
+      success?: boolean;
+      error?: string;
+      content?: string;
+      html?: string;
+      urlUsed?: string;
+    } | null;
+
+    if (!payload?.success) {
+      throw new Error(payload?.error || `Failed to fetch EUR-Lex body for ${langCode.toUpperCase()}`);
+    }
+
+    const content = payload.content || '';
+    if (!content || content.length < 1000) {
+      throw new Error(
+        `Fetched content too short for ${langCode.toUpperCase()} (${content.length} chars, url: ${payload.urlUsed || 'n/a'})`
+      );
+    }
+
+    return {
+      content,
+      htmlContent: payload.html,
+      urlUsed: payload.urlUsed || 'n/a',
+    };
   };
 
   const loadEnglishSource = async (): Promise<EnglishSource | null> => {
@@ -338,7 +326,7 @@ export function BatchEurLexImporter({ celexNumber = '32025R0327', onComplete }: 
           s.code === langCode ? { ...s, status: 'fetching' } : s
         ));
 
-        const { content, urlUsed } = await fetchWithFallback(langCode);
+        const { content, htmlContent, urlUsed } = await fetchWithFallback(langCode);
         console.log(`[${langCode}] Fetched ${content.length} chars from ${urlUsed}`);
 
         // Parse
@@ -346,8 +334,26 @@ export function BatchEurLexImporter({ celexNumber = '32025R0327', onComplete }: 
           s.code === langCode ? { ...s, status: 'parsing' } : s
         ));
 
-        const { content: parsed, analysis: parseAnalysis } = await parseDocumentAdaptive(content);
-        
+        let parseResult = await parseDocumentAdaptive(content, { requestedLanguage: langCode });
+
+        // Fallback: if text payload parses poorly, retry with HTML payload
+        if (
+          (parseResult.content.articles.length < 10 || parseResult.content.recitals.length < 10) &&
+          htmlContent &&
+          htmlContent.length > 1000
+        ) {
+          const htmlParseResult = await parseDocumentAdaptive(htmlContent, { requestedLanguage: langCode });
+          const textScore = parseResult.content.articles.length + parseResult.content.recitals.length;
+          const htmlScore = htmlParseResult.content.articles.length + htmlParseResult.content.recitals.length;
+
+          if (htmlScore > textScore) {
+            parseResult = htmlParseResult;
+            console.log(`[${langCode}] Switched to HTML payload parse (${htmlScore} > ${textScore})`);
+          }
+        }
+
+        const { content: parsed, analysis: parseAnalysis } = parseResult;
+
         console.log(`[${langCode}] Parse results:`, {
           articles: parsed.articles.length,
           recitals: parsed.recitals.length,

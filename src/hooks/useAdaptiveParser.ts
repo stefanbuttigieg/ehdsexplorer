@@ -698,7 +698,10 @@ export function parseFootnotes(text: string, analysis: StructureAnalysis): Parse
 }
 
 // === Main parsing function ===
-export async function parseDocumentAdaptive(text: string): Promise<{
+export async function parseDocumentAdaptive(
+  text: string,
+  options?: { requestedLanguage?: string }
+): Promise<{
   content: ParsedContent;
   analysis: StructureAnalysis;
 }> {
@@ -752,8 +755,10 @@ export async function parseDocumentAdaptive(text: string): Promise<{
     articlesStart = recitalsEnd > 0 && recitalsEnd < lines.length ? recitalsEnd : 0;
   }
   
-  // Use detected language for parsing regexes, fall back to 'en' internally only
-  const parserLang = analysis.detectedLanguage === 'unknown' ? 'en' : analysis.detectedLanguage;
+  // Use detected language when available; otherwise use caller-provided language; only then fall back to English
+  const parserLang = (analysis.detectedLanguage !== 'unknown'
+    ? analysis.detectedLanguage
+    : options?.requestedLanguage?.toLowerCase()) || 'en';
   const articlesEnd = annexesStart > articlesStart ? annexesStart : lines.length;
   
   // Step 4: Parse all content types

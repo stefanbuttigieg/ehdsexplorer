@@ -752,14 +752,15 @@ export async function parseDocumentAdaptive(text: string): Promise<{
     articlesStart = recitalsEnd > 0 && recitalsEnd < lines.length ? recitalsEnd : 0;
   }
   
-  const lang = analysis.detectedLanguage === 'unknown' ? 'en' : analysis.detectedLanguage;
+  // Use detected language for parsing regexes, fall back to 'en' internally only
+  const parserLang = analysis.detectedLanguage === 'unknown' ? 'en' : analysis.detectedLanguage;
   const articlesEnd = annexesStart > articlesStart ? annexesStart : lines.length;
   
   // Step 4: Parse all content types
-  const recitals = parseRecitals(lines, lang, recitalsEnd);
-  const articles = parseArticles(lines, lang, articlesStart, articlesEnd);
+  const recitals = parseRecitals(lines, parserLang, recitalsEnd);
+  const articles = parseArticles(lines, parserLang, articlesStart, articlesEnd);
   const definitions = parseDefinitions(articles);
-  const annexes = parseAnnexes(lines, lang, annexesStart);
+  const annexes = parseAnnexes(lines, parserLang, annexesStart);
   const footnotes = parseFootnotes(processed, analysis);
   
   const content: ParsedContent = {
@@ -768,7 +769,8 @@ export async function parseDocumentAdaptive(text: string): Promise<{
     definitions,
     annexes,
     footnotes,
-    detectedLanguage: lang,
+    // Report the ACTUAL detected language, not the internal fallback
+    detectedLanguage: analysis.detectedLanguage,
   };
   
   return { content, analysis };

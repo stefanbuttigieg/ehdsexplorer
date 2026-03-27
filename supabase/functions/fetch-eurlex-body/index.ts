@@ -6,11 +6,14 @@ const corsHeaders = {
 const LANGUAGE_CODE_PATTERN = /^[a-z]{2}$/i;
 const CELEX_PATTERN = /^\d{5}[A-Z]\d{4}$/i;
 
-// Shell-page markers — these appear on navigation/index pages, not the regulation body
 const SHELL_MARKERS = /Official Journal of the European Union|available languages and formats|Display all languages|Choose language|multilingual display|language selector/i;
-
-// Real document body markers — at least one article heading should be present
 const ARTICLE_MARKERS = /\b(?:Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu)\s+\d+|(?:^|\n)\s*\d+\.\s*(?:cikk|artikla|pants|straipsnis|člen)\b/im;
+
+function isShellPage(content: string): boolean {
+  if (SHELL_MARKERS.test(content) && !ARTICLE_MARKERS.test(content)) return true;
+  if (!ARTICLE_MARKERS.test(content) && content.length < 5000) return true;
+  return false;
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -38,15 +41,7 @@ Deno.serve(async (req) => {
     const lang = String(languageCode).toUpperCase();
     const celex = rawCelex;
 
-    const firecrawlKey = Deno.env.get('FIRECRAWL_API_KEY');
-    if (!firecrawlKey) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Firecrawl API key not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // EUR-Lex URL variants to try — TXT/HTML is usually the full rendered doc
+    // URL variants to try
     const urls = [
       `https://eur-lex.europa.eu/legal-content/${lang}/TXT/HTML/?uri=CELEX:${celex}`,
       `https://eur-lex.europa.eu/legal-content/${lang}/TXT/?uri=CELEX:${celex}`,
@@ -55,66 +50,104 @@ Deno.serve(async (req) => {
 
     let lastError = 'No successful EUR-Lex response';
 
+    // --- Strategy 1: Direct fetch with proper headers ---
     for (const url of urls) {
-      console.log(`Fetching ${url} via Firecrawl...`);
+      console.log(`Direct fetch: ${url}`);
+      try {
+        const res = await fetch(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': `${lang.toLowerCase()},en;q=0.5`,
+          },
+        });
 
-      const fcResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${firecrawlKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          url,
-          formats: ['markdown', 'html'],
-          onlyMainContent: false, // Get full page to avoid missing regulation body
-          waitFor: 5000, // EUR-Lex uses JS rendering, wait longer
-        }),
-      });
+        if (!res.ok) {
+          lastError = `HTTP ${res.status} from ${url}`;
+          console.log(lastError);
+          await res.text(); // consume body
+          continue;
+        }
 
-      const fcData = await fcResponse.json();
+        const html = await res.text();
 
-      if (!fcResponse.ok || !fcData.success) {
-        lastError = `Firecrawl error for ${url}: ${fcData.error || `HTTP ${fcResponse.status}`}`;
+        if (html.length < 1000) {
+          lastError = `Content too short from ${url} (${html.length} chars)`;
+          console.log(lastError);
+          continue;
+        }
+
+        if (isShellPage(html)) {
+          lastError = `Shell page from direct fetch: ${url}`;
+          console.log(lastError);
+          continue;
+        }
+
+        console.log(`Direct fetch success: ${html.length} chars from ${url}`);
+        return new Response(
+          JSON.stringify({ success: true, content: html, html, urlUsed: url }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      } catch (e) {
+        lastError = `Direct fetch error for ${url}: ${e instanceof Error ? e.message : String(e)}`;
         console.log(lastError);
-        continue;
       }
+    }
 
-      const markdown = fcData.data?.markdown || '';
-      const html = fcData.data?.html || '';
+    // --- Strategy 2: Firecrawl fallback (JS-rendered) ---
+    const firecrawlKey = Deno.env.get('FIRECRAWL_API_KEY');
+    if (firecrawlKey) {
+      for (const url of urls.slice(0, 2)) {
+        console.log(`Firecrawl fetch: ${url}`);
+        try {
+          const fcResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${firecrawlKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              url,
+              formats: ['markdown', 'html'],
+              onlyMainContent: false,
+              waitFor: 5000,
+            }),
+          });
 
-      if (markdown.length < 1000 && html.length < 1000) {
-        lastError = `Content too short from ${url} (md: ${markdown.length}, html: ${html.length})`;
-        console.log(lastError);
-        continue;
+          const fcData = await fcResponse.json();
+
+          if (!fcResponse.ok || !fcData.success) {
+            lastError = `Firecrawl error for ${url}: ${fcData.error || `HTTP ${fcResponse.status}`}`;
+            console.log(lastError);
+            continue;
+          }
+
+          const markdown = fcData.data?.markdown || '';
+          const html = fcData.data?.html || '';
+          const content = markdown || html;
+
+          if (content.length < 1000) {
+            lastError = `Firecrawl content too short from ${url}`;
+            console.log(lastError);
+            continue;
+          }
+
+          if (isShellPage(content)) {
+            lastError = `Shell page via Firecrawl: ${url}`;
+            console.log(lastError);
+            continue;
+          }
+
+          console.log(`Firecrawl success: ${markdown.length} md, ${html.length} html from ${url}`);
+          return new Response(
+            JSON.stringify({ success: true, content: markdown || html, html, urlUsed: url }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        } catch (e) {
+          lastError = `Firecrawl error: ${e instanceof Error ? e.message : String(e)}`;
+          console.log(lastError);
+        }
       }
-
-      // Check if this is a shell/navigation page rather than the document body
-      const contentToCheck = markdown || html;
-      if (SHELL_MARKERS.test(contentToCheck) && !ARTICLE_MARKERS.test(contentToCheck)) {
-        lastError = `Shell page detected from ${url}`;
-        console.log(lastError);
-        continue;
-      }
-
-      // Verify we have actual article content
-      if (!ARTICLE_MARKERS.test(contentToCheck)) {
-        lastError = `No article markers found in content from ${url}`;
-        console.log(lastError);
-        continue;
-      }
-
-      console.log(`Success: ${markdown.length} chars markdown, ${html.length} chars html from ${url}`);
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          content: markdown,
-          html: html,
-          urlUsed: url,
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
     }
 
     return new Response(

@@ -205,9 +205,10 @@ export function analyzeStructure(text: string): StructureAnalysis {
   const tableRecitalMatches = text.match(/^\|\s*\((\d+)\)\s*\|/gm) || [];
   const recitalCount = Math.max(recitalMatches.length, tableRecitalMatches.length);
   
-  // Count articles
+  // Count articles - include both word-first and number-first patterns
   const articleMatches = text.match(/(?:^|\n)(?:Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu)\s+\d+/gi) || [];
-  const articleCount = articleMatches.length;
+  const numberFirstMatches = text.match(/(?:^|\n)\d+\.\s*(?:cikk|artikla|pants|straipsnis|člen)/gi) || [];
+  const articleCount = articleMatches.length + numberFirstMatches.length;
   
   // Detect footnote format
   let footnoteFormat: 'eurlex-link' | 'numbered-paren' | 'caret' | 'none' = 'none';

@@ -315,10 +315,20 @@ export function BatchEurLexImporter({ celexNumber = '32025R0327', onComplete }: 
           s.code === langCode ? { ...s, status: 'parsing' } : s
         ));
 
-        const { content: parsed } = await parseDocumentAdaptive(content);
+        const { content: parsed, analysis: parseAnalysis } = await parseDocumentAdaptive(content);
+        
+        console.log(`[${langCode}] Parse results:`, {
+          articles: parsed.articles.length,
+          recitals: parsed.recitals.length,
+          definitions: parsed.definitions.length,
+          annexes: parsed.annexes.length,
+          footnotes: parsed.footnotes.length,
+          language: parsed.detectedLanguage,
+          analysis: parseAnalysis,
+        });
 
         if (parsed.articles.length < 10 || parsed.recitals.length < 10) {
-          throw new Error(`Low parse count: ${parsed.articles.length} articles, ${parsed.recitals.length} recitals`);
+          throw new Error(`Low parse count: ${parsed.articles.length} articles, ${parsed.recitals.length} recitals (detected lang: ${parsed.detectedLanguage})`);
         }
 
         // Import

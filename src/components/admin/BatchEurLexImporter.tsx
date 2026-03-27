@@ -57,9 +57,53 @@ export function BatchEurLexImporter({ celexNumber = '32025R0327', onComplete }: 
   const cancelRef = useRef(false);
   const pauseRef = useRef(false);
 
-  const generateUrl = (langCode: string) => {
+  // URL variants to try — the TXT/HTML variant often returns a shell/language-matrix page
+  const EUR_LEX_URL_VARIANTS = [
+    (lang: string, celex: string) => `https://eur-lex.europa.eu/legal-content/${lang}/TXT/?uri=CELEX:${celex}`,
+    (lang: string, celex: string) => `https://eur-lex.europa.eu/legal-content/${lang}/TXT/HTML/?uri=CELEX:${celex}`,
+    (lang: string, celex: string) => `https://eur-lex.europa.eu/legal-content/${lang}/ALL/?uri=CELEX:${celex}`,
+  ];
+
+  const isShellPage = (content: string): boolean => {
+    // Shell pages have language matrices and navigation but no actual regulation text
+    const hasShellMarkers = /Official Journal of the European Union|Choose language|multilingual display|Diario Oficial|Journal officiel|Amtsblatt/i.test(content);
+    const hasArticleContent = /\bArticle\s+\d+|\bArtikel\s+\d+|\bArticolo\s+\d+|\bArtículo\s+\d+|\bArtigo\s+\d+|\bArtykuł\s+\d+|^\d+\.\s*cikk/im.test(content);
+    return hasShellMarkers && !hasArticleContent;
+  };
+
+  const fetchWithFallback = async (langCode: string): Promise<{ content: string; urlUsed: string }> => {
     const eurLexLang = LANG_MAP[langCode] || 'EN';
-    return `https://eur-lex.europa.eu/legal-content/${eurLexLang}/TXT/HTML/?uri=CELEX:${celexNumber}`;
+    
+    for (const urlFn of EUR_LEX_URL_VARIANTS) {
+      const url = urlFn(eurLexLang, celexNumber);
+      console.log(`[${langCode}] Trying URL: ${url}`);
+      
+      const response = await firecrawlApi.scrape(url, {
+        formats: ['markdown'],
+        onlyMainContent: true,
+        waitFor: 2000,
+      });
+
+      if (!response.success || !response.data?.markdown) {
+        console.log(`[${langCode}] Fetch failed for ${url}: ${response.error || 'empty'}`);
+        continue;
+      }
+
+      const content = response.data.markdown;
+      if (content.length < 1000) {
+        console.log(`[${langCode}] Content too short (${content.length} chars) from ${url}`);
+        continue;
+      }
+
+      if (isShellPage(content)) {
+        console.log(`[${langCode}] Shell page detected from ${url}, trying next variant...`);
+        continue;
+      }
+
+      return { content, urlUsed: url };
+    }
+
+    throw new Error(`All EUR-Lex URL variants returned shell pages or empty content for ${langCode.toUpperCase()}`);
   };
 
   const loadEnglishSource = async (): Promise<EnglishSource | null> => {

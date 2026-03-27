@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
 
     const lang = String(languageCode).toUpperCase();
     const langLower = String(languageCode).toLowerCase();
-    const celex = String(celexNumber).toUpperCase();
+    const celex = rawCelex;
 
     const urls = [
       `https://eur-lex.europa.eu/legal-content/${lang}/ALL/?uri=CELEX:${celex}`,

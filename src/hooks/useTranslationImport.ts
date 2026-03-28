@@ -159,6 +159,7 @@ export function useTranslationImport() {
      // Filter selected items
      const articlesToImport = currentParsedContent.articles.filter(a => selectedArticles.includes(a.articleNumber));
      const recitalsToImport = currentParsedContent.recitals.filter(r => selectedRecitals.includes(r.recitalNumber));
+     const definitionsToImport = currentParsedContent.definitions.filter(d => selectedDefinitions.includes(d.definitionNumber));
      const annexesToImport = currentParsedContent.annexes.filter(a => selectedAnnexes.includes(a.annexNumber));
      const footnotesToImport = currentParsedContent.footnotes.filter((_, i) => selectedFootnotes.includes(i));
      

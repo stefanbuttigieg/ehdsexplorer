@@ -698,6 +698,11 @@ const AdminTranslationImportPage = () => {
                         {selectedRecitals.length} recitals
                       </Badge>
                     )}
+                    {selectedDefinitions.length > 0 && (
+                      <Badge variant="secondary" className="ml-2">
+                        {selectedDefinitions.length} definitions
+                      </Badge>
+                    )}
                     {selectedAnnexes.length > 0 && (
                       <Badge variant="secondary" className="ml-2">
                         {selectedAnnexes.length} annexes
@@ -723,6 +728,7 @@ const AdminTranslationImportPage = () => {
                       !selectedLanguage ||
                       (selectedArticles.length === 0 &&
                         selectedRecitals.length === 0 &&
+                        selectedDefinitions.length === 0 &&
                         selectedAnnexes.length === 0 &&
                         selectedFootnotes.length === 0)
                     }

@@ -79,29 +79,34 @@ const AdminTranslationsPage = () => {
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 animate-fade-in">
+      <div className="max-w-7xl mx-auto p-3 sm:p-4 md:p-6 animate-fade-in">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-6">
-          <Link to="/admin">
-            <Button variant="ghost" size="icon">
+        <div className="flex items-start gap-2 sm:gap-4 mb-6">
+          <Link to="/admin" className="flex-shrink-0 mt-1">
+            <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
-          <div className="flex-1">
-            <h1 className="text-2xl sm:text-3xl font-bold font-serif flex items-center gap-2">
-              <Globe className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
-              Translation Management
-            </h1>
-            <p className="text-sm sm:text-base text-muted-foreground">
-              Manage translations for all content types across EU languages
-            </p>
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-2xl md:text-3xl font-bold font-serif flex items-center gap-2">
+                  <Globe className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-primary flex-shrink-0" />
+                  <span className="truncate">Translation Management</span>
+                </h1>
+                <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
+                  Manage translations for all content types across EU languages
+                </p>
+              </div>
+              <Link to="/admin/translation-import" className="flex-shrink-0">
+                <Button variant="outline" size="sm" className="gap-2 text-xs sm:text-sm">
+                  <Upload className="h-4 w-4" />
+                  <span className="hidden sm:inline">Import from PDF or HTML</span>
+                  <span className="sm:hidden">Import</span>
+                </Button>
+              </Link>
+            </div>
           </div>
-          <Link to="/admin/translation-import">
-            <Button variant="outline" className="gap-2">
-              <Upload className="h-4 w-4" />
-              Import from PDF or HTML
-            </Button>
-          </Link>
         </div>
 
         {/* Language Selection */}
@@ -150,22 +155,24 @@ const AdminTranslationsPage = () => {
             <TranslationStats languageCode={selectedLanguage} />
 
             {/* Content Type Tabs */}
-            <Card className="mt-6">
+            <Card className="mt-6 overflow-hidden">
               <Tabs value={selectedContentType} onValueChange={(v) => setSelectedContentType(v as ContentType)}>
-                <CardHeader className="pb-0">
-                  <TabsList className="flex flex-wrap h-auto gap-1 justify-start bg-transparent p-0">
-                    {Object.entries(contentTypeLabels).map(([type, label]) => (
-                      <TabsTrigger
-                        key={type}
-                        value={type}
-                        className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                      >
-                        {label}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
+                <CardHeader className="pb-0 px-3 sm:px-6">
+                  <div className="overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0 scrollbar-thin">
+                    <TabsList className="flex flex-nowrap sm:flex-wrap h-auto gap-1 justify-start bg-transparent p-0 min-w-max sm:min-w-0">
+                      {Object.entries(contentTypeLabels).map(([type, label]) => (
+                        <TabsTrigger
+                          key={type}
+                          value={type}
+                          className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs sm:text-sm whitespace-nowrap"
+                        >
+                          {label}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </div>
                 </CardHeader>
-                <CardContent className="pt-6">
+                <CardContent className="pt-6 px-3 sm:px-6">
                   {Object.keys(contentTypeLabels).map((type) => (
                     <TabsContent key={type} value={type} className="mt-0">
                       <TranslationEditor contentType={type as ContentType} languageCode={selectedLanguage} />

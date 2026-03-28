@@ -273,22 +273,29 @@ export default function AdminCountryLegislationPage() {
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto p-6 animate-fade-in">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold font-serif">National Legislation</h1>
-            <p className="text-muted-foreground mt-1">
-              Manage national EHDS-linked legislation across EU member states
-            </p>
+      <div className="max-w-7xl mx-auto p-3 sm:p-4 md:p-6 animate-fade-in">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+          <div className="flex items-center gap-2">
+            <Link to="/admin">
+              <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-serif">National Legislation</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                Manage national EHDS-linked legislation across EU member states
+              </p>
+            </div>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => handleOpenDialog()}>
+              <Button onClick={() => handleOpenDialog()} size="sm" className="self-start sm:self-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Legislation
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {editingLegislation ? 'Edit Legislation' : 'Add New Legislation'}
@@ -299,7 +306,7 @@ export default function AdminCountryLegislationPage() {
               </DialogHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="country_code"

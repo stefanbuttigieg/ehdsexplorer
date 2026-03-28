@@ -475,19 +475,19 @@ export default function AdminBulkImportPage() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-4xl">
         <Button
           variant="ghost"
-          className="mb-6"
+          className="mb-4 sm:mb-6"
           onClick={() => navigate("/admin")}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Dashboard
         </Button>
 
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Bulk Import</h1>
-          <p className="text-muted-foreground">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2">Bulk Import</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Import content from JSON data. This will replace all existing data of the selected type.
           </p>
         </div>

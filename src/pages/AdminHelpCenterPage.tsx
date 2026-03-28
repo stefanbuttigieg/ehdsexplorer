@@ -21,17 +21,17 @@ import Layout from '@/components/Layout';
 const AdminHelpCenterPage = () => {
   return (
     <Layout>
-      <div className="max-w-5xl mx-auto p-6 animate-fade-in">
+      <div className="max-w-5xl mx-auto p-3 sm:p-4 md:p-6 animate-fade-in">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-2 sm:gap-4 mb-6 sm:mb-8">
           <Link to="/admin">
-            <Button variant="ghost" size="icon" aria-label="Go back to admin dashboard">
-              <ArrowLeft className="h-5 w-5" />
+            <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0" aria-label="Go back to admin dashboard">
+              <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
-          <div>
-            <h1 className="text-3xl font-bold font-serif">Admin Help Center</h1>
-            <p className="text-muted-foreground mt-1">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-serif truncate">Admin Help Center</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
               Documentation for editors and administrators
             </p>
           </div>

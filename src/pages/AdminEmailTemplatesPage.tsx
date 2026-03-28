@@ -118,14 +118,14 @@ const AdminEmailTemplatesPage = () => {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto p-6 space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/admin')}>
-            <ArrowLeft className="h-5 w-5" />
+      <div className="max-w-4xl mx-auto p-3 sm:p-4 md:p-6 space-y-6">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0" onClick={() => navigate('/admin')}>
+            <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Email Templates</h1>
-            <p className="text-muted-foreground">Manage email templates for invitations and notifications</p>
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight truncate">Email Templates</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">Manage email templates for invitations and notifications</p>
           </div>
         </div>
 
@@ -166,7 +166,7 @@ const AdminEmailTemplatesPage = () => {
       </div>
 
       <Dialog open={!!editingTemplate} onOpenChange={(open) => !open && setEditingTemplate(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Email Template</DialogTitle>
             <DialogDescription>

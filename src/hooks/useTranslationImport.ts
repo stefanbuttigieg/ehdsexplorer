@@ -208,6 +208,20 @@ export function useTranslationImport() {
        };
      }).filter(Boolean);
 
+     // Map to database format - Definitions
+     const definitionTranslations = definitionsToImport.map(def => {
+       const sourceDef = currentEnglishSource.definitions.find(d => d.id === def.definitionNumber);
+       if (!sourceDef) return null;
+       
+       return {
+         definition_id: sourceDef.id,
+         language_code: languageCode,
+         term: def.term,
+         definition: def.definition,
+         is_published: false,
+       };
+     }).filter(Boolean);
+
       // For footnotes, we need to first find or create the base footnote, then add translation
       const { data: existingFootnotes } = await supabase
         .from('footnotes')

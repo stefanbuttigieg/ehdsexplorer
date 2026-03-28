@@ -20,14 +20,17 @@ interface TranslationDiffPreviewProps {
   validation: ValidationResult;
   selectedArticles: number[];
   selectedRecitals: number[];
+  selectedDefinitions: number[];
   selectedAnnexes: number[];
   selectedFootnotes: number[];
   onArticleSelect: (articleNumber: number, selected: boolean) => void;
   onRecitalSelect: (recitalNumber: number, selected: boolean) => void;
+  onDefinitionSelect: (definitionNumber: number, selected: boolean) => void;
   onAnnexSelect: (annexNumber: number, selected: boolean) => void;
   onFootnoteSelect: (footnoteIndex: number, selected: boolean) => void;
   onSelectAllArticles: (selected: boolean) => void;
   onSelectAllRecitals: (selected: boolean) => void;
+  onSelectAllDefinitions: (selected: boolean) => void;
   onSelectAllAnnexes: (selected: boolean) => void;
   onSelectAllFootnotes: (selected: boolean) => void;
 }
@@ -42,14 +45,17 @@ export function TranslationDiffPreview({
   validation,
   selectedArticles,
   selectedRecitals,
+  selectedDefinitions,
   selectedAnnexes,
   selectedFootnotes,
   onArticleSelect,
   onRecitalSelect,
+  onDefinitionSelect,
   onAnnexSelect,
   onFootnoteSelect,
   onSelectAllArticles,
   onSelectAllRecitals,
+  onSelectAllDefinitions,
   onSelectAllAnnexes,
   onSelectAllFootnotes,
 }: TranslationDiffPreviewProps) {

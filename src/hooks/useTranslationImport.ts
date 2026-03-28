@@ -300,6 +300,16 @@ export function useTranslationImport() {
        if (annexError) throw annexError;
      }
 
+     if (definitionTranslations.length > 0) {
+       const { error: defError } = await supabase
+         .from('definition_translations')
+         .upsert(definitionTranslations as any[], {
+           onConflict: 'definition_id,language_code',
+         });
+       
+       if (defError) throw defError;
+     }
+
      if (footnoteTranslations.length > 0) {
        const { error: footnoteError } = await supabase
          .from('footnote_translations')
@@ -313,6 +323,7 @@ export function useTranslationImport() {
      const parts = [];
      if (articleTranslations.length > 0) parts.push(`${articleTranslations.length} articles`);
      if (recitalTranslations.length > 0) parts.push(`${recitalTranslations.length} recitals`);
+     if (definitionTranslations.length > 0) parts.push(`${definitionTranslations.length} definitions`);
      if (annexTranslations.length > 0) parts.push(`${annexTranslations.length} annexes`);
      if (footnoteTranslations.length > 0) parts.push(`${footnoteTranslations.length} footnotes`);
      

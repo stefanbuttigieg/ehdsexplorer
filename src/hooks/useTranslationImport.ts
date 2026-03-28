@@ -141,6 +141,7 @@ export function useTranslationImport() {
    languageCode: string,
    selectedArticles: number[],
    selectedRecitals: number[],
+   selectedDefinitions: number[] = [],
    selectedAnnexes: number[] = [],
    selectedFootnotes: number[] = []
  ) => {
@@ -158,6 +159,7 @@ export function useTranslationImport() {
      // Filter selected items
      const articlesToImport = currentParsedContent.articles.filter(a => selectedArticles.includes(a.articleNumber));
      const recitalsToImport = currentParsedContent.recitals.filter(r => selectedRecitals.includes(r.recitalNumber));
+     const definitionsToImport = currentParsedContent.definitions.filter(d => selectedDefinitions.includes(d.definitionNumber));
      const annexesToImport = currentParsedContent.annexes.filter(a => selectedAnnexes.includes(a.annexNumber));
      const footnotesToImport = currentParsedContent.footnotes.filter((_, i) => selectedFootnotes.includes(i));
      
@@ -202,6 +204,20 @@ export function useTranslationImport() {
          language_code: languageCode,
          title: annex.title,
          content: annex.content,
+         is_published: false,
+       };
+     }).filter(Boolean);
+
+     // Map to database format - Definitions
+     const definitionTranslations = definitionsToImport.map(def => {
+       const sourceDef = currentEnglishSource.definitions.find(d => d.id === def.definitionNumber);
+       if (!sourceDef) return null;
+       
+       return {
+         definition_id: sourceDef.id,
+         language_code: languageCode,
+         term: def.term,
+         definition: def.definition,
          is_published: false,
        };
      }).filter(Boolean);
@@ -298,6 +314,16 @@ export function useTranslationImport() {
        if (annexError) throw annexError;
      }
 
+     if (definitionTranslations.length > 0) {
+       const { error: defError } = await supabase
+         .from('definition_translations')
+         .upsert(definitionTranslations as any[], {
+           onConflict: 'definition_id,language_code',
+         });
+       
+       if (defError) throw defError;
+     }
+
      if (footnoteTranslations.length > 0) {
        const { error: footnoteError } = await supabase
          .from('footnote_translations')
@@ -311,6 +337,7 @@ export function useTranslationImport() {
      const parts = [];
      if (articleTranslations.length > 0) parts.push(`${articleTranslations.length} articles`);
      if (recitalTranslations.length > 0) parts.push(`${recitalTranslations.length} recitals`);
+     if (definitionTranslations.length > 0) parts.push(`${definitionTranslations.length} definitions`);
      if (annexTranslations.length > 0) parts.push(`${annexTranslations.length} annexes`);
      if (footnoteTranslations.length > 0) parts.push(`${footnoteTranslations.length} footnotes`);
      

@@ -20,14 +20,17 @@ interface TranslationDiffPreviewProps {
   validation: ValidationResult;
   selectedArticles: number[];
   selectedRecitals: number[];
+  selectedDefinitions: number[];
   selectedAnnexes: number[];
   selectedFootnotes: number[];
   onArticleSelect: (articleNumber: number, selected: boolean) => void;
   onRecitalSelect: (recitalNumber: number, selected: boolean) => void;
+  onDefinitionSelect: (definitionNumber: number, selected: boolean) => void;
   onAnnexSelect: (annexNumber: number, selected: boolean) => void;
   onFootnoteSelect: (footnoteIndex: number, selected: boolean) => void;
   onSelectAllArticles: (selected: boolean) => void;
   onSelectAllRecitals: (selected: boolean) => void;
+  onSelectAllDefinitions: (selected: boolean) => void;
   onSelectAllAnnexes: (selected: boolean) => void;
   onSelectAllFootnotes: (selected: boolean) => void;
 }
@@ -42,14 +45,17 @@ export function TranslationDiffPreview({
   validation,
   selectedArticles,
   selectedRecitals,
+  selectedDefinitions,
   selectedAnnexes,
   selectedFootnotes,
   onArticleSelect,
   onRecitalSelect,
+  onDefinitionSelect,
   onAnnexSelect,
   onFootnoteSelect,
   onSelectAllArticles,
   onSelectAllRecitals,
+  onSelectAllDefinitions,
   onSelectAllAnnexes,
   onSelectAllFootnotes,
 }: TranslationDiffPreviewProps) {
@@ -129,11 +135,14 @@ export function TranslationDiffPreview({
   const allRecitalsSelected = parsedRecitals.length > 0 &&
     parsedRecitals.every(r => selectedRecitals.includes(r.recitalNumber));
 
-  const allAnnexesSelected = parsedAnnexes.length > 0 &&
-    parsedAnnexes.every(a => selectedAnnexes.includes(a.annexNumber));
+   const allAnnexesSelected = parsedAnnexes.length > 0 &&
+     parsedAnnexes.every(a => selectedAnnexes.includes(a.annexNumber));
 
-  const allFootnotesSelected = parsedFootnotes.length > 0 &&
-    parsedFootnotes.every((_, i) => selectedFootnotes.includes(i));
+   const allDefinitionsSelected = parsedDefinitions.length > 0 &&
+     parsedDefinitions.every(d => selectedDefinitions.includes(d.definitionNumber));
+
+   const allFootnotesSelected = parsedFootnotes.length > 0 &&
+     parsedFootnotes.every((_, i) => selectedFootnotes.includes(i));
  
    return (
      <div className="space-y-4">
@@ -437,17 +446,47 @@ export function TranslationDiffPreview({
 
           {/* Definitions Tab */}
           <TabsContent value="definitions" className="mt-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Checkbox
+                id="select-all-definitions"
+                checked={allDefinitionsSelected}
+                onCheckedChange={(checked) => onSelectAllDefinitions(!!checked)}
+              />
+              <label htmlFor="select-all-definitions" className="text-sm font-medium">
+                Select all definitions for import
+              </label>
+              <Badge variant="outline" className="ml-auto">
+                {selectedDefinitions.length} selected
+              </Badge>
+            </div>
+
             <ScrollArea className="h-[500px] border rounded-md">
               <div className="p-2 space-y-2">
-                {parsedDefinitions.map((def) => (
-                  <div key={def.definitionNumber} className="border rounded-md p-3">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="outline">({def.definitionNumber})</Badge>
-                      <span className="font-medium">{def.term}</span>
+                {parsedDefinitions.map((def) => {
+                  const isSelected = selectedDefinitions.includes(def.definitionNumber);
+                  const englishDef = englishSource.definitions.find(d => d.id === def.definitionNumber);
+                  return (
+                    <div 
+                      key={def.definitionNumber} 
+                      className={`border rounded-md p-3 ${isSelected ? 'bg-primary/5' : ''}`}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={(checked) => onDefinitionSelect(def.definitionNumber, !!checked)}
+                        />
+                        <Badge variant="outline">({def.definitionNumber})</Badge>
+                        <span className="font-medium">{def.term}</span>
+                        {englishDef && (
+                          <span className="text-xs text-muted-foreground ml-2">EN: {englishDef.term}</span>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground ml-6">
+                        {def.definition.slice(0, 200)}{def.definition.length > 200 && '...'}
+                      </p>
                     </div>
-                    <p className="text-sm text-muted-foreground">{def.definition.slice(0, 200)}...</p>
-                  </div>
-                ))}
+                  );
+                })}
                 {parsedDefinitions.length === 0 && (
                   <p className="text-center text-muted-foreground py-8">
                     <BookOpen className="h-8 w-8 mx-auto mb-2 opacity-50" />

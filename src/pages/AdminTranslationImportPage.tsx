@@ -93,6 +93,7 @@ const AdminTranslationImportPage = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
   const [selectedArticles, setSelectedArticles] = useState<number[]>([]);
   const [selectedRecitals, setSelectedRecitals] = useState<number[]>([]);
+  const [selectedDefinitions, setSelectedDefinitions] = useState<number[]>([]);
   const [selectedAnnexes, setSelectedAnnexes] = useState<number[]>([]);
   const [selectedFootnotes, setSelectedFootnotes] = useState<number[]>([]);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -146,6 +147,9 @@ const AdminTranslationImportPage = () => {
 
       // Select all annexes
       setSelectedAnnexes(parsedContent.annexes.map((a) => a.annexNumber));
+
+      // Select all definitions
+      setSelectedDefinitions(parsedContent.definitions.map((d) => d.definitionNumber));
 
       // Select all footnotes
       setSelectedFootnotes(parsedContent.footnotes.map((_, i) => i));
@@ -275,6 +279,7 @@ const AdminTranslationImportPage = () => {
       selectedLanguage,
       selectedArticles,
       selectedRecitals,
+      selectedDefinitions,
       selectedAnnexes,
       selectedFootnotes,
     );
@@ -285,6 +290,7 @@ const AdminTranslationImportPage = () => {
     selectedLanguage,
     selectedArticles,
     selectedRecitals,
+    selectedDefinitions,
     selectedAnnexes,
     selectedFootnotes,
     importTranslations,
@@ -296,6 +302,8 @@ const AdminTranslationImportPage = () => {
     setUploadedFile(null);
     setSelectedArticles([]);
     setSelectedRecitals([]);
+    setSelectedDefinitions([]);
+    setSelectedAnnexes([]);
     setSelectedAnnexes([]);
     setSelectedFootnotes([]);
     setParseProgress(0);
@@ -340,6 +348,10 @@ const AdminTranslationImportPage = () => {
     setSelectedAnnexes((prev) => (selected ? [...prev, annexNumber] : prev.filter((n) => n !== annexNumber)));
   }, []);
 
+  const handleDefinitionSelect = useCallback((definitionNumber: number, selected: boolean) => {
+    setSelectedDefinitions((prev) => (selected ? [...prev, definitionNumber] : prev.filter((n) => n !== definitionNumber)));
+  }, []);
+
   const handleFootnoteSelect = useCallback((footnoteIndex: number, selected: boolean) => {
     setSelectedFootnotes((prev) => (selected ? [...prev, footnoteIndex] : prev.filter((n) => n !== footnoteIndex)));
   }, []);
@@ -350,6 +362,17 @@ const AdminTranslationImportPage = () => {
         setSelectedAnnexes(parsedContent.annexes.map((a) => a.annexNumber));
       } else {
         setSelectedAnnexes([]);
+      }
+    },
+    [parsedContent],
+  );
+
+  const handleSelectAllDefinitions = useCallback(
+    (selected: boolean) => {
+      if (selected && parsedContent) {
+        setSelectedDefinitions(parsedContent.definitions.map((d) => d.definitionNumber));
+      } else {
+        setSelectedDefinitions([]);
       }
     },
     [parsedContent],
@@ -643,14 +666,17 @@ const AdminTranslationImportPage = () => {
                 validation={validation}
                 selectedArticles={selectedArticles}
                 selectedRecitals={selectedRecitals}
+                selectedDefinitions={selectedDefinitions}
                 selectedAnnexes={selectedAnnexes}
                 selectedFootnotes={selectedFootnotes}
                 onArticleSelect={handleArticleSelect}
                 onRecitalSelect={handleRecitalSelect}
+                onDefinitionSelect={handleDefinitionSelect}
                 onAnnexSelect={handleAnnexSelect}
                 onFootnoteSelect={handleFootnoteSelect}
                 onSelectAllArticles={handleSelectAllArticles}
                 onSelectAllRecitals={handleSelectAllRecitals}
+                onSelectAllDefinitions={handleSelectAllDefinitions}
                 onSelectAllAnnexes={handleSelectAllAnnexes}
                 onSelectAllFootnotes={handleSelectAllFootnotes}
               />
@@ -670,6 +696,11 @@ const AdminTranslationImportPage = () => {
                     {selectedRecitals.length > 0 && (
                       <Badge variant="secondary" className="ml-2">
                         {selectedRecitals.length} recitals
+                      </Badge>
+                    )}
+                    {selectedDefinitions.length > 0 && (
+                      <Badge variant="secondary" className="ml-2">
+                        {selectedDefinitions.length} definitions
                       </Badge>
                     )}
                     {selectedAnnexes.length > 0 && (
@@ -697,6 +728,7 @@ const AdminTranslationImportPage = () => {
                       !selectedLanguage ||
                       (selectedArticles.length === 0 &&
                         selectedRecitals.length === 0 &&
+                        selectedDefinitions.length === 0 &&
                         selectedAnnexes.length === 0 &&
                         selectedFootnotes.length === 0)
                     }

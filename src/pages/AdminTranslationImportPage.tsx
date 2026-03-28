@@ -93,6 +93,7 @@ const AdminTranslationImportPage = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("");
   const [selectedArticles, setSelectedArticles] = useState<number[]>([]);
   const [selectedRecitals, setSelectedRecitals] = useState<number[]>([]);
+  const [selectedDefinitions, setSelectedDefinitions] = useState<number[]>([]);
   const [selectedAnnexes, setSelectedAnnexes] = useState<number[]>([]);
   const [selectedFootnotes, setSelectedFootnotes] = useState<number[]>([]);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -146,6 +147,9 @@ const AdminTranslationImportPage = () => {
 
       // Select all annexes
       setSelectedAnnexes(parsedContent.annexes.map((a) => a.annexNumber));
+
+      // Select all definitions
+      setSelectedDefinitions(parsedContent.definitions.map((d) => d.definitionNumber));
 
       // Select all footnotes
       setSelectedFootnotes(parsedContent.footnotes.map((_, i) => i));
@@ -275,6 +279,7 @@ const AdminTranslationImportPage = () => {
       selectedLanguage,
       selectedArticles,
       selectedRecitals,
+      selectedDefinitions,
       selectedAnnexes,
       selectedFootnotes,
     );
@@ -285,6 +290,7 @@ const AdminTranslationImportPage = () => {
     selectedLanguage,
     selectedArticles,
     selectedRecitals,
+    selectedDefinitions,
     selectedAnnexes,
     selectedFootnotes,
     importTranslations,
@@ -296,6 +302,8 @@ const AdminTranslationImportPage = () => {
     setUploadedFile(null);
     setSelectedArticles([]);
     setSelectedRecitals([]);
+    setSelectedDefinitions([]);
+    setSelectedAnnexes([]);
     setSelectedAnnexes([]);
     setSelectedFootnotes([]);
     setParseProgress(0);

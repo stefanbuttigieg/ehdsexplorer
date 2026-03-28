@@ -141,6 +141,7 @@ export function useTranslationImport() {
    languageCode: string,
    selectedArticles: number[],
    selectedRecitals: number[],
+   selectedDefinitions: number[] = [],
    selectedAnnexes: number[] = [],
    selectedFootnotes: number[] = []
  ) => {

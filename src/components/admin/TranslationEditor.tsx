@@ -367,34 +367,54 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
               return (
                 <div
                   key={item.id}
-                  className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                  className="flex flex-col gap-1 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
                 >
-                  <Badge variant={hasTranslation ? 'default' : 'outline'} className="shrink-0">
-                    {getItemLabel(item)}
-                  </Badge>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm truncate">
-                      {item.title || item.term || item.content?.substring(0, 80) || item.summary?.substring(0, 80)}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {hasTranslation && (
-                      <Badge 
-                        variant={isPublishedTrans ? 'default' : 'secondary'}
-                        className="text-xs"
+                  <div className="flex items-center gap-3">
+                    <Badge variant={hasTranslation ? 'default' : 'outline'} className="shrink-0">
+                      {getItemLabel(item)}
+                    </Badge>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm truncate">
+                        {item.title || item.term || item.content?.substring(0, 80) || item.summary?.substring(0, 80)}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {hasTranslation && (
+                        <Badge 
+                          variant={isPublishedTrans ? 'default' : 'secondary'}
+                          className="text-xs"
+                        >
+                          {isPublishedTrans ? <Eye className="h-3 w-3 mr-1" /> : <EyeOff className="h-3 w-3 mr-1" />}
+                          {isPublishedTrans ? 'Published' : 'Draft'}
+                        </Badge>
+                      )}
+                      <Button
+                        variant={hasTranslation ? 'outline' : 'default'}
+                        size="sm"
+                        onClick={() => handleEdit(item)}
                       >
-                        {isPublishedTrans ? <Eye className="h-3 w-3 mr-1" /> : <EyeOff className="h-3 w-3 mr-1" />}
-                        {isPublishedTrans ? 'Published' : 'Draft'}
-                      </Badge>
-                    )}
-                    <Button
-                      variant={hasTranslation ? 'outline' : 'default'}
-                      size="sm"
-                      onClick={() => handleEdit(item)}
-                    >
-                      {hasTranslation ? <Edit2 className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                    </Button>
+                        {hasTranslation ? <Edit2 className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                      </Button>
+                    </div>
                   </div>
+                  {hasTranslation && translation && (
+                    <div className="ml-0 sm:ml-[calc(theme(spacing.3)+4rem)] pl-0 sm:pl-3 border-l-0 sm:border-l-2 border-primary/20">
+                      <p className="text-xs text-muted-foreground line-clamp-2">
+                        {(() => {
+                          const firstField = config.displayFields[0];
+                          const translatedValue = translation[firstField.translated];
+                          if (!translatedValue) return null;
+                          const preview = String(translatedValue).substring(0, 150);
+                          return (
+                            <>
+                              <span className="font-medium text-primary/70">{languageCode.toUpperCase()}:</span>{' '}
+                              {preview}{String(translatedValue).length > 150 ? '…' : ''}
+                            </>
+                          );
+                        })()}
+                      </p>
+                    </div>
+                  )}
                 </div>
               );
             })

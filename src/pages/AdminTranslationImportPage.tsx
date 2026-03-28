@@ -348,6 +348,10 @@ const AdminTranslationImportPage = () => {
     setSelectedAnnexes((prev) => (selected ? [...prev, annexNumber] : prev.filter((n) => n !== annexNumber)));
   }, []);
 
+  const handleDefinitionSelect = useCallback((definitionNumber: number, selected: boolean) => {
+    setSelectedDefinitions((prev) => (selected ? [...prev, definitionNumber] : prev.filter((n) => n !== definitionNumber)));
+  }, []);
+
   const handleFootnoteSelect = useCallback((footnoteIndex: number, selected: boolean) => {
     setSelectedFootnotes((prev) => (selected ? [...prev, footnoteIndex] : prev.filter((n) => n !== footnoteIndex)));
   }, []);
@@ -358,6 +362,17 @@ const AdminTranslationImportPage = () => {
         setSelectedAnnexes(parsedContent.annexes.map((a) => a.annexNumber));
       } else {
         setSelectedAnnexes([]);
+      }
+    },
+    [parsedContent],
+  );
+
+  const handleSelectAllDefinitions = useCallback(
+    (selected: boolean) => {
+      if (selected && parsedContent) {
+        setSelectedDefinitions(parsedContent.definitions.map((d) => d.definitionNumber));
+      } else {
+        setSelectedDefinitions([]);
       }
     },
     [parsedContent],
@@ -651,14 +666,17 @@ const AdminTranslationImportPage = () => {
                 validation={validation}
                 selectedArticles={selectedArticles}
                 selectedRecitals={selectedRecitals}
+                selectedDefinitions={selectedDefinitions}
                 selectedAnnexes={selectedAnnexes}
                 selectedFootnotes={selectedFootnotes}
                 onArticleSelect={handleArticleSelect}
                 onRecitalSelect={handleRecitalSelect}
+                onDefinitionSelect={handleDefinitionSelect}
                 onAnnexSelect={handleAnnexSelect}
                 onFootnoteSelect={handleFootnoteSelect}
                 onSelectAllArticles={handleSelectAllArticles}
                 onSelectAllRecitals={handleSelectAllRecitals}
+                onSelectAllDefinitions={handleSelectAllDefinitions}
                 onSelectAllAnnexes={handleSelectAllAnnexes}
                 onSelectAllFootnotes={handleSelectAllFootnotes}
               />

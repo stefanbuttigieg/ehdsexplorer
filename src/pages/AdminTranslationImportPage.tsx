@@ -28,6 +28,7 @@ import { TranslationDiffPreview } from "@/components/admin/TranslationDiffPrevie
 import { BatchEurLexImporter } from "@/components/admin/BatchEurLexImporter";
 import { EurLexImporter } from "@/components/admin/EurLexImporter";
 import { ExtractionPreviewViewer } from "@/components/admin/ExtractionPreviewViewer";
+import { TranslationImportLogs } from "@/components/admin/TranslationImportLogs";
 import type { StructureAnalysis, ParsedContent } from "@/hooks/useAdaptiveParser";
 // PDF.js types
 type PDFDocumentProxy = Awaited<ReturnType<(typeof import("pdfjs-dist"))["getDocument"]>["promise"]>;
@@ -490,8 +491,9 @@ const AdminTranslationImportPage = () => {
                 <EurLexImporter onContentFetched={handleEurLexContent} />
               </TabsContent>
 
-              <TabsContent value="batch" className="mt-4">
+              <TabsContent value="batch" className="mt-4 space-y-4">
                 <BatchEurLexImporter />
+                <TranslationImportLogs />
               </TabsContent>
 
               <TabsContent value="upload" className="mt-4">

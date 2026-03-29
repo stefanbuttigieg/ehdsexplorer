@@ -380,13 +380,35 @@ export function BatchEurLexImporter({ celexNumber = '32025R0327', onComplete }: 
             ? { ...s, status: 'done', articles: result.articles, recitals: result.recitals, definitions: result.definitions, annexes: result.annexes, footnotes: result.footnotes }
             : s
         ));
+        // Log success to database
+        await supabase.from('translation_import_logs').insert({
+          language_code: langCode,
+          status: 'done',
+          articles_count: result.articles,
+          recitals_count: result.recitals,
+          definitions_count: result.definitions,
+          annexes_count: result.annexes,
+          footnotes_count: result.footnotes,
+          parser_detected_language: parsed.detectedLanguage,
+          content_length: content.length,
+          source_url: urlUsed,
+          import_type: 'batch',
+        } as any);
       } catch (err) {
+        const errorMsg = (err as Error).message;
         console.error(`Failed for ${langCode}:`, err);
         setStatuses(prev => prev.map(s =>
           s.code === langCode
-            ? { ...s, status: 'error', error: (err as Error).message }
+            ? { ...s, status: 'error', error: errorMsg }
             : s
         ));
+        // Log error to database
+        await supabase.from('translation_import_logs').insert({
+          language_code: langCode,
+          status: 'error',
+          error_message: errorMsg,
+          import_type: 'batch',
+        } as any);
       }
 
       // Small delay between requests to be respectful

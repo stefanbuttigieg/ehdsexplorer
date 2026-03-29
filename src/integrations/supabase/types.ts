@@ -3897,6 +3897,57 @@ export type Database = {
           },
         ]
       }
+      translation_import_logs: {
+        Row: {
+          annexes_count: number | null
+          articles_count: number | null
+          content_length: number | null
+          created_at: string
+          definitions_count: number | null
+          error_message: string | null
+          footnotes_count: number | null
+          id: string
+          import_type: string | null
+          language_code: string
+          parser_detected_language: string | null
+          recitals_count: number | null
+          source_url: string | null
+          status: string
+        }
+        Insert: {
+          annexes_count?: number | null
+          articles_count?: number | null
+          content_length?: number | null
+          created_at?: string
+          definitions_count?: number | null
+          error_message?: string | null
+          footnotes_count?: number | null
+          id?: string
+          import_type?: string | null
+          language_code: string
+          parser_detected_language?: string | null
+          recitals_count?: number | null
+          source_url?: string | null
+          status?: string
+        }
+        Update: {
+          annexes_count?: number | null
+          articles_count?: number | null
+          content_length?: number | null
+          created_at?: string
+          definitions_count?: number | null
+          error_message?: string | null
+          footnotes_count?: number | null
+          id?: string
+          import_type?: string | null
+          language_code?: string
+          parser_detected_language?: string | null
+          recitals_count?: number | null
+          source_url?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       ui_translations: {
         Row: {
           context: string | null

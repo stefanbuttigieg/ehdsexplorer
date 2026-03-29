@@ -1,0 +1,1 @@
+ALTER TABLE public.footnotes ADD CONSTRAINT footnotes_marker_unique UNIQUE (marker);

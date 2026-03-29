@@ -1,0 +1,1 @@
+ALTER TABLE public.footnotes DROP CONSTRAINT footnote_must_have_parent;

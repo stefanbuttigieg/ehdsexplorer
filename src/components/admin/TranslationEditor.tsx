@@ -505,7 +505,7 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
       </ScrollArea>
 
       {/* Stats bar */}
-      <div className="flex items-center justify-between text-sm text-muted-foreground px-1">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs sm:text-sm text-muted-foreground px-1 gap-1">
         <span>{filteredItems.length} items</span>
         <span>
           {translations?.length || 0} translated • {translations?.filter(t => t.is_published).length || 0} published

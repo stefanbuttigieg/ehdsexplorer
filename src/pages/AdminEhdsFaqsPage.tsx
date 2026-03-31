@@ -90,11 +90,12 @@ const AdminEhdsFaqsPage = () => {
     }
   };
 
-  const saveFaq = async (updated: Partial<EhdsFaq>) => {
+  const saveFaq = async (updated: Partial<EhdsFaq> & { faq_number?: number }) => {
     if (!editingFaq) return;
     const { error } = await supabase
       .from("ehds_faqs")
       .update({
+        faq_number: updated.faq_number ?? editingFaq.faq_number,
         question: updated.question,
         answer: updated.answer,
         rich_content: updated.rich_content,

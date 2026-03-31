@@ -332,8 +332,13 @@ function EditFaqDialog({ faq, onClose, onSave }: {
             <div>
               <Label>Source Recitals (comma-separated)</Label>
               <Input
-                value={(form.source_recitals || []).join(", ")}
-                onChange={e => setForm(p => ({ ...p, source_recitals: e.target.value.split(",").map(s => s.trim()).filter(Boolean) }))}
+                value={form._rawRecitals ?? (form.source_recitals || []).join(", ")}
+                onChange={e => {
+                  const raw = e.target.value;
+                  const parsed = raw.split(",").map(s => s.trim()).filter(Boolean);
+                  setForm(p => ({ ...p, _rawRecitals: raw, source_recitals: parsed }));
+                }}
+                onBlur={() => setForm(p => ({ ...p, _rawRecitals: undefined }))}
                 placeholder="e.g. 1, 5, 12"
               />
             </div>

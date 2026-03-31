@@ -256,11 +256,12 @@ export function analyzeStructure(text: string): StructureAnalysis {
     }
   }
   
-  // Detect language
+  // Detect language - scan a wider range to handle HTML-heavy content
   let detectedLanguage = 'unknown';
+  const scanLimit = Math.min(lines.length, 2000);
   for (const [lang, pattern] of Object.entries(ARTICLE_PATTERNS)) {
-    for (const line of lines.slice(0, 500)) {
-      if (pattern.test(line.trim())) {
+    for (let i = 0; i < scanLimit; i++) {
+      if (pattern.test(lines[i].trim())) {
         detectedLanguage = lang;
         break;
       }

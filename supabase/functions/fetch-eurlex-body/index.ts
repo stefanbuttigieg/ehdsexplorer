@@ -7,7 +7,7 @@ const LANGUAGE_CODE_PATTERN = /^[a-z]{2}$/i;
 const CELEX_PATTERN = /^\d{5}[A-Z]\d{4}$/i;
 
 const SHELL_MARKERS = /Official Journal of the European Union|available languages and formats|Display all languages|Choose language|multilingual display|language selector/i;
-const ARTICLE_MARKERS = /\b(?:Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu)\s+\d+|(?:^|\n)\s*\d+\.\s*(?:cikk|artikla|pants|straipsnis|člen)\b/im;
+const ARTICLE_MARKERS = /\b(?:Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Članak|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu|Člen)\s+\d+|(?:^|\n)\s*\d+\.\s*(?:cikk|artikla|pants|straipsnis)\b/im;
 
 function isShellPage(content: string): boolean {
   if (SHELL_MARKERS.test(content) && !ARTICLE_MARKERS.test(content)) return true;

@@ -422,18 +422,21 @@ const AdminTranslationImportPage = () => {
               Parse translated regulation PDFs and import content with validation
             </p>
           </div>
-          {parsedContent && (
-            <div className="flex gap-2">
+           {parsedContent && (
+            <div className="flex gap-2 flex-wrap">
               <Button
                 variant={showExtractionPreview ? "default" : "outline"}
+                size="sm"
                 onClick={() => setShowExtractionPreview(!showExtractionPreview)}
               >
                 <Eye className="h-4 w-4 mr-2" />
-                {showExtractionPreview ? "Hide" : "Show"} Preview
+                <span className="hidden sm:inline">{showExtractionPreview ? "Hide" : "Show"} Preview</span>
+                <span className="sm:hidden">Preview</span>
               </Button>
-              <Button variant="outline" onClick={handleReset}>
+              <Button variant="outline" size="sm" onClick={handleReset}>
                 <RotateCcw className="h-4 w-4 mr-2" />
-                Start Over
+                <span className="hidden sm:inline">Start Over</span>
+                <span className="sm:hidden">Reset</span>
               </Button>
             </div>
           )}

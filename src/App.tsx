@@ -281,6 +281,7 @@ const App = () => (
             <Route path="/admin/ia-data-tables" element={<AdminImplementingActDataTablesPage />} />
             <Route path="/admin/faq-data-tables" element={<AdminFaqDataTablesPage />} />
             <Route path="/admin/sidebar" element={<AdminSidebarPage />} />
+            <Route path="/admin/ui-translations" element={<AdminUITranslationsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>

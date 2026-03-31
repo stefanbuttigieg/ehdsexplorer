@@ -115,6 +115,7 @@ function FAQItem({ faq, footnotes, isOpen, onToggle, implementingActs }: {
 
 const FAQsPage = () => {
   const { data: faqs = [], isLoading } = useEhdsFaqs();
+  const { data: implementingActs = [] } = useImplementingActs();
   const faqIds = useMemo(() => faqs.map(f => f.id), [faqs]);
   const { data: allFootnotes = [] } = useEhdsFaqFootnotes(faqIds);
   const [search, setSearch] = useState("");

@@ -474,19 +474,22 @@ const AdminTranslationImportPage = () => {
         {!parsedContent ? (
           /* Import Method Selection */
           <div className="space-y-6">
-            <Tabs value={importMethod} onValueChange={(v) => setImportMethod(v as "upload" | "url" | "batch")}>
+             <Tabs value={importMethod} onValueChange={(v) => setImportMethod(v as "upload" | "url" | "batch")}>
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="url" className="gap-2">
-                  <Globe className="h-4 w-4" />
-                  EUR-Lex URL
+                <TabsTrigger value="url" className="gap-1 sm:gap-2 text-xs sm:text-sm px-1 sm:px-3">
+                  <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">EUR-Lex URL</span>
+                  <span className="sm:hidden">URL</span>
                 </TabsTrigger>
-                <TabsTrigger value="batch" className="gap-2">
-                  <Languages className="h-4 w-4" />
-                  Batch All
+                <TabsTrigger value="batch" className="gap-1 sm:gap-2 text-xs sm:text-sm px-1 sm:px-3">
+                  <Languages className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Batch All</span>
+                  <span className="sm:hidden">Batch</span>
                 </TabsTrigger>
-                <TabsTrigger value="upload" className="gap-2">
-                  <Upload className="h-4 w-4" />
-                  Upload PDF/Text
+                <TabsTrigger value="upload" className="gap-1 sm:gap-2 text-xs sm:text-sm px-1 sm:px-3">
+                  <Upload className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Upload PDF/Text</span>
+                  <span className="sm:hidden">Upload</span>
                 </TabsTrigger>
               </TabsList>
 

@@ -72,7 +72,6 @@ const AdminEhdsFaqParserPage = () => {
     <AdminPageLayout
       title="EHDS FAQ Parser"
       description="Import and sync official EU Commission FAQs from the EHDS Q&A PDF"
-      icon={FileText}
     >
       <div className="space-y-6">
         {/* Sync Controls */}

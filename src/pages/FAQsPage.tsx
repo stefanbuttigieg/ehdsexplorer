@@ -16,7 +16,7 @@ import { useEhdsFaqs, useEhdsFaqFootnotes, getChaptersFromFaqs, type EhdsFaq } f
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
 
 function FAQContent({ faq, footnotes }: { faq: EhdsFaq; footnotes: { marker: string; content: string }[] }) {
   const content = faq.rich_content || faq.answer;

@@ -564,8 +564,11 @@ export function BatchEurLexImporter({ celexNumber = '32025R0327', onComplete }: 
               Clear Results
             </Button>
             {errorCount > 0 && (
-              <Button onClick={startBatch} className="flex-1">
-                Retry Failed
+              <Button onClick={() => {
+                const failed = statuses.filter(s => s.status === 'error').map(s => s.code);
+                startBatch(failed);
+              }} className="flex-1">
+                Retry Failed ({errorCount})
               </Button>
             )}
           </div>

@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Search, Pencil, Trash2, ExternalLink, Upload, Plus, History, Table as TableIcon } from "lucide-react";
+import { Search, Pencil, Trash2, ExternalLink, Upload, Plus, History, Table as TableIcon, CheckSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -11,10 +11,13 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { AdminPageLayout } from "@/components/admin/AdminPageLayout";
 import MarkdownEditor from "@/components/MarkdownEditor";
 import { useAllEhdsFaqs, useEhdsFaqVersions, type EhdsFaq, type EhdsFaqVersion } from "@/hooks/useEhdsFaqs";
+import { useBulkSelection } from "@/hooks/useBulkSelection";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -27,6 +30,7 @@ const AdminEhdsFaqsPage = () => {
   const [editingFaq, setEditingFaq] = useState<EhdsFaq | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [showVersionDialog, setShowVersionDialog] = useState(false);
+  const [showBulkEdit, setShowBulkEdit] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 

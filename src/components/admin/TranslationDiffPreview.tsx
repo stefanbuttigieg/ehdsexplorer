@@ -159,18 +159,18 @@ export function TranslationDiffPreview({
            </CardTitle>
          </CardHeader>
          <CardContent className="space-y-2">
-           <div className="flex gap-4 text-sm">
-             <span>Articles: <Badge variant="secondary">{validation.articleCount} / 105</Badge></span>
-             <span>Recitals: <Badge variant="secondary">{validation.recitalCount} / 115</Badge></span>
-              {validation.definitionCount > 0 && (
-                <span>Definitions: <Badge variant="secondary">{validation.definitionCount}</Badge></span>
-              )}
-              {validation.annexCount > 0 && (
-                <span>Annexes: <Badge variant="secondary">{validation.annexCount}</Badge></span>
-              )}
-              {validation.footnoteCount > 0 && (
-                <span>Footnotes: <Badge variant="secondary">{validation.footnoteCount}</Badge></span>
-              )}
+            <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm">
+              <span>Articles: <Badge variant="secondary">{validation.articleCount} / 105</Badge></span>
+              <span>Recitals: <Badge variant="secondary">{validation.recitalCount} / 115</Badge></span>
+               {validation.definitionCount > 0 && (
+                 <span>Definitions: <Badge variant="secondary">{validation.definitionCount}</Badge></span>
+               )}
+               {validation.annexCount > 0 && (
+                 <span>Annexes: <Badge variant="secondary">{validation.annexCount}</Badge></span>
+               )}
+               {validation.footnoteCount > 0 && (
+                 <span>Footnotes: <Badge variant="secondary">{validation.footnoteCount}</Badge></span>
+               )}
            </div>
            
            {validation.errors.length > 0 && (
@@ -211,30 +211,32 @@ export function TranslationDiffPreview({
        </div>
  
        {/* Content Preview Tabs */}
-       <Tabs defaultValue="articles">
-         <TabsList>
-           <TabsTrigger value="articles">
-             Articles ({filteredArticles.length})
-           </TabsTrigger>
-           <TabsTrigger value="recitals">
-             Recitals ({filteredRecitals.length})
-           </TabsTrigger>
-            {parsedDefinitions.length > 0 && (
-              <TabsTrigger value="definitions">
-                Definitions ({parsedDefinitions.length})
+        <Tabs defaultValue="articles">
+          <div className="overflow-x-auto -mx-2 px-2 scrollbar-thin">
+            <TabsList className="flex flex-nowrap sm:flex-wrap h-auto gap-1 justify-start bg-transparent p-0 min-w-max sm:min-w-0">
+              <TabsTrigger value="articles" className="text-xs sm:text-sm whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                Articles ({filteredArticles.length})
               </TabsTrigger>
-            )}
-            {parsedAnnexes.length > 0 && (
-              <TabsTrigger value="annexes">
-                Annexes ({parsedAnnexes.length})
+              <TabsTrigger value="recitals" className="text-xs sm:text-sm whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                Recitals ({filteredRecitals.length})
               </TabsTrigger>
-            )}
-            {parsedFootnotes.length > 0 && (
-              <TabsTrigger value="footnotes">
-                Footnotes ({parsedFootnotes.length})
-              </TabsTrigger>
-            )}
-         </TabsList>
+               {parsedDefinitions.length > 0 && (
+                 <TabsTrigger value="definitions" className="text-xs sm:text-sm whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                   Defs ({parsedDefinitions.length})
+                 </TabsTrigger>
+               )}
+               {parsedAnnexes.length > 0 && (
+                 <TabsTrigger value="annexes" className="text-xs sm:text-sm whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                   Annexes ({parsedAnnexes.length})
+                 </TabsTrigger>
+               )}
+               {parsedFootnotes.length > 0 && (
+                 <TabsTrigger value="footnotes" className="text-xs sm:text-sm whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                   Footnotes ({parsedFootnotes.length})
+                 </TabsTrigger>
+               )}
+            </TabsList>
+          </div>
  
          <TabsContent value="articles" className="mt-4">
            <div className="flex items-center gap-2 mb-3">
@@ -303,7 +305,7 @@ export function TranslationDiffPreview({
                        </div>
                        
                        <CollapsibleContent>
-                         <div className="border-t p-3 grid grid-cols-2 gap-4">
+                          <div className="border-t p-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
                            <div>
                              <h4 className="text-xs font-semibold text-muted-foreground mb-1 flex items-center gap-1">
                                <Eye className="h-3 w-3" /> Translated Content
@@ -405,7 +407,7 @@ export function TranslationDiffPreview({
                        </div>
                        
                        <CollapsibleContent>
-                         <div className="border-t p-3 grid grid-cols-2 gap-4">
+                         <div className="border-t p-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
                            <div>
                              <h4 className="text-xs font-semibold text-muted-foreground mb-1 flex items-center gap-1">
                                <Eye className="h-3 w-3" /> Translated Content

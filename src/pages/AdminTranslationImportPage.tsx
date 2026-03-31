@@ -405,7 +405,7 @@ const AdminTranslationImportPage = () => {
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 animate-fade-in">
+      <div className="max-w-7xl mx-auto p-3 sm:p-4 md:p-6 animate-fade-in">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-6">
           <Link to="/admin/translations">
@@ -414,26 +414,29 @@ const AdminTranslationImportPage = () => {
             </Button>
           </Link>
           <div className="flex-1">
-            <h1 className="text-2xl sm:text-3xl font-bold font-serif flex items-center gap-2">
-              <Upload className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+             <h1 className="text-lg sm:text-2xl md:text-3xl font-bold font-serif flex items-center gap-2">
+               <Upload className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-primary" />
               Translation Import
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground">
               Parse translated regulation PDFs and import content with validation
             </p>
           </div>
-          {parsedContent && (
-            <div className="flex gap-2">
+           {parsedContent && (
+            <div className="flex gap-2 flex-wrap">
               <Button
                 variant={showExtractionPreview ? "default" : "outline"}
+                size="sm"
                 onClick={() => setShowExtractionPreview(!showExtractionPreview)}
               >
                 <Eye className="h-4 w-4 mr-2" />
-                {showExtractionPreview ? "Hide" : "Show"} Preview
+                <span className="hidden sm:inline">{showExtractionPreview ? "Hide" : "Show"} Preview</span>
+                <span className="sm:hidden">Preview</span>
               </Button>
-              <Button variant="outline" onClick={handleReset}>
+              <Button variant="outline" size="sm" onClick={handleReset}>
                 <RotateCcw className="h-4 w-4 mr-2" />
-                Start Over
+                <span className="hidden sm:inline">Start Over</span>
+                <span className="sm:hidden">Reset</span>
               </Button>
             </div>
           )}
@@ -471,19 +474,22 @@ const AdminTranslationImportPage = () => {
         {!parsedContent ? (
           /* Import Method Selection */
           <div className="space-y-6">
-            <Tabs value={importMethod} onValueChange={(v) => setImportMethod(v as "upload" | "url" | "batch")}>
+             <Tabs value={importMethod} onValueChange={(v) => setImportMethod(v as "upload" | "url" | "batch")}>
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="url" className="gap-2">
-                  <Globe className="h-4 w-4" />
-                  EUR-Lex URL
+                <TabsTrigger value="url" className="gap-1 sm:gap-2 text-xs sm:text-sm px-1 sm:px-3">
+                  <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">EUR-Lex URL</span>
+                  <span className="sm:hidden">URL</span>
                 </TabsTrigger>
-                <TabsTrigger value="batch" className="gap-2">
-                  <Languages className="h-4 w-4" />
-                  Batch All
+                <TabsTrigger value="batch" className="gap-1 sm:gap-2 text-xs sm:text-sm px-1 sm:px-3">
+                  <Languages className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Batch All</span>
+                  <span className="sm:hidden">Batch</span>
                 </TabsTrigger>
-                <TabsTrigger value="upload" className="gap-2">
-                  <Upload className="h-4 w-4" />
-                  Upload PDF/Text
+                <TabsTrigger value="upload" className="gap-1 sm:gap-2 text-xs sm:text-sm px-1 sm:px-3">
+                  <Upload className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Upload PDF/Text</span>
+                  <span className="sm:hidden">Upload</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -509,7 +515,7 @@ const AdminTranslationImportPage = () => {
                   </CardHeader>
                   <CardContent className="space-y-6">
                     {/* File Upload */}
-                    <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                    <div className="border-2 border-dashed rounded-lg p-4 sm:p-8 text-center">
                       <input
                         type="file"
                         accept=".pdf,.txt,.md"
@@ -641,8 +647,9 @@ const AdminTranslationImportPage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
-                  <SelectTrigger className="w-64">
+                 <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+
+                  <SelectTrigger className="w-full sm:w-64">
                     <SelectValue placeholder="Select language" />
                   </SelectTrigger>
                   <SelectContent>

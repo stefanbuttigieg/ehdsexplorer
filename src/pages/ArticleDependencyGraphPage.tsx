@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Network, ArrowRight, ArrowLeft, ZoomIn, ZoomOut, RotateCcw, Info, Filter } from "lucide-react";
 import Layout from "@/components/Layout";

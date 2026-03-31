@@ -292,6 +292,7 @@ const FAQsPage = () => {
                             footnotes={getFootnotes(faq.id)}
                             isOpen={openFaqs.has(faq.faq_number)}
                             onToggle={() => toggleFaq(faq.faq_number)}
+                            implementingActs={implementingActs}
                           />
                         ))}
                       </div>

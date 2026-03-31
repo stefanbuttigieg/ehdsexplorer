@@ -184,7 +184,7 @@ const Layout = ({
 
   // Use DB items if available, otherwise fallback
   const navItems = useMemo(() => {
-    let items = dbMainItems || fallbackNavItems;
+    let items = (dbMainItems && dbMainItems.length > 0) ? dbMainItems : fallbackNavItems;
 
     // Filter to kid-friendly routes when Kids Mode is active
     if (isKidsMode) {

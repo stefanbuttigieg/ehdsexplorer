@@ -341,7 +341,8 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [X] Map of officially designated Digital Health Authorities and Health Data Access Bodies
 - [X] Add links to existing regulatory-focused portals
 - [X] Help Centre Content Manager
-- [ ] Website Layout Manager
+- [X] Website Layout Manager (Sidebar Manager)
+- [X] EHDS Official FAQs with PDF parser and auto-update
 - [ ] Complete content updates - Implementing Acts
 - [ ] Complete content updates - Annexes
 - [ ] Complete content updates - Language Translations

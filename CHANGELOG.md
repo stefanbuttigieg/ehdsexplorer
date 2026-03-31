@@ -5,6 +5,56 @@ All notable changes to the EHDS Regulation Explorer will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-03-31
+
+### Added
+
+#### Official EHDS FAQs System
+- **Dedicated `ehds_faqs` table** — Purpose-built storage for the 67 official EU Commission EHDS Q&As with chapter grouping, sub-categories, source article references, and rich markdown content
+- **`ehds_faq_footnotes` table** — Per-FAQ footnote storage with marker and content fields
+- **`ehds_faq_sync_log` table** — Audit trail for PDF parsing runs with SHA-256 hash-based change detection
+- **PDF Parser Edge Function** (`parse-ehds-faq`) — AI-powered extraction using Gemini 2.5 Pro to parse all 67 FAQs from the 61-page EU Commission PDF, preserving tables, links, footnotes, and article references
+- **Auto-Update Mechanism** (`check-ehds-faq-updates`) — Weekly Firecrawl-based monitoring of the EU source page to detect new PDF versions and trigger automatic re-parsing
+- **Public FAQs Page** (`/faqs`) — Searchable, chapter-grouped accordion display with rich content rendering, footnote tooltips, article reference badges, FAQ cross-reference anchors, and official source linkback
+- **Admin EHDS FAQ Manager** (`/admin/ehds-faqs`) — Dedicated admin page for managing FAQs separately from Help Center content, with edit, publish/unpublish, and sync controls
+- **Admin PDF Parser Page** (`/admin/ehds-faq-parser`) — Manual sync trigger, PDF URL override, sync history log, and dry-run preview mode
+- **API Integration** — FAQs available via `?resource=faqs` endpoint with chapter filtering, field selection, and CSV export
+- **Article Sidebar Integration** — "Related Official FAQs" card on article pages linking to relevant FAQ entries
+- **AI Assistant Integration** — EHDS FAQs injected into assistant context for faithful, citation-backed answers
+- **FAQ-to-Implementing Act cross-links** — FAQs automatically display related implementing acts based on shared article references
+
+#### Implementing Act Data Tables
+- **`implementing_act_data_tables` table** — Structured data element storage for implementing acts with column name, data type, description, cardinality, value set, and FHIR mapping fields
+- **Searchable & exportable tables** — Full-text search across all data element fields with CSV and JSON export
+- **Admin Data Tables Manager** (`/admin/implementing-act-data-tables`) — CRUD interface for managing data elements per implementing act
+- **Public display** — Data tables tab on implementing act detail pages with search bar and export buttons
+
+#### Content Network Knowledge Graph
+- **Interactive visualization** (`/content-network`) — SVG-based force-grouped graph linking Articles, FAQs, Recitals, Annexes, and Implementing Acts
+- **Pan, zoom, and filter** — Filter by content type, click nodes for detail panel with metadata and connections
+- **Color-coded nodes** — Distinct colors for each EHDS entity type
+- **Linked from Article Dependencies page** — "View Full Content Network" button
+
+#### Sidebar Manager
+- **`sidebar_items` table** — Database-driven sidebar navigation with label, path, icon, section, sort order, and visibility controls
+- **Admin Sidebar Manager** (`/admin/sidebar`) — Drag-to-reorder, toggle visibility, edit details, add/delete navigation links
+- **Dynamic Layout** — Sidebar renders from DB with hardcoded fallback for resilience
+
+#### AI Assistant Enhancements
+- **Expanded model selection** — Added Gemini 2.5 Flash, Gemini 2.5 Flash Lite, GPT-5 Mini, GPT-5 Nano, and GPT-5.2
+- **Admin AI Settings** (`/admin/ai-settings`) — Manage available models, default model, and system prompt from admin panel
+- **Feedback fix** — AI Assistant feedback (thumbs up/down) now correctly persists to the `ai_assistant_feedback` table
+
+#### Implementing Acts Search & Sort
+- **Search bar** on implementing acts page for filtering by title, description, or category
+- **Sort by linked article number** for quick discovery of acts related to specific articles
+
+### Fixed
+- **Sidebar disappearing on Live** — Fallback logic now treats empty `sidebar_items` array same as null, ensuring hardcoded navigation always renders when DB is empty
+- **AI feedback not recording** — Fixed mutation to correctly insert feedback records with user query and message content
+
+---
+
 ## [2.0.8] - 2026-03-25
 
 ### Added

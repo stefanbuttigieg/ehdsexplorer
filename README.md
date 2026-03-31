@@ -10,7 +10,7 @@ A comprehensive digital platform for exploring **Regulation (EU) 2025/327** - th
 ![Leaflet](https://img.shields.io/badge/Leaflet-1.9-199900?logo=leaflet)
 ![Capacitor](https://img.shields.io/badge/Capacitor-8.0-119EFF?logo=capacitor)
 [![BuyMeACoffee](https://raw.githubusercontent.com/pachadotdev/buymeacoffee-badges/main/bmc-yellow.svg)](https://buymeacoffee.com/stefanbuttigieg)
-![Lovable Credits](https://img.shields.io/badge/Lovable%20Credits-650%20credits%20used-blue)
+![Lovable Credits](https://img.shields.io/badge/Lovable%20Credits-700%20credits%20used-blue)
 ![Analytics](https://img.shields.io/badge/Analytics-Umami-brightgreen)
 ![UX Analytics](https://img.shields.io/badge/UX%20Analytics-PostHog-blue)
 
@@ -53,6 +53,8 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Detailed act pages** with dedicated articles and recitals per implementing act
 - **Searchable content** within each implementing act
 - **Section-based article organization** for complex acts
+- **Data Tables** — Structured data element tables per implementing act with search, CSV/JSON export, FHIR mapping fields
+- **Search & sort** — Filter implementing acts by title/description and sort by linked article number
 
 ### 🗺️ National EHDS Entities
 - **Directory of DHAs and HDABs** across all 27 EU member states
@@ -138,6 +140,27 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Admin-managed announcements** displayed as banners
 - **Expiration dates** for time-limited notifications
 - **Dismissible notifications** for better UX
+
+### ❓ Official EHDS FAQs
+- **67 official EU Commission Q&As** parsed from the EHDS FAQ PDF document
+- **Chapter-grouped accordion** display with search across questions and answers
+- **Rich content** rendering including markdown tables, links, and formatted lists
+- **Footnote tooltips** per FAQ with inline markers
+- **Article reference badges** linking to `/articles/{number}`
+- **Implementing Act cross-links** showing related acts per FAQ
+- **FAQ cross-references** (e.g. "see question 33") as clickable anchors
+- **Official source linkback** to EU Commission page
+- **Auto-update pipeline** — weekly monitoring of EU source page for new PDF versions
+- **PDF parser** — AI-powered extraction of all 67 FAQs preserving tables, footnotes, and references
+- **API endpoint** — `?resource=faqs` with chapter filtering and CSV export
+- **JSON-LD structured data** for SEO
+
+### 🕸️ Content Network Graph
+- **Interactive knowledge graph** linking Articles, FAQs, Recitals, Annexes, and Implementing Acts
+- **SVG visualization** with pan, zoom, and force-grouped layout
+- **Filter by content type** and click nodes for detail panel
+- **Color-coded nodes** for different EHDS entity types
+- **Accessible from** Article Dependencies page
 
 ### 📊 Quick Explorers & Visualizations
 - **Articles grid** (1-105) with hover tooltips showing titles
@@ -242,15 +265,18 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 ### 🔐 Admin Backend
 - **Role-based access control** (Admin/Editor roles)
 - **Centralized API documentation** at `/admin/api-docs` with all GET/POST endpoints
+- **Sidebar Manager** at `/admin/sidebar` — database-driven navigation with reorder, visibility toggle, add/delete
 - **Content management** for all content types:
   - Articles, Recitals, Chapters, Sections
   - Definitions, Annexes
-  - Implementing Acts (with dedicated article/recital/section content)
+  - Implementing Acts (with dedicated article/recital/section content and data tables)
+  - EHDS FAQs (separate from Help Center FAQs) with PDF parser and auto-sync
   - Joint Action Deliverables
   - Published Works
   - Notifications
   - Footnotes (inline and attached)
   - Plain Language Translations
+- **AI Settings** — manage available models, default model, and system prompt
 - **Implementation Tracker** with inline evidence management per obligation
 - **Markdown WYSIWYG editor** with live preview
 - **Bulk editing** with multi-select for recitals and articles
@@ -315,7 +341,8 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [X] Map of officially designated Digital Health Authorities and Health Data Access Bodies
 - [X] Add links to existing regulatory-focused portals
 - [X] Help Centre Content Manager
-- [ ] Website Layout Manager
+- [X] Website Layout Manager (Sidebar Manager)
+- [X] EHDS Official FAQs with PDF parser and auto-update
 - [ ] Complete content updates - Implementing Acts
 - [ ] Complete content updates - Annexes
 - [ ] Complete content updates - Language Translations
@@ -356,6 +383,7 @@ https://api.ehdsexplorer.eu/functions/v1/api-data
 | `?resource=definitions` | All definitions |
 | `?resource=chapters` | All 10 chapters |
 | `?resource=implementing-acts` | All 33 implementing acts |
+| `?resource=faqs` | All 67 official EHDS FAQs |
 | `?resource=metadata` | Dataset metadata |
 
 ### Example

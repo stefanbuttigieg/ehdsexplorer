@@ -227,7 +227,7 @@ const AdminSidebarPage = () => {
             </div>
             <div className="space-y-1">
               <Label>Section</Label>
-              <Select value={form.section} onValueChange={v => setForm(f => ({ ...f, section: v }))}>
+              <Select value={form.section} onValueChange={(v: "main" | "legal" | "utility") => setForm(f => ({ ...f, section: v }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="main">Main Navigation</SelectItem>

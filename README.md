@@ -141,6 +141,27 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Expiration dates** for time-limited notifications
 - **Dismissible notifications** for better UX
 
+### ❓ Official EHDS FAQs
+- **67 official EU Commission Q&As** parsed from the EHDS FAQ PDF document
+- **Chapter-grouped accordion** display with search across questions and answers
+- **Rich content** rendering including markdown tables, links, and formatted lists
+- **Footnote tooltips** per FAQ with inline markers
+- **Article reference badges** linking to `/articles/{number}`
+- **Implementing Act cross-links** showing related acts per FAQ
+- **FAQ cross-references** (e.g. "see question 33") as clickable anchors
+- **Official source linkback** to EU Commission page
+- **Auto-update pipeline** — weekly monitoring of EU source page for new PDF versions
+- **PDF parser** — AI-powered extraction of all 67 FAQs preserving tables, footnotes, and references
+- **API endpoint** — `?resource=faqs` with chapter filtering and CSV export
+- **JSON-LD structured data** for SEO
+
+### 🕸️ Content Network Graph
+- **Interactive knowledge graph** linking Articles, FAQs, Recitals, Annexes, and Implementing Acts
+- **SVG visualization** with pan, zoom, and force-grouped layout
+- **Filter by content type** and click nodes for detail panel
+- **Color-coded nodes** for different EHDS entity types
+- **Accessible from** Article Dependencies page
+
 ### 📊 Quick Explorers & Visualizations
 - **Articles grid** (1-105) with hover tooltips showing titles
 - **Recitals grid** (1-115) with content preview on hover

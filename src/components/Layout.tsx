@@ -2,6 +2,7 @@ import { ReactNode, useState, useEffect, useMemo } from "react";
 import { version } from '../../package.json';
 import { Link, useLocation } from "react-router-dom";
 import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText, Accessibility, Code, Newspaper, Settings, HelpCircle, StickyNote, Users, GitCompare, PanelLeftClose, PanelLeft, Trophy, MapPin, Brain, Network, Heart, Laptop, Stethoscope, Sparkles, Wrench, Globe, Medal, MessageCircleQuestion, BookOpen, Layers, ExternalLink, type LucideIcon } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useSidebarItems, type SidebarItem } from "@/hooks/useSidebarItems";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -60,6 +61,26 @@ const ROUTE_TO_PLACEMENT: Record<string, string> = {
   '/tools': 'tools',
 };
 
+// Map sidebar labels to translation keys for i18n
+const LABEL_TO_KEY: Record<string, string> = {
+  "Home": "nav.home", "Overview": "nav.overview", "Definitions": "nav.definitions",
+  "Articles": "nav.articles", "Recitals": "nav.recitals", "Annexes": "nav.annexes",
+  "Implementing Acts": "nav.implementing_acts", "EHDS Country Map": "nav.country_map",
+  "Regulatory Map": "nav.regulatory_map", "Article Dependencies": "nav.article_dependencies",
+  "Content Network": "nav.content_network", "For Citizens": "nav.for_citizens",
+  "For Health Tech": "nav.for_healthtech", "For Healthcare Pros": "nav.for_healthcare",
+  "Topic Index": "nav.topic_index", "Tools Hub": "nav.tools_hub",
+  "Scenario Finder": "nav.scenario_finder", "News": "nav.news",
+  "Official FAQs": "nav.faqs", "Bookmarks": "nav.bookmarks", "Notes": "nav.notes",
+  "Achievements": "nav.achievements", "Compare": "nav.compare",
+  "Leaderboard": "nav.leaderboard", "Games": "nav.games", "Comics": "nav.comics",
+  "Help Center": "nav.help_center", "API Documentation": "nav.api_docs",
+  "Privacy Policy": "nav.privacy_policy", "Cookie Policy": "nav.cookie_policy",
+  "Terms of Service": "nav.terms_of_service", "Accessibility Statement": "nav.accessibility",
+  "Chapters": "nav.chapters", "Search": "ui.search",
+  "Keyboard shortcuts": "ui.keyboard_shortcuts",
+};
+
 function LayoutDisclaimers({ pathname }: { pathname: string }) {
   const placement = ROUTE_TO_PLACEMENT[pathname];
   if (!placement) return null;
@@ -102,7 +123,14 @@ const Layout = ({
   } = useAuth();
   const { isFeatureEnabled } = useFeatureFlags();
   const { isKidsMode, isKidsFriendlyRoute } = useKidsMode();
+  const { t } = useLanguage();
   const { data: dbSidebarItems } = useSidebarItems();
+
+  // Helper to translate a label via the LABEL_TO_KEY map
+  const tLabel = (label: string) => {
+    const key = LABEL_TO_KEY[label];
+    return key ? t(key, label) : label;
+  };
   // Initialize text highlight hook for URL-based highlighting
   useTextHighlight();
 
@@ -270,10 +298,10 @@ const Layout = ({
                           <item.icon className="h-4 w-4" />
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent side="right">{item.label}</TooltipContent>
+                      <TooltipContent side="right">{tLabel(item.label)}</TooltipContent>
                     </Tooltip> : <Button variant={isActive(item.path) ? "secondary" : "ghost"} className={cn("w-full justify-start gap-2 overflow-hidden", isActive(item.path) && "bg-sidebar-accent text-sidebar-accent-foreground")}>
                       <item.icon className="h-4 w-4 flex-shrink-0" />
-                      <span className="truncate">{item.label}</span>
+                      <span className="truncate">{tLabel(item.label)}</span>
                     </Button>}
                 </Link>)}
             </div>
@@ -282,7 +310,7 @@ const Layout = ({
             {!sidebarCollapsed && !isKidsMode && <Collapsible open={chaptersOpen} onOpenChange={setChaptersOpen} className="mt-4" data-tour="sidebar-chapters">
                 <CollapsibleTrigger asChild>
                   <Button variant="ghost" className="w-full justify-between">
-                    <span className="font-semibold">Chapters</span>
+                    <span className="font-semibold">{tLabel("Chapters")}</span>
                     <ChevronDown className={cn("h-4 w-4 transition-transform flex-shrink-0", chaptersOpen && "rotate-180")} />
                   </Button>
                 </CollapsibleTrigger>

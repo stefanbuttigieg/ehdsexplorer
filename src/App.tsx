@@ -129,6 +129,7 @@ const AdminEhdsFaqsPage = lazy(() => import("./pages/AdminEhdsFaqsPage"));
 const AdminImplementingActDataTablesPage = lazy(() => import("./pages/AdminImplementingActDataTablesPage"));
 const AdminFaqDataTablesPage = lazy(() => import("./pages/AdminFaqDataTablesPage"));
 const AdminSidebarPage = lazy(() => import("./pages/AdminSidebarPage"));
+const AdminUITranslationsPage = lazy(() => import("./pages/AdminUITranslationsPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -280,6 +281,7 @@ const App = () => (
             <Route path="/admin/ia-data-tables" element={<AdminImplementingActDataTablesPage />} />
             <Route path="/admin/faq-data-tables" element={<AdminFaqDataTablesPage />} />
             <Route path="/admin/sidebar" element={<AdminSidebarPage />} />
+            <Route path="/admin/ui-translations" element={<AdminUITranslationsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>

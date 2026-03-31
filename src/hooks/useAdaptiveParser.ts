@@ -257,16 +257,23 @@ export function analyzeStructure(text: string): StructureAnalysis {
   }
   
   // Detect language - scan a wider range to handle HTML-heavy content
+  // Count matches per language to pick the one with most article headers
   let detectedLanguage = 'unknown';
   const scanLimit = Math.min(lines.length, 2000);
+  const langHits: Record<string, number> = {};
   for (const [lang, pattern] of Object.entries(ARTICLE_PATTERNS)) {
+    let count = 0;
     for (let i = 0; i < scanLimit; i++) {
       if (pattern.test(lines[i].trim())) {
-        detectedLanguage = lang;
-        break;
+        count++;
       }
     }
-    if (detectedLanguage !== 'unknown') break;
+    if (count > 0) langHits[lang] = count;
+  }
+  // Pick language with most hits; in case of tie, prefer specific over generic
+  if (Object.keys(langHits).length > 0) {
+    const sorted = Object.entries(langHits).sort((a, b) => b[1] - a[1]);
+    detectedLanguage = sorted[0][0];
   }
   
   // Sample recitals for preview

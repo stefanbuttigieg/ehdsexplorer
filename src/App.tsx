@@ -125,6 +125,7 @@ const ArticleDependencyGraphPage = lazy(() => import("./pages/ArticleDependencyG
 const FAQsPage = lazy(() => import("./pages/FAQsPage"));
 const AdminEhdsFaqParserPage = lazy(() => import("./pages/AdminEhdsFaqParserPage"));
 const AdminEhdsFaqsPage = lazy(() => import("./pages/AdminEhdsFaqsPage"));
+const AdminImplementingActDataTablesPage = lazy(() => import("./pages/AdminImplementingActDataTablesPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -272,6 +273,7 @@ const App = () => (
             <Route path="/admin/comic-panels" element={<AdminComicPanelsPage />} />
             <Route path="/admin/ehds-faq-parser" element={<AdminEhdsFaqParserPage />} />
             <Route path="/admin/ehds-faqs" element={<AdminEhdsFaqsPage />} />
+            <Route path="/admin/ia-data-tables" element={<AdminImplementingActDataTablesPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>

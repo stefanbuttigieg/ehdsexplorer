@@ -253,6 +253,12 @@ const AdminDashboard = () => {
       href: '/admin/implementing-act-content',
     },
     {
+      title: 'IA Data Tables',
+      description: 'Manage structured data tables for implementing acts (data elements, logical models)',
+      icon: TableProperties,
+      href: '/admin/ia-data-tables',
+    },
+    {
       title: 'Comic Panel Images',
       description: 'Pre-generate and manage AI comic panel artwork for Comics section',
       icon: Sparkles,

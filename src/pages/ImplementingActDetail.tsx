@@ -17,6 +17,7 @@ import { SubscribeAlertButton } from "@/components/SubscribeAlertButton";
 import { CompareButton } from "@/components/CompareButton";
 import LinkedInPostsSection from "@/components/LinkedInPostsSection";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
+import ImplementingActDataTables from "@/components/ImplementingActDataTables";
 
 const parseFeedbackDeadline = (deadline: string) => {
   const parts = deadline.split(" - ");
@@ -189,6 +190,11 @@ const ImplementingActDetail = () => {
         {/* Implementing Act Content (Articles & Recitals) */}
         <div className="mb-6">
           <ImplementingActContent implementingActId={act.id} />
+        </div>
+
+        {/* Data Tables */}
+        <div className="mb-6">
+          <ImplementingActDataTables implementingActId={act.id} />
         </div>
 
         <Card className="mb-6">

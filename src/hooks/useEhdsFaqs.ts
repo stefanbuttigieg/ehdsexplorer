@@ -129,6 +129,20 @@ export function useEhdsFaqSyncLogs() {
   });
 }
 
+export function useEhdsFaqVersions() {
+  return useQuery({
+    queryKey: ["ehds-faq-versions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ehds_faq_versions")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as EhdsFaqVersion[];
+    },
+  });
+}
+
 // Get unique chapters from FAQs for navigation
 export function getChaptersFromFaqs(faqs: EhdsFaq[]): { chapter: string; count: number; subCategories: string[] }[] {
   const chapterMap = new Map<string, { count: number; subCategories: Set<string> }>();

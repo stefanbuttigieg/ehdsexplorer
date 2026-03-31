@@ -138,14 +138,16 @@ IMPORTANT: Extract ALL 67 FAQs. Do not skip any. Preserve markdown tables exactl
           faq_number: faq.faq_number,
           question: faq.question,
           answer: faq.answer || faq.question,
-          rich_content: faq.rich_content || faq.answer,
+          rich_content: faq.rich_content && faq.rich_content !== faq.answer ? faq.rich_content : null,
           chapter: faq.chapter || "General",
           sub_category: faq.sub_category || null,
           source_articles: faq.source_articles || [],
+          source_recitals: faq.source_recitals || [],
           source_references: faq.source_references || null,
           is_published: true,
           sort_order: faq.faq_number,
           pdf_version: pdfHash.substring(0, 16),
+          document_version: body.document_version || null,
         }, { onConflict: "faq_number" });
 
       if (error) {

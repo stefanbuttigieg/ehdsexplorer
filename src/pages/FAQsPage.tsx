@@ -94,6 +94,18 @@ function FAQItem({ faq, footnotes, isOpen, onToggle, implementingActs }: {
                 ))}
               </div>
             )}
+            {(faq.source_recitals || []).length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {(faq.source_recitals || []).map((rec) => (
+                  <Link key={rec} to={`/recital/${rec}`}>
+                    <Badge variant="outline" className="text-xs cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors border-accent">
+                      <ScrollText className="h-3 w-3 mr-1" />
+                      Recital {rec}
+                    </Badge>
+                  </Link>
+                ))}
+              </div>
+            )}
             {relatedActs.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-2">
                 {relatedActs.map((act) => (

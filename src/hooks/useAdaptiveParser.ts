@@ -99,7 +99,7 @@ const CHAPTER_PATTERNS: Record<string, RegExp> = {
   et: /^([IVXLCDM]+)\s*PEATÜKK/i,
   lv: /^([IVXLCDM]+)\s*NODAĻA/i,
   lt: /^([IVXLCDM]+)\s*SKYRIUS/i,
-  sl: /^([IVXLCDM]+)\.\s*POGLAVJE/i,
+  sl: /^POGLAVJE\s+([IVXLCDM]+)/i,
   hr: /^POGLAVLJE\s+([IVXLCDM]+)/i,
   mt: /^KAPITOLU\s+([IVXLCDM]+)/i,
   ga: /^CAIBIDIL\s+([IVXLCDM]+)/i,

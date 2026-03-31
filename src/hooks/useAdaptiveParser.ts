@@ -256,11 +256,12 @@ export function analyzeStructure(text: string): StructureAnalysis {
     }
   }
   
-  // Detect language
+  // Detect language - scan a wider range to handle HTML-heavy content
   let detectedLanguage = 'unknown';
+  const scanLimit = Math.min(lines.length, 2000);
   for (const [lang, pattern] of Object.entries(ARTICLE_PATTERNS)) {
-    for (const line of lines.slice(0, 500)) {
-      if (pattern.test(line.trim())) {
+    for (let i = 0; i < scanLimit; i++) {
+      if (pattern.test(lines[i].trim())) {
         detectedLanguage = lang;
         break;
       }
@@ -348,9 +349,22 @@ export function adaptivePreprocess(text: string, analysis: StructureAnalysis): s
   // Step 7: Remove images
   processed = processed.replace(/!\[([^\]]*)\]\([^)]+\)/g, '');
   
-  // Step 8: Clean HTML tags
+  // Step 8: Clean HTML tags — add line breaks for block elements first
+  processed = processed.replace(/<\/(?:p|div|tr|li|h[1-6]|dt|dd|blockquote|section|td|th)>/gi, '\n');
+  processed = processed.replace(/<(?:p|div|tr|li|h[1-6]|dt|dd|blockquote|section)\b[^>]*>/gi, '\n');
   processed = processed.replace(/<br\s*\/?>/gi, '\n');
   processed = processed.replace(/<[^>]+>/g, '');
+  // Decode common HTML entities
+  processed = processed.replace(/&nbsp;/g, ' ');
+  processed = processed.replace(/&amp;/g, '&');
+  processed = processed.replace(/&lt;/g, '<');
+  processed = processed.replace(/&gt;/g, '>');
+  processed = processed.replace(/&quot;/g, '"');
+  processed = processed.replace(/&#39;/g, "'");
+  processed = processed.replace(/&#\d+;/g, (m) => {
+    const code = parseInt(m.slice(2, -1));
+    return String.fromCharCode(code);
+  });
   
   // Step 9: Remove horizontal rules
   processed = processed.replace(/^\s*\*\s*\*\s*\*\s*$/gm, '');

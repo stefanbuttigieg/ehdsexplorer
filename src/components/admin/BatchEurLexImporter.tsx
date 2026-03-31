@@ -272,23 +272,43 @@ export function BatchEurLexImporter({ celexNumber = '32025R0327', onComplete }: 
     return (count || 0) > 50; // Consider "done" if >50 articles already translated
   };
 
-  const startBatch = useCallback(async () => {
+  const startBatch = useCallback(async (onlyLanguages?: string[]) => {
     cancelRef.current = false;
     pauseRef.current = false;
     setIsRunning(true);
     setIsPaused(false);
 
-    const languages = Object.keys(LANG_MAP);
-    const initialStatuses: LanguageStatus[] = languages.map(code => ({
-      code,
-      status: 'pending',
-      articles: 0,
-      recitals: 0,
-      definitions: 0,
-      annexes: 0,
-      footnotes: 0,
-    }));
-    setStatuses(initialStatuses);
+    const languages = onlyLanguages || Object.keys(LANG_MAP);
+    
+    // If retrying specific languages, keep existing statuses and reset only those
+    if (onlyLanguages) {
+      setStatuses(prev => {
+        const existing = new Map(prev.map(s => [s.code, s]));
+        for (const code of onlyLanguages) {
+          existing.set(code, {
+            code,
+            status: 'pending',
+            articles: 0,
+            recitals: 0,
+            definitions: 0,
+            annexes: 0,
+            footnotes: 0,
+          });
+        }
+        return Array.from(existing.values());
+      });
+    } else {
+      const initialStatuses: LanguageStatus[] = languages.map(code => ({
+        code,
+        status: 'pending',
+        articles: 0,
+        recitals: 0,
+        definitions: 0,
+        annexes: 0,
+        footnotes: 0,
+      }));
+      setStatuses(initialStatuses);
+    }
 
     // Load English source
     const source = await loadEnglishSource();
@@ -311,13 +331,15 @@ export function BatchEurLexImporter({ celexNumber = '32025R0327', onComplete }: 
       setCurrentLang(langCode);
       setOverallProgress(Math.round((i / languages.length) * 100));
 
-      // Check if already translated
-      const exists = await checkExistingTranslations(langCode);
-      if (exists) {
-        setStatuses(prev => prev.map(s =>
-          s.code === langCode ? { ...s, status: 'skipped' } : s
-        ));
-        continue;
+      // Check if already translated (skip only for full batch, not retries)
+      if (!onlyLanguages) {
+        const exists = await checkExistingTranslations(langCode);
+        if (exists) {
+          setStatuses(prev => prev.map(s =>
+            s.code === langCode ? { ...s, status: 'skipped' } : s
+          ));
+          continue;
+        }
       }
 
       try {
@@ -461,7 +483,7 @@ export function BatchEurLexImporter({ celexNumber = '32025R0327', onComplete }: 
       </CardHeader>
       <CardContent className="space-y-4">
         {!isRunning && statuses.length === 0 && (
-          <Button onClick={startBatch} className="w-full" size="lg">
+          <Button onClick={() => startBatch()} className="w-full" size="lg">
             <Play className="h-4 w-4 mr-2" />
             Start Batch Import (23 Languages)
           </Button>
@@ -542,8 +564,11 @@ export function BatchEurLexImporter({ celexNumber = '32025R0327', onComplete }: 
               Clear Results
             </Button>
             {errorCount > 0 && (
-              <Button onClick={startBatch} className="flex-1">
-                Retry Failed
+              <Button onClick={() => {
+                const failed = statuses.filter(s => s.status === 'error').map(s => s.code);
+                startBatch(failed);
+              }} className="flex-1">
+                Retry Failed ({errorCount})
               </Button>
             )}
           </div>

@@ -441,29 +441,29 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
               return (
                 <div
                   key={item.id}
-                  className={`flex flex-col gap-1 p-3 rounded-lg border hover:bg-muted/50 transition-colors ${bulk.isSelected(itemIdStr) ? 'bg-muted/50' : ''}`}
+                  className={`flex flex-col gap-1 p-2 sm:p-3 rounded-lg border hover:bg-muted/50 transition-colors ${bulk.isSelected(itemIdStr) ? 'bg-muted/50' : ''}`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-start sm:items-center gap-2 sm:gap-3">
                     {hasTranslation && (
                       <Checkbox
                         checked={bulk.isSelected(itemIdStr)}
                         onCheckedChange={() => bulk.toggle(itemIdStr)}
-                        className="shrink-0"
+                        className="shrink-0 mt-1 sm:mt-0"
                       />
                     )}
-                    <Badge variant={hasTranslation ? 'default' : 'outline'} className="shrink-0">
-                      {getItemLabel(item)}
-                    </Badge>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm truncate">
+                    <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                      <Badge variant={hasTranslation ? 'default' : 'outline'} className="shrink-0 w-fit text-xs">
+                        {getItemLabel(item)}
+                      </Badge>
+                      <p className="text-sm truncate min-w-0">
                         {item.title || item.term || item.content?.substring(0, 80) || item.summary?.substring(0, 80)}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                       {hasTranslation && (
                         <Badge 
                           variant={isPublishedTrans ? 'default' : 'secondary'}
-                          className="text-xs"
+                          className="text-[10px] sm:text-xs hidden sm:flex"
                         >
                           {isPublishedTrans ? <Eye className="h-3 w-3 mr-1" /> : <EyeOff className="h-3 w-3 mr-1" />}
                           {isPublishedTrans ? 'Published' : 'Draft'}
@@ -472,9 +472,10 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
                       <Button
                         variant={hasTranslation ? 'outline' : 'default'}
                         size="sm"
+                        className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                         onClick={() => handleEdit(item)}
                       >
-                        {hasTranslation ? <Edit2 className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                        {hasTranslation ? <Edit2 className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
                       </Button>
                     </div>
                   </div>

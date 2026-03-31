@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -19,6 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Search, Edit2, Plus, Eye, EyeOff, Trash2, Globe } from 'lucide-react';
 import { toast } from 'sonner';
+import { useBulkSelection } from '@/hooks/useBulkSelection';
 
 type Tables = Database['public']['Tables'];
 type TableName = keyof Tables;

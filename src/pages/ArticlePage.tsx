@@ -29,6 +29,8 @@ import { useLegislationByArticle } from "@/hooks/useCountryLegislation";
 import { CountryLegislationCard } from "@/components/CountryLegislationCard";
 import { CrossRegulationSection } from "@/components/CrossRegulationSection";
 import { SEOHead, ArticleSchema, BreadcrumbSchema } from "@/components/seo";
+import { useRelatedFaqs } from "@/hooks/useEhdsFaqs";
+import { MessageCircleQuestion } from "lucide-react";
 
 const ArticlePage = () => {
   const { id } = useParams();

@@ -13,6 +13,7 @@ import { SEOHead, BreadcrumbSchema } from "@/components/seo";
 import { FAQSchema } from "@/components/seo/FAQSchema";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { useEhdsFaqs, useEhdsFaqFootnotes, getChaptersFromFaqs, type EhdsFaq } from "@/hooks/useEhdsFaqs";
+import { useImplementingActs, type ImplementingAct } from "@/hooks/useImplementingActs";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";

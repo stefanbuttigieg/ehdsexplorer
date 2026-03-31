@@ -28,6 +28,7 @@ const AdminEhdsFaqsPage = () => {
   const { data: versions = [] } = useEhdsFaqVersions();
   const [search, setSearch] = useState("");
   const [editingFaq, setEditingFaq] = useState<EhdsFaq | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [showVersionDialog, setShowVersionDialog] = useState(false);
   const [showBulkEdit, setShowBulkEdit] = useState(false);

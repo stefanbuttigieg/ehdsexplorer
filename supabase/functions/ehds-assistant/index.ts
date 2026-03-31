@@ -405,7 +405,11 @@ ${implementingActsList}
 EU COMMISSION FREQUENTLY ASKED QUESTIONS (Official FAQs from DG SANTE, last updated March 2026):
 ${faqsList}
 
-When users ask about specific topics, first check if the EU Commission FAQ section has a relevant answer and use it as an authoritative reference. Then reference the most relevant articles and explain how they apply. For navigation requests, provide direct references to articles, chapters, or definitions that address their query. Always end your response with a Sources section listing the specific articles, recitals, or definitions you referenced.`;
+OFFICIAL EHDS FAQ BANK (67 detailed Q&As from European Commission, DG SANTE Unit C.1 – Digital Health):
+These are the authoritative EU Commission answers. When a user's question matches or relates to one of these FAQs, base your answer PRIMARILY on this official content and cite the FAQ number (e.g., "See FAQ #33").
+${officialFaqsList}
+
+When users ask about specific topics, first check if the official EHDS FAQ bank has a relevant answer and use it as the PRIMARY authoritative reference. Cite FAQ numbers. Then reference the most relevant articles and explain how they apply. For navigation requests, provide direct references to articles, chapters, or definitions that address their query. Always end your response with a Sources section listing the specific articles, recitals, definitions, or FAQ numbers you referenced.`;
 
     // Fetch configured AI model from site settings
     let aiModel = "google/gemini-2.5-flash";

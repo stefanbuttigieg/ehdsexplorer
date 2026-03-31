@@ -174,8 +174,8 @@ const AdminEhdsFaqsPage = () => {
                     <TableCell className="font-mono text-sm">{faq.faq_number}</TableCell>
                     <TableCell className="max-w-xs">
                       <p className="text-sm line-clamp-2">{faq.question}</p>
-                      {!faq.rich_content && (
-                        <Badge variant="outline" className="text-xs mt-1 text-amber-600 border-amber-300">No rich content</Badge>
+                    {!faq.rich_content && (
+                        <Badge variant="outline" className="text-xs mt-1 text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-600">No rich content</Badge>
                       )}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">

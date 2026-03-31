@@ -127,6 +127,12 @@ const AdminDashboard = () => {
       href: '/admin/footnotes',
     },
     {
+      title: 'EHDS FAQs',
+      description: 'Manage the 67 official EU Commission EHDS FAQs and PDF parser',
+      icon: MessageCircleQuestion,
+      href: '/admin/ehds-faqs',
+    },
+    {
       title: 'Help Center FAQs',
       description: 'Manage FAQ content for the public help page',
       icon: HelpCircle,

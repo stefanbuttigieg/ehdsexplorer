@@ -61,6 +61,26 @@ const ROUTE_TO_PLACEMENT: Record<string, string> = {
   '/tools': 'tools',
 };
 
+// Map sidebar labels to translation keys for i18n
+const LABEL_TO_KEY: Record<string, string> = {
+  "Home": "nav.home", "Overview": "nav.overview", "Definitions": "nav.definitions",
+  "Articles": "nav.articles", "Recitals": "nav.recitals", "Annexes": "nav.annexes",
+  "Implementing Acts": "nav.implementing_acts", "EHDS Country Map": "nav.country_map",
+  "Regulatory Map": "nav.regulatory_map", "Article Dependencies": "nav.article_dependencies",
+  "Content Network": "nav.content_network", "For Citizens": "nav.for_citizens",
+  "For Health Tech": "nav.for_healthtech", "For Healthcare Pros": "nav.for_healthcare",
+  "Topic Index": "nav.topic_index", "Tools Hub": "nav.tools_hub",
+  "Scenario Finder": "nav.scenario_finder", "News": "nav.news",
+  "Official FAQs": "nav.faqs", "Bookmarks": "nav.bookmarks", "Notes": "nav.notes",
+  "Achievements": "nav.achievements", "Compare": "nav.compare",
+  "Leaderboard": "nav.leaderboard", "Games": "nav.games", "Comics": "nav.comics",
+  "Help Center": "nav.help_center", "API Documentation": "nav.api_docs",
+  "Privacy Policy": "nav.privacy_policy", "Cookie Policy": "nav.cookie_policy",
+  "Terms of Service": "nav.terms_of_service", "Accessibility Statement": "nav.accessibility",
+  "Chapters": "nav.chapters", "Search": "ui.search",
+  "Keyboard shortcuts": "ui.keyboard_shortcuts",
+};
+
 function LayoutDisclaimers({ pathname }: { pathname: string }) {
   const placement = ROUTE_TO_PLACEMENT[pathname];
   if (!placement) return null;

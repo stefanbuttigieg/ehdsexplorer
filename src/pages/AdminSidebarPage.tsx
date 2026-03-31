@@ -38,7 +38,7 @@ interface EditFormState {
   label: string;
   path: string;
   icon_name: string;
-  section: string;
+  section: "main" | "legal" | "utility";
   requires_auth: boolean;
   open_external: boolean;
 }

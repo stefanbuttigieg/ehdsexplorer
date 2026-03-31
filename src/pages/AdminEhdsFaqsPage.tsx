@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { AdminPageLayout } from "@/components/admin/AdminPageLayout";
 import MarkdownEditor from "@/components/MarkdownEditor";
 import { useAllEhdsFaqs, useEhdsFaqVersions, type EhdsFaq, type EhdsFaqVersion } from "@/hooks/useEhdsFaqs";

@@ -209,7 +209,7 @@ IMPORTANT: Extract ALL 67 FAQs. Do not skip any. Preserve markdown tables exactl
     await supabase.from("ehds_faq_sync_log").insert({
       status: "error",
       error_message: msg,
-    }).catch(() => {});
+    });
 
     return new Response(JSON.stringify({ success: false, error: msg }), {
       status: 500,

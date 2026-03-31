@@ -215,6 +215,48 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
            number.includes(searchLower);
   }) || [];
 
+  // Bulk selection — only items that already have a translation
+  const translatableIds = filteredItems
+    .filter(item => translationMap.has(item.id))
+    .map(item => String(item.id));
+  const bulk = useBulkSelection<string>(translatableIds);
+
+  const bulkSetPublished = async (publish: boolean) => {
+    if (bulk.selectedCount === 0) return;
+    setBulkUpdating(true);
+    const ids = bulk.selectedArray
+      .map(sourceId => translationMap.get(sourceId === String(Number(sourceId)) ? Number(sourceId) : sourceId))
+      .filter(Boolean)
+      .map(t => t!.id);
+
+    const session = await supabase.auth.getSession();
+    const token = session.data.session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/${config.table}?id=in.(${ids.map(i => `"${i}"`).join(',')})`,
+      {
+        method: 'PATCH',
+        headers: {
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({ is_published: publish }),
+      }
+    );
+
+    setBulkUpdating(false);
+    if (!response.ok) {
+      toast.error('Bulk update failed');
+    } else {
+      toast.success(`${ids.length} translations ${publish ? 'published' : 'unpublished'}`);
+      queryClient.invalidateQueries({ queryKey: [config.table, languageCode] });
+      queryClient.invalidateQueries({ queryKey: ['translation-stats', languageCode] });
+      bulk.clearSelection();
+    }
+  };
+
   // Save translation mutation
   const saveMutation = useMutation({
     mutationFn: async (data: { isNew: boolean; translationId?: string }) => {

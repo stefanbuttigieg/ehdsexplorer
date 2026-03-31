@@ -15,6 +15,41 @@ function isShellPage(content: string): boolean {
   return false;
 }
 
+/** Convert HTML to clean text preserving structural line breaks */
+function htmlToText(html: string): string {
+  let text = html;
+  // Add newlines before/after block elements
+  text = text.replace(/<br\s*\/?>/gi, '\n');
+  text = text.replace(/<\/(?:p|div|tr|li|h[1-6]|dt|dd|blockquote|section|article|header|footer|td|th)>/gi, '\n');
+  text = text.replace(/<(?:p|div|tr|li|h[1-6]|dt|dd|blockquote|section|article|header|footer)\b[^>]*>/gi, '\n');
+  // Table cells get a space
+  text = text.replace(/<(?:td|th)\b[^>]*>/gi, ' ');
+  // Strip remaining tags
+  text = text.replace(/<[^>]+>/g, '');
+  // Decode common HTML entities
+  text = text.replace(/&nbsp;/g, ' ');
+  text = text.replace(/&amp;/g, '&');
+  text = text.replace(/&lt;/g, '<');
+  text = text.replace(/&gt;/g, '>');
+  text = text.replace(/&quot;/g, '"');
+  text = text.replace(/&#39;/g, "'");
+  text = text.replace(/&rsquo;/g, '\u2019');
+  text = text.replace(/&lsquo;/g, '\u2018');
+  text = text.replace(/&rdquo;/g, '\u201D');
+  text = text.replace(/&ldquo;/g, '\u201C');
+  text = text.replace(/&mdash;/g, '\u2014');
+  text = text.replace(/&ndash;/g, '\u2013');
+  text = text.replace(/&#\d+;/g, (m) => {
+    const code = parseInt(m.slice(2, -1));
+    return String.fromCharCode(code);
+  });
+  // Normalize whitespace per line
+  text = text.split('\n').map(l => l.replace(/\s+/g, ' ').trim()).join('\n');
+  // Collapse multiple blank lines
+  text = text.replace(/\n{3,}/g, '\n\n');
+  return text.trim();
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -77,15 +112,18 @@ Deno.serve(async (req) => {
           continue;
         }
 
-        if (isShellPage(html)) {
+        // Convert HTML to clean text for the content field
+        const textContent = htmlToText(html);
+
+        if (isShellPage(textContent)) {
           lastError = `Shell page from direct fetch: ${url}`;
           console.log(lastError);
           continue;
         }
 
-        console.log(`Direct fetch success: ${html.length} chars from ${url}`);
+        console.log(`Direct fetch success: ${textContent.length} text chars from ${url}`);
         return new Response(
-          JSON.stringify({ success: true, content: html, html, urlUsed: url }),
+          JSON.stringify({ success: true, content: textContent, html, urlUsed: url }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       } catch (e) {
@@ -123,8 +161,8 @@ Deno.serve(async (req) => {
           }
 
           const markdown = fcData.data?.markdown || '';
-          const html = fcData.data?.html || '';
-          const content = markdown || html;
+          const fcHtml = fcData.data?.html || '';
+          const content = markdown || htmlToText(fcHtml);
 
           if (content.length < 1000) {
             lastError = `Firecrawl content too short from ${url}`;
@@ -138,9 +176,9 @@ Deno.serve(async (req) => {
             continue;
           }
 
-          console.log(`Firecrawl success: ${markdown.length} md, ${html.length} html from ${url}`);
+          console.log(`Firecrawl success: ${content.length} chars from ${url}`);
           return new Response(
-            JSON.stringify({ success: true, content: markdown || html, html, urlUsed: url }),
+            JSON.stringify({ success: true, content, html: fcHtml, urlUsed: url }),
             { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           );
         } catch (e) {

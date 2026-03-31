@@ -345,6 +345,10 @@ serve(async (req) => {
       `Recital (${r.recital_number}): ${r.content.substring(0, 300)}${r.content.length > 300 ? '...' : ''}`
     ).join("\n\n");
 
+    const faqsList = faqs.map(f => 
+      `Q: ${f.question}\nA: ${f.answer}`
+    ).join("\n\n");
+
     // Get role and level specific prompts
     const rolePrompt = ROLE_PROMPTS[role] || ROLE_PROMPTS.general;
     const levelPrompt = EXPLAIN_LEVEL_PROMPTS[explainLevel] || EXPLAIN_LEVEL_PROMPTS.professional;

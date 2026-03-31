@@ -2,6 +2,7 @@ import { ReactNode, useState, useEffect, useMemo } from "react";
 import { version } from '../../package.json';
 import { Link, useLocation } from "react-router-dom";
 import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText, Accessibility, Code, Newspaper, Settings, HelpCircle, StickyNote, Users, GitCompare, PanelLeftClose, PanelLeft, Trophy, MapPin, Brain, Network, Heart, Laptop, Stethoscope, Sparkles, Wrench, Globe, Medal, MessageCircleQuestion, BookOpen, Layers, ExternalLink, type LucideIcon } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useSidebarItems, type SidebarItem } from "@/hooks/useSidebarItems";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

@@ -206,8 +206,8 @@ export function analyzeStructure(text: string): StructureAnalysis {
   const recitalCount = Math.max(recitalMatches.length, tableRecitalMatches.length);
   
   // Count articles - include both word-first and number-first patterns
-  const articleMatches = text.match(/(?:^|\n)(?:Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu)\s+\d+/gi) || [];
-  const numberFirstMatches = text.match(/(?:^|\n)\d+\.\s*(?:cikk|artikla|pants|straipsnis|člen)/gi) || [];
+  const articleMatches = text.match(/(?:^|\n)\s*(?:Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Članak|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu)\s+\d+/gi) || [];
+  const numberFirstMatches = text.match(/(?:^|\n)\s*\d+\.\s*(?:cikk|artikla|pants|straipsnis|člen)\b/gi) || [];
   const articleCount = articleMatches.length + numberFirstMatches.length;
   
   // Detect footnote format

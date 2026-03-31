@@ -53,6 +53,8 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Detailed act pages** with dedicated articles and recitals per implementing act
 - **Searchable content** within each implementing act
 - **Section-based article organization** for complex acts
+- **Data Tables** — Structured data element tables per implementing act with search, CSV/JSON export, FHIR mapping fields
+- **Search & sort** — Filter implementing acts by title/description and sort by linked article number
 
 ### 🗺️ National EHDS Entities
 - **Directory of DHAs and HDABs** across all 27 EU member states

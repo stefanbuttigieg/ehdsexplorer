@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Search, Pencil, Trash2, ExternalLink, Upload, Plus, History } from "lucide-react";
+import { Search, Pencil, Trash2, ExternalLink, Upload, Plus, History, Table as TableIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";

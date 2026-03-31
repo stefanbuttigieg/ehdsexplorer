@@ -63,6 +63,33 @@ const AdminEhdsFaqsPage = () => {
     }
   };
 
+  const createFaq = async (data: Partial<EhdsFaq> & { faq_number?: number }) => {
+    const nextNumber = data.faq_number || (faqs.length > 0 ? Math.max(...faqs.map(f => f.faq_number)) + 1 : 1);
+    const { error } = await supabase
+      .from("ehds_faqs")
+      .insert({
+        faq_number: nextNumber,
+        question: data.question || "New FAQ",
+        answer: data.answer || "",
+        rich_content: data.rich_content || null,
+        chapter: data.chapter || "General",
+        sub_category: data.sub_category || null,
+        source_references: data.source_references || null,
+        source_articles: data.source_articles || [],
+        source_recitals: data.source_recitals || [],
+        document_version: data.document_version || null,
+        is_published: false,
+      });
+    if (error) {
+      toast({ title: "Error creating FAQ", description: error.message, variant: "destructive" });
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["ehds-faqs"] });
+      queryClient.invalidateQueries({ queryKey: ["ehds-faqs-all"] });
+      toast({ title: "FAQ created" });
+      setIsCreating(false);
+    }
+  };
+
   const saveFaq = async (updated: Partial<EhdsFaq>) => {
     if (!editingFaq) return;
     const { error } = await supabase

@@ -187,15 +187,14 @@ const AdminFaqDataTablesPage = () => {
   const [searchParams] = useSearchParams();
   const faqIdParam = searchParams.get("faq") || "";
   const { data: faqs = [] } = useAllEhdsFaqs();
-  const [selectedFaqState, setSelectedFaqState] = useState(faqIdParam);
-  const activeFaqId = selectedFaqState || faqIdParam;
-  const { data: tables = [] } = useFaqDataTables(activeFaqId);
-  const { createTable } = useFaqDataTableMutations(activeFaqId);
   const { toast } = useToast();
 
-  const [selectedFaq, setSelectedFaq] = useState(faqId);
+  const [selectedFaq, setSelectedFaq] = useState(faqIdParam);
   const [newTableName, setNewTableName] = useState("");
   const [newTableDesc, setNewTableDesc] = useState("");
+
+  const { data: tables = [] } = useFaqDataTables(selectedFaq);
+  const { createTable } = useFaqDataTableMutations(selectedFaq);
 
   const currentFaq = faqs.find(f => f.id === selectedFaq);
 

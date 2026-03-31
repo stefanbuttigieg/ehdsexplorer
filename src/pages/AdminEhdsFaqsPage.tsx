@@ -577,7 +577,7 @@ function EditFaqDialog({ faq, onClose, onSave, isCreateMode }: {
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={handleClose}>Cancel</Button>
-          <Button onClick={() => onSave(form)}>Save Changes</Button>
+          <Button onClick={() => onSave(form)}>{isCreateMode ? "Create FAQ" : "Save Changes"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -466,6 +466,7 @@ function EditFaqDialog({ faq, onClose, onSave, isCreateMode }: {
   useEffect(() => {
     if (faq) {
       setForm({
+        faq_number: faq.faq_number,
         question: faq.question,
         answer: faq.answer,
         rich_content: faq.rich_content || "",

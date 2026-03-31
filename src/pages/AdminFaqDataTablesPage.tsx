@@ -30,6 +30,8 @@ function TableEditor({ table, faqId }: { table: FaqDataTable; faqId: string }) {
   const [newColName, setNewColName] = useState("");
   const [editingRow, setEditingRow] = useState<FaqDataRow | null>(null);
   const [rowValues, setRowValues] = useState<Record<string, string>>({});
+  const [showPasteImport, setShowPasteImport] = useState(false);
+  const [pasteText, setPasteText] = useState("");
 
   const addColumn = () => {
     if (!newColName.trim()) return;
@@ -60,6 +62,62 @@ function TableEditor({ table, faqId }: { table: FaqDataTable; faqId: string }) {
       onSuccess: () => { setEditingRow(null); toast({ title: "Row updated" }); },
       onError: (e: any) => toast({ title: "Error", description: e.message, variant: "destructive" }),
     });
+  };
+
+  const handlePasteImport = async () => {
+    if (!pasteText.trim()) return;
+    const lines = pasteText.trim().split(/\r?\n/).filter(l => l.trim());
+    if (lines.length < 2) {
+      toast({ title: "Need at least a header row and one data row", variant: "destructive" });
+      return;
+    }
+
+    const delimiter = lines[0].includes('\t') ? '\t' : ',';
+    const parsedRows = lines.map(l => l.split(delimiter).map(c => c.trim()));
+    const headers = parsedRows[0];
+    const dataRows = parsedRows.slice(1);
+
+    // Create columns first
+    for (let i = 0; i < headers.length; i++) {
+      const name = headers[i];
+      const key = name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
+      try {
+        await new Promise<void>((resolve, reject) => {
+          createColumn.mutate({ name, column_key: key, sort_order: columns.length + i }, {
+            onSuccess: () => resolve(),
+            onError: (e: any) => reject(e),
+          });
+        });
+      } catch {
+        // Column may already exist, continue
+      }
+    }
+
+    // Small delay for columns to be available
+    await new Promise(r => setTimeout(r, 500));
+
+    // Create rows
+    const colKeys = headers.map(h => h.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, ""));
+    for (let i = 0; i < dataRows.length; i++) {
+      const vals: Record<string, string> = {};
+      colKeys.forEach((key, ci) => {
+        vals[key] = dataRows[i][ci] || "";
+      });
+      try {
+        await new Promise<void>((resolve, reject) => {
+          createRow.mutate({ values: vals, sort_order: rows.length + i }, {
+            onSuccess: () => resolve(),
+            onError: (e: any) => reject(e),
+          });
+        });
+      } catch {
+        // continue
+      }
+    }
+
+    toast({ title: `Imported ${headers.length} columns and ${dataRows.length} rows` });
+    setPasteText("");
+    setShowPasteImport(false);
   };
 
   return (

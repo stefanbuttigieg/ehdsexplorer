@@ -101,7 +101,7 @@ export type Database = {
           feedback_type: string
           id: string
           message_content: string
-          user_id: string
+          user_id: string | null
           user_query: string
         }
         Insert: {
@@ -109,7 +109,7 @@ export type Database = {
           feedback_type: string
           id?: string
           message_content: string
-          user_id: string
+          user_id?: string | null
           user_query: string
         }
         Update: {
@@ -117,7 +117,7 @@ export type Database = {
           feedback_type?: string
           id?: string
           message_content?: string
-          user_id?: string
+          user_id?: string | null
           user_query?: string
         }
         Relationships: []

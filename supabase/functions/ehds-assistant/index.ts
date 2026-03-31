@@ -396,7 +396,10 @@ ${recitalsSummary}
 IMPLEMENTING ACTS STATUS:
 ${implementingActsList}
 
-When users ask about specific topics, reference the most relevant articles and explain how they apply. For navigation requests, provide direct references to articles, chapters, or definitions that address their query. Always end your response with a Sources section listing the specific articles, recitals, or definitions you referenced.`;
+EU COMMISSION FREQUENTLY ASKED QUESTIONS (Official FAQs from DG SANTE, last updated March 2026):
+${faqsList}
+
+When users ask about specific topics, first check if the EU Commission FAQ section has a relevant answer and use it as an authoritative reference. Then reference the most relevant articles and explain how they apply. For navigation requests, provide direct references to articles, chapters, or definitions that address their query. Always end your response with a Sources section listing the specific articles, recitals, or definitions you referenced.`;
 
     // Fetch configured AI model from site settings
     let aiModel = "google/gemini-2.5-flash";

@@ -430,6 +430,7 @@ const AdminUITranslationsPage = () => {
                       <TableHead>Translation</TableHead>
                       <TableHead className="w-24">Context</TableHead>
                       <TableHead className="w-16">AI</TableHead>
+                      <TableHead className="w-16">IATE</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>

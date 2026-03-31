@@ -13,7 +13,7 @@ const corsHeaders = {
 // Allowed resources - expanded whitelist
 const ALLOWED_RESOURCES = [
   "articles", "recitals", "definitions", "chapters", "sections",
-  "implementing-acts", "annexes", "health-authorities", "country-legislation", "metadata"
+  "implementing-acts", "annexes", "health-authorities", "country-legislation", "faqs", "metadata"
 ];
 const ALLOWED_FORMATS = ["json", "csv"];
 const ALLOWED_LANGUAGES = ["en", "mt", "de", "fr", "it", "es", "pt", "nl", "pl", "cs", "sk", "hu", "ro", "bg", "el", "sv", "da", "fi", "et", "lv", "lt", "sl", "hr", "ga"];

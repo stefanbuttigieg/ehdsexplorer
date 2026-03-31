@@ -124,6 +124,7 @@ const LeaderboardPage = lazy(() => import("./pages/LeaderboardPage"));
 const ArticleDependencyGraphPage = lazy(() => import("./pages/ArticleDependencyGraphPage"));
 const FAQsPage = lazy(() => import("./pages/FAQsPage"));
 const AdminEhdsFaqParserPage = lazy(() => import("./pages/AdminEhdsFaqParserPage"));
+const AdminEhdsFaqsPage = lazy(() => import("./pages/AdminEhdsFaqsPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -270,6 +271,7 @@ const App = () => (
             <Route path="/admin/ai-settings" element={<AdminAISettingsPage />} />
             <Route path="/admin/comic-panels" element={<AdminComicPanelsPage />} />
             <Route path="/admin/ehds-faq-parser" element={<AdminEhdsFaqParserPage />} />
+            <Route path="/admin/ehds-faqs" element={<AdminEhdsFaqsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>

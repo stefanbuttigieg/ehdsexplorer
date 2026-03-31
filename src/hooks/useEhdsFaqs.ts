@@ -52,6 +52,20 @@ export function useEhdsFaqs() {
   });
 }
 
+export function useAllEhdsFaqs() {
+  return useQuery({
+    queryKey: ["ehds-faqs-all"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ehds_faqs")
+        .select("*")
+        .order("faq_number");
+      if (error) throw error;
+      return data as EhdsFaq[];
+    },
+  });
+}
+
 export function useEhdsFaqFootnotes(faqIds: string[]) {
   return useQuery({
     queryKey: ["ehds-faq-footnotes", faqIds],

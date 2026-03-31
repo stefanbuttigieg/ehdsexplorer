@@ -470,6 +470,17 @@ const AdminUITranslationsPage = () => {
                               </Badge>
                             )}
                           </TableCell>
+                          <TableCell>
+                            <a
+                              href={`https://iate.europa.eu/search/result/${encodeURIComponent(k.value)}/${selectedLang}/en`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title={`Look up "${k.value}" in IATE`}
+                              className="text-primary hover:underline text-xs"
+                            >
+                              IATE
+                            </a>
+                          </TableCell>
                         </TableRow>
                       );
                     })}

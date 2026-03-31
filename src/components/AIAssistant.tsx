@@ -129,19 +129,11 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast({
-          title: "Error",
-          description: "You must be logged in to provide feedback",
-          variant: "destructive",
-        });
-        return;
-      }
 
       const { error: insertError } = await supabase
         .from('ai_assistant_feedback')
         .insert({
-          user_id: user.id,
+          user_id: user?.id || null,
           message_content: assistantMessage.content,
           user_query: userQuery,
           feedback_type: feedbackType,

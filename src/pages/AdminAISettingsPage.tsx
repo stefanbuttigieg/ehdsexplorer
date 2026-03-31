@@ -11,15 +11,15 @@ import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { AdminPageLayout } from '@/components/admin/AdminPageLayout';
 
 const AI_MODELS = [
-  { id: 'google/gemini-2.5-flash', label: 'Gemini 2.5 Flash', description: 'Balanced speed & quality (recommended)', tier: 'recommended' },
   { id: 'google/gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite', description: 'Fastest & cheapest, good for simple tasks', tier: 'economy' },
+  { id: 'google/gemini-2.5-flash', label: 'Gemini 2.5 Flash', description: 'Balanced speed & quality', tier: 'standard' },
   { id: 'google/gemini-2.5-pro', label: 'Gemini 2.5 Pro', description: 'Top-tier reasoning & multimodal', tier: 'premium' },
-  { id: 'google/gemini-3-flash-preview', label: 'Gemini 3 Flash (Preview)', description: 'Next-gen balanced model', tier: 'preview' },
-  { id: 'google/gemini-3-pro-preview', label: 'Gemini 3 Pro (Preview)', description: 'Next-gen top-tier model', tier: 'preview' },
-  { id: 'openai/gpt-5-nano', label: 'GPT-5 Nano', description: 'Fast & cost-efficient', tier: 'economy' },
+  { id: 'google/gemini-3-flash-preview', label: 'Gemini 3 Flash (Preview)', description: 'Next-gen balanced model (recommended)', tier: 'recommended' },
+  { id: 'google/gemini-3.1-pro-preview', label: 'Gemini 3.1 Pro (Preview)', description: 'Latest next-gen reasoning model', tier: 'preview' },
+  { id: 'openai/gpt-5-nano', label: 'GPT-5 Nano', description: 'Fast & cost-efficient for simple tasks', tier: 'economy' },
   { id: 'openai/gpt-5-mini', label: 'GPT-5 Mini', description: 'Strong performance, lower cost than full GPT-5', tier: 'standard' },
   { id: 'openai/gpt-5', label: 'GPT-5', description: 'Powerful all-rounder, excellent reasoning', tier: 'premium' },
-  { id: 'openai/gpt-5.2', label: 'GPT-5.2', description: 'Latest with enhanced reasoning', tier: 'premium' },
+  { id: 'openai/gpt-5.2', label: 'GPT-5.2', description: 'Latest with enhanced reasoning capabilities', tier: 'premium' },
 ];
 
 const tierColors: Record<string, string> = {

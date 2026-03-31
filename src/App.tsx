@@ -127,6 +127,7 @@ const FAQsPage = lazy(() => import("./pages/FAQsPage"));
 const AdminEhdsFaqParserPage = lazy(() => import("./pages/AdminEhdsFaqParserPage"));
 const AdminEhdsFaqsPage = lazy(() => import("./pages/AdminEhdsFaqsPage"));
 const AdminImplementingActDataTablesPage = lazy(() => import("./pages/AdminImplementingActDataTablesPage"));
+const AdminFaqDataTablesPage = lazy(() => import("./pages/AdminFaqDataTablesPage"));
 const AdminSidebarPage = lazy(() => import("./pages/AdminSidebarPage"));
 
 const queryClient = new QueryClient({

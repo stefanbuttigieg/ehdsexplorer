@@ -323,6 +323,7 @@ serve(async (req) => {
     const definitions = definitionsRes.data || [];
     const chapters = chaptersRes.data || [];
     const implementingActs = implementingActsRes.data || [];
+    const faqs = faqsRes.data || [];
 
     const articlesSummary = articles.map(a => 
       `Article ${a.article_number}: ${a.title}\n${a.content.substring(0, 500)}${a.content.length > 500 ? '...' : ''}`

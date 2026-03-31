@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -19,6 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Search, Edit2, Plus, Eye, EyeOff, Trash2, Globe } from 'lucide-react';
 import { toast } from 'sonner';
+import { useBulkSelection } from '@/hooks/useBulkSelection';
 
 type Tables = Database['public']['Tables'];
 type TableName = keyof Tables;
@@ -156,6 +158,7 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
   const [existingTranslation, setExistingTranslation] = useState<Translation | null>(null);
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [isPublished, setIsPublished] = useState(false);
+  const [bulkUpdating, setBulkUpdating] = useState(false);
 
   // Fetch source items - using rpc-style query to avoid deep type inference
   const { data: sourceItems, isLoading: sourceLoading } = useQuery({
@@ -211,6 +214,48 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
            term.includes(searchLower) ||
            number.includes(searchLower);
   }) || [];
+
+  // Bulk selection — only items that already have a translation
+  const translatableIds = filteredItems
+    .filter(item => translationMap.has(item.id))
+    .map(item => String(item.id));
+  const bulk = useBulkSelection<string>(translatableIds);
+
+  const bulkSetPublished = async (publish: boolean) => {
+    if (bulk.selectedCount === 0) return;
+    setBulkUpdating(true);
+    const ids = bulk.selectedArray
+      .map(sourceId => translationMap.get(sourceId === String(Number(sourceId)) ? Number(sourceId) : sourceId))
+      .filter(Boolean)
+      .map(t => t!.id);
+
+    const session = await supabase.auth.getSession();
+    const token = session.data.session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/${config.table}?id=in.(${ids.map(i => `"${i}"`).join(',')})`,
+      {
+        method: 'PATCH',
+        headers: {
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({ is_published: publish }),
+      }
+    );
+
+    setBulkUpdating(false);
+    if (!response.ok) {
+      toast.error('Bulk update failed');
+    } else {
+      toast.success(`${ids.length} translations ${publish ? 'published' : 'unpublished'}`);
+      queryClient.invalidateQueries({ queryKey: [config.table, languageCode] });
+      queryClient.invalidateQueries({ queryKey: ['translation-stats', languageCode] });
+      bulk.clearSelection();
+    }
+  };
 
   // Save translation mutation
   const saveMutation = useMutation({
@@ -332,20 +377,48 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
 
   return (
     <div className="space-y-4">
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search items..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
-        />
+      {/* Search + Bulk Actions */}
+      <div className="flex flex-col sm:flex-row gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search items..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        {bulk.selectedCount > 0 && (
+          <div className="flex gap-2 flex-shrink-0">
+            <Button size="sm" onClick={() => bulkSetPublished(true)} disabled={bulkUpdating}>
+              <Eye className="h-4 w-4 mr-1" />
+              Publish ({bulk.selectedCount})
+            </Button>
+            <Button size="sm" variant="secondary" onClick={() => bulkSetPublished(false)} disabled={bulkUpdating}>
+              <EyeOff className="h-4 w-4 mr-1" />
+              Unpublish
+            </Button>
+            <Button size="sm" variant="outline" onClick={bulk.clearSelection}>
+              Clear
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Items List */}
       <ScrollArea className="h-[500px] border rounded-lg">
         <div className="p-2 space-y-1">
+          {!isLoading && filteredItems.length > 0 && translatableIds.length > 0 && (
+            <div className="flex items-center gap-2 px-3 py-2 border-b mb-1">
+              <Checkbox
+                checked={bulk.isAllSelected}
+                onCheckedChange={bulk.toggleAll}
+              />
+              <span className="text-xs text-muted-foreground">
+                Select all translated ({translatableIds.length})
+              </span>
+            </div>
+          )}
           {isLoading ? (
             Array.from({ length: 10 }).map((_, i) => (
               <div key={i} className="flex items-center gap-3 p-3 rounded-lg border">
@@ -363,13 +436,21 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
               const hasTranslation = translationMap.has(item.id);
               const translation = translationMap.get(item.id);
               const isPublishedTrans = translation?.is_published;
+              const itemIdStr = String(item.id);
 
               return (
                 <div
                   key={item.id}
-                  className="flex flex-col gap-1 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                  className={`flex flex-col gap-1 p-3 rounded-lg border hover:bg-muted/50 transition-colors ${bulk.isSelected(itemIdStr) ? 'bg-muted/50' : ''}`}
                 >
                   <div className="flex items-center gap-3">
+                    {hasTranslation && (
+                      <Checkbox
+                        checked={bulk.isSelected(itemIdStr)}
+                        onCheckedChange={() => bulk.toggle(itemIdStr)}
+                        className="shrink-0"
+                      />
+                    )}
                     <Badge variant={hasTranslation ? 'default' : 'outline'} className="shrink-0">
                       {getItemLabel(item)}
                     </Badge>

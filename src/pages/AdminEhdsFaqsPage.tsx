@@ -176,6 +176,10 @@ const AdminEhdsFaqsPage = () => {
                 PDF Parser
               </Button>
             </Link>
+            <Button size="sm" onClick={() => setIsCreating(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add FAQ
+            </Button>
             <Link to="/faqs" target="_blank">
               <Button variant="outline" size="sm">
                 <ExternalLink className="h-4 w-4 mr-2" />

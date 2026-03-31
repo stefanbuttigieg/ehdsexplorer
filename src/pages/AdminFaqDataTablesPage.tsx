@@ -241,6 +241,38 @@ function TableEditor({ table, faqId }: { table: FaqDataTable; faqId: string }) {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Paste Import Dialog */}
+        <Dialog open={showPasteImport} onOpenChange={setShowPasteImport}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Paste Table Data</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Paste tab-separated or comma-separated data below. The first row will be used as column headers.
+              </p>
+              <Textarea
+                value={pasteText}
+                onChange={(e) => setPasteText(e.target.value)}
+                rows={8}
+                placeholder={"Column A\tColumn B\tColumn C\nValue 1\tValue 2\tValue 3\nValue 4\tValue 5\tValue 6"}
+                className="font-mono text-xs"
+              />
+              {pasteText.trim() && (
+                <p className="text-xs text-muted-foreground">
+                  Detected {pasteText.trim().split(/\r?\n/).filter(l => l.trim()).length} rows
+                </p>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setPasteText(""); setShowPasteImport(false); }}>Cancel</Button>
+              <Button onClick={handlePasteImport} disabled={!pasteText.trim()}>
+                <ClipboardPaste className="h-4 w-4 mr-1" /> Import
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );

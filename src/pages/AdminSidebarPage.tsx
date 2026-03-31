@@ -57,7 +57,7 @@ const AdminSidebarPage = () => {
     label: "", path: "", icon_name: "FileText", section: "main", requires_auth: false, open_external: false,
   });
 
-  if (authLoading || !isAuthorized) return null;
+  if (authLoading || !shouldRender) return null;
 
   const sections = ["main", "utility", "legal"];
 

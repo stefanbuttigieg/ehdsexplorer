@@ -408,6 +408,17 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
       {/* Items List */}
       <ScrollArea className="h-[500px] border rounded-lg">
         <div className="p-2 space-y-1">
+          {!isLoading && filteredItems.length > 0 && translatableIds.length > 0 && (
+            <div className="flex items-center gap-2 px-3 py-2 border-b mb-1">
+              <Checkbox
+                checked={bulk.isAllSelected}
+                onCheckedChange={bulk.toggleAll}
+              />
+              <span className="text-xs text-muted-foreground">
+                Select all translated ({translatableIds.length})
+              </span>
+            </div>
+          )}
           {isLoading ? (
             Array.from({ length: 10 }).map((_, i) => (
               <div key={i} className="flex items-center gap-3 p-3 rounded-lg border">
@@ -425,13 +436,21 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
               const hasTranslation = translationMap.has(item.id);
               const translation = translationMap.get(item.id);
               const isPublishedTrans = translation?.is_published;
+              const itemIdStr = String(item.id);
 
               return (
                 <div
                   key={item.id}
-                  className="flex flex-col gap-1 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                  className={`flex flex-col gap-1 p-3 rounded-lg border hover:bg-muted/50 transition-colors ${bulk.isSelected(itemIdStr) ? 'bg-muted/50' : ''}`}
                 >
                   <div className="flex items-center gap-3">
+                    {hasTranslation && (
+                      <Checkbox
+                        checked={bulk.isSelected(itemIdStr)}
+                        onCheckedChange={() => bulk.toggle(itemIdStr)}
+                        className="shrink-0"
+                      />
+                    )}
                     <Badge variant={hasTranslation ? 'default' : 'outline'} className="shrink-0">
                       {getItemLabel(item)}
                     </Badge>

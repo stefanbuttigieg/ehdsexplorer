@@ -72,7 +72,7 @@ const ARTICLE_PATTERNS: Record<string, RegExp> = {
   et: /^Artikkel\s+(\d+)/i,
   lv: /^(\d+)\.\s*pants/i,
   lt: /^(\d+)\s*straipsnis/i,
-  sl: /^(\d+)\.\s*člen/i,
+  sl: /^Člen\s+(\d+)/i,
   hr: /^Članak\s+(\d+)/i,
   mt: /^Artikolu\s+(\d+)/i,
   ga: /^Airteagal\s+(\d+)/i,

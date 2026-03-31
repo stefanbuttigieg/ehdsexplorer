@@ -216,6 +216,7 @@ const App = () => (
             <Route path="/tools" element={<ToolsHubPage />} />
             <Route path="/leaderboard" element={<LeaderboardPage />} />
             <Route path="/article-dependencies" element={<ArticleDependencyGraphPage />} />
+            <Route path="/faqs" element={<FAQsPage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin/set-password" element={<AdminSetPasswordPage />} />
             <Route path="/profile" element={<ProfilePage />} />

@@ -649,7 +649,7 @@ const AdminTranslationImportPage = () => {
               <CardContent>
                  <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
 
-                  <SelectTrigger className="w-64">
+                  <SelectTrigger className="w-full sm:w-64">
                     <SelectValue placeholder="Select language" />
                   </SelectTrigger>
                   <SelectContent>

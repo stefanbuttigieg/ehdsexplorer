@@ -305,7 +305,7 @@ export function TranslationDiffPreview({
                        </div>
                        
                        <CollapsibleContent>
-                         <div className="border-t p-3 grid grid-cols-2 gap-4">
+                          <div className="border-t p-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
                            <div>
                              <h4 className="text-xs font-semibold text-muted-foreground mb-1 flex items-center gap-1">
                                <Eye className="h-3 w-3" /> Translated Content

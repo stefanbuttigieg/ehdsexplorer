@@ -3726,6 +3726,59 @@ export type Database = {
           },
         ]
       }
+      sidebar_items: {
+        Row: {
+          created_at: string
+          feature_flag_id: string | null
+          icon_name: string
+          id: string
+          is_visible: boolean
+          label: string
+          open_external: boolean
+          path: string
+          requires_auth: boolean
+          section: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          feature_flag_id?: string | null
+          icon_name?: string
+          id?: string
+          is_visible?: boolean
+          label: string
+          open_external?: boolean
+          path: string
+          requires_auth?: boolean
+          section?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          feature_flag_id?: string | null
+          icon_name?: string
+          id?: string
+          is_visible?: boolean
+          label?: string
+          open_external?: boolean
+          path?: string
+          requires_auth?: boolean
+          section?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sidebar_items_feature_flag_id_fkey"
+            columns: ["feature_flag_id"]
+            isOneToOne: false
+            referencedRelation: "feature_flags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_disclaimers: {
         Row: {
           created_at: string

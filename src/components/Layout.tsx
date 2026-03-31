@@ -1,7 +1,8 @@
 import { ReactNode, useState, useEffect, useMemo } from "react";
 import { version } from '../../package.json';
 import { Link, useLocation } from "react-router-dom";
-import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText, Accessibility, Code, Newspaper, Settings, HelpCircle, StickyNote, Users, GitCompare, PanelLeftClose, PanelLeft, Trophy, MapPin, Brain, Network, Heart, Laptop, Stethoscope, Sparkles, Wrench, Globe, Medal, MessageCircleQuestion } from "lucide-react";
+import { Book, FileText, Scale, ListChecks, Bookmark, Search, Menu, X, Home, ChevronDown, Files, Keyboard, Github, Shield, Cookie, ScrollText, Accessibility, Code, Newspaper, Settings, HelpCircle, StickyNote, Users, GitCompare, PanelLeftClose, PanelLeft, Trophy, MapPin, Brain, Network, Heart, Laptop, Stethoscope, Sparkles, Wrench, Globe, Medal, MessageCircleQuestion, BookOpen, Layers, ExternalLink, type LucideIcon } from "lucide-react";
+import { useSidebarItems, type SidebarItem } from "@/hooks/useSidebarItems";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toRoman } from "@/lib/romanNumerals";
@@ -33,6 +34,14 @@ import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { KidsModeToggle } from "@/components/KidsModeToggle";
 import { useKidsMode } from "@/contexts/KidsModeContext";
 import { LeaderboardTracker } from "@/components/LeaderboardTracker";
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  Home, Book, FileText, Scale, Files, ListChecks, Globe, Network, GitCompare,
+  Heart, Laptop, Stethoscope, Wrench, Sparkles, Newspaper, MessageCircleQuestion,
+  Bookmark, StickyNote, Trophy, Medal, Brain, HelpCircle, Code, Shield, Cookie,
+  ScrollText, Accessibility, Users, Settings, MapPin, BookOpen, Layers, ExternalLink,
+  Search, Menu, X,
+};
 
 const ROUTE_TO_PLACEMENT: Record<string, string> = {
   '/': 'home',
@@ -93,6 +102,7 @@ const Layout = ({
   } = useAuth();
   const { isFeatureEnabled } = useFeatureFlags();
   const { isKidsMode, isKidsFriendlyRoute } = useKidsMode();
+  const { data: dbSidebarItems } = useSidebarItems();
   // Initialize text highlight hook for URL-based highlighting
   useTextHighlight();
 
@@ -106,139 +116,87 @@ const Layout = ({
   });
   const isActive = (path: string) => location.pathname === path;
   
-  // Base nav items that are always visible
-  const baseNavItems = [{
-    path: "/",
-    icon: Home,
-    label: "Home"
-  }, {
-    path: "/overview",
-    icon: Book,
-    label: "Overview"
-  }, {
-    path: "/definitions",
-    icon: FileText,
-    label: "Definitions"
-  }, {
-    path: "/articles",
-    icon: FileText,
-    label: "Articles"
-  }, {
-    path: "/recitals",
-    icon: Scale,
-    label: "Recitals"
-  }, {
-    path: "/annexes",
-    icon: Files,
-    label: "Annexes"
-  }, {
-    path: "/implementing-acts",
-    icon: ListChecks,
-    label: "Implementing Acts"
-  }, {
-    path: "/health-authorities",
-    icon: Globe,
-    label: "EHDS Country Map"
-  }, {
-    path: "/cross-regulation-map",
-    icon: Network,
-    label: "Regulatory Map"
-  }, {
-    path: "/article-dependencies",
-    icon: GitCompare,
-    label: "Article Dependencies"
-  }, {
-    path: "/for/citizens",
-    icon: Heart,
-    label: "For Citizens"
-  }, {
-    path: "/for/healthtech",
-    icon: Laptop,
-    label: "For Health Tech"
-  }, {
-    path: "/for/healthcare-professionals",
-    icon: Stethoscope,
-    label: "For Healthcare Pros"
-  }, {
-    path: "/topic-index",
-    icon: FileText,
-    label: "Topic Index"
-  }, {
-    path: "/tools",
-    icon: Wrench,
-    label: "Tools Hub"
-  }, {
-    path: "/scenario-finder",
-    icon: Sparkles,
-    label: "Scenario Finder"
-  }, {
-    path: "/news",
-    icon: Newspaper,
-    label: "News"
-  }, {
-    path: "/faqs",
-    icon: MessageCircleQuestion,
-    label: "Official FAQs"
-  }, {
-    path: "/bookmarks",
-    icon: Bookmark,
-    label: "Bookmarks"
-  }, {
-    path: "/notes",
-    icon: StickyNote,
-    label: "Notes"
-  }, {
-    path: "/profile?tab=achievements",
-    icon: Trophy,
-    label: "Achievements"
-  }, {
-    path: "/compare",
-    icon: GitCompare,
-    label: "Compare"
-  }, {
-    path: "/leaderboard",
-    icon: Medal,
-    label: "Leaderboard"
-  }, {
-    path: "/games",
-    icon: Brain,
-    label: "Games"
-  }];
-  
-  // Filter nav items based on feature flags
+  // Hardcoded fallback nav items (used while DB loads)
+  const fallbackNavItems = [
+    { path: "/", icon: Home, label: "Home" },
+    { path: "/overview", icon: Book, label: "Overview" },
+    { path: "/definitions", icon: FileText, label: "Definitions" },
+    { path: "/articles", icon: FileText, label: "Articles" },
+    { path: "/recitals", icon: Scale, label: "Recitals" },
+    { path: "/annexes", icon: Files, label: "Annexes" },
+    { path: "/implementing-acts", icon: ListChecks, label: "Implementing Acts" },
+    { path: "/health-authorities", icon: Globe, label: "EHDS Country Map" },
+    { path: "/cross-regulation-map", icon: Network, label: "Regulatory Map" },
+    { path: "/article-dependencies", icon: GitCompare, label: "Article Dependencies" },
+    { path: "/content-network", icon: Network, label: "Content Network" },
+    { path: "/for/citizens", icon: Heart, label: "For Citizens" },
+    { path: "/for/healthtech", icon: Laptop, label: "For Health Tech" },
+    { path: "/for/healthcare-professionals", icon: Stethoscope, label: "For Healthcare Pros" },
+    { path: "/topic-index", icon: FileText, label: "Topic Index" },
+    { path: "/tools", icon: Wrench, label: "Tools Hub" },
+    { path: "/scenario-finder", icon: Sparkles, label: "Scenario Finder" },
+    { path: "/news", icon: Newspaper, label: "News" },
+    { path: "/faqs", icon: MessageCircleQuestion, label: "Official FAQs" },
+    { path: "/bookmarks", icon: Bookmark, label: "Bookmarks" },
+    { path: "/notes", icon: StickyNote, label: "Notes" },
+    { path: "/profile?tab=achievements", icon: Trophy, label: "Achievements" },
+    { path: "/compare", icon: GitCompare, label: "Compare" },
+    { path: "/leaderboard", icon: Medal, label: "Leaderboard" },
+    { path: "/games", icon: Brain, label: "Games" },
+  ];
+
+  // Convert DB sidebar items to nav format
+  const dbMainItems = useMemo(() => {
+    if (!dbSidebarItems) return null;
+    return dbSidebarItems
+      .filter(i => i.section === "main")
+      .map(i => ({
+        path: i.path,
+        icon: ICON_MAP[i.icon_name] || FileText,
+        label: i.label,
+        openExternal: i.open_external,
+      }));
+  }, [dbSidebarItems]);
+
+  const dbUtilityItems = useMemo(() => {
+    if (!dbSidebarItems) return null;
+    return dbSidebarItems
+      .filter(i => i.section === "utility")
+      .map(i => ({
+        path: i.path,
+        icon: ICON_MAP[i.icon_name] || FileText,
+        label: i.label,
+        openExternal: i.open_external,
+      }));
+  }, [dbSidebarItems]);
+
+  const dbLegalItems = useMemo(() => {
+    if (!dbSidebarItems) return null;
+    return dbSidebarItems
+      .filter(i => i.section === "legal")
+      .map(i => ({
+        path: i.path,
+        icon: ICON_MAP[i.icon_name] || FileText,
+        label: i.label,
+        openExternal: i.open_external,
+      }));
+  }, [dbSidebarItems]);
+
+  // Use DB items if available, otherwise fallback
   const navItems = useMemo(() => {
-    let items = [...baseNavItems];
-    
-    // Remove Tools Hub if disabled
-    if (!isFeatureEnabled('tools_hub')) {
-      items = items.filter(item => item.path !== '/tools');
-    }
-    
-    // Add Teams only if enabled
-    if (isFeatureEnabled('teams')) {
-      const compareIndex = items.findIndex(item => item.path === '/compare');
-      items.splice(compareIndex, 0, {
-        path: "/teams",
-        icon: Users,
-        label: "Teams"
-      });
-    }
+    let items = dbMainItems || fallbackNavItems;
 
     // Filter to kid-friendly routes when Kids Mode is active
     if (isKidsMode) {
       items = items.filter(item => isKidsFriendlyRoute(item.path));
-      // Add Comics to nav if not already present
       if (!items.find(item => item.path === '/kids')) {
-        items.splice(1, 0, {
-          path: "/kids",
-          icon: Heart,
-          label: "Comics"
-        });
+        items = [items[0], { path: "/kids", icon: Heart, label: "Comics" }, ...items.slice(1)];
       }
     }
     
     return items;
-  }, [isFeatureEnabled, isKidsMode, isKidsFriendlyRoute]);
+  }, [dbMainItems, isKidsMode, isKidsFriendlyRoute]);
+  
   return <div className="min-h-screen flex w-full">
       {/* Mobile Header - simplified, removed menu button since we have bottom nav */}
       <header className="fixed top-0 left-0 right-0 bg-card border-b border-border flex items-center justify-between px-4 md:hidden z-50" style={{
@@ -357,20 +315,19 @@ const Layout = ({
             {/* Take a Tour Button - Only when expanded */}
             {!sidebarCollapsed && <TourButton onClick={startTour} variant="full" />}
 
-            {/* Help Center & Developer Links - Only when expanded */}
+            {/* Utility Links - Only when expanded */}
             {!sidebarCollapsed && <div className="pt-2 space-y-1">
-                <Link to="/help" onClick={() => setSidebarOpen(false)}>
-                  <Button variant="ghost" className={cn("w-full justify-start gap-2 text-muted-foreground", isActive("/help") && "bg-sidebar-accent text-sidebar-accent-foreground")}>
-                    <HelpCircle className="h-4 w-4 flex-shrink-0" />
-                    <span className="truncate">Help Center</span>
-                  </Button>
-                </Link>
-                <Link to="/api" onClick={() => setSidebarOpen(false)}>
-                  <Button variant="ghost" className={cn("w-full justify-start gap-2 text-muted-foreground", isActive("/api") && "bg-sidebar-accent text-sidebar-accent-foreground")}>
-                    <Code className="h-4 w-4 flex-shrink-0" />
-                    <span className="truncate">API Documentation</span>
-                  </Button>
-                </Link>
+                {(dbUtilityItems || [
+                  { path: "/help", icon: HelpCircle, label: "Help Center" },
+                  { path: "/api", icon: Code, label: "API Documentation" },
+                ]).map(item => (
+                  <Link key={item.path} to={item.path} onClick={() => setSidebarOpen(false)}>
+                    <Button variant="ghost" className={cn("w-full justify-start gap-2 text-muted-foreground", isActive(item.path) && "bg-sidebar-accent text-sidebar-accent-foreground")}>
+                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      <span className="truncate">{item.label}</span>
+                    </Button>
+                  </Link>
+                ))}
                 <a href="https://github.com/stefanbuttigieg/ehdsexplorer" target="_blank" rel="noopener noreferrer" className="block">
                   <Button variant="ghost" className="w-full justify-start gap-2 text-muted-foreground">
                     <Github className="h-4 w-4 flex-shrink-0" />
@@ -382,30 +339,19 @@ const Layout = ({
             {/* Legal Links - Only when expanded */}
             {!sidebarCollapsed && <div className="pt-4 mt-4 border-t border-sidebar-border">
                 <p className="text-xs text-muted-foreground px-3 mb-2">Legal</p>
-                <Link to="/privacy-policy" onClick={() => setSidebarOpen(false)}>
-                  <Button variant="ghost" className={cn("w-full justify-start gap-2 text-muted-foreground h-8 text-sm", isActive("/privacy-policy") && "bg-sidebar-accent text-sidebar-accent-foreground")}>
-                    <Shield className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span className="truncate">Privacy Policy</span>
-                  </Button>
-                </Link>
-                <Link to="/cookies-policy" onClick={() => setSidebarOpen(false)}>
-                  <Button variant="ghost" className={cn("w-full justify-start gap-2 text-muted-foreground h-8 text-sm", isActive("/cookies-policy") && "bg-sidebar-accent text-sidebar-accent-foreground")}>
-                    <Cookie className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span className="truncate">Cookies Policy</span>
-                  </Button>
-                </Link>
-                <Link to="/terms-of-service" onClick={() => setSidebarOpen(false)}>
-                  <Button variant="ghost" className={cn("w-full justify-start gap-2 text-muted-foreground h-8 text-sm", isActive("/terms-of-service") && "bg-sidebar-accent text-sidebar-accent-foreground")}>
-                    <ScrollText className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span className="truncate">Terms of Service</span>
-                  </Button>
-                </Link>
-                <Link to="/accessibility" onClick={() => setSidebarOpen(false)}>
-                  <Button variant="ghost" className={cn("w-full justify-start gap-2 text-muted-foreground h-8 text-sm", isActive("/accessibility") && "bg-sidebar-accent text-sidebar-accent-foreground")}>
-                    <Accessibility className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span className="truncate">Accessibility</span>
-                  </Button>
-                </Link>
+                {(dbLegalItems || [
+                  { path: "/privacy-policy", icon: Shield, label: "Privacy Policy" },
+                  { path: "/cookies-policy", icon: Cookie, label: "Cookies Policy" },
+                  { path: "/terms-of-service", icon: ScrollText, label: "Terms of Service" },
+                  { path: "/accessibility", icon: Accessibility, label: "Accessibility" },
+                ]).map(item => (
+                  <Link key={item.path} to={item.path} onClick={() => setSidebarOpen(false)}>
+                    <Button variant="ghost" className={cn("w-full justify-start gap-2 text-muted-foreground h-8 text-sm", isActive(item.path) && "bg-sidebar-accent text-sidebar-accent-foreground")}>
+                      <item.icon className="h-3.5 w-3.5 flex-shrink-0" />
+                      <span className="truncate">{item.label}</span>
+                    </Button>
+                  </Link>
+                ))}
                 <p className="text-xs text-muted-foreground px-3 pt-4 pb-6">v{version} · {__BUILD_HASH__}</p>
               </div>}
             

@@ -351,6 +351,10 @@ serve(async (req) => {
       `Q: ${f.question}\nA: ${f.answer}`
     ).join("\n\n");
 
+    const officialFaqsList = ehdsFaqs.map(f => 
+      `FAQ #${f.faq_number}: ${f.question}\n${f.rich_content || f.answer}\n${f.source_references || ''}`
+    ).join("\n\n---\n\n");
+
     // Get role and level specific prompts
     const rolePrompt = ROLE_PROMPTS[role] || ROLE_PROMPTS.general;
     const levelPrompt = EXPLAIN_LEVEL_PROMPTS[explainLevel] || EXPLAIN_LEVEL_PROMPTS.professional;

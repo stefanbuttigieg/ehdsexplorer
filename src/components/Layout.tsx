@@ -102,6 +102,7 @@ const Layout = ({
   } = useAuth();
   const { isFeatureEnabled } = useFeatureFlags();
   const { isKidsMode, isKidsFriendlyRoute } = useKidsMode();
+  const { data: dbSidebarItems } = useSidebarItems();
   // Initialize text highlight hook for URL-based highlighting
   useTextHighlight();
 

@@ -208,9 +208,14 @@ function TableEditor({ table, faqId }: { table: FaqDataTable; faqId: string }) {
                 </TableBody>
               </Table>
             </div>
-            <Button variant="outline" size="sm" onClick={addRow}>
-              <Plus className="h-3 w-3 mr-1" /> Add Row
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={addRow}>
+                <Plus className="h-3 w-3 mr-1" /> Add Row
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setShowPasteImport(true)}>
+                <ClipboardPaste className="h-3 w-3 mr-1" /> Paste Table
+              </Button>
+            </div>
           </>
         )}
 

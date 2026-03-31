@@ -158,6 +158,7 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
   const [existingTranslation, setExistingTranslation] = useState<Translation | null>(null);
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [isPublished, setIsPublished] = useState(false);
+  const [bulkUpdating, setBulkUpdating] = useState(false);
 
   // Fetch source items - using rpc-style query to avoid deep type inference
   const { data: sourceItems, isLoading: sourceLoading } = useQuery({

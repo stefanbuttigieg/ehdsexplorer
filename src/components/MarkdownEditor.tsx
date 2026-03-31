@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { Eye, Edit2, Bold, Italic, Heading1, Heading2, Heading3, List, ListOrdered, Link, Quote } from 'lucide-react';
+import { Eye, Edit2, Bold, Italic, Heading1, Heading2, Heading3, List, ListOrdered, Link, Quote, Table2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,11 +7,50 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Separator } from '@/components/ui/separator';
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
+import remarkGfm from 'remark-gfm';
 
 // Collapse blank lines between numbered list items so markdown treats them as one continuous list
 const fixNumberedLists = (text: string): string => {
   const normalized = text.replace(/\r\n/g, '\n');
   return normalized.replace(/(^\d+\.\s+.*)\n\s*\n(?=\d+\.\s+)/gm, '$1\n');
+};
+
+/** Convert tab-separated or CSV text into a Markdown table */
+const tsvToMarkdownTable = (text: string): string => {
+  const lines = text.trim().split(/\r?\n/).filter(l => l.trim());
+  if (lines.length === 0) return text;
+
+  // Detect delimiter: tab or comma
+  const delimiter = lines[0].includes('\t') ? '\t' : ',';
+  const rows = lines.map(line => line.split(delimiter).map(cell => cell.trim()));
+
+  if (rows.length === 0 || rows[0].length === 0) return text;
+
+  const header = rows[0];
+  const divider = header.map(() => '---');
+  const dataRows = rows.slice(1);
+
+  let md = `| ${header.join(' | ')} |\n`;
+  md += `| ${divider.join(' | ')} |\n`;
+  dataRows.forEach(row => {
+    // Pad row to match header length
+    while (row.length < header.length) row.push('');
+    md += `| ${row.join(' | ')} |\n`;
+  });
+
+  return md;
+};
+
+/** Detect if text looks like tabular data */
+const isTabularText = (text: string): boolean => {
+  const lines = text.trim().split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 2) return false;
+  const tabCount = (lines[0].match(/\t/g) || []).length;
+  if (tabCount >= 1) return true;
+  // CSV: consistent comma count across lines
+  const commaCount = (lines[0].match(/,/g) || []).length;
+  if (commaCount >= 2 && lines.slice(1).every(l => (l.match(/,/g) || []).length === commaCount)) return true;
+  return false;
 };
 
 interface MarkdownEditorProps {
@@ -44,7 +83,6 @@ const MarkdownEditor = ({ value, onChange, rows = 16, placeholder }: MarkdownEdi
     const newValue = value.substring(0, start) + before + textToInsert + after + value.substring(end);
     onChange(newValue);
 
-    // Set cursor position after the operation
     setTimeout(() => {
       textarea.focus();
       const newCursorPos = start + before.length + textToInsert.length;
@@ -62,7 +100,6 @@ const MarkdownEditor = ({ value, onChange, rows = 16, placeholder }: MarkdownEdi
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     
-    // Find the start of the current line
     const lineStart = value.lastIndexOf('\n', start - 1) + 1;
     const lineEnd = value.indexOf('\n', end);
     const actualLineEnd = lineEnd === -1 ? value.length : lineEnd;
@@ -77,6 +114,22 @@ const MarkdownEditor = ({ value, onChange, rows = 16, placeholder }: MarkdownEdi
       textarea.focus();
       const newPos = start + prefix.length;
       textarea.setSelectionRange(newPos, newPos);
+    }, 0);
+  }, [value, onChange]);
+
+  const insertTable = useCallback(() => {
+    const template = '\n| Header 1 | Header 2 | Header 3 |\n| --- | --- | --- |\n| Cell 1 | Cell 2 | Cell 3 |\n| Cell 4 | Cell 5 | Cell 6 |\n';
+    const textarea = textareaRef.current;
+    if (!textarea) {
+      onChange(value + template);
+      return;
+    }
+    const pos = textarea.selectionStart;
+    const newValue = value.substring(0, pos) + template + value.substring(pos);
+    onChange(newValue);
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(pos + template.length, pos + template.length);
     }, 0);
   }, [value, onChange]);
 
@@ -131,6 +184,11 @@ const MarkdownEditor = ({ value, onChange, rows = 16, placeholder }: MarkdownEdi
       label: 'Link',
       action: () => insertText('[', '](url)', 'link text'),
     },
+    {
+      icon: <Table2 className="h-4 w-4" />,
+      label: 'Insert Table',
+      action: insertTable,
+    },
   ];
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -144,6 +202,26 @@ const MarkdownEditor = ({ value, onChange, rows = 16, placeholder }: MarkdownEdi
       }
     }
   }, [insertText]);
+
+  const handlePaste = useCallback((e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const html = e.clipboardData.getData('text/html');
+    const text = e.clipboardData.getData('text/plain');
+
+    // Detect tabular data (from spreadsheet or HTML table)
+    if (html.includes('<table') || html.includes('<tr') || isTabularText(text)) {
+      e.preventDefault();
+      const mdTable = tsvToMarkdownTable(text);
+      const textarea = textareaRef.current;
+      if (textarea) {
+        const pos = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const newValue = value.substring(0, pos) + '\n' + mdTable + value.substring(end);
+        onChange(newValue);
+      } else {
+        onChange(value + '\n' + mdTable);
+      }
+    }
+  }, [value, onChange]);
 
   return (
     <div className="border rounded-md overflow-hidden">
@@ -159,6 +237,11 @@ const MarkdownEditor = ({ value, onChange, rows = 16, placeholder }: MarkdownEdi
               Preview
             </TabsTrigger>
           </TabsList>
+          {activeTab === 'write' && (
+            <span className="text-[10px] text-muted-foreground hidden sm:block">
+              Paste tables from Excel/Sheets — auto-converts to Markdown
+            </span>
+          )}
         </div>
         
         {activeTab === 'write' && (
@@ -196,6 +279,7 @@ const MarkdownEditor = ({ value, onChange, rows = 16, placeholder }: MarkdownEdi
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
             rows={rows}
             placeholder={placeholder}
             className="border-0 rounded-none focus-visible:ring-0 font-mono text-sm resize-none"
@@ -208,7 +292,7 @@ const MarkdownEditor = ({ value, onChange, rows = 16, placeholder }: MarkdownEdi
             style={{ minHeight: `${rows * 1.5}rem` }}
           >
             {value ? (
-              <ReactMarkdown remarkPlugins={[remarkBreaks]}>{fixNumberedLists(value)}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkBreaks, remarkGfm]}>{fixNumberedLists(value)}</ReactMarkdown>
             ) : (
               <p className="text-muted-foreground italic">Nothing to preview</p>
             )}

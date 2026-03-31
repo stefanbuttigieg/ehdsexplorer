@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Plus, Pencil, Trash2, Table as TableIcon, ChevronLeft } from "lucide-react";
+import { Plus, Pencil, Trash2, Table as TableIcon, ClipboardPaste } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,6 +30,8 @@ function TableEditor({ table, faqId }: { table: FaqDataTable; faqId: string }) {
   const [newColName, setNewColName] = useState("");
   const [editingRow, setEditingRow] = useState<FaqDataRow | null>(null);
   const [rowValues, setRowValues] = useState<Record<string, string>>({});
+  const [showPasteImport, setShowPasteImport] = useState(false);
+  const [pasteText, setPasteText] = useState("");
 
   const addColumn = () => {
     if (!newColName.trim()) return;
@@ -60,6 +62,62 @@ function TableEditor({ table, faqId }: { table: FaqDataTable; faqId: string }) {
       onSuccess: () => { setEditingRow(null); toast({ title: "Row updated" }); },
       onError: (e: any) => toast({ title: "Error", description: e.message, variant: "destructive" }),
     });
+  };
+
+  const handlePasteImport = async () => {
+    if (!pasteText.trim()) return;
+    const lines = pasteText.trim().split(/\r?\n/).filter(l => l.trim());
+    if (lines.length < 2) {
+      toast({ title: "Need at least a header row and one data row", variant: "destructive" });
+      return;
+    }
+
+    const delimiter = lines[0].includes('\t') ? '\t' : ',';
+    const parsedRows = lines.map(l => l.split(delimiter).map(c => c.trim()));
+    const headers = parsedRows[0];
+    const dataRows = parsedRows.slice(1);
+
+    // Create columns first
+    for (let i = 0; i < headers.length; i++) {
+      const name = headers[i];
+      const key = name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
+      try {
+        await new Promise<void>((resolve, reject) => {
+          createColumn.mutate({ name, column_key: key, sort_order: columns.length + i }, {
+            onSuccess: () => resolve(),
+            onError: (e: any) => reject(e),
+          });
+        });
+      } catch {
+        // Column may already exist, continue
+      }
+    }
+
+    // Small delay for columns to be available
+    await new Promise(r => setTimeout(r, 500));
+
+    // Create rows
+    const colKeys = headers.map(h => h.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, ""));
+    for (let i = 0; i < dataRows.length; i++) {
+      const vals: Record<string, string> = {};
+      colKeys.forEach((key, ci) => {
+        vals[key] = dataRows[i][ci] || "";
+      });
+      try {
+        await new Promise<void>((resolve, reject) => {
+          createRow.mutate({ values: vals, sort_order: rows.length + i }, {
+            onSuccess: () => resolve(),
+            onError: (e: any) => reject(e),
+          });
+        });
+      } catch {
+        // continue
+      }
+    }
+
+    toast({ title: `Imported ${headers.length} columns and ${dataRows.length} rows` });
+    setPasteText("");
+    setShowPasteImport(false);
   };
 
   return (
@@ -150,9 +208,14 @@ function TableEditor({ table, faqId }: { table: FaqDataTable; faqId: string }) {
                 </TableBody>
               </Table>
             </div>
-            <Button variant="outline" size="sm" onClick={addRow}>
-              <Plus className="h-3 w-3 mr-1" /> Add Row
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={addRow}>
+                <Plus className="h-3 w-3 mr-1" /> Add Row
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setShowPasteImport(true)}>
+                <ClipboardPaste className="h-3 w-3 mr-1" /> Paste Table
+              </Button>
+            </div>
           </>
         )}
 
@@ -175,6 +238,38 @@ function TableEditor({ table, faqId }: { table: FaqDataTable; faqId: string }) {
             <DialogFooter>
               <Button variant="outline" onClick={() => setEditingRow(null)}>Cancel</Button>
               <Button onClick={saveRow}>Save</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Paste Import Dialog */}
+        <Dialog open={showPasteImport} onOpenChange={setShowPasteImport}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Paste Table Data</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Paste tab-separated or comma-separated data below. The first row will be used as column headers.
+              </p>
+              <Textarea
+                value={pasteText}
+                onChange={(e) => setPasteText(e.target.value)}
+                rows={8}
+                placeholder={"Column A\tColumn B\tColumn C\nValue 1\tValue 2\tValue 3\nValue 4\tValue 5\tValue 6"}
+                className="font-mono text-xs"
+              />
+              {pasteText.trim() && (
+                <p className="text-xs text-muted-foreground">
+                  Detected {pasteText.trim().split(/\r?\n/).filter(l => l.trim()).length} rows
+                </p>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setPasteText(""); setShowPasteImport(false); }}>Cancel</Button>
+              <Button onClick={handlePasteImport} disabled={!pasteText.trim()}>
+                <ClipboardPaste className="h-4 w-4 mr-1" /> Import
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

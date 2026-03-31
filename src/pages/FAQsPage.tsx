@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Search, ChevronDown, FileText } from "lucide-react";
+import { Search, ChevronDown, FileText, BookOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,7 @@ import { SEOHead, BreadcrumbSchema } from "@/components/seo";
 import { FAQSchema } from "@/components/seo/FAQSchema";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { useEhdsFaqs, useEhdsFaqFootnotes, getChaptersFromFaqs, type EhdsFaq } from "@/hooks/useEhdsFaqs";
+import { useImplementingActs, type ImplementingAct } from "@/hooks/useImplementingActs";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
@@ -48,13 +49,23 @@ function FAQContent({ faq, footnotes }: { faq: EhdsFaq; footnotes: { marker: str
   );
 }
 
-function FAQItem({ faq, footnotes, isOpen, onToggle }: {
+function FAQItem({ faq, footnotes, isOpen, onToggle, implementingActs }: {
   faq: EhdsFaq;
   footnotes: { marker: string; content: string }[];
   isOpen: boolean;
   onToggle: () => void;
+  implementingActs: ImplementingAct[];
 }) {
   const articleLinks = (faq.source_articles || []).filter(Boolean);
+  
+  // Find implementing acts linked to the same articles as this FAQ
+  const relatedActs = useMemo(() => {
+    if (articleLinks.length === 0) return [];
+    const artNums = articleLinks.map(a => parseInt(a, 10)).filter(n => !isNaN(n));
+    return implementingActs.filter(act => 
+      act.relatedArticles.some(r => artNums.includes(r))
+    );
+  }, [articleLinks, implementingActs]);
 
   return (
     <div id={`faq-${faq.faq_number}`} className="scroll-mt-20">
@@ -83,6 +94,18 @@ function FAQItem({ faq, footnotes, isOpen, onToggle }: {
                 ))}
               </div>
             )}
+            {relatedActs.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {relatedActs.map((act) => (
+                  <Link key={act.id} to={`/implementing-acts/${act.id}`}>
+                    <Badge variant="outline" className="text-xs cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors border-primary/30">
+                      <BookOpen className="h-3 w-3 mr-1" />
+                      {act.title.length > 40 ? act.title.slice(0, 40) + "…" : act.title}
+                    </Badge>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </CollapsibleContent>
       </Collapsible>
@@ -92,6 +115,7 @@ function FAQItem({ faq, footnotes, isOpen, onToggle }: {
 
 const FAQsPage = () => {
   const { data: faqs = [], isLoading } = useEhdsFaqs();
+  const { data: implementingActs = [] } = useImplementingActs();
   const faqIds = useMemo(() => faqs.map(f => f.id), [faqs]);
   const { data: allFootnotes = [] } = useEhdsFaqFootnotes(faqIds);
   const [search, setSearch] = useState("");
@@ -268,6 +292,7 @@ const FAQsPage = () => {
                             footnotes={getFootnotes(faq.id)}
                             isOpen={openFaqs.has(faq.faq_number)}
                             onToggle={() => toggleFaq(faq.faq_number)}
+                            implementingActs={implementingActs}
                           />
                         ))}
                       </div>

@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Network, ArrowRight, ArrowLeft, ZoomIn, ZoomOut, RotateCcw, Info, Filter } from "lucide-react";
 import Layout from "@/components/Layout";
@@ -170,7 +170,8 @@ const ArticleDependencyGraphPage = () => {
               Article Dependency Graph
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Explore how the 105 EHDS articles reference and depend on each other
+              Explore how the 105 EHDS articles reference and depend on each other.{" "}
+              <Link to="/content-network" className="text-primary hover:underline">View full content network →</Link>
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">

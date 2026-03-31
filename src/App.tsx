@@ -122,6 +122,7 @@ const KidsCornerPage = lazy(() => import("./pages/KidsCornerPage"));
 const AdminComicPanelsPage = lazy(() => import("./pages/AdminComicPanelsPage"));
 const LeaderboardPage = lazy(() => import("./pages/LeaderboardPage"));
 const ArticleDependencyGraphPage = lazy(() => import("./pages/ArticleDependencyGraphPage"));
+const ContentNetworkPage = lazy(() => import("./pages/ContentNetworkPage"));
 const FAQsPage = lazy(() => import("./pages/FAQsPage"));
 const AdminEhdsFaqParserPage = lazy(() => import("./pages/AdminEhdsFaqParserPage"));
 const AdminEhdsFaqsPage = lazy(() => import("./pages/AdminEhdsFaqsPage"));
@@ -218,6 +219,7 @@ const App = () => (
             <Route path="/tools" element={<ToolsHubPage />} />
             <Route path="/leaderboard" element={<LeaderboardPage />} />
             <Route path="/article-dependencies" element={<ArticleDependencyGraphPage />} />
+            <Route path="/content-network" element={<ContentNetworkPage />} />
             <Route path="/faqs" element={<FAQsPage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin/set-password" element={<AdminSetPasswordPage />} />

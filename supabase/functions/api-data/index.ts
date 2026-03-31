@@ -181,7 +181,7 @@ const RESOURCE_FIELDS: Record<string, string[]> = {
   annexes: ["id", "title", "content"],
   "health-authorities": ["id", "name", "country_code", "country_name", "authority_type", "status", "email", "phone", "website", "address", "description", "ehds_role", "latitude", "longitude"],
   "country-legislation": ["id", "country_code", "country_name", "title", "official_title", "legislation_type", "status", "status_notes", "summary", "url", "effective_date", "adoption_date", "publication_date", "enforcement_measures"],
-  "faqs": ["faq_number", "question", "answer", "rich_content", "chapter", "sub_category", "source_articles", "source_references"],
+  "faqs": ["faq_number", "question", "answer", "rich_content", "chapter", "sub_category", "source_articles", "source_recitals", "source_references", "data_tables"],
 };
 
 Deno.serve(async (req) => {

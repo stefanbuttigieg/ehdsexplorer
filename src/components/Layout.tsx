@@ -196,7 +196,7 @@ const Layout = ({
     
     return items;
   }, [dbMainItems, isKidsMode, isKidsFriendlyRoute]);
-  }, [isFeatureEnabled, isKidsMode, isKidsFriendlyRoute]);
+  
   return <div className="min-h-screen flex w-full">
       {/* Mobile Header - simplified, removed menu button since we have bottom nav */}
       <header className="fixed top-0 left-0 right-0 bg-card border-b border-border flex items-center justify-between px-4 md:hidden z-50" style={{

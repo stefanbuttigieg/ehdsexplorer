@@ -315,20 +315,19 @@ const Layout = ({
             {/* Take a Tour Button - Only when expanded */}
             {!sidebarCollapsed && <TourButton onClick={startTour} variant="full" />}
 
-            {/* Help Center & Developer Links - Only when expanded */}
+            {/* Utility Links - Only when expanded */}
             {!sidebarCollapsed && <div className="pt-2 space-y-1">
-                <Link to="/help" onClick={() => setSidebarOpen(false)}>
-                  <Button variant="ghost" className={cn("w-full justify-start gap-2 text-muted-foreground", isActive("/help") && "bg-sidebar-accent text-sidebar-accent-foreground")}>
-                    <HelpCircle className="h-4 w-4 flex-shrink-0" />
-                    <span className="truncate">Help Center</span>
-                  </Button>
-                </Link>
-                <Link to="/api" onClick={() => setSidebarOpen(false)}>
-                  <Button variant="ghost" className={cn("w-full justify-start gap-2 text-muted-foreground", isActive("/api") && "bg-sidebar-accent text-sidebar-accent-foreground")}>
-                    <Code className="h-4 w-4 flex-shrink-0" />
-                    <span className="truncate">API Documentation</span>
-                  </Button>
-                </Link>
+                {(dbUtilityItems || [
+                  { path: "/help", icon: HelpCircle, label: "Help Center" },
+                  { path: "/api", icon: Code, label: "API Documentation" },
+                ]).map(item => (
+                  <Link key={item.path} to={item.path} onClick={() => setSidebarOpen(false)}>
+                    <Button variant="ghost" className={cn("w-full justify-start gap-2 text-muted-foreground", isActive(item.path) && "bg-sidebar-accent text-sidebar-accent-foreground")}>
+                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      <span className="truncate">{item.label}</span>
+                    </Button>
+                  </Link>
+                ))}
                 <a href="https://github.com/stefanbuttigieg/ehdsexplorer" target="_blank" rel="noopener noreferrer" className="block">
                   <Button variant="ghost" className="w-full justify-start gap-2 text-muted-foreground">
                     <Github className="h-4 w-4 flex-shrink-0" />
@@ -340,30 +339,19 @@ const Layout = ({
             {/* Legal Links - Only when expanded */}
             {!sidebarCollapsed && <div className="pt-4 mt-4 border-t border-sidebar-border">
                 <p className="text-xs text-muted-foreground px-3 mb-2">Legal</p>
-                <Link to="/privacy-policy" onClick={() => setSidebarOpen(false)}>
-                  <Button variant="ghost" className={cn("w-full justify-start gap-2 text-muted-foreground h-8 text-sm", isActive("/privacy-policy") && "bg-sidebar-accent text-sidebar-accent-foreground")}>
-                    <Shield className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span className="truncate">Privacy Policy</span>
-                  </Button>
-                </Link>
-                <Link to="/cookies-policy" onClick={() => setSidebarOpen(false)}>
-                  <Button variant="ghost" className={cn("w-full justify-start gap-2 text-muted-foreground h-8 text-sm", isActive("/cookies-policy") && "bg-sidebar-accent text-sidebar-accent-foreground")}>
-                    <Cookie className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span className="truncate">Cookies Policy</span>
-                  </Button>
-                </Link>
-                <Link to="/terms-of-service" onClick={() => setSidebarOpen(false)}>
-                  <Button variant="ghost" className={cn("w-full justify-start gap-2 text-muted-foreground h-8 text-sm", isActive("/terms-of-service") && "bg-sidebar-accent text-sidebar-accent-foreground")}>
-                    <ScrollText className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span className="truncate">Terms of Service</span>
-                  </Button>
-                </Link>
-                <Link to="/accessibility" onClick={() => setSidebarOpen(false)}>
-                  <Button variant="ghost" className={cn("w-full justify-start gap-2 text-muted-foreground h-8 text-sm", isActive("/accessibility") && "bg-sidebar-accent text-sidebar-accent-foreground")}>
-                    <Accessibility className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span className="truncate">Accessibility</span>
-                  </Button>
-                </Link>
+                {(dbLegalItems || [
+                  { path: "/privacy-policy", icon: Shield, label: "Privacy Policy" },
+                  { path: "/cookies-policy", icon: Cookie, label: "Cookies Policy" },
+                  { path: "/terms-of-service", icon: ScrollText, label: "Terms of Service" },
+                  { path: "/accessibility", icon: Accessibility, label: "Accessibility" },
+                ]).map(item => (
+                  <Link key={item.path} to={item.path} onClick={() => setSidebarOpen(false)}>
+                    <Button variant="ghost" className={cn("w-full justify-start gap-2 text-muted-foreground h-8 text-sm", isActive(item.path) && "bg-sidebar-accent text-sidebar-accent-foreground")}>
+                      <item.icon className="h-3.5 w-3.5 flex-shrink-0" />
+                      <span className="truncate">{item.label}</span>
+                    </Button>
+                  </Link>
+                ))}
                 <p className="text-xs text-muted-foreground px-3 pt-4 pb-6">v{version} · {__BUILD_HASH__}</p>
               </div>}
             

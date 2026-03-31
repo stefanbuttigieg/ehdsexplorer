@@ -249,7 +249,6 @@ function EditFaqDialog({ faq, onClose, onSave }: {
   faq: EhdsFaq | null;
   onClose: () => void;
   onSave: (data: Partial<EhdsFaq>) => void;
-  versions: EhdsFaqVersion[];
 }) {
   const [form, setForm] = useState<Partial<EhdsFaq>>({});
 

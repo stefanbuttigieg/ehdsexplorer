@@ -849,6 +849,7 @@ function getResourceDescription(resource: string): string {
     annexes: "Regulation annexes",
     "health-authorities": "National Digital Health Authorities and Health Data Access Bodies",
     "country-legislation": "National implementing legislation tracker",
+    "faqs": "Official EHDS FAQs from the European Commission (DG SANTE)",
   };
   return descriptions[resource] || resource;
 }

@@ -383,6 +383,7 @@ https://api.ehdsexplorer.eu/functions/v1/api-data
 | `?resource=definitions` | All definitions |
 | `?resource=chapters` | All 10 chapters |
 | `?resource=implementing-acts` | All 33 implementing acts |
+| `?resource=faqs` | All 67 official EHDS FAQs |
 | `?resource=metadata` | Dataset metadata |
 
 ### Example

@@ -2043,6 +2043,109 @@ export type Database = {
           },
         ]
       }
+      implementing_act_data_columns: {
+        Row: {
+          column_key: string
+          created_at: string | null
+          id: string
+          name: string
+          sort_order: number | null
+          table_id: string
+        }
+        Insert: {
+          column_key: string
+          created_at?: string | null
+          id?: string
+          name: string
+          sort_order?: number | null
+          table_id: string
+        }
+        Update: {
+          column_key?: string
+          created_at?: string | null
+          id?: string
+          name?: string
+          sort_order?: number | null
+          table_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "implementing_act_data_columns_table_id_fkey"
+            columns: ["table_id"]
+            isOneToOne: false
+            referencedRelation: "implementing_act_data_tables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      implementing_act_data_rows: {
+        Row: {
+          created_at: string | null
+          id: string
+          sort_order: number | null
+          table_id: string
+          updated_at: string | null
+          values: Json
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          sort_order?: number | null
+          table_id: string
+          updated_at?: string | null
+          values?: Json
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          sort_order?: number | null
+          table_id?: string
+          updated_at?: string | null
+          values?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "implementing_act_data_rows_table_id_fkey"
+            columns: ["table_id"]
+            isOneToOne: false
+            referencedRelation: "implementing_act_data_tables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      implementing_act_data_tables: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          implementing_act_id: string
+          is_published: boolean | null
+          name: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          implementing_act_id: string
+          is_published?: boolean | null
+          name: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          implementing_act_id?: string
+          is_published?: boolean | null
+          name?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       implementing_act_linkedin_posts: {
         Row: {
           author_name: string | null

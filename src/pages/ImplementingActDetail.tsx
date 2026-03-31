@@ -17,6 +17,7 @@ import { SubscribeAlertButton } from "@/components/SubscribeAlertButton";
 import { CompareButton } from "@/components/CompareButton";
 import LinkedInPostsSection from "@/components/LinkedInPostsSection";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
+import ImplementingActDataTables from "@/components/ImplementingActDataTables";
 
 const parseFeedbackDeadline = (deadline: string) => {
   const parts = deadline.split(" - ");

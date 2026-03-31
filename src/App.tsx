@@ -122,6 +122,7 @@ const KidsCornerPage = lazy(() => import("./pages/KidsCornerPage"));
 const AdminComicPanelsPage = lazy(() => import("./pages/AdminComicPanelsPage"));
 const LeaderboardPage = lazy(() => import("./pages/LeaderboardPage"));
 const ArticleDependencyGraphPage = lazy(() => import("./pages/ArticleDependencyGraphPage"));
+const ContentNetworkPage = lazy(() => import("./pages/ContentNetworkPage"));
 const FAQsPage = lazy(() => import("./pages/FAQsPage"));
 const AdminEhdsFaqParserPage = lazy(() => import("./pages/AdminEhdsFaqParserPage"));
 const AdminEhdsFaqsPage = lazy(() => import("./pages/AdminEhdsFaqsPage"));

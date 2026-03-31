@@ -256,7 +256,7 @@ function EditFaqDialog({ faq, onClose, onSave }: {
   onClose: () => void;
   onSave: (data: Partial<EhdsFaq>) => void;
 }) {
-  const [form, setForm] = useState<Partial<EhdsFaq>>({});
+  const [form, setForm] = useState<Partial<EhdsFaq> & { _rawArticles?: string; _rawRecitals?: string }>({});
 
   useEffect(() => {
     if (faq) {

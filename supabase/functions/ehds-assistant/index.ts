@@ -309,12 +309,13 @@ serve(async (req) => {
 
     console.log("Fetching EHDS content for context... Role:", role, "Level:", explainLevel);
     
-    const [articlesRes, recitalsRes, definitionsRes, chaptersRes, implementingActsRes] = await Promise.all([
+    const [articlesRes, recitalsRes, definitionsRes, chaptersRes, implementingActsRes, faqsRes] = await Promise.all([
       supabase.from("articles").select("article_number, title, content").order("article_number"),
       supabase.from("recitals").select("recital_number, content, related_articles").order("recital_number"),
       supabase.from("definitions").select("term, definition, source_article").order("term"),
       supabase.from("chapters").select("chapter_number, title, description").order("chapter_number"),
       supabase.from("implementing_acts").select("id, title, description, status, article_reference, type, theme"),
+      supabase.from("help_center_faq").select("question, answer, category").eq("is_published", true).order("sort_order"),
     ]);
 
     const articles = articlesRes.data || [];

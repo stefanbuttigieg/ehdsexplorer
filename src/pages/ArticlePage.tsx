@@ -281,6 +281,33 @@ const ArticlePage = () => {
           <CrossRegulationSection articleId={articleId} />
         </div>
 
+        {/* Related Official FAQs */}
+        {relatedFaqs.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <MessageCircleQuestion className="h-5 w-5" />
+                Related Official FAQs
+              </CardTitle>
+              <CardDescription>
+                EU Commission Q&As referencing this article
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {relatedFaqs.map((faq) => (
+                <Link key={faq.id} to={`/faqs#faq-${faq.faq_number}`} className="block">
+                  <div className="p-3 rounded-lg bg-muted hover:bg-accent transition-colors">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="font-mono shrink-0">#{faq.faq_number}</Badge>
+                      <span className="text-sm line-clamp-2">{faq.question}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
         {/* National Implementation */}
         {nationalLegislation.length > 0 && (
           <Card className="mb-8">

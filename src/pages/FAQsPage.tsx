@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Search, ChevronDown, FileText } from "lucide-react";
+import { Search, ChevronDown, FileText, BookOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

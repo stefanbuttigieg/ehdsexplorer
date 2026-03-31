@@ -187,6 +187,15 @@ const FAQsPage = () => {
             Official Q&A from the European Commission (DG SANTE, Unit C.1 – Digital Health).
             {faqs.length > 0 && ` ${faqs.length} questions across ${chapters.length} topics.`}
           </p>
+          <a
+            href="https://health.ec.europa.eu/ehealth-digital-health-and-care/ehds-action_en"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline mt-2"
+          >
+            <FileText className="h-4 w-4" />
+            View official source on the European Commission website ↗
+          </a>
         </div>
 
         {/* Search */}

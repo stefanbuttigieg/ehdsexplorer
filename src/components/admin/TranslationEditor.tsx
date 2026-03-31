@@ -389,7 +389,7 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
           />
         </div>
         {bulk.selectedCount > 0 && (
-          <div className="flex gap-2 flex-shrink-0">
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
             <Button size="sm" onClick={() => bulkSetPublished(true)} disabled={bulkUpdating}>
               <Eye className="h-4 w-4 mr-1" />
               Publish ({bulk.selectedCount})

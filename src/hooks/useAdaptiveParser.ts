@@ -206,8 +206,8 @@ export function analyzeStructure(text: string): StructureAnalysis {
   const recitalCount = Math.max(recitalMatches.length, tableRecitalMatches.length);
   
   // Count articles - include both word-first and number-first patterns
-  const articleMatches = text.match(/(?:^|\n)(?:Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu)\s+\d+/gi) || [];
-  const numberFirstMatches = text.match(/(?:^|\n)\d+\.\s*(?:cikk|artikla|pants|straipsnis|člen)/gi) || [];
+  const articleMatches = text.match(/(?:^|\n)\s*(?:Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Članak|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu)\s+\d+/gi) || [];
+  const numberFirstMatches = text.match(/(?:^|\n)\s*\d+\.\s*(?:cikk|artikla|pants|straipsnis|člen)\b/gi) || [];
   const articleCount = articleMatches.length + numberFirstMatches.length;
   
   // Detect footnote format
@@ -257,16 +257,23 @@ export function analyzeStructure(text: string): StructureAnalysis {
   }
   
   // Detect language - scan a wider range to handle HTML-heavy content
+  // Count matches per language to pick the one with most article headers
   let detectedLanguage = 'unknown';
   const scanLimit = Math.min(lines.length, 2000);
+  const langHits: Record<string, number> = {};
   for (const [lang, pattern] of Object.entries(ARTICLE_PATTERNS)) {
+    let count = 0;
     for (let i = 0; i < scanLimit; i++) {
       if (pattern.test(lines[i].trim())) {
-        detectedLanguage = lang;
-        break;
+        count++;
       }
     }
-    if (detectedLanguage !== 'unknown') break;
+    if (count > 0) langHits[lang] = count;
+  }
+  // Pick language with most hits; in case of tie, prefer specific over generic
+  if (Object.keys(langHits).length > 0) {
+    const sorted = Object.entries(langHits).sort((a, b) => b[1] - a[1]);
+    detectedLanguage = sorted[0][0];
   }
   
   // Sample recitals for preview
@@ -372,7 +379,7 @@ export function adaptivePreprocess(text: string, analysis: StructureAnalysis): s
   
   // Step 10: Add line breaks before structural markers
   // Use a simpler approach that doesn't need variable-length lookbehinds
-  const articleWords = 'Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu';
+  const articleWords = 'Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Članak|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu';
   // Break before "Article N" when NOT already at start of line
   processed = processed.replace(new RegExp(`([.;:!?])\\s*((?:${articleWords})\\s+\\d+)`, 'gim'), '$1\n$2');
   
@@ -727,19 +734,18 @@ export async function parseDocumentAdaptive(
   const processed = adaptivePreprocess(text, analysis);
   const lines = processed.split('\n');
   
-  // Step 3: Find boundaries
-  let recitalsEnd = analysis.adoptionLineIndex > 0 ? analysis.adoptionLineIndex : lines.length;
+  // Step 3: Find boundaries in processed text
+  let adoptionLine = -1;
   let articlesStart = -1;
   let annexesStart = lines.length;
   
-  // Re-find boundaries in processed text
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     
-    if (recitalsEnd === lines.length) {
+    if (adoptionLine === -1) {
       for (const marker of ADOPTION_MARKERS) {
         if (marker.test(line)) {
-          recitalsEnd = i;
+          adoptionLine = i;
           break;
         }
       }
@@ -764,15 +770,35 @@ export async function parseDocumentAdaptive(
     }
   }
   
+  // Validate adoption line: it must appear before articles but after at least some recital-like content
+  // If adoption line is too early (before line 50 AND before any recitals), it's a false positive (header text)
+  let recitalsEnd: number;
+  if (adoptionLine > 0 && adoptionLine < lines.length) {
+    // Check there are actually recitals before this line
+    const recitalsBefore = lines.slice(0, adoptionLine).filter(l => /^\s*\(\d+\)\s+/.test(l)).length;
+    if (recitalsBefore >= 5) {
+      recitalsEnd = adoptionLine;
+    } else if (articlesStart > 0) {
+      // Adoption line is likely in a header/preamble; use articlesStart as boundary
+      recitalsEnd = articlesStart;
+    } else {
+      recitalsEnd = lines.length;
+    }
+  } else if (articlesStart > 0) {
+    recitalsEnd = articlesStart;
+  } else {
+    recitalsEnd = lines.length;
+  }
+  
   // If no article start found, default to after recitals
   if (articlesStart === -1) {
     articlesStart = recitalsEnd > 0 && recitalsEnd < lines.length ? recitalsEnd : 0;
   }
   
-  // Use detected language when available; otherwise use caller-provided language; only then fall back to English
-  const parserLang = (analysis.detectedLanguage !== 'unknown'
-    ? analysis.detectedLanguage
-    : options?.requestedLanguage?.toLowerCase()) || 'en';
+  // Use caller-provided language when available; otherwise detected; only then fall back to English
+  // This avoids false detection when languages share the same article word (e.g. DE/SV/NL/DA all use "Artikel")
+  const parserLang = options?.requestedLanguage?.toLowerCase()
+    || (analysis.detectedLanguage !== 'unknown' ? analysis.detectedLanguage : 'en');
   const articlesEnd = annexesStart > articlesStart ? annexesStart : lines.length;
   
   // Step 4: Parse all content types

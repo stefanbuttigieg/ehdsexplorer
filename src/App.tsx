@@ -277,6 +277,7 @@ const App = () => (
             <Route path="/admin/ehds-faq-parser" element={<AdminEhdsFaqParserPage />} />
             <Route path="/admin/ehds-faqs" element={<AdminEhdsFaqsPage />} />
             <Route path="/admin/ia-data-tables" element={<AdminImplementingActDataTablesPage />} />
+            <Route path="/admin/sidebar" element={<AdminSidebarPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>

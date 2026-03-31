@@ -298,10 +298,10 @@ const Layout = ({
                           <item.icon className="h-4 w-4" />
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent side="right">{item.label}</TooltipContent>
+                      <TooltipContent side="right">{tLabel(item.label)}</TooltipContent>
                     </Tooltip> : <Button variant={isActive(item.path) ? "secondary" : "ghost"} className={cn("w-full justify-start gap-2 overflow-hidden", isActive(item.path) && "bg-sidebar-accent text-sidebar-accent-foreground")}>
                       <item.icon className="h-4 w-4 flex-shrink-0" />
-                      <span className="truncate">{item.label}</span>
+                      <span className="truncate">{tLabel(item.label)}</span>
                     </Button>}
                 </Link>)}
             </div>

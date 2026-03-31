@@ -309,13 +309,14 @@ serve(async (req) => {
 
     console.log("Fetching EHDS content for context... Role:", role, "Level:", explainLevel);
     
-    const [articlesRes, recitalsRes, definitionsRes, chaptersRes, implementingActsRes, faqsRes] = await Promise.all([
+    const [articlesRes, recitalsRes, definitionsRes, chaptersRes, implementingActsRes, faqsRes, ehdsFaqsRes] = await Promise.all([
       supabase.from("articles").select("article_number, title, content").order("article_number"),
       supabase.from("recitals").select("recital_number, content, related_articles").order("recital_number"),
       supabase.from("definitions").select("term, definition, source_article").order("term"),
       supabase.from("chapters").select("chapter_number, title, description").order("chapter_number"),
       supabase.from("implementing_acts").select("id, title, description, status, article_reference, type, theme"),
       supabase.from("help_center_faq").select("question, answer, category").eq("is_published", true).order("sort_order"),
+      supabase.from("ehds_faqs").select("faq_number, question, answer, rich_content, chapter, source_articles, source_references").eq("is_published", true).order("faq_number"),
     ]);
 
     const articles = articlesRes.data || [];
@@ -324,6 +325,7 @@ serve(async (req) => {
     const chapters = chaptersRes.data || [];
     const implementingActs = implementingActsRes.data || [];
     const faqs = faqsRes.data || [];
+    const ehdsFaqs = ehdsFaqsRes.data || [];
 
     const articlesSummary = articles.map(a => 
       `Article ${a.article_number}: ${a.title}\n${a.content.substring(0, 500)}${a.content.length > 500 ? '...' : ''}`
@@ -348,6 +350,10 @@ serve(async (req) => {
     const faqsList = faqs.map(f => 
       `Q: ${f.question}\nA: ${f.answer}`
     ).join("\n\n");
+
+    const officialFaqsList = ehdsFaqs.map(f => 
+      `FAQ #${f.faq_number}: ${f.question}\n${f.rich_content || f.answer}\n${f.source_references || ''}`
+    ).join("\n\n---\n\n");
 
     // Get role and level specific prompts
     const rolePrompt = ROLE_PROMPTS[role] || ROLE_PROMPTS.general;
@@ -399,7 +405,11 @@ ${implementingActsList}
 EU COMMISSION FREQUENTLY ASKED QUESTIONS (Official FAQs from DG SANTE, last updated March 2026):
 ${faqsList}
 
-When users ask about specific topics, first check if the EU Commission FAQ section has a relevant answer and use it as an authoritative reference. Then reference the most relevant articles and explain how they apply. For navigation requests, provide direct references to articles, chapters, or definitions that address their query. Always end your response with a Sources section listing the specific articles, recitals, or definitions you referenced.`;
+OFFICIAL EHDS FAQ BANK (67 detailed Q&As from European Commission, DG SANTE Unit C.1 – Digital Health):
+These are the authoritative EU Commission answers. When a user's question matches or relates to one of these FAQs, base your answer PRIMARILY on this official content and cite the FAQ number (e.g., "See FAQ #33").
+${officialFaqsList}
+
+When users ask about specific topics, first check if the official EHDS FAQ bank has a relevant answer and use it as the PRIMARY authoritative reference. Cite FAQ numbers. Then reference the most relevant articles and explain how they apply. For navigation requests, provide direct references to articles, chapters, or definitions that address their query. Always end your response with a Sources section listing the specific articles, recitals, definitions, or FAQ numbers you referenced.`;
 
     // Fetch configured AI model from site settings
     let aiModel = "google/gemini-2.5-flash";

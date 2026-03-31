@@ -29,6 +29,8 @@ import { useLegislationByArticle } from "@/hooks/useCountryLegislation";
 import { CountryLegislationCard } from "@/components/CountryLegislationCard";
 import { CrossRegulationSection } from "@/components/CrossRegulationSection";
 import { SEOHead, ArticleSchema, BreadcrumbSchema } from "@/components/seo";
+import { useRelatedFaqs } from "@/hooks/useEhdsFaqs";
+import { MessageCircleQuestion } from "lucide-react";
 
 const ArticlePage = () => {
   const { id } = useParams();
@@ -40,6 +42,7 @@ const ArticlePage = () => {
   const { data: publishedWorks = [] } = usePublishedWorks();
   const { data: footnotes = [] } = useFootnotesByArticle(article?.id ?? null);
   const { data: nationalLegislation = [] } = useLegislationByArticle(articleId);
+  const { data: relatedFaqs = [] } = useRelatedFaqs(articleId);
   const chapter = getChapterByArticle(articleId);
   const relatedRecitals = getRecitalsByArticle(articleId);
   const relatedActs = getActsByArticle(implementingActs, articleId);
@@ -277,6 +280,33 @@ const ArticlePage = () => {
         <div className="mb-8">
           <CrossRegulationSection articleId={articleId} />
         </div>
+
+        {/* Related Official FAQs */}
+        {relatedFaqs.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <MessageCircleQuestion className="h-5 w-5" />
+                Related Official FAQs
+              </CardTitle>
+              <CardDescription>
+                EU Commission Q&As referencing this article
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {relatedFaqs.map((faq) => (
+                <Link key={faq.id} to={`/faqs#faq-${faq.faq_number}`} className="block">
+                  <div className="p-3 rounded-lg bg-muted hover:bg-accent transition-colors">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="font-mono shrink-0">#{faq.faq_number}</Badge>
+                      <span className="text-sm line-clamp-2">{faq.question}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         {/* National Implementation */}
         {nationalLegislation.length > 0 && (

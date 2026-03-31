@@ -1098,6 +1098,122 @@ export type Database = {
         }
         Relationships: []
       }
+      ehds_faq_footnotes: {
+        Row: {
+          content: string
+          created_at: string | null
+          faq_id: string
+          id: string
+          marker: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          faq_id: string
+          id?: string
+          marker: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          faq_id?: string
+          id?: string
+          marker?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ehds_faq_footnotes_faq_id_fkey"
+            columns: ["faq_id"]
+            isOneToOne: false
+            referencedRelation: "ehds_faqs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ehds_faq_sync_log: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          faqs_parsed: number | null
+          footnotes_parsed: number | null
+          id: string
+          pdf_hash: string | null
+          pdf_url: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          faqs_parsed?: number | null
+          footnotes_parsed?: number | null
+          id?: string
+          pdf_hash?: string | null
+          pdf_url?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          faqs_parsed?: number | null
+          footnotes_parsed?: number | null
+          id?: string
+          pdf_hash?: string | null
+          pdf_url?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      ehds_faqs: {
+        Row: {
+          answer: string
+          chapter: string
+          created_at: string | null
+          faq_number: number
+          id: string
+          is_published: boolean | null
+          pdf_version: string | null
+          question: string
+          rich_content: string | null
+          sort_order: number | null
+          source_articles: string[] | null
+          source_references: string | null
+          sub_category: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          answer: string
+          chapter: string
+          created_at?: string | null
+          faq_number: number
+          id?: string
+          is_published?: boolean | null
+          pdf_version?: string | null
+          question: string
+          rich_content?: string | null
+          sort_order?: number | null
+          source_articles?: string[] | null
+          source_references?: string | null
+          sub_category?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          answer?: string
+          chapter?: string
+          created_at?: string | null
+          faq_number?: number
+          id?: string
+          is_published?: boolean | null
+          pdf_version?: string | null
+          question?: string
+          rich_content?: string | null
+          sort_order?: number | null
+          source_articles?: string[] | null
+          source_references?: string | null
+          sub_category?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       ehds_obligations: {
         Row: {
           article_references: string[]

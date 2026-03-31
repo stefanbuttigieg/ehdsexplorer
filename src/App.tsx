@@ -122,6 +122,8 @@ const KidsCornerPage = lazy(() => import("./pages/KidsCornerPage"));
 const AdminComicPanelsPage = lazy(() => import("./pages/AdminComicPanelsPage"));
 const LeaderboardPage = lazy(() => import("./pages/LeaderboardPage"));
 const ArticleDependencyGraphPage = lazy(() => import("./pages/ArticleDependencyGraphPage"));
+const FAQsPage = lazy(() => import("./pages/FAQsPage"));
+const AdminEhdsFaqParserPage = lazy(() => import("./pages/AdminEhdsFaqParserPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -214,6 +216,7 @@ const App = () => (
             <Route path="/tools" element={<ToolsHubPage />} />
             <Route path="/leaderboard" element={<LeaderboardPage />} />
             <Route path="/article-dependencies" element={<ArticleDependencyGraphPage />} />
+            <Route path="/faqs" element={<FAQsPage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin/set-password" element={<AdminSetPasswordPage />} />
             <Route path="/profile" element={<ProfilePage />} />
@@ -266,6 +269,7 @@ const App = () => (
             <Route path="/admin/toolkit-questions" element={<AdminToolkitQuestionsPage />} />
             <Route path="/admin/ai-settings" element={<AdminAISettingsPage />} />
             <Route path="/admin/comic-panels" element={<AdminComicPanelsPage />} />
+            <Route path="/admin/ehds-faq-parser" element={<AdminEhdsFaqParserPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>

@@ -288,6 +288,15 @@ const AdminEhdsFaqsPage = () => {
       {/* Edit Dialog */}
       <EditFaqDialog key={editingFaq?.id || "none"} faq={editingFaq} onClose={() => setEditingFaq(null)} onSave={saveFaq} />
 
+      {/* Create Dialog */}
+      <EditFaqDialog
+        key="create-new"
+        faq={isCreating ? { id: "", faq_number: (faqs.length > 0 ? Math.max(...faqs.map(f => f.faq_number)) + 1 : 1), question: "", answer: "", chapter: "General", is_published: false, rich_content: "", source_articles: [], source_recitals: [], source_references: "", sub_category: "", document_version: "", sort_order: null, created_at: "", updated_at: "", pdf_version: null } as EhdsFaq : null}
+        onClose={() => setIsCreating(false)}
+        onSave={createFaq}
+        isCreateMode
+      />
+
       {/* Delete Confirmation */}
       <Dialog open={!!deletingId} onOpenChange={() => setDeletingId(null)}>
         <DialogContent>

@@ -125,6 +125,7 @@ const ArticleDependencyGraphPage = lazy(() => import("./pages/ArticleDependencyG
 const FAQsPage = lazy(() => import("./pages/FAQsPage"));
 const AdminEhdsFaqParserPage = lazy(() => import("./pages/AdminEhdsFaqParserPage"));
 const AdminEhdsFaqsPage = lazy(() => import("./pages/AdminEhdsFaqsPage"));
+const AdminImplementingActDataTablesPage = lazy(() => import("./pages/AdminImplementingActDataTablesPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {

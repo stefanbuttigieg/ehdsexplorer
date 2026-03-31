@@ -256,7 +256,7 @@ function EditFaqDialog({ faq, onClose, onSave }: {
   onClose: () => void;
   onSave: (data: Partial<EhdsFaq>) => void;
 }) {
-  const [form, setForm] = useState<Partial<EhdsFaq>>({});
+  const [form, setForm] = useState<Partial<EhdsFaq> & { _rawArticles?: string; _rawRecitals?: string }>({});
 
   useEffect(() => {
     if (faq) {
@@ -319,16 +319,26 @@ function EditFaqDialog({ faq, onClose, onSave }: {
             <div>
               <Label>Source Articles (comma-separated)</Label>
               <Input
-                value={(form.source_articles || []).join(", ")}
-                onChange={e => setForm(p => ({ ...p, source_articles: e.target.value.split(",").map(s => s.trim()).filter(Boolean) }))}
+                value={form._rawArticles ?? (form.source_articles || []).join(", ")}
+                onChange={e => {
+                  const raw = e.target.value;
+                  const parsed = raw.split(",").map(s => s.trim()).filter(Boolean);
+                  setForm(p => ({ ...p, _rawArticles: raw, source_articles: parsed }));
+                }}
+                onBlur={() => setForm(p => ({ ...p, _rawArticles: undefined }))}
                 placeholder="e.g. 1, 14, 105"
               />
             </div>
             <div>
               <Label>Source Recitals (comma-separated)</Label>
               <Input
-                value={(form.source_recitals || []).join(", ")}
-                onChange={e => setForm(p => ({ ...p, source_recitals: e.target.value.split(",").map(s => s.trim()).filter(Boolean) }))}
+                value={form._rawRecitals ?? (form.source_recitals || []).join(", ")}
+                onChange={e => {
+                  const raw = e.target.value;
+                  const parsed = raw.split(",").map(s => s.trim()).filter(Boolean);
+                  setForm(p => ({ ...p, _rawRecitals: raw, source_recitals: parsed }));
+                }}
+                onBlur={() => setForm(p => ({ ...p, _rawRecitals: undefined }))}
                 placeholder="e.g. 1, 5, 12"
               />
             </div>

@@ -316,7 +316,8 @@ export function analyzeStructure(text: string): StructureAnalysis {
 
 // === Adaptive Preprocessing ===
 export function adaptivePreprocess(text: string, analysis: StructureAnalysis): string {
-  let processed = text;
+  // Step 0: Normalize non-breaking spaces and other Unicode whitespace to regular spaces
+  let processed = text.replace(/[\u00A0\u2007\u202F\u2060]/g, ' ');
   
   // Step 1: Handle markdown tables based on detected format
   if (analysis.tableFormat === 'two-column') {

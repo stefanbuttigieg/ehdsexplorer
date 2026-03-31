@@ -1,27 +1,32 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Search, Eye, EyeOff, Pencil, Trash2, ExternalLink, FileText, Upload } from "lucide-react";
+import { Search, Pencil, Trash2, ExternalLink, Upload, Plus, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+
 import { AdminPageLayout } from "@/components/admin/AdminPageLayout";
-import { useAllEhdsFaqs, type EhdsFaq } from "@/hooks/useEhdsFaqs";
+import MarkdownEditor from "@/components/MarkdownEditor";
+import { useAllEhdsFaqs, useEhdsFaqVersions, type EhdsFaq, type EhdsFaqVersion } from "@/hooks/useEhdsFaqs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
 
 const AdminEhdsFaqsPage = () => {
   const { data: faqs = [], isLoading } = useAllEhdsFaqs();
+  const { data: versions = [] } = useEhdsFaqVersions();
   const [search, setSearch] = useState("");
   const [editingFaq, setEditingFaq] = useState<EhdsFaq | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showVersionDialog, setShowVersionDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -62,6 +67,8 @@ const AdminEhdsFaqsPage = () => {
         sub_category: updated.sub_category,
         source_references: updated.source_references,
         source_articles: updated.source_articles,
+        source_recitals: updated.source_recitals,
+        document_version: updated.document_version,
       })
       .eq("id", editingFaq.id);
     if (error) {
@@ -108,6 +115,10 @@ const AdminEhdsFaqsPage = () => {
             />
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => setShowVersionDialog(true)}>
+              <History className="h-4 w-4 mr-2" />
+              Versions
+            </Button>
             <Link to="/admin/ehds-faq-parser">
               <Button variant="outline" size="sm">
                 <Upload className="h-4 w-4 mr-2" />
@@ -152,6 +163,7 @@ const AdminEhdsFaqsPage = () => {
                   <TableHead>Question</TableHead>
                   <TableHead className="hidden md:table-cell">Chapter</TableHead>
                   <TableHead className="hidden lg:table-cell">Articles</TableHead>
+                  <TableHead className="hidden lg:table-cell">Version</TableHead>
                   <TableHead className="w-20">Published</TableHead>
                   <TableHead className="w-24">Actions</TableHead>
                 </TableRow>
@@ -162,6 +174,9 @@ const AdminEhdsFaqsPage = () => {
                     <TableCell className="font-mono text-sm">{faq.faq_number}</TableCell>
                     <TableCell className="max-w-xs">
                       <p className="text-sm line-clamp-2">{faq.question}</p>
+                    {!faq.rich_content && (
+                        <Badge variant="outline" className="text-xs mt-1 text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-600">No rich content</Badge>
+                      )}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       <Badge variant="outline" className="text-xs">{faq.chapter}</Badge>
@@ -175,6 +190,9 @@ const AdminEhdsFaqsPage = () => {
                           <Badge variant="secondary" className="text-xs">+{(faq.source_articles || []).length - 3}</Badge>
                         )}
                       </div>
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      <span className="text-xs text-muted-foreground">{faq.document_version || "—"}</span>
                     </TableCell>
                     <TableCell>
                       <Switch
@@ -216,25 +234,41 @@ const AdminEhdsFaqsPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Version History Dialog */}
+      <VersionHistoryDialog
+        open={showVersionDialog}
+        onClose={() => setShowVersionDialog(false)}
+        versions={versions}
+      />
     </AdminPageLayout>
   );
 };
 
-function EditFaqDialog({ faq, onClose, onSave }: { faq: EhdsFaq | null; onClose: () => void; onSave: (data: Partial<EhdsFaq>) => void }) {
+function EditFaqDialog({ faq, onClose, onSave }: {
+  faq: EhdsFaq | null;
+  onClose: () => void;
+  onSave: (data: Partial<EhdsFaq>) => void;
+}) {
   const [form, setForm] = useState<Partial<EhdsFaq>>({});
 
-  // Reset form when faq changes
-  if (faq && form.question === undefined) {
-    setForm({
-      question: faq.question,
-      answer: faq.answer,
-      rich_content: faq.rich_content || "",
-      chapter: faq.chapter,
-      sub_category: faq.sub_category || "",
-      source_references: faq.source_references || "",
-      source_articles: faq.source_articles || [],
-    });
-  }
+  useEffect(() => {
+    if (faq) {
+      setForm({
+        question: faq.question,
+        answer: faq.answer,
+        rich_content: faq.rich_content || "",
+        chapter: faq.chapter,
+        sub_category: faq.sub_category || "",
+        source_references: faq.source_references || "",
+        source_articles: faq.source_articles || [],
+        source_recitals: faq.source_recitals || [],
+        document_version: faq.document_version || "",
+      });
+    } else {
+      setForm({});
+    }
+  }, [faq]);
 
   const handleClose = () => {
     setForm({});
@@ -243,7 +277,7 @@ function EditFaqDialog({ faq, onClose, onSave }: { faq: EhdsFaq | null; onClose:
 
   return (
     <Dialog open={!!faq} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit FAQ #{faq?.faq_number}</DialogTitle>
         </DialogHeader>
@@ -253,12 +287,17 @@ function EditFaqDialog({ faq, onClose, onSave }: { faq: EhdsFaq | null; onClose:
             <Textarea value={form.question || ""} onChange={e => setForm(p => ({ ...p, question: e.target.value }))} rows={2} />
           </div>
           <div>
-            <Label>Answer (plain text)</Label>
+            <Label>Answer (plain text summary)</Label>
             <Textarea value={form.answer || ""} onChange={e => setForm(p => ({ ...p, answer: e.target.value }))} rows={3} />
           </div>
           <div>
-            <Label>Rich Content (Markdown)</Label>
-            <Textarea value={form.rich_content || ""} onChange={e => setForm(p => ({ ...p, rich_content: e.target.value }))} rows={8} className="font-mono text-xs" />
+            <Label>Rich Content (Markdown with preview)</Label>
+            <MarkdownEditor
+              value={form.rich_content || ""}
+              onChange={(val) => setForm(p => ({ ...p, rich_content: val }))}
+              rows={12}
+              placeholder="Full FAQ answer in Markdown format..."
+            />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -270,22 +309,132 @@ function EditFaqDialog({ faq, onClose, onSave }: { faq: EhdsFaq | null; onClose:
               <Input value={form.sub_category || ""} onChange={e => setForm(p => ({ ...p, sub_category: e.target.value }))} />
             </div>
           </div>
-          <div>
-            <Label>Source References</Label>
-            <Input value={form.source_references || ""} onChange={e => setForm(p => ({ ...p, source_references: e.target.value }))} />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Source Articles (comma-separated)</Label>
+              <Input
+                value={(form.source_articles || []).join(", ")}
+                onChange={e => setForm(p => ({ ...p, source_articles: e.target.value.split(",").map(s => s.trim()).filter(Boolean) }))}
+                placeholder="e.g. 1, 14, 105"
+              />
+            </div>
+            <div>
+              <Label>Source Recitals (comma-separated)</Label>
+              <Input
+                value={(form.source_recitals || []).join(", ")}
+                onChange={e => setForm(p => ({ ...p, source_recitals: e.target.value.split(",").map(s => s.trim()).filter(Boolean) }))}
+                placeholder="e.g. 1, 5, 12"
+              />
+            </div>
           </div>
-          <div>
-            <Label>Source Articles (comma-separated)</Label>
-            <Input
-              value={(form.source_articles || []).join(", ")}
-              onChange={e => setForm(p => ({ ...p, source_articles: e.target.value.split(",").map(s => s.trim()).filter(Boolean) }))}
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Source References</Label>
+              <Input value={form.source_references || ""} onChange={e => setForm(p => ({ ...p, source_references: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Document Version</Label>
+              <Input
+                value={form.document_version || ""}
+                onChange={e => setForm(p => ({ ...p, document_version: e.target.value }))}
+                placeholder="e.g. v2.0 - March 2025"
+              />
+            </div>
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={handleClose}>Cancel</Button>
           <Button onClick={() => onSave(form)}>Save Changes</Button>
         </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function VersionHistoryDialog({ open, onClose, versions }: {
+  open: boolean;
+  onClose: () => void;
+  versions: EhdsFaqVersion[];
+}) {
+  const [newVersion, setNewVersion] = useState({ version_label: "", release_date: "", notes: "" });
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const addVersion = async () => {
+    if (!newVersion.version_label.trim()) return;
+    const { error } = await supabase.from("ehds_faq_versions").insert({
+      version_label: newVersion.version_label,
+      release_date: newVersion.release_date || null,
+      notes: newVersion.notes || null,
+    });
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Version added" });
+      queryClient.invalidateQueries({ queryKey: ["ehds-faq-versions"] });
+      setNewVersion({ version_label: "", release_date: "", notes: "" });
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>FAQ Document Versions</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          {/* Add new version */}
+          <Card>
+            <CardHeader className="py-3 px-4">
+              <CardTitle className="text-sm">Add Version</CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-4 space-y-2">
+              <Input
+                placeholder="Version label (e.g. v2.0 - March 2025)"
+                value={newVersion.version_label}
+                onChange={e => setNewVersion(p => ({ ...p, version_label: e.target.value }))}
+              />
+              <Input
+                type="date"
+                value={newVersion.release_date}
+                onChange={e => setNewVersion(p => ({ ...p, release_date: e.target.value }))}
+              />
+              <Textarea
+                placeholder="Release notes..."
+                value={newVersion.notes}
+                onChange={e => setNewVersion(p => ({ ...p, notes: e.target.value }))}
+                rows={2}
+              />
+              <Button size="sm" onClick={addVersion} disabled={!newVersion.version_label.trim()}>
+                <Plus className="h-4 w-4 mr-1" /> Add Version
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Version list */}
+          {versions.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">No versions tracked yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {versions.map(v => (
+                <div key={v.id} className="p-3 rounded-lg border bg-muted/30">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-sm">{v.version_label}</span>
+                    {v.release_date && (
+                      <span className="text-xs text-muted-foreground">
+                        {format(new Date(v.release_date), "dd MMM yyyy")}
+                      </span>
+                    )}
+                  </div>
+                  {v.notes && <p className="text-xs text-muted-foreground mt-1">{v.notes}</p>}
+                  {v.faqs_updated_count > 0 && (
+                    <Badge variant="secondary" className="text-xs mt-1">{v.faqs_updated_count} FAQs updated</Badge>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );

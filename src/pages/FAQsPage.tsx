@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Search, ChevronDown, FileText, BookOpen } from "lucide-react";
+import { Search, ChevronDown, FileText, BookOpen, ScrollText } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -89,6 +89,18 @@ function FAQItem({ faq, footnotes, isOpen, onToggle, implementingActs }: {
                     <Badge variant="secondary" className="text-xs cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">
                       <FileText className="h-3 w-3 mr-1" />
                       Art. {art}
+                    </Badge>
+                  </Link>
+                ))}
+              </div>
+            )}
+            {(faq.source_recitals || []).length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {(faq.source_recitals || []).map((rec) => (
+                  <Link key={rec} to={`/recital/${rec}`}>
+                    <Badge variant="outline" className="text-xs cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors border-accent">
+                      <ScrollText className="h-3 w-3 mr-1" />
+                      Recital {rec}
                     </Badge>
                   </Link>
                 ))}

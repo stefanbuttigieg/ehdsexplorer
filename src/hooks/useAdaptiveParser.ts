@@ -379,12 +379,12 @@ export function adaptivePreprocess(text: string, analysis: StructureAnalysis): s
   
   // Step 10: Add line breaks before structural markers
   // Use a simpler approach that doesn't need variable-length lookbehinds
-  const articleWords = 'Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Članak|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu';
+  const articleWords = 'Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Članak|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu|Člen';
   // Break before "Article N" when NOT already at start of line
   processed = processed.replace(new RegExp(`([.;:!?])\\s*((?:${articleWords})\\s+\\d+)`, 'gim'), '$1\n$2');
   
-  // For number-first languages (Hungarian, Finnish, Latvian, Lithuanian, Slovenian)
-  processed = processed.replace(/([.;:!?])\s*(\d+)\.\s*(cikk|artikla|pants|straipsnis|člen)/gim, '$1\n$2. $3');
+  // For number-first languages (Hungarian, Finnish, Latvian, Lithuanian)
+  processed = processed.replace(/([.;:!?])\s*(\d+)\.\s*(cikk|artikla|pants|straipsnis)/gim, '$1\n$2. $3');
   
   const chapterWords = 'CHAPTER|KAPITEL|CHAPITRE|CAPÍTULO|CAPO|HOOFDSTUK|ROZDZIAŁ|KAPITOLA|CAPITOLUL|ГЛАВА|ΚΕΦΑΛΑΙΟ|PEATÜKK|NODAĻA|SKYRIUS|POGLAVJE|POGLAVLJE|KAPITOLU|CAIBIDIL|FEJEZET|LUKU';
   processed = processed.replace(new RegExp(`([.;:!?\\n])\\s*((?:${chapterWords})\\s+[IVXLCDM]+)`, 'gim'), '$1\n$2');

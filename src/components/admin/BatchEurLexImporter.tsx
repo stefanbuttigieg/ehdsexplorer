@@ -483,7 +483,7 @@ export function BatchEurLexImporter({ celexNumber = '32025R0327', onComplete }: 
       </CardHeader>
       <CardContent className="space-y-4">
         {!isRunning && statuses.length === 0 && (
-          <Button onClick={startBatch} className="w-full" size="lg">
+          <Button onClick={() => startBatch()} className="w-full" size="lg">
             <Play className="h-4 w-4 mr-2" />
             Start Batch Import (23 Languages)
           </Button>

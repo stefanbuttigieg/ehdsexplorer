@@ -265,15 +265,18 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 ### 🔐 Admin Backend
 - **Role-based access control** (Admin/Editor roles)
 - **Centralized API documentation** at `/admin/api-docs` with all GET/POST endpoints
+- **Sidebar Manager** at `/admin/sidebar` — database-driven navigation with reorder, visibility toggle, add/delete
 - **Content management** for all content types:
   - Articles, Recitals, Chapters, Sections
   - Definitions, Annexes
-  - Implementing Acts (with dedicated article/recital/section content)
+  - Implementing Acts (with dedicated article/recital/section content and data tables)
+  - EHDS FAQs (separate from Help Center FAQs) with PDF parser and auto-sync
   - Joint Action Deliverables
   - Published Works
   - Notifications
   - Footnotes (inline and attached)
   - Plain Language Translations
+- **AI Settings** — manage available models, default model, and system prompt
 - **Implementation Tracker** with inline evidence management per obligation
 - **Markdown WYSIWYG editor** with live preview
 - **Bulk editing** with multi-select for recitals and articles

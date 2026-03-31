@@ -596,7 +596,7 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
             </div>
 
             {/* Actions */}
-            <div className="flex items-center justify-between pt-4 border-t">
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between pt-4 border-t gap-2">
               <div>
                 {existingTranslation && (
                   <Button
@@ -604,6 +604,7 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
                     size="sm"
                     onClick={handleDelete}
                     disabled={deleteMutation.isPending}
+                    className="w-full sm:w-auto"
                   >
                     <Trash2 className="h-4 w-4 mr-1" />
                     Delete
@@ -611,11 +612,11 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
                 )}
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setEditingItem(null)}>
+                <Button variant="outline" onClick={() => setEditingItem(null)} className="flex-1 sm:flex-none">
                   Cancel
                 </Button>
-                <Button onClick={handleSave} disabled={saveMutation.isPending}>
-                  {saveMutation.isPending ? 'Saving...' : 'Save Translation'}
+                <Button onClick={handleSave} disabled={saveMutation.isPending} className="flex-1 sm:flex-none">
+                  {saveMutation.isPending ? 'Saving...' : 'Save'}
                 </Button>
               </div>
             </div>

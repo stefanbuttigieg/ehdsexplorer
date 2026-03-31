@@ -327,6 +327,13 @@ const AdminDashboard = () => {
       badge: 'Super Admin',
     },
     {
+      title: 'Sidebar Manager',
+      description: 'Manage navigation items in the left sidebar',
+      icon: Settings2,
+      href: '/admin/sidebar',
+      badge: 'Super Admin',
+    },
+    {
       title: 'API Keys & Logs',
       description: 'View API keys and request logs from country managers',
       icon: Key,

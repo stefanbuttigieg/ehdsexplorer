@@ -18,7 +18,7 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const pdfUrl = body.pdf_url || "https://health.ec.europa.eu/document/download/39129f32-710e-412c-89d2-52f9a1f81900_en?filename=ehealth_ehds_qa_en.pdf";
+    const pdfUrl = body.pdf_url || "https://health.ec.europa.eu/document/download/4dd47ec2-71dd-49fc-b036-ad7c14f6ed68_en?filename=ehealth_ehds_qa_en.pdf";
     const dryRun = body.dry_run === true;
 
     console.log("Downloading PDF from:", pdfUrl);
@@ -27,7 +27,16 @@ serve(async (req) => {
     const pdfResponse = await fetch(pdfUrl);
     if (!pdfResponse.ok) throw new Error(`Failed to download PDF: ${pdfResponse.status}`);
     const pdfBuffer = await pdfResponse.arrayBuffer();
-    const pdfBase64 = btoa(String.fromCharCode(...new Uint8Array(pdfBuffer)));
+    
+    // Encode to base64 in chunks to avoid stack overflow on large PDFs
+    const bytes = new Uint8Array(pdfBuffer);
+    const chunkSize = 32768;
+    let pdfBase64 = "";
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      const chunk = bytes.subarray(i, i + chunkSize);
+      pdfBase64 += String.fromCharCode(...chunk);
+    }
+    pdfBase64 = btoa(pdfBase64);
 
     // Compute a simple hash for change detection
     const hashBuffer = await crypto.subtle.digest("SHA-256", pdfBuffer);

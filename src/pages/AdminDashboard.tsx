@@ -169,6 +169,12 @@ const AdminDashboard = () => {
       href: '/admin/languages',
     },
     {
+      title: 'UI Translations',
+      description: 'Manage site-wide UI string translations with AI and IATE terminology',
+      icon: Globe,
+      href: '/admin/ui-translations',
+    },
+    {
       title: 'National EHDS Entities',
       description: 'Manage Digital Health Authorities (DHAs) and Health Data Access Bodies (HDABs)',
       icon: MapPin,

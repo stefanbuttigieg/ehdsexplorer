@@ -430,6 +430,7 @@ const AdminUITranslationsPage = () => {
                       <TableHead>Translation</TableHead>
                       <TableHead className="w-24">Context</TableHead>
                       <TableHead className="w-16">AI</TableHead>
+                      <TableHead className="w-16">IATE</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -468,6 +469,17 @@ const AdminUITranslationsPage = () => {
                                 AI
                               </Badge>
                             )}
+                          </TableCell>
+                          <TableCell>
+                            <a
+                              href={`https://iate.europa.eu/search/standard/result?source=en&target=${selectedLang}&query=${encodeURIComponent(k.value)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title={`Look up "${k.value}" in IATE`}
+                              className="text-primary hover:underline text-xs"
+                            >
+                              IATE
+                            </a>
                           </TableCell>
                         </TableRow>
                       );

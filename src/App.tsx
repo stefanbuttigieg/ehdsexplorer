@@ -273,6 +273,7 @@ const App = () => (
             <Route path="/admin/comic-panels" element={<AdminComicPanelsPage />} />
             <Route path="/admin/ehds-faq-parser" element={<AdminEhdsFaqParserPage />} />
             <Route path="/admin/ehds-faqs" element={<AdminEhdsFaqsPage />} />
+            <Route path="/admin/ia-data-tables" element={<AdminImplementingActDataTablesPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>

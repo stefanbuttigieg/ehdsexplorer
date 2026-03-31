@@ -72,7 +72,7 @@ const ARTICLE_PATTERNS: Record<string, RegExp> = {
   et: /^Artikkel\s+(\d+)/i,
   lv: /^(\d+)\.\s*pants/i,
   lt: /^(\d+)\s*straipsnis/i,
-  sl: /^(\d+)\.\s*člen/i,
+  sl: /^Člen\s+(\d+)/i,
   hr: /^Članak\s+(\d+)/i,
   mt: /^Artikolu\s+(\d+)/i,
   ga: /^Airteagal\s+(\d+)/i,
@@ -99,7 +99,7 @@ const CHAPTER_PATTERNS: Record<string, RegExp> = {
   et: /^([IVXLCDM]+)\s*PEATÜKK/i,
   lv: /^([IVXLCDM]+)\s*NODAĻA/i,
   lt: /^([IVXLCDM]+)\s*SKYRIUS/i,
-  sl: /^([IVXLCDM]+)\.\s*POGLAVJE/i,
+  sl: /^POGLAVJE\s+([IVXLCDM]+)/i,
   hr: /^POGLAVLJE\s+([IVXLCDM]+)/i,
   mt: /^KAPITOLU\s+([IVXLCDM]+)/i,
   ga: /^CAIBIDIL\s+([IVXLCDM]+)/i,
@@ -206,8 +206,8 @@ export function analyzeStructure(text: string): StructureAnalysis {
   const recitalCount = Math.max(recitalMatches.length, tableRecitalMatches.length);
   
   // Count articles - include both word-first and number-first patterns
-  const articleMatches = text.match(/(?:^|\n)\s*(?:Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Članak|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu)\s+\d+/gi) || [];
-  const numberFirstMatches = text.match(/(?:^|\n)\s*\d+\.\s*(?:cikk|artikla|pants|straipsnis|člen)\b/gi) || [];
+  const articleMatches = text.match(/(?:^|\n)\s*(?:Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Članak|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu|Člen)\s+\d+/gi) || [];
+  const numberFirstMatches = text.match(/(?:^|\n)\s*\d+\.\s*(?:cikk|artikla|pants|straipsnis)\b/gi) || [];
   const articleCount = articleMatches.length + numberFirstMatches.length;
   
   // Detect footnote format
@@ -316,7 +316,8 @@ export function analyzeStructure(text: string): StructureAnalysis {
 
 // === Adaptive Preprocessing ===
 export function adaptivePreprocess(text: string, analysis: StructureAnalysis): string {
-  let processed = text;
+  // Step 0: Normalize non-breaking spaces and other Unicode whitespace to regular spaces
+  let processed = text.replace(/[\u00A0\u2007\u202F\u2060]/g, ' ');
   
   // Step 1: Handle markdown tables based on detected format
   if (analysis.tableFormat === 'two-column') {
@@ -379,17 +380,17 @@ export function adaptivePreprocess(text: string, analysis: StructureAnalysis): s
   
   // Step 10: Add line breaks before structural markers
   // Use a simpler approach that doesn't need variable-length lookbehinds
-  const articleWords = 'Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Članak|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu';
+  const articleWords = 'Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Članak|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu|Člen';
   // Break before "Article N" when NOT already at start of line
   processed = processed.replace(new RegExp(`([.;:!?])\\s*((?:${articleWords})\\s+\\d+)`, 'gim'), '$1\n$2');
   
-  // For number-first languages (Hungarian, Finnish, Latvian, Lithuanian, Slovenian)
-  processed = processed.replace(/([.;:!?])\s*(\d+)\.\s*(cikk|artikla|pants|straipsnis|člen)/gim, '$1\n$2. $3');
+  // For number-first languages (Hungarian, Finnish, Latvian, Lithuanian)
+  processed = processed.replace(/([.;:!?])\s*(\d+)\.\s*(cikk|artikla|pants|straipsnis)/gim, '$1\n$2. $3');
   
   const chapterWords = 'CHAPTER|KAPITEL|CHAPITRE|CAPÍTULO|CAPO|HOOFDSTUK|ROZDZIAŁ|KAPITOLA|CAPITOLUL|ГЛАВА|ΚΕΦΑΛΑΙΟ|PEATÜKK|NODAĻA|SKYRIUS|POGLAVJE|POGLAVLJE|KAPITOLU|CAIBIDIL|FEJEZET|LUKU';
   processed = processed.replace(new RegExp(`([.;:!?\\n])\\s*((?:${chapterWords})\\s+[IVXLCDM]+)`, 'gim'), '$1\n$2');
-  // Also handle number-first chapter patterns
-  processed = processed.replace(/([.;:!?\n])\s*([IVXLCDM]+)\.\s*(FEJEZET|LUKU|PEATÜKK|NODAĻA|SKYRIUS|POGLAVJE)/gim, '$1\n$2. $3');
+  // Also handle number-first chapter patterns (Hungarian, Finnish, Estonian, Latvian, Lithuanian)
+  processed = processed.replace(/([.;:!?\n])\s*([IVXLCDM]+)\.\s*(FEJEZET|LUKU|PEATÜKK|NODAĻA|SKYRIUS)/gim, '$1\n$2. $3');
   
   const annexWords = 'ANNEX|ANHANG|ANNEXE|ANEXO|ALLEGATO|BIJLAGE|ZAŁĄCZNIK|PŘÍLOHA|PRÍLOHA|ANEXA|ПРИЛОЖЕНИЕ|ΠΑΡΑΡΤΗΜΑ|BILAGA|BILAG|LIITE|LISA|PIELIKUMS|PRIEDAS|PRILOGA|PRILOG|ANNESS|IARSCRÍBHINN|MELLÉKLET';
   processed = processed.replace(new RegExp(`([.;:!?\\n])\\s*((?:${annexWords})\\s+[IVXLCDM]+)`, 'gim'), '$1\n$2');
@@ -417,6 +418,8 @@ export function parseRecitals(lines: string[], lang: string, endLine: number): P
   let lastRecitalNumber = 0;
   
   const recitalPattern = /^\((\d+)\)\s*/;
+  // Pattern for standalone recital number on its own line (EUR-Lex two-column table)
+  const standaloneNumberPattern = /^\((\d+)\)\s*$/;
   
   for (let i = 0; i < endLine && i < lines.length; i++) {
     const trimmedLine = lines[i].trim();
@@ -448,9 +451,25 @@ export function parseRecitals(lines: string[], lang: string, endLine: number): P
       }
       
       lastRecitalNumber = num;
+      let initialContent = trimmedLine.replace(recitalPattern, '').trim();
+      
+      // If this line is JUST the number "(N)" with no content, grab the next non-empty line
+      if (!initialContent && standaloneNumberPattern.test(trimmedLine)) {
+        for (let j = i + 1; j < endLine && j < lines.length; j++) {
+          const nextLine = lines[j].trim();
+          if (nextLine && !recitalPattern.test(nextLine)) {
+            initialContent = nextLine;
+            i = j; // skip ahead
+            break;
+          } else if (recitalPattern.test(nextLine)) {
+            break; // next recital number found, don't consume it
+          }
+        }
+      }
+      
       currentRecital = {
         recitalNumber: num,
-        content: trimmedLine.replace(recitalPattern, '').trim(),
+        content: initialContent,
       };
       contentLines = [];
     } else if (currentRecital) {

@@ -7,7 +7,7 @@ const LANGUAGE_CODE_PATTERN = /^[a-z]{2}$/i;
 const CELEX_PATTERN = /^\d{5}[A-Z]\d{4}$/i;
 
 const SHELL_MARKERS = /Official Journal of the European Union|available languages and formats|Display all languages|Choose language|multilingual display|language selector/i;
-const ARTICLE_MARKERS = /\b(?:Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu)\s+\d+|(?:^|\n)\s*\d+\.\s*(?:cikk|artikla|pants|straipsnis|člen)\b/im;
+const ARTICLE_MARKERS = /\b(?:Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Članak|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu|Člen)\s+\d+|(?:^|\n)\s*\d+\.\s*(?:cikk|artikla|pants|straipsnis)\b/im;
 
 function isShellPage(content: string): boolean {
   if (SHELL_MARKERS.test(content) && !ARTICLE_MARKERS.test(content)) return true;
@@ -18,6 +18,14 @@ function isShellPage(content: string): boolean {
 /** Convert HTML to clean text preserving structural line breaks */
 function htmlToText(html: string): string {
   let text = html;
+  
+  // Step 0: Merge EUR-Lex two-column recital tables where number and content are in adjacent cells
+  // Pattern: <td...>(N)</td><td...>content</td> → merge into single line
+  text = text.replace(
+    /<td[^>]*>\s*(?:<p[^>]*>)?\s*\((\d+)\)\s*(?:<\/p>)?\s*<\/td>\s*<td[^>]*>\s*(?:<p[^>]*>)?\s*/gi,
+    '\n($1) '
+  );
+  
   // Add newlines before/after block elements
   text = text.replace(/<br\s*\/?>/gi, '\n');
   text = text.replace(/<\/(?:p|div|tr|li|h[1-6]|dt|dd|blockquote|section|article|header|footer|td|th)>/gi, '\n');
@@ -43,6 +51,8 @@ function htmlToText(html: string): string {
     const code = parseInt(m.slice(2, -1));
     return String.fromCharCode(code);
   });
+  // Normalize non-breaking spaces and other Unicode whitespace to regular spaces
+  text = text.replace(/[\u00A0\u2007\u202F\u2060]/g, ' ');
   // Normalize whitespace per line
   text = text.split('\n').map(l => l.replace(/\s+/g, ' ').trim()).join('\n');
   // Collapse multiple blank lines

@@ -116,138 +116,86 @@ const Layout = ({
   });
   const isActive = (path: string) => location.pathname === path;
   
-  // Base nav items that are always visible
-  const baseNavItems = [{
-    path: "/",
-    icon: Home,
-    label: "Home"
-  }, {
-    path: "/overview",
-    icon: Book,
-    label: "Overview"
-  }, {
-    path: "/definitions",
-    icon: FileText,
-    label: "Definitions"
-  }, {
-    path: "/articles",
-    icon: FileText,
-    label: "Articles"
-  }, {
-    path: "/recitals",
-    icon: Scale,
-    label: "Recitals"
-  }, {
-    path: "/annexes",
-    icon: Files,
-    label: "Annexes"
-  }, {
-    path: "/implementing-acts",
-    icon: ListChecks,
-    label: "Implementing Acts"
-  }, {
-    path: "/health-authorities",
-    icon: Globe,
-    label: "EHDS Country Map"
-  }, {
-    path: "/cross-regulation-map",
-    icon: Network,
-    label: "Regulatory Map"
-  }, {
-    path: "/article-dependencies",
-    icon: GitCompare,
-    label: "Article Dependencies"
-  }, {
-    path: "/for/citizens",
-    icon: Heart,
-    label: "For Citizens"
-  }, {
-    path: "/for/healthtech",
-    icon: Laptop,
-    label: "For Health Tech"
-  }, {
-    path: "/for/healthcare-professionals",
-    icon: Stethoscope,
-    label: "For Healthcare Pros"
-  }, {
-    path: "/topic-index",
-    icon: FileText,
-    label: "Topic Index"
-  }, {
-    path: "/tools",
-    icon: Wrench,
-    label: "Tools Hub"
-  }, {
-    path: "/scenario-finder",
-    icon: Sparkles,
-    label: "Scenario Finder"
-  }, {
-    path: "/news",
-    icon: Newspaper,
-    label: "News"
-  }, {
-    path: "/faqs",
-    icon: MessageCircleQuestion,
-    label: "Official FAQs"
-  }, {
-    path: "/bookmarks",
-    icon: Bookmark,
-    label: "Bookmarks"
-  }, {
-    path: "/notes",
-    icon: StickyNote,
-    label: "Notes"
-  }, {
-    path: "/profile?tab=achievements",
-    icon: Trophy,
-    label: "Achievements"
-  }, {
-    path: "/compare",
-    icon: GitCompare,
-    label: "Compare"
-  }, {
-    path: "/leaderboard",
-    icon: Medal,
-    label: "Leaderboard"
-  }, {
-    path: "/games",
-    icon: Brain,
-    label: "Games"
-  }];
-  
-  // Filter nav items based on feature flags
+  // Hardcoded fallback nav items (used while DB loads)
+  const fallbackNavItems = [
+    { path: "/", icon: Home, label: "Home" },
+    { path: "/overview", icon: Book, label: "Overview" },
+    { path: "/definitions", icon: FileText, label: "Definitions" },
+    { path: "/articles", icon: FileText, label: "Articles" },
+    { path: "/recitals", icon: Scale, label: "Recitals" },
+    { path: "/annexes", icon: Files, label: "Annexes" },
+    { path: "/implementing-acts", icon: ListChecks, label: "Implementing Acts" },
+    { path: "/health-authorities", icon: Globe, label: "EHDS Country Map" },
+    { path: "/cross-regulation-map", icon: Network, label: "Regulatory Map" },
+    { path: "/article-dependencies", icon: GitCompare, label: "Article Dependencies" },
+    { path: "/content-network", icon: Network, label: "Content Network" },
+    { path: "/for/citizens", icon: Heart, label: "For Citizens" },
+    { path: "/for/healthtech", icon: Laptop, label: "For Health Tech" },
+    { path: "/for/healthcare-professionals", icon: Stethoscope, label: "For Healthcare Pros" },
+    { path: "/topic-index", icon: FileText, label: "Topic Index" },
+    { path: "/tools", icon: Wrench, label: "Tools Hub" },
+    { path: "/scenario-finder", icon: Sparkles, label: "Scenario Finder" },
+    { path: "/news", icon: Newspaper, label: "News" },
+    { path: "/faqs", icon: MessageCircleQuestion, label: "Official FAQs" },
+    { path: "/bookmarks", icon: Bookmark, label: "Bookmarks" },
+    { path: "/notes", icon: StickyNote, label: "Notes" },
+    { path: "/profile?tab=achievements", icon: Trophy, label: "Achievements" },
+    { path: "/compare", icon: GitCompare, label: "Compare" },
+    { path: "/leaderboard", icon: Medal, label: "Leaderboard" },
+    { path: "/games", icon: Brain, label: "Games" },
+  ];
+
+  // Convert DB sidebar items to nav format
+  const dbMainItems = useMemo(() => {
+    if (!dbSidebarItems) return null;
+    return dbSidebarItems
+      .filter(i => i.section === "main")
+      .map(i => ({
+        path: i.path,
+        icon: ICON_MAP[i.icon_name] || FileText,
+        label: i.label,
+        openExternal: i.open_external,
+      }));
+  }, [dbSidebarItems]);
+
+  const dbUtilityItems = useMemo(() => {
+    if (!dbSidebarItems) return null;
+    return dbSidebarItems
+      .filter(i => i.section === "utility")
+      .map(i => ({
+        path: i.path,
+        icon: ICON_MAP[i.icon_name] || FileText,
+        label: i.label,
+        openExternal: i.open_external,
+      }));
+  }, [dbSidebarItems]);
+
+  const dbLegalItems = useMemo(() => {
+    if (!dbSidebarItems) return null;
+    return dbSidebarItems
+      .filter(i => i.section === "legal")
+      .map(i => ({
+        path: i.path,
+        icon: ICON_MAP[i.icon_name] || FileText,
+        label: i.label,
+        openExternal: i.open_external,
+      }));
+  }, [dbSidebarItems]);
+
+  // Use DB items if available, otherwise fallback
   const navItems = useMemo(() => {
-    let items = [...baseNavItems];
-    
-    // Remove Tools Hub if disabled
-    if (!isFeatureEnabled('tools_hub')) {
-      items = items.filter(item => item.path !== '/tools');
-    }
-    
-    // Add Teams only if enabled
-    if (isFeatureEnabled('teams')) {
-      const compareIndex = items.findIndex(item => item.path === '/compare');
-      items.splice(compareIndex, 0, {
-        path: "/teams",
-        icon: Users,
-        label: "Teams"
-      });
-    }
+    let items = dbMainItems || fallbackNavItems;
 
     // Filter to kid-friendly routes when Kids Mode is active
     if (isKidsMode) {
       items = items.filter(item => isKidsFriendlyRoute(item.path));
-      // Add Comics to nav if not already present
       if (!items.find(item => item.path === '/kids')) {
-        items.splice(1, 0, {
-          path: "/kids",
-          icon: Heart,
-          label: "Comics"
-        });
+        items = [items[0], { path: "/kids", icon: Heart, label: "Comics" }, ...items.slice(1)];
       }
     }
     
     return items;
+  }, [dbMainItems, isKidsMode, isKidsFriendlyRoute]);
   }, [isFeatureEnabled, isKidsMode, isKidsFriendlyRoute]);
   return <div className="min-h-screen flex w-full">
       {/* Mobile Header - simplified, removed menu button since we have bottom nav */}

@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 
-const DEFAULT_PDF_URL = "https://health.ec.europa.eu/document/download/39129f32-710e-412c-89d2-52f9a1f81900_en?filename=ehealth_ehds_qa_en.pdf";
+const DEFAULT_PDF_URL = "https://health.ec.europa.eu/document/download/4dd47ec2-71dd-49fc-b036-ad7c14f6ed68_en?filename=ehealth_ehds_qa_en.pdf";
 
 const AdminEhdsFaqParserPage = () => {
   const { data: syncLogs = [], isLoading: logsLoading } = useEhdsFaqSyncLogs();

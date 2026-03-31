@@ -1163,11 +1163,48 @@ export type Database = {
         }
         Relationships: []
       }
+      ehds_faq_versions: {
+        Row: {
+          created_at: string
+          faqs_updated_count: number | null
+          id: string
+          notes: string | null
+          pdf_hash: string | null
+          pdf_url: string | null
+          release_date: string | null
+          updated_at: string
+          version_label: string
+        }
+        Insert: {
+          created_at?: string
+          faqs_updated_count?: number | null
+          id?: string
+          notes?: string | null
+          pdf_hash?: string | null
+          pdf_url?: string | null
+          release_date?: string | null
+          updated_at?: string
+          version_label: string
+        }
+        Update: {
+          created_at?: string
+          faqs_updated_count?: number | null
+          id?: string
+          notes?: string | null
+          pdf_hash?: string | null
+          pdf_url?: string | null
+          release_date?: string | null
+          updated_at?: string
+          version_label?: string
+        }
+        Relationships: []
+      }
       ehds_faqs: {
         Row: {
           answer: string
           chapter: string
           created_at: string | null
+          document_version: string | null
           faq_number: number
           id: string
           is_published: boolean | null
@@ -1176,6 +1213,7 @@ export type Database = {
           rich_content: string | null
           sort_order: number | null
           source_articles: string[] | null
+          source_recitals: string[] | null
           source_references: string | null
           sub_category: string | null
           updated_at: string | null
@@ -1184,6 +1222,7 @@ export type Database = {
           answer: string
           chapter: string
           created_at?: string | null
+          document_version?: string | null
           faq_number: number
           id?: string
           is_published?: boolean | null
@@ -1192,6 +1231,7 @@ export type Database = {
           rich_content?: string | null
           sort_order?: number | null
           source_articles?: string[] | null
+          source_recitals?: string[] | null
           source_references?: string | null
           sub_category?: string | null
           updated_at?: string | null
@@ -1200,6 +1240,7 @@ export type Database = {
           answer?: string
           chapter?: string
           created_at?: string | null
+          document_version?: string | null
           faq_number?: number
           id?: string
           is_published?: boolean | null
@@ -1208,6 +1249,7 @@ export type Database = {
           rich_content?: string | null
           sort_order?: number | null
           source_articles?: string[] | null
+          source_recitals?: string[] | null
           source_references?: string | null
           sub_category?: string | null
           updated_at?: string | null

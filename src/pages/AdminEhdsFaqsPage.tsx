@@ -45,6 +45,9 @@ const AdminEhdsFaqsPage = () => {
     );
   });
 
+  const filteredIds = filtered.map(f => f.id);
+  const bulk = useBulkSelection<string>(filteredIds);
+
   const togglePublished = async (faq: EhdsFaq) => {
     const { error } = await supabase
       .from("ehds_faqs")
@@ -119,6 +122,16 @@ const AdminEhdsFaqsPage = () => {
             />
           </div>
           <div className="flex gap-2 flex-wrap">
+            {bulk.selectedCount > 0 && (
+              <>
+                <Button variant="default" size="sm" onClick={() => setShowBulkEdit(true)}>
+                  Bulk Edit ({bulk.selectedCount})
+                </Button>
+                <Button variant="outline" size="sm" onClick={bulk.clearSelection}>
+                  Clear
+                </Button>
+              </>
+            )}
             <Button variant="outline" size="sm" onClick={() => setShowVersionDialog(true)}>
               <History className="h-4 w-4 mr-2" />
               Versions
@@ -169,6 +182,12 @@ const AdminEhdsFaqsPage = () => {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={bulk.isAllSelected}
+                      onCheckedChange={bulk.toggleAll}
+                    />
+                  </TableHead>
                   <TableHead className="w-16">#</TableHead>
                   <TableHead>Question</TableHead>
                   <TableHead className="hidden md:table-cell">Chapter</TableHead>
@@ -180,12 +199,18 @@ const AdminEhdsFaqsPage = () => {
               </TableHeader>
               <TableBody>
                 {filtered.map(faq => (
-                  <TableRow key={faq.id}>
+                  <TableRow key={faq.id} data-state={bulk.isSelected(faq.id) ? "selected" : undefined}>
+                    <TableCell>
+                      <Checkbox
+                        checked={bulk.isSelected(faq.id)}
+                        onCheckedChange={() => bulk.toggle(faq.id)}
+                      />
+                    </TableCell>
                     <TableCell className="font-mono text-sm">{faq.faq_number}</TableCell>
                     <TableCell className="max-w-xs">
                       <p className="text-sm line-clamp-2">{faq.question}</p>
-                    {!faq.rich_content && (
-                        <Badge variant="outline" className="text-xs mt-1 text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-600">No rich content</Badge>
+                      {!faq.rich_content && (
+                        <Badge variant="outline" className="text-xs mt-1 border-amber-300 dark:border-amber-600 text-amber-600 dark:text-amber-400">No rich content</Badge>
                       )}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
@@ -251,9 +276,143 @@ const AdminEhdsFaqsPage = () => {
         onClose={() => setShowVersionDialog(false)}
         versions={versions}
       />
+
+      {/* Bulk Edit Dialog */}
+      <BulkEditDialog
+        open={showBulkEdit}
+        onClose={() => setShowBulkEdit(false)}
+        selectedIds={bulk.selectedArray}
+        versions={versions}
+        chapters={chapters}
+        onDone={() => {
+          bulk.clearSelection();
+          queryClient.invalidateQueries({ queryKey: ["ehds-faqs"] });
+          queryClient.invalidateQueries({ queryKey: ["ehds-faqs-all"] });
+        }}
+      />
     </AdminPageLayout>
   );
 };
+
+/* ── Bulk Edit Dialog ── */
+function BulkEditDialog({ open, onClose, selectedIds, versions, chapters, onDone }: {
+  open: boolean;
+  onClose: () => void;
+  selectedIds: string[];
+  versions: EhdsFaqVersion[];
+  chapters: string[];
+  onDone: () => void;
+}) {
+  const [field, setField] = useState("document_version");
+  const [value, setValue] = useState("");
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
+
+  const applyBulkEdit = async () => {
+    if (selectedIds.length === 0 || !value) return;
+    setSaving(true);
+
+    let updatePayload: Record<string, unknown> = {};
+    if (field === "document_version") {
+      updatePayload = { document_version: value };
+    } else if (field === "chapter") {
+      updatePayload = { chapter: value };
+    } else if (field === "is_published") {
+      updatePayload = { is_published: value === "true" };
+    } else if (field === "sub_category") {
+      updatePayload = { sub_category: value || null };
+    }
+
+    const { error } = await supabase
+      .from("ehds_faqs")
+      .update(updatePayload)
+      .in("id", selectedIds);
+
+    setSaving(false);
+    if (error) {
+      toast({ title: "Bulk update failed", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: `Updated ${selectedIds.length} FAQs` });
+      onDone();
+      onClose();
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Bulk Edit {selectedIds.length} FAQs</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label>Field to update</Label>
+            <Select value={field} onValueChange={(v) => { setField(v); setValue(""); }}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="document_version">Document Version</SelectItem>
+                <SelectItem value="chapter">Chapter</SelectItem>
+                <SelectItem value="is_published">Published Status</SelectItem>
+                <SelectItem value="sub_category">Sub-category</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label>New value</Label>
+            {field === "document_version" ? (
+              versions.length > 0 ? (
+                <Select value={value} onValueChange={setValue}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select version..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {versions.map(v => (
+                      <SelectItem key={v.id} value={v.version_label}>{v.version_label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input value={value} onChange={e => setValue(e.target.value)} placeholder="e.g. v2.0 - March 2025" />
+              )
+            ) : field === "chapter" ? (
+              <Select value={value} onValueChange={setValue}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select chapter..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {chapters.map(ch => (
+                    <SelectItem key={ch} value={ch}>{ch}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : field === "is_published" ? (
+              <Select value={value} onValueChange={setValue}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="true">Published</SelectItem>
+                  <SelectItem value="false">Unpublished</SelectItem>
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input value={value} onChange={e => setValue(e.target.value)} placeholder="Sub-category value..." />
+            )}
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={applyBulkEdit} disabled={!value || saving}>
+            {saving ? "Updating..." : `Update ${selectedIds.length} FAQs`}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 function EditFaqDialog({ faq, onClose, onSave }: {
   faq: EhdsFaq | null;

@@ -379,7 +379,7 @@ export function adaptivePreprocess(text: string, analysis: StructureAnalysis): s
   
   // Step 10: Add line breaks before structural markers
   // Use a simpler approach that doesn't need variable-length lookbehinds
-  const articleWords = 'Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu';
+  const articleWords = 'Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Članak|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu';
   // Break before "Article N" when NOT already at start of line
   processed = processed.replace(new RegExp(`([.;:!?])\\s*((?:${articleWords})\\s+\\d+)`, 'gim'), '$1\n$2');
   

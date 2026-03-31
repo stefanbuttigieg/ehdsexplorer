@@ -734,19 +734,18 @@ export async function parseDocumentAdaptive(
   const processed = adaptivePreprocess(text, analysis);
   const lines = processed.split('\n');
   
-  // Step 3: Find boundaries
-  let recitalsEnd = analysis.adoptionLineIndex > 0 ? analysis.adoptionLineIndex : lines.length;
+  // Step 3: Find boundaries in processed text
+  let adoptionLine = -1;
   let articlesStart = -1;
   let annexesStart = lines.length;
   
-  // Re-find boundaries in processed text
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     
-    if (recitalsEnd === lines.length) {
+    if (adoptionLine === -1) {
       for (const marker of ADOPTION_MARKERS) {
         if (marker.test(line)) {
-          recitalsEnd = i;
+          adoptionLine = i;
           break;
         }
       }
@@ -771,15 +770,35 @@ export async function parseDocumentAdaptive(
     }
   }
   
+  // Validate adoption line: it must appear before articles but after at least some recital-like content
+  // If adoption line is too early (before line 50 AND before any recitals), it's a false positive (header text)
+  let recitalsEnd: number;
+  if (adoptionLine > 0 && adoptionLine < lines.length) {
+    // Check there are actually recitals before this line
+    const recitalsBefore = lines.slice(0, adoptionLine).filter(l => /^\s*\(\d+\)\s+/.test(l)).length;
+    if (recitalsBefore >= 5) {
+      recitalsEnd = adoptionLine;
+    } else if (articlesStart > 0) {
+      // Adoption line is likely in a header/preamble; use articlesStart as boundary
+      recitalsEnd = articlesStart;
+    } else {
+      recitalsEnd = lines.length;
+    }
+  } else if (articlesStart > 0) {
+    recitalsEnd = articlesStart;
+  } else {
+    recitalsEnd = lines.length;
+  }
+  
   // If no article start found, default to after recitals
   if (articlesStart === -1) {
     articlesStart = recitalsEnd > 0 && recitalsEnd < lines.length ? recitalsEnd : 0;
   }
   
-  // Use detected language when available; otherwise use caller-provided language; only then fall back to English
-  const parserLang = (analysis.detectedLanguage !== 'unknown'
-    ? analysis.detectedLanguage
-    : options?.requestedLanguage?.toLowerCase()) || 'en';
+  // Use caller-provided language when available; otherwise detected; only then fall back to English
+  // This avoids false detection when languages share the same article word (e.g. DE/SV/NL/DA all use "Artikel")
+  const parserLang = options?.requestedLanguage?.toLowerCase()
+    || (analysis.detectedLanguage !== 'unknown' ? analysis.detectedLanguage : 'en');
   const articlesEnd = annexesStart > articlesStart ? annexesStart : lines.length;
   
   // Step 4: Parse all content types

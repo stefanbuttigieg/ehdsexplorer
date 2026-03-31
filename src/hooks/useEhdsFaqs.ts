@@ -10,10 +10,24 @@ export interface EhdsFaq {
   chapter: string;
   sub_category: string | null;
   source_articles: string[] | null;
+  source_recitals: string[] | null;
   source_references: string | null;
   is_published: boolean;
   sort_order: number;
   pdf_version: string | null;
+  document_version: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EhdsFaqVersion {
+  id: string;
+  version_label: string;
+  pdf_hash: string | null;
+  pdf_url: string | null;
+  release_date: string | null;
+  notes: string | null;
+  faqs_updated_count: number;
   created_at: string;
   updated_at: string;
 }

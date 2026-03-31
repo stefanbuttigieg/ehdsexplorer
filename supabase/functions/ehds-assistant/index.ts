@@ -309,12 +309,13 @@ serve(async (req) => {
 
     console.log("Fetching EHDS content for context... Role:", role, "Level:", explainLevel);
     
-    const [articlesRes, recitalsRes, definitionsRes, chaptersRes, implementingActsRes] = await Promise.all([
+    const [articlesRes, recitalsRes, definitionsRes, chaptersRes, implementingActsRes, faqsRes] = await Promise.all([
       supabase.from("articles").select("article_number, title, content").order("article_number"),
       supabase.from("recitals").select("recital_number, content, related_articles").order("recital_number"),
       supabase.from("definitions").select("term, definition, source_article").order("term"),
       supabase.from("chapters").select("chapter_number, title, description").order("chapter_number"),
       supabase.from("implementing_acts").select("id, title, description, status, article_reference, type, theme"),
+      supabase.from("help_center_faq").select("question, answer, category").eq("is_published", true).order("sort_order"),
     ]);
 
     const articles = articlesRes.data || [];
@@ -322,6 +323,7 @@ serve(async (req) => {
     const definitions = definitionsRes.data || [];
     const chapters = chaptersRes.data || [];
     const implementingActs = implementingActsRes.data || [];
+    const faqs = faqsRes.data || [];
 
     const articlesSummary = articles.map(a => 
       `Article ${a.article_number}: ${a.title}\n${a.content.substring(0, 500)}${a.content.length > 500 ? '...' : ''}`
@@ -341,6 +343,10 @@ serve(async (req) => {
 
     const recitalsSummary = recitals.slice(0, 50).map(r => 
       `Recital (${r.recital_number}): ${r.content.substring(0, 300)}${r.content.length > 300 ? '...' : ''}`
+    ).join("\n\n");
+
+    const faqsList = faqs.map(f => 
+      `Q: ${f.question}\nA: ${f.answer}`
     ).join("\n\n");
 
     // Get role and level specific prompts
@@ -390,7 +396,10 @@ ${recitalsSummary}
 IMPLEMENTING ACTS STATUS:
 ${implementingActsList}
 
-When users ask about specific topics, reference the most relevant articles and explain how they apply. For navigation requests, provide direct references to articles, chapters, or definitions that address their query. Always end your response with a Sources section listing the specific articles, recitals, or definitions you referenced.`;
+EU COMMISSION FREQUENTLY ASKED QUESTIONS (Official FAQs from DG SANTE, last updated March 2026):
+${faqsList}
+
+When users ask about specific topics, first check if the EU Commission FAQ section has a relevant answer and use it as an authoritative reference. Then reference the most relevant articles and explain how they apply. For navigation requests, provide direct references to articles, chapters, or definitions that address their query. Always end your response with a Sources section listing the specific articles, recitals, or definitions you referenced.`;
 
     // Fetch configured AI model from site settings
     let aiModel = "google/gemini-2.5-flash";

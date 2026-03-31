@@ -17,6 +17,7 @@ import { useImplementingActs, type ImplementingAct } from "@/hooks/useImplementi
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
+import { FaqDataTableDisplay } from "@/components/FaqDataTableDisplay";
 
 
 function FAQContent({ faq, footnotes }: { faq: EhdsFaq; footnotes: { marker: string; content: string }[] }) {
@@ -82,6 +83,7 @@ function FAQItem({ faq, footnotes, isOpen, onToggle, implementingActs }: {
         <CollapsibleContent>
           <div className="px-4 pb-4 ml-10">
             <FAQContent faq={faq} footnotes={footnotes} />
+            <FaqDataTableDisplay faqId={faq.id} />
             {articleLinks.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-3">
                 {articleLinks.map((art) => (

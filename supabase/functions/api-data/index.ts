@@ -181,7 +181,7 @@ const RESOURCE_FIELDS: Record<string, string[]> = {
   annexes: ["id", "title", "content"],
   "health-authorities": ["id", "name", "country_code", "country_name", "authority_type", "status", "email", "phone", "website", "address", "description", "ehds_role", "latitude", "longitude"],
   "country-legislation": ["id", "country_code", "country_name", "title", "official_title", "legislation_type", "status", "status_notes", "summary", "url", "effective_date", "adoption_date", "publication_date", "enforcement_measures"],
-  "faqs": ["faq_number", "question", "answer", "rich_content", "chapter", "sub_category", "source_articles", "source_references"],
+  "faqs": ["faq_number", "question", "answer", "rich_content", "chapter", "sub_category", "source_articles", "source_recitals", "source_references", "data_tables"],
 };
 
 Deno.serve(async (req) => {
@@ -712,8 +712,37 @@ Deno.serve(async (req) => {
 
       case "faqs": {
         const validatedId = validateId(id);
-        const columns = "faq_number, question, answer, rich_content, chapter, sub_category, source_articles, source_references";
+        const columns = "id, faq_number, question, answer, rich_content, chapter, sub_category, source_articles, source_recitals, source_references";
         
+        async function attachDataTables(faqs: any[]) {
+          if (!faqs || faqs.length === 0) return faqs;
+          const faqIds = faqs.map((f: any) => f.id);
+          const { data: tables } = await supabase
+            .from("ehds_faq_data_tables")
+            .select("*")
+            .in("faq_id", faqIds)
+            .eq("is_published", true)
+            .order("sort_order");
+          if (!tables || tables.length === 0) {
+            return faqs.map((f: any) => { const { id: _id, ...rest } = f; return { ...rest, data_tables: [] }; });
+          }
+          const tableIds = tables.map((t: any) => t.id);
+          const [{ data: cols }, { data: rows }] = await Promise.all([
+            supabase.from("ehds_faq_data_columns").select("*").in("table_id", tableIds).order("sort_order"),
+            supabase.from("ehds_faq_data_rows").select("*").in("table_id", tableIds).order("sort_order"),
+          ]);
+          return faqs.map((f: any) => {
+            const faqTables = (tables || []).filter((t: any) => t.faq_id === f.id).map((t: any) => ({
+              name: t.name,
+              description: t.description,
+              columns: (cols || []).filter((c: any) => c.table_id === t.id).map((c: any) => ({ name: c.name, key: c.column_key })),
+              rows: (rows || []).filter((r: any) => r.table_id === t.id).map((r: any) => r.values),
+            }));
+            const { id: _id, ...rest } = f;
+            return { ...rest, data_tables: faqTables };
+          });
+        }
+
         if (validatedId) {
           const result = await supabase
             .from("ehds_faqs")
@@ -721,7 +750,12 @@ Deno.serve(async (req) => {
             .eq("faq_number", validatedId)
             .eq("is_published", true)
             .single();
-          data = result.data;
+          if (result.data) {
+            const enriched = await attachDataTables([result.data]);
+            data = enriched[0];
+          } else {
+            data = result.data;
+          }
           error = result.error;
         } else {
           const chapter = url.searchParams.get("chapter");
@@ -735,7 +769,11 @@ Deno.serve(async (req) => {
           }
           
           const result = await query.order("faq_number", { ascending: true });
-          data = result.data;
+          if (result.data) {
+            data = await attachDataTables(result.data);
+          } else {
+            data = result.data;
+          }
           error = result.error;
         }
         break;

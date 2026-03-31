@@ -42,6 +42,7 @@ const ArticlePage = () => {
   const { data: publishedWorks = [] } = usePublishedWorks();
   const { data: footnotes = [] } = useFootnotesByArticle(article?.id ?? null);
   const { data: nationalLegislation = [] } = useLegislationByArticle(articleId);
+  const { data: relatedFaqs = [] } = useRelatedFaqs(articleId);
   const chapter = getChapterByArticle(articleId);
   const relatedRecitals = getRecitalsByArticle(articleId);
   const relatedActs = getActsByArticle(implementingActs, articleId);

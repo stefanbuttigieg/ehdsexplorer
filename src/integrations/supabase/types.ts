@@ -1098,6 +1098,108 @@ export type Database = {
         }
         Relationships: []
       }
+      ehds_faq_data_columns: {
+        Row: {
+          column_key: string
+          id: string
+          name: string
+          sort_order: number
+          table_id: string
+        }
+        Insert: {
+          column_key: string
+          id?: string
+          name: string
+          sort_order?: number
+          table_id: string
+        }
+        Update: {
+          column_key?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          table_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ehds_faq_data_columns_table_id_fkey"
+            columns: ["table_id"]
+            isOneToOne: false
+            referencedRelation: "ehds_faq_data_tables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ehds_faq_data_rows: {
+        Row: {
+          id: string
+          sort_order: number
+          table_id: string
+          values: Json
+        }
+        Insert: {
+          id?: string
+          sort_order?: number
+          table_id: string
+          values?: Json
+        }
+        Update: {
+          id?: string
+          sort_order?: number
+          table_id?: string
+          values?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ehds_faq_data_rows_table_id_fkey"
+            columns: ["table_id"]
+            isOneToOne: false
+            referencedRelation: "ehds_faq_data_tables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ehds_faq_data_tables: {
+        Row: {
+          created_at: string
+          description: string | null
+          faq_id: string
+          id: string
+          is_published: boolean
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          faq_id: string
+          id?: string
+          is_published?: boolean
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          faq_id?: string
+          id?: string
+          is_published?: boolean
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ehds_faq_data_tables_faq_id_fkey"
+            columns: ["faq_id"]
+            isOneToOne: false
+            referencedRelation: "ehds_faqs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ehds_faq_footnotes: {
         Row: {
           content: string

@@ -245,7 +245,7 @@ const AdminEhdsFaqsPage = () => {
   );
 };
 
-function EditFaqDialog({ faq, onClose, onSave, versions }: {
+function EditFaqDialog({ faq, onClose, onSave }: {
   faq: EhdsFaq | null;
   onClose: () => void;
   onSave: (data: Partial<EhdsFaq>) => void;

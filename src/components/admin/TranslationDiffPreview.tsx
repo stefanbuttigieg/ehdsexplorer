@@ -159,18 +159,18 @@ export function TranslationDiffPreview({
            </CardTitle>
          </CardHeader>
          <CardContent className="space-y-2">
-           <div className="flex gap-4 text-sm">
-             <span>Articles: <Badge variant="secondary">{validation.articleCount} / 105</Badge></span>
-             <span>Recitals: <Badge variant="secondary">{validation.recitalCount} / 115</Badge></span>
-              {validation.definitionCount > 0 && (
-                <span>Definitions: <Badge variant="secondary">{validation.definitionCount}</Badge></span>
-              )}
-              {validation.annexCount > 0 && (
-                <span>Annexes: <Badge variant="secondary">{validation.annexCount}</Badge></span>
-              )}
-              {validation.footnoteCount > 0 && (
-                <span>Footnotes: <Badge variant="secondary">{validation.footnoteCount}</Badge></span>
-              )}
+            <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm">
+              <span>Articles: <Badge variant="secondary">{validation.articleCount} / 105</Badge></span>
+              <span>Recitals: <Badge variant="secondary">{validation.recitalCount} / 115</Badge></span>
+               {validation.definitionCount > 0 && (
+                 <span>Definitions: <Badge variant="secondary">{validation.definitionCount}</Badge></span>
+               )}
+               {validation.annexCount > 0 && (
+                 <span>Annexes: <Badge variant="secondary">{validation.annexCount}</Badge></span>
+               )}
+               {validation.footnoteCount > 0 && (
+                 <span>Footnotes: <Badge variant="secondary">{validation.footnoteCount}</Badge></span>
+               )}
            </div>
            
            {validation.errors.length > 0 && (

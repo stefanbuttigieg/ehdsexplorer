@@ -35,6 +35,14 @@ import { KidsModeToggle } from "@/components/KidsModeToggle";
 import { useKidsMode } from "@/contexts/KidsModeContext";
 import { LeaderboardTracker } from "@/components/LeaderboardTracker";
 
+const ICON_MAP: Record<string, LucideIcon> = {
+  Home, Book, FileText, Scale, Files, ListChecks, Globe, Network, GitCompare,
+  Heart, Laptop, Stethoscope, Wrench, Sparkles, Newspaper, MessageCircleQuestion,
+  Bookmark, StickyNote, Trophy, Medal, Brain, HelpCircle, Code, Shield, Cookie,
+  ScrollText, Accessibility, Users, Settings, MapPin, BookOpen, Layers, ExternalLink,
+  Search, Menu, X,
+};
+
 const ROUTE_TO_PLACEMENT: Record<string, string> = {
   '/': 'home',
   '/articles': 'articles',

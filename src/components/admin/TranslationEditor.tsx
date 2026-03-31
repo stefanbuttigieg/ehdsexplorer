@@ -389,7 +389,7 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
           />
         </div>
         {bulk.selectedCount > 0 && (
-          <div className="flex gap-2 flex-shrink-0">
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
             <Button size="sm" onClick={() => bulkSetPublished(true)} disabled={bulkUpdating}>
               <Eye className="h-4 w-4 mr-1" />
               Publish ({bulk.selectedCount})
@@ -441,29 +441,29 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
               return (
                 <div
                   key={item.id}
-                  className={`flex flex-col gap-1 p-3 rounded-lg border hover:bg-muted/50 transition-colors ${bulk.isSelected(itemIdStr) ? 'bg-muted/50' : ''}`}
+                  className={`flex flex-col gap-1 p-2 sm:p-3 rounded-lg border hover:bg-muted/50 transition-colors ${bulk.isSelected(itemIdStr) ? 'bg-muted/50' : ''}`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-start sm:items-center gap-2 sm:gap-3">
                     {hasTranslation && (
                       <Checkbox
                         checked={bulk.isSelected(itemIdStr)}
                         onCheckedChange={() => bulk.toggle(itemIdStr)}
-                        className="shrink-0"
+                        className="shrink-0 mt-1 sm:mt-0"
                       />
                     )}
-                    <Badge variant={hasTranslation ? 'default' : 'outline'} className="shrink-0">
-                      {getItemLabel(item)}
-                    </Badge>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm truncate">
+                    <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                      <Badge variant={hasTranslation ? 'default' : 'outline'} className="shrink-0 w-fit text-xs">
+                        {getItemLabel(item)}
+                      </Badge>
+                      <p className="text-sm truncate min-w-0">
                         {item.title || item.term || item.content?.substring(0, 80) || item.summary?.substring(0, 80)}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                       {hasTranslation && (
                         <Badge 
                           variant={isPublishedTrans ? 'default' : 'secondary'}
-                          className="text-xs"
+                          className="text-[10px] sm:text-xs hidden sm:flex"
                         >
                           {isPublishedTrans ? <Eye className="h-3 w-3 mr-1" /> : <EyeOff className="h-3 w-3 mr-1" />}
                           {isPublishedTrans ? 'Published' : 'Draft'}
@@ -472,9 +472,10 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
                       <Button
                         variant={hasTranslation ? 'outline' : 'default'}
                         size="sm"
+                        className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                         onClick={() => handleEdit(item)}
                       >
-                        {hasTranslation ? <Edit2 className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                        {hasTranslation ? <Edit2 className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
                       </Button>
                     </div>
                   </div>
@@ -504,7 +505,7 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
       </ScrollArea>
 
       {/* Stats bar */}
-      <div className="flex items-center justify-between text-sm text-muted-foreground px-1">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs sm:text-sm text-muted-foreground px-1 gap-1">
         <span>{filteredItems.length} items</span>
         <span>
           {translations?.length || 0} translated • {translations?.filter(t => t.is_published).length || 0} published
@@ -513,7 +514,7 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
 
       {/* Edit Dialog */}
       <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Globe className="h-5 w-5" />
@@ -595,7 +596,7 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
             </div>
 
             {/* Actions */}
-            <div className="flex items-center justify-between pt-4 border-t">
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between pt-4 border-t gap-2">
               <div>
                 {existingTranslation && (
                   <Button
@@ -603,6 +604,7 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
                     size="sm"
                     onClick={handleDelete}
                     disabled={deleteMutation.isPending}
+                    className="w-full sm:w-auto"
                   >
                     <Trash2 className="h-4 w-4 mr-1" />
                     Delete
@@ -610,11 +612,11 @@ const TranslationEditor = ({ contentType, languageCode }: TranslationEditorProps
                 )}
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setEditingItem(null)}>
+                <Button variant="outline" onClick={() => setEditingItem(null)} className="flex-1 sm:flex-none">
                   Cancel
                 </Button>
-                <Button onClick={handleSave} disabled={saveMutation.isPending}>
-                  {saveMutation.isPending ? 'Saving...' : 'Save Translation'}
+                <Button onClick={handleSave} disabled={saveMutation.isPending} className="flex-1 sm:flex-none">
+                  {saveMutation.isPending ? 'Saving...' : 'Save'}
                 </Button>
               </div>
             </div>

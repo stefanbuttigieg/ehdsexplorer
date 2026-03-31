@@ -44,7 +44,7 @@ interface EditFormState {
 }
 
 const AdminSidebarPage = () => {
-  const { isAuthorized, loading: authLoading } = useAdminGuard();
+  const { shouldRender, loading: authLoading } = useAdminGuard();
   const { data: items, isLoading } = useAllSidebarItems();
   const updateItem = useUpdateSidebarItem();
   const createItem = useCreateSidebarItem();

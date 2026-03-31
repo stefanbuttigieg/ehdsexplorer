@@ -219,7 +219,7 @@ const AdminEhdsFaqsPage = () => {
       </div>
 
       {/* Edit Dialog */}
-      <EditFaqDialog faq={editingFaq} onClose={() => setEditingFaq(null)} onSave={saveFaq} versions={versions} />
+      <EditFaqDialog faq={editingFaq} onClose={() => setEditingFaq(null)} onSave={saveFaq} />
 
       {/* Delete Confirmation */}
       <Dialog open={!!deletingId} onOpenChange={() => setDeletingId(null)}>

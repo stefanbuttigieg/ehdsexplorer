@@ -176,6 +176,10 @@ const Layout = ({
     icon: Newspaper,
     label: "News"
   }, {
+    path: "/faqs",
+    icon: MessageCircleQuestion,
+    label: "Official FAQs"
+  }, {
     path: "/bookmarks",
     icon: Bookmark,
     label: "Bookmarks"

@@ -472,7 +472,7 @@ const AdminUITranslationsPage = () => {
                           </TableCell>
                           <TableCell>
                             <a
-                              href={`https://iate.europa.eu/search/result/${encodeURIComponent(k.value)}/${selectedLang}/en`}
+                              href={`https://iate.europa.eu/search/standard/result?source=en&target=${selectedLang}&query=${encodeURIComponent(k.value)}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               title={`Look up "${k.value}" in IATE`}

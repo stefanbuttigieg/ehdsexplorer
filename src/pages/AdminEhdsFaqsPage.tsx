@@ -114,11 +114,17 @@ const AdminEhdsFaqsPage = () => {
               className="pl-10"
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button variant="outline" size="sm" onClick={() => setShowVersionDialog(true)}>
               <History className="h-4 w-4 mr-2" />
               Versions
             </Button>
+            <Link to="/admin/faq-data-tables">
+              <Button variant="outline" size="sm">
+                <TableIcon className="h-4 w-4 mr-2" />
+                Data Tables
+              </Button>
+            </Link>
             <Link to="/admin/ehds-faq-parser">
               <Button variant="outline" size="sm">
                 <Upload className="h-4 w-4 mr-2" />

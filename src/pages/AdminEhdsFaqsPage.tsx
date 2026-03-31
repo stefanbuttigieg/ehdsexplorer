@@ -491,9 +491,20 @@ function EditFaqDialog({ faq, onClose, onSave, isCreateMode }: {
     <Dialog open={!!faq} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit FAQ #{faq?.faq_number}</DialogTitle>
+          <DialogTitle>{isCreateMode ? "Add New FAQ" : `Edit FAQ #${faq?.faq_number}`}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
+          {isCreateMode && (
+            <div>
+              <Label>FAQ Number</Label>
+              <Input
+                type="number"
+                value={form.faq_number || ""}
+                onChange={e => setForm(p => ({ ...p, faq_number: parseInt(e.target.value) || undefined }))}
+                placeholder="Auto-assigned if empty"
+              />
+            </div>
+          )}
           <div>
             <Label>Question</Label>
             <Textarea value={form.question || ""} onChange={e => setForm(p => ({ ...p, question: e.target.value }))} rows={2} />

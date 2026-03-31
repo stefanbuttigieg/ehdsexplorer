@@ -28,6 +28,7 @@ const AdminEhdsFaqsPage = () => {
   const { data: versions = [] } = useEhdsFaqVersions();
   const [search, setSearch] = useState("");
   const [editingFaq, setEditingFaq] = useState<EhdsFaq | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [showVersionDialog, setShowVersionDialog] = useState(false);
   const [showBulkEdit, setShowBulkEdit] = useState(false);
@@ -59,6 +60,33 @@ const AdminEhdsFaqsPage = () => {
       queryClient.invalidateQueries({ queryKey: ["ehds-faqs"] });
       queryClient.invalidateQueries({ queryKey: ["ehds-faqs-all"] });
       toast({ title: faq.is_published ? "Unpublished" : "Published" });
+    }
+  };
+
+  const createFaq = async (data: Partial<EhdsFaq> & { faq_number?: number }) => {
+    const nextNumber = data.faq_number || (faqs.length > 0 ? Math.max(...faqs.map(f => f.faq_number)) + 1 : 1);
+    const { error } = await supabase
+      .from("ehds_faqs")
+      .insert({
+        faq_number: nextNumber,
+        question: data.question || "New FAQ",
+        answer: data.answer || "",
+        rich_content: data.rich_content || null,
+        chapter: data.chapter || "General",
+        sub_category: data.sub_category || null,
+        source_references: data.source_references || null,
+        source_articles: data.source_articles || [],
+        source_recitals: data.source_recitals || [],
+        document_version: data.document_version || null,
+        is_published: false,
+      });
+    if (error) {
+      toast({ title: "Error creating FAQ", description: error.message, variant: "destructive" });
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["ehds-faqs"] });
+      queryClient.invalidateQueries({ queryKey: ["ehds-faqs-all"] });
+      toast({ title: "FAQ created" });
+      setIsCreating(false);
     }
   };
 
@@ -148,6 +176,10 @@ const AdminEhdsFaqsPage = () => {
                 PDF Parser
               </Button>
             </Link>
+            <Button size="sm" onClick={() => setIsCreating(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add FAQ
+            </Button>
             <Link to="/faqs" target="_blank">
               <Button variant="outline" size="sm">
                 <ExternalLink className="h-4 w-4 mr-2" />
@@ -255,6 +287,15 @@ const AdminEhdsFaqsPage = () => {
 
       {/* Edit Dialog */}
       <EditFaqDialog key={editingFaq?.id || "none"} faq={editingFaq} onClose={() => setEditingFaq(null)} onSave={saveFaq} />
+
+      {/* Create Dialog */}
+      <EditFaqDialog
+        key="create-new"
+        faq={isCreating ? { id: "", faq_number: (faqs.length > 0 ? Math.max(...faqs.map(f => f.faq_number)) + 1 : 1), question: "", answer: "", chapter: "General", is_published: false, rich_content: "", source_articles: [], source_recitals: [], source_references: "", sub_category: "", document_version: "", sort_order: null, created_at: "", updated_at: "", pdf_version: null } as EhdsFaq : null}
+        onClose={() => setIsCreating(false)}
+        onSave={createFaq}
+        isCreateMode
+      />
 
       {/* Delete Confirmation */}
       <Dialog open={!!deletingId} onOpenChange={() => setDeletingId(null)}>
@@ -414,16 +455,18 @@ function BulkEditDialog({ open, onClose, selectedIds, versions, chapters, onDone
   );
 }
 
-function EditFaqDialog({ faq, onClose, onSave }: {
+function EditFaqDialog({ faq, onClose, onSave, isCreateMode }: {
   faq: EhdsFaq | null;
   onClose: () => void;
-  onSave: (data: Partial<EhdsFaq>) => void;
+  onSave: (data: Partial<EhdsFaq> & { faq_number?: number }) => void;
+  isCreateMode?: boolean;
 }) {
-  const [form, setForm] = useState<Partial<EhdsFaq> & { _rawArticles?: string; _rawRecitals?: string }>({});
+  const [form, setForm] = useState<Partial<EhdsFaq> & { _rawArticles?: string; _rawRecitals?: string; faq_number?: number }>({});
 
   useEffect(() => {
     if (faq) {
       setForm({
+        faq_number: faq.faq_number,
         question: faq.question,
         answer: faq.answer,
         rich_content: faq.rich_content || "",
@@ -448,9 +491,20 @@ function EditFaqDialog({ faq, onClose, onSave }: {
     <Dialog open={!!faq} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit FAQ #{faq?.faq_number}</DialogTitle>
+          <DialogTitle>{isCreateMode ? "Add New FAQ" : `Edit FAQ #${faq?.faq_number}`}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
+          {isCreateMode && (
+            <div>
+              <Label>FAQ Number</Label>
+              <Input
+                type="number"
+                value={form.faq_number || ""}
+                onChange={e => setForm(p => ({ ...p, faq_number: parseInt(e.target.value) || undefined }))}
+                placeholder="Auto-assigned if empty"
+              />
+            </div>
+          )}
           <div>
             <Label>Question</Label>
             <Textarea value={form.question || ""} onChange={e => setForm(p => ({ ...p, question: e.target.value }))} rows={2} />
@@ -523,7 +577,7 @@ function EditFaqDialog({ faq, onClose, onSave }: {
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={handleClose}>Cancel</Button>
-          <Button onClick={() => onSave(form)}>Save Changes</Button>
+          <Button onClick={() => onSave(form)}>{isCreateMode ? "Create FAQ" : "Save Changes"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

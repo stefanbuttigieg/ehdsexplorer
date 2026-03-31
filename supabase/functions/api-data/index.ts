@@ -13,7 +13,7 @@ const corsHeaders = {
 // Allowed resources - expanded whitelist
 const ALLOWED_RESOURCES = [
   "articles", "recitals", "definitions", "chapters", "sections",
-  "implementing-acts", "annexes", "health-authorities", "country-legislation", "metadata"
+  "implementing-acts", "annexes", "health-authorities", "country-legislation", "faqs", "metadata"
 ];
 const ALLOWED_FORMATS = ["json", "csv"];
 const ALLOWED_LANGUAGES = ["en", "mt", "de", "fr", "it", "es", "pt", "nl", "pl", "cs", "sk", "hu", "ro", "bg", "el", "sv", "da", "fi", "et", "lv", "lt", "sl", "hr", "ga"];
@@ -181,6 +181,7 @@ const RESOURCE_FIELDS: Record<string, string[]> = {
   annexes: ["id", "title", "content"],
   "health-authorities": ["id", "name", "country_code", "country_name", "authority_type", "status", "email", "phone", "website", "address", "description", "ehds_role", "latitude", "longitude"],
   "country-legislation": ["id", "country_code", "country_name", "title", "official_title", "legislation_type", "status", "status_notes", "summary", "url", "effective_date", "adoption_date", "publication_date", "enforcement_measures"],
+  "faqs": ["faq_number", "question", "answer", "rich_content", "chapter", "sub_category", "source_articles", "source_references"],
 };
 
 Deno.serve(async (req) => {
@@ -709,7 +710,36 @@ Deno.serve(async (req) => {
         break;
       }
 
-      case "metadata":
+      case "faqs": {
+        const validatedId = validateId(id);
+        const columns = "faq_number, question, answer, rich_content, chapter, sub_category, source_articles, source_references";
+        
+        if (validatedId) {
+          const result = await supabase
+            .from("ehds_faqs")
+            .select(columns)
+            .eq("faq_number", validatedId)
+            .eq("is_published", true)
+            .single();
+          data = result.data;
+          error = result.error;
+        } else {
+          const chapter = url.searchParams.get("chapter");
+          let query = supabase
+            .from("ehds_faqs")
+            .select(columns)
+            .eq("is_published", true);
+          
+          if (chapter) {
+            query = query.eq("chapter", chapter);
+          }
+          
+          const result = await query.order("faq_number", { ascending: true });
+          data = result.data;
+          error = result.error;
+        }
+        break;
+      }
         data = {
           regulation: {
             title: "Regulation (EU) 2025/327 - European Health Data Space",
@@ -819,6 +849,7 @@ function getResourceDescription(resource: string): string {
     annexes: "Regulation annexes",
     "health-authorities": "National Digital Health Authorities and Health Data Access Bodies",
     "country-legislation": "National implementing legislation tracker",
+    "faqs": "Official EHDS FAQs from the European Commission (DG SANTE)",
   };
   return descriptions[resource] || resource;
 }

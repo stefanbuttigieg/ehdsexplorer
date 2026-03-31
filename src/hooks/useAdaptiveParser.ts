@@ -418,6 +418,8 @@ export function parseRecitals(lines: string[], lang: string, endLine: number): P
   let lastRecitalNumber = 0;
   
   const recitalPattern = /^\((\d+)\)\s*/;
+  // Pattern for standalone recital number on its own line (EUR-Lex two-column table)
+  const standaloneNumberPattern = /^\((\d+)\)\s*$/;
   
   for (let i = 0; i < endLine && i < lines.length; i++) {
     const trimmedLine = lines[i].trim();
@@ -449,9 +451,25 @@ export function parseRecitals(lines: string[], lang: string, endLine: number): P
       }
       
       lastRecitalNumber = num;
+      let initialContent = trimmedLine.replace(recitalPattern, '').trim();
+      
+      // If this line is JUST the number "(N)" with no content, grab the next non-empty line
+      if (!initialContent && standaloneNumberPattern.test(trimmedLine)) {
+        for (let j = i + 1; j < endLine && j < lines.length; j++) {
+          const nextLine = lines[j].trim();
+          if (nextLine && !recitalPattern.test(nextLine)) {
+            initialContent = nextLine;
+            i = j; // skip ahead
+            break;
+          } else if (recitalPattern.test(nextLine)) {
+            break; // next recital number found, don't consume it
+          }
+        }
+      }
+      
       currentRecital = {
         recitalNumber: num,
-        content: trimmedLine.replace(recitalPattern, '').trim(),
+        content: initialContent,
       };
       contentLines = [];
     } else if (currentRecital) {

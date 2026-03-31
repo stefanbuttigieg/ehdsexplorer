@@ -123,7 +123,14 @@ const Layout = ({
   } = useAuth();
   const { isFeatureEnabled } = useFeatureFlags();
   const { isKidsMode, isKidsFriendlyRoute } = useKidsMode();
+  const { t } = useLanguage();
   const { data: dbSidebarItems } = useSidebarItems();
+
+  // Helper to translate a label via the LABEL_TO_KEY map
+  const tLabel = (label: string) => {
+    const key = LABEL_TO_KEY[label];
+    return key ? t(key, label) : label;
+  };
   // Initialize text highlight hook for URL-based highlighting
   useTextHighlight();
 

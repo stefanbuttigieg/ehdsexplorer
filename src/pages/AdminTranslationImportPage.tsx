@@ -515,7 +515,7 @@ const AdminTranslationImportPage = () => {
                   </CardHeader>
                   <CardContent className="space-y-6">
                     {/* File Upload */}
-                    <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                    <div className="border-2 border-dashed rounded-lg p-4 sm:p-8 text-center">
                       <input
                         type="file"
                         accept=".pdf,.txt,.md"

@@ -17,6 +17,7 @@ import { useImplementingActs, type ImplementingAct } from "@/hooks/useImplementi
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
+import { FaqDataTableDisplay } from "@/components/FaqDataTableDisplay";
 
 
 function FAQContent({ faq, footnotes }: { faq: EhdsFaq; footnotes: { marker: string; content: string }[] }) {

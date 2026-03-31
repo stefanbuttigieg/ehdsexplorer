@@ -192,6 +192,11 @@ const ImplementingActDetail = () => {
           <ImplementingActContent implementingActId={act.id} />
         </div>
 
+        {/* Data Tables */}
+        <div className="mb-6">
+          <ImplementingActDataTables implementingActId={act.id} />
+        </div>
+
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="text-lg">Related EHDS Articles</CardTitle>

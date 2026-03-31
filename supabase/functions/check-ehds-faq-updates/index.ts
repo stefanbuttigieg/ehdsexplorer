@@ -57,7 +57,7 @@ serve(async (req) => {
 
     // Fallback to known URL
     if (!pdfUrl) {
-      pdfUrl = "https://health.ec.europa.eu/document/download/39129f32-710e-412c-89d2-52f9a1f81900_en?filename=ehealth_ehds_qa_en.pdf";
+      pdfUrl = "https://health.ec.europa.eu/document/download/4dd47ec2-71dd-49fc-b036-ad7c14f6ed68_en?filename=ehealth_ehds_qa_en.pdf";
       console.log("Using fallback PDF URL:", pdfUrl);
     } else {
       console.log("Found PDF URL:", pdfUrl);

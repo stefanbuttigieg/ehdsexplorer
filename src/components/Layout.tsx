@@ -310,7 +310,7 @@ const Layout = ({
             {!sidebarCollapsed && !isKidsMode && <Collapsible open={chaptersOpen} onOpenChange={setChaptersOpen} className="mt-4" data-tour="sidebar-chapters">
                 <CollapsibleTrigger asChild>
                   <Button variant="ghost" className="w-full justify-between">
-                    <span className="font-semibold">Chapters</span>
+                    <span className="font-semibold">{tLabel("Chapters")}</span>
                     <ChevronDown className={cn("h-4 w-4 transition-transform flex-shrink-0", chaptersOpen && "rotate-180")} />
                   </Button>
                 </CollapsibleTrigger>

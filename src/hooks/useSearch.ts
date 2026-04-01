@@ -6,6 +6,7 @@ import { useDefinitions } from './useDefinitions';
 import { useChapters } from './useChapters';
 import { useImplementingActs } from './useImplementingActs';
 import { useAnnexes } from './useAnnexes';
+import { useEhdsFaqs } from './useEhdsFaqs';
 
 // Helper functions for Roman numerals
 export const romanToNumber = (roman: string): number => {

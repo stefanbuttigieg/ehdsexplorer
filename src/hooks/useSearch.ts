@@ -191,9 +191,10 @@ export const useSearch = (): UseSearchReturn => {
   const { data: rawChapters = [], isLoading: chaptersLoading } = useChapters();
   const { data: rawImplementingActs = [], isLoading: actsLoading } = useImplementingActs();
   const { data: rawAnnexes = [], isLoading: annexesLoading } = useAnnexes();
+  const { data: rawFaqs = [], isLoading: faqsLoading } = useEhdsFaqs();
 
   const isLoading = articlesLoading || recitalsLoading || definitionsLoading || 
-                    chaptersLoading || actsLoading || annexesLoading;
+                    chaptersLoading || actsLoading || annexesLoading || faqsLoading;
 
   // Prepare searchable data with normalized content
   const searchableData = useMemo(() => ({

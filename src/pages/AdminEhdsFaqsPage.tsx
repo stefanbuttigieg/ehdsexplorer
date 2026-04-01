@@ -287,7 +287,7 @@ const AdminEhdsFaqsPage = () => {
       </div>
 
       {/* Edit Dialog */}
-      <EditFaqDialog key={editingFaq?.id || "none"} faq={editingFaq} onClose={() => setEditingFaq(null)} onSave={saveFaq} />
+      <EditFaqDialog key={editingFaq?.id || "none"} faq={editingFaq} onClose={() => setEditingFaq(null)} onSave={saveFaq} versions={versions} />
 
       {/* Create Dialog */}
       <EditFaqDialog
@@ -296,6 +296,7 @@ const AdminEhdsFaqsPage = () => {
         onClose={() => setIsCreating(false)}
         onSave={createFaq}
         isCreateMode
+        versions={versions}
       />
 
       {/* Delete Confirmation */}
@@ -456,11 +457,12 @@ function BulkEditDialog({ open, onClose, selectedIds, versions, chapters, onDone
   );
 }
 
-function EditFaqDialog({ faq, onClose, onSave, isCreateMode }: {
+function EditFaqDialog({ faq, onClose, onSave, isCreateMode, versions = [] }: {
   faq: EhdsFaq | null;
   onClose: () => void;
   onSave: (data: Partial<EhdsFaq> & { faq_number?: number }) => void;
   isCreateMode?: boolean;
+  versions?: EhdsFaqVersion[];
 }) {
   const [form, setForm] = useState<Partial<EhdsFaq> & { _rawArticles?: string; _rawRecitals?: string; faq_number?: number }>({});
 
@@ -566,11 +568,28 @@ function EditFaqDialog({ faq, onClose, onSave, isCreateMode }: {
             </div>
             <div>
               <Label>Document Version</Label>
-              <Input
-                value={form.document_version || ""}
-                onChange={e => setForm(p => ({ ...p, document_version: e.target.value }))}
-                placeholder="e.g. v2.0 - March 2025"
-              />
+              {versions.length > 0 ? (
+                <Select
+                  value={form.document_version || ""}
+                  onValueChange={v => setForm(p => ({ ...p, document_version: v === "__none__" ? "" : v }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select version..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— None —</SelectItem>
+                    {versions.map(v => (
+                      <SelectItem key={v.id} value={v.version_label}>{v.version_label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  value={form.document_version || ""}
+                  onChange={e => setForm(p => ({ ...p, document_version: e.target.value }))}
+                  placeholder="e.g. v2.0 - March 2025"
+                />
+              )}
             </div>
           </div>
         </div>

@@ -23,7 +23,7 @@ const SearchPage = () => {
 
   const results = useMemo(() => {
     if (!query.trim()) {
-      return { articles: [], recitals: [], definitions: [], chapters: [], implementingActs: [], annexes: [] };
+      return { articles: [], recitals: [], definitions: [], chapters: [], implementingActs: [], annexes: [], faqs: [] };
     }
     return search(query);
   }, [query, search]);

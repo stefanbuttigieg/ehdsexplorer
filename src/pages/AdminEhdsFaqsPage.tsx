@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Search, Pencil, Trash2, ExternalLink, Upload, Plus, History, Table as TableIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -465,24 +465,29 @@ function EditFaqDialog({ faq, onClose, onSave, isCreateMode, versions = [] }: {
   versions?: EhdsFaqVersion[];
 }) {
   const [form, setForm] = useState<Partial<EhdsFaq> & { _rawArticles?: string; _rawRecitals?: string; faq_number?: number }>({});
+  const initializedIdRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (faq) {
-      setForm({
-        faq_number: faq.faq_number,
-        question: faq.question,
-        answer: faq.answer,
-        rich_content: faq.rich_content || "",
-        chapter: faq.chapter,
-        sub_category: faq.sub_category || "",
-        source_references: faq.source_references || "",
-        source_articles: faq.source_articles || [],
-        source_recitals: faq.source_recitals || [],
-        document_version: faq.document_version || "",
-      });
-    } else {
+    if (!faq) {
+      initializedIdRef.current = null;
       setForm({});
+      return;
     }
+    const id = faq.id ?? "__new__";
+    if (initializedIdRef.current === id) return;
+    initializedIdRef.current = id;
+    setForm({
+      faq_number: faq.faq_number,
+      question: faq.question,
+      answer: faq.answer,
+      rich_content: faq.rich_content || "",
+      chapter: faq.chapter,
+      sub_category: faq.sub_category || "",
+      source_references: faq.source_references || "",
+      source_articles: faq.source_articles || [],
+      source_recitals: faq.source_recitals || [],
+      document_version: faq.document_version || "",
+    });
   }, [faq]);
 
   const handleClose = () => {

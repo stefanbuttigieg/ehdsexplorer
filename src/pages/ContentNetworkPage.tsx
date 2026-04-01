@@ -1,12 +1,14 @@
 import { useState, useMemo, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Network, ZoomIn, ZoomOut, RotateCcw, FileText, HelpCircle, BookOpen, Layers, ScrollText } from "lucide-react";
+import { Network, ZoomIn, ZoomOut, RotateCcw, FileText, HelpCircle, BookOpen, Layers, ScrollText, Package, Download } from "lucide-react";
 import Layout from "@/components/Layout";
 import { useArticles } from "@/hooks/useArticles";
 import { useEhdsFaqs } from "@/hooks/useEhdsFaqs";
 import { useRecitals } from "@/hooks/useRecitals";
 import { useAnnexes } from "@/hooks/useAnnexes";
 import { useImplementingActs } from "@/hooks/useImplementingActs";
+import { useJointActionDeliverables } from "@/hooks/useJointActionDeliverables";
+import { useDownloadableResources } from "@/hooks/useDownloadableResources";
 import { useContentNetwork, ContentNode, ContentNodeType } from "@/hooks/useContentNetwork";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,9 +25,11 @@ const typeConfig: Record<ContentNodeType, { color: string; icon: typeof FileText
   recital: { color: "hsl(150 60% 45%)", icon: ScrollText, label: "Recitals", route: (n) => `/recital/${n.id.replace("rec-", "")}` },
   annex: { color: "hsl(270 60% 55%)", icon: Layers, label: "Annexes", route: (n) => `/annexes/${n.id.replace("anx-", "")}` },
   "implementing-act": { color: "hsl(340 75% 55%)", icon: BookOpen, label: "Impl. Acts", route: (n) => `/implementing-acts/${n.id.replace("ia-", "")}` },
+  deliverable: { color: "hsl(25 85% 55%)", icon: Package, label: "Deliverables", route: () => `/tools` },
+  resource: { color: "hsl(190 70% 45%)", icon: Download, label: "Resources", route: () => `/tools` },
 };
 
-const typeFilters: ContentNodeType[] = ["article", "faq", "recital", "annex", "implementing-act"];
+const typeFilters: ContentNodeType[] = ["article", "faq", "recital", "annex", "implementing-act", "deliverable", "resource"];
 
 const ContentNetworkPage = () => {
   const navigate = useNavigate();
@@ -34,8 +38,10 @@ const ContentNetworkPage = () => {
   const { data: recitals } = useRecitals();
   const { data: annexes } = useAnnexes();
   const { data: implementingActs } = useImplementingActs();
+  const { data: deliverables } = useJointActionDeliverables();
+  const { data: resources } = useDownloadableResources();
 
-  const { nodes, links, totalLinks, typeCounts } = useContentNetwork(articles, faqs, recitals, annexes, implementingActs);
+  const { nodes, links, totalLinks, typeCounts } = useContentNetwork(articles, faqs, recitals, annexes, implementingActs, deliverables, resources);
 
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [activeTypes, setActiveTypes] = useState<Set<ContentNodeType>>(new Set(typeFilters));
@@ -58,22 +64,21 @@ const ContentNetworkPage = () => {
     });
   };
 
-  // Filter nodes by active types
   const visibleNodes = useMemo(() => nodes.filter(n => activeTypes.has(n.type)), [nodes, activeTypes]);
   const visibleIds = useMemo(() => new Set(visibleNodes.map(n => n.id)), [visibleNodes]);
   const visibleLinks = useMemo(() => links.filter(l => visibleIds.has(l.source) && visibleIds.has(l.target)), [links, visibleIds]);
 
-  // Position nodes using a force-directed-like layout grouped by type
   const nodePositions = useMemo(() => {
     const positions = new Map<string, { x: number; y: number }>();
-    
-    // Group by type and lay out in sectors
+
     const typeAngles: Record<ContentNodeType, number> = {
       article: 0,
-      faq: (Math.PI * 2) / 5,
-      recital: (Math.PI * 2 * 2) / 5,
-      annex: (Math.PI * 2 * 3) / 5,
-      "implementing-act": (Math.PI * 2 * 4) / 5,
+      faq: (Math.PI * 2) / 7,
+      recital: (Math.PI * 2 * 2) / 7,
+      annex: (Math.PI * 2 * 3) / 7,
+      "implementing-act": (Math.PI * 2 * 4) / 7,
+      deliverable: (Math.PI * 2 * 5) / 7,
+      resource: (Math.PI * 2 * 6) / 7,
     };
 
     const typeGroups: Record<string, ContentNode[]> = {};
@@ -85,10 +90,9 @@ const ContentNetworkPage = () => {
     for (const [type, groupNodes] of Object.entries(typeGroups)) {
       const baseAngle = typeAngles[type as ContentNodeType] || 0;
       const sectorSpread = Math.PI * 0.35;
-      const baseRadius = type === "article" ? 0 : 280; // Articles at center
+      const baseRadius = type === "article" ? 0 : 280;
 
       if (type === "article") {
-        // Articles in a spiral at center
         const sorted = [...groupNodes].sort((a, b) => {
           const aNum = parseInt(a.id.replace("art-", ""));
           const bNum = parseInt(b.id.replace("art-", ""));
@@ -117,7 +121,6 @@ const ContentNetworkPage = () => {
     return positions;
   }, [visibleNodes, centerX, centerY]);
 
-  // Selected connections
   const selectedConnections = useMemo(() => {
     if (!selectedNode) return [];
     return visibleLinks.filter(l => l.source === selectedNode || l.target === selectedNode);
@@ -140,7 +143,6 @@ const ContentNetworkPage = () => {
     return Math.max(6, Math.min(12, 6 + node.degree * 0.8));
   };
 
-  // Pan/zoom handlers
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button === 0 && (e.target as SVGElement).tagName === "svg") {
       setIsDragging(true);
@@ -176,7 +178,7 @@ const ContentNetworkPage = () => {
     <Layout>
       <SEOHead
         title="EHDS Content Network | Interactive Knowledge Graph"
-        description="Explore how Articles, FAQs, Recitals, Annexes, and Implementing Acts in the EHDS Regulation are interconnected."
+        description="Explore how Articles, FAQs, Recitals, Annexes, Implementing Acts, Deliverables and Resources in the EHDS Regulation are interconnected."
       />
       <div className="container mx-auto px-4 py-6 space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -191,12 +193,13 @@ const ContentNetworkPage = () => {
           </div>
         </div>
 
-        {/* Stats + Type Filters */}
         <div className="flex flex-wrap gap-2 items-center">
           {typeFilters.map(t => {
             const cfg = typeConfig[t];
             const Icon = cfg.icon;
             const active = activeTypes.has(t);
+            const count = typeCounts[t] || 0;
+            if (count === 0 && t !== "resource") return null;
             return (
               <Button
                 key={t}
@@ -208,14 +211,13 @@ const ContentNetworkPage = () => {
               >
                 <Icon className="h-3.5 w-3.5" />
                 {cfg.label}
-                <Badge variant="secondary" className="ml-1 text-[10px] h-4 px-1">{typeCounts[t]}</Badge>
+                <Badge variant="secondary" className="ml-1 text-[10px] h-4 px-1">{count}</Badge>
               </Button>
             );
           })}
           <span className="text-xs text-muted-foreground ml-2">{totalLinks} connections</span>
         </div>
 
-        {/* Graph + Detail */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4">
           <Card className="overflow-hidden relative">
             <div className="absolute top-2 right-2 z-10 flex flex-col gap-1">
@@ -243,7 +245,6 @@ const ContentNetworkPage = () => {
               onWheel={handleWheel}
             >
               <g transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}>
-                {/* Links */}
                 {visibleLinks.map((link, i) => {
                   const sp = nodePositions.get(link.source);
                   const tp = nodePositions.get(link.target);
@@ -260,7 +261,6 @@ const ContentNetworkPage = () => {
                   );
                 })}
 
-                {/* Nodes */}
                 {visibleNodes.map(node => {
                   const pos = nodePositions.get(node.id);
                   if (!pos) return null;
@@ -300,7 +300,6 @@ const ContentNetworkPage = () => {
             </svg>
           </Card>
 
-          {/* Detail Panel */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">
@@ -362,12 +361,16 @@ const ContentNetworkPage = () => {
                 <div className="text-sm text-muted-foreground space-y-3">
                   <p>Click any node to explore its connections across all EHDS content.</p>
                   <div className="space-y-1.5 text-xs">
-                    {typeFilters.map(t => (
-                      <div key={t} className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full" style={{ background: typeConfig[t].color }} />
-                        <span>{typeConfig[t].label} ({typeCounts[t]})</span>
-                      </div>
-                    ))}
+                    {typeFilters.map(t => {
+                      const count = typeCounts[t] || 0;
+                      if (count === 0 && t !== "resource") return null;
+                      return (
+                        <div key={t} className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full" style={{ background: typeConfig[t].color }} />
+                          <span>{typeConfig[t].label} ({count})</span>
+                        </div>
+                      );
+                    })}
                   </div>
                   <p className="text-[11px] text-muted-foreground/70">
                     Scroll to zoom, drag to pan. Toggle content types above.

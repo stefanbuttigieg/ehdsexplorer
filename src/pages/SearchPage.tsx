@@ -84,6 +84,9 @@ const SearchPage = () => {
                 <Button variant={filter === 'definitions' ? 'default' : 'outline'} size="sm" onClick={() => setFilter('definitions')}>
                   Definitions ({results.definitions.length})
                 </Button>
+                <Button variant={filter === 'faqs' ? 'default' : 'outline'} size="sm" onClick={() => setFilter('faqs')}>
+                  FAQs ({results.faqs.length})
+                </Button>
               </div>
             </div>
 

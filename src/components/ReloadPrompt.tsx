@@ -1,6 +1,44 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 
+const PREVIEW_RESET_VERSION = '2';
+const PREVIEW_BUSTER_PARAM = '__lovable_preview_bust__';
+
+const getStorageKeys = (storage: Storage) =>
+  Array.from({ length: storage.length }, (_, index) => storage.key(index)).filter(
+    (key): key is string => key !== null
+  );
+
+const shouldPreserveLocalStorageKey = (key: string) =>
+  key.startsWith('sb-') || key.startsWith('supabase.');
+
+const clearStoragePreservingAuth = () => {
+  const preservedLocalEntries = getStorageKeys(localStorage)
+    .filter(shouldPreserveLocalStorageKey)
+    .map((key) => [key, localStorage.getItem(key)] as const)
+    .filter((entry): entry is [string, string] => entry[1] !== null);
+
+  localStorage.clear();
+  preservedLocalEntries.forEach(([key, value]) => {
+    localStorage.setItem(key, value);
+  });
+  sessionStorage.clear();
+};
+
+const removePreviewBusterFromUrl = () => {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has(PREVIEW_BUSTER_PARAM)) return;
+
+  url.searchParams.delete(PREVIEW_BUSTER_PARAM);
+  window.history.replaceState(window.history.state, document.title, `${url.pathname}${url.search}${url.hash}`);
+};
+
+const getPreviewBustedUrl = () => {
+  const url = new URL(window.location.href);
+  url.searchParams.set(PREVIEW_BUSTER_PARAM, `${__BUILD_HASH__}-${Date.now()}`);
+  return url.toString();
+};
+
 /**
  * Handles PWA service worker registration and auto-updates in production-like
  * environments, while actively disabling stale SW state in Lovable preview.
@@ -13,41 +51,38 @@ const isPreviewEnvironment = () => {
 
 const PreviewServiceWorkerReset = () => {
   useEffect(() => {
-    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
+    if (typeof window === 'undefined') return;
 
-    const resetKey = `ehds-preview-sw-reset:${__BUILD_HASH__}`;
-    if (sessionStorage.getItem(resetKey) === 'done') return;
+    const resetKey = `ehds-preview-hard-reset:${PREVIEW_RESET_VERSION}:${__BUILD_HASH__}`;
+    if (sessionStorage.getItem(resetKey) === 'done') {
+      removePreviewBusterFromUrl();
+      return;
+    }
 
     let cancelled = false;
 
     const reset = async () => {
       try {
         const [registrations, cacheKeys] = await Promise.all([
-          navigator.serviceWorker.getRegistrations(),
-          caches.keys(),
+          'serviceWorker' in navigator ? navigator.serviceWorker.getRegistrations() : Promise.resolve([]),
+          'caches' in window ? caches.keys() : Promise.resolve([]),
         ]);
 
-        const unregisterResults = await Promise.allSettled(
+        await Promise.allSettled(
           registrations.map((registration) => registration.unregister())
         );
-        const cacheDeleteResults = await Promise.allSettled(
+        await Promise.allSettled(
           cacheKeys.map((cacheKey) => caches.delete(cacheKey))
         );
-
-        const hadRegistrations = unregisterResults.some(
-          (result) => result.status === 'fulfilled' && result.value
-        );
-        const hadCaches = cacheDeleteResults.some(
-          (result) => result.status === 'fulfilled' && result.value
-        );
-
-        sessionStorage.setItem(resetKey, 'done');
-
-        if (!cancelled && (hadRegistrations || hadCaches)) {
-          window.location.reload();
-        }
       } catch {
-        sessionStorage.setItem(resetKey, 'done');
+        // Continue with a storage reset and hard refresh even if cleanup partially fails.
+      }
+
+      clearStoragePreservingAuth();
+      sessionStorage.setItem(resetKey, 'done');
+
+      if (!cancelled) {
+        window.location.replace(getPreviewBustedUrl());
       }
     };
 

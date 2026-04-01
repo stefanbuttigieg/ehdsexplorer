@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Search, Pencil, Trash2, ExternalLink, Upload, Plus, History, Table as TableIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";

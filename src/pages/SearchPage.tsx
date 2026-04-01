@@ -34,7 +34,7 @@ const SearchPage = () => {
   };
 
   const totalResults = results.articles.length + results.recitals.length + results.definitions.length + 
-                       results.chapters.length + results.implementingActs.length + results.annexes.length;
+                       results.chapters.length + results.implementingActs.length + results.annexes.length + results.faqs.length;
 
   return (
     <Layout>

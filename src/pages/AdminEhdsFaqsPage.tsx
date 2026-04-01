@@ -296,6 +296,7 @@ const AdminEhdsFaqsPage = () => {
         onClose={() => setIsCreating(false)}
         onSave={createFaq}
         isCreateMode
+        versions={versions}
       />
 
       {/* Delete Confirmation */}

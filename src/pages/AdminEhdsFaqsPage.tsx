@@ -567,11 +567,28 @@ function EditFaqDialog({ faq, onClose, onSave, isCreateMode, versions = [] }: {
             </div>
             <div>
               <Label>Document Version</Label>
-              <Input
-                value={form.document_version || ""}
-                onChange={e => setForm(p => ({ ...p, document_version: e.target.value }))}
-                placeholder="e.g. v2.0 - March 2025"
-              />
+              {versions.length > 0 ? (
+                <Select
+                  value={form.document_version || ""}
+                  onValueChange={v => setForm(p => ({ ...p, document_version: v === "__none__" ? "" : v }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select version..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— None —</SelectItem>
+                    {versions.map(v => (
+                      <SelectItem key={v.id} value={v.version_label}>{v.version_label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  value={form.document_version || ""}
+                  onChange={e => setForm(p => ({ ...p, document_version: e.target.value }))}
+                  placeholder="e.g. v2.0 - March 2025"
+                />
+              )}
             </div>
           </div>
         </div>

@@ -456,11 +456,12 @@ function BulkEditDialog({ open, onClose, selectedIds, versions, chapters, onDone
   );
 }
 
-function EditFaqDialog({ faq, onClose, onSave, isCreateMode }: {
+function EditFaqDialog({ faq, onClose, onSave, isCreateMode, versions = [] }: {
   faq: EhdsFaq | null;
   onClose: () => void;
   onSave: (data: Partial<EhdsFaq> & { faq_number?: number }) => void;
   isCreateMode?: boolean;
+  versions?: EhdsFaqVersion[];
 }) {
   const [form, setForm] = useState<Partial<EhdsFaq> & { _rawArticles?: string; _rawRecitals?: string; faq_number?: number }>({});
 

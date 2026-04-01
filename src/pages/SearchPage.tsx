@@ -262,6 +262,34 @@ const SearchPage = () => {
                 </Link>
               ))}
 
+              {(filter === 'all' || filter === 'faqs') && results.faqs.map(result => (
+                <Link key={`faq-${result.item.id}`} to={`/faqs#faq-${result.item.faq_number}`}>
+                  <Card className="hover:border-primary transition-colors">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <HelpCircle className="h-4 w-4 text-primary" />
+                        <Badge variant="outline">FAQ {result.item.faq_number}</Badge>
+                        <Badge variant="secondary" className="text-xs">{result.item.chapter}</Badge>
+                        {result.score !== undefined && (
+                          <span className="text-xs text-muted-foreground ml-auto">
+                            {Math.round((1 - result.score) * 100)}% match
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="font-medium">
+                        <HighlightedText text={result.item.question} query={query} />
+                      </h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                        <HighlightedText 
+                          text={getMatchContext(result.item.normalizedAnswer, query, 100)} 
+                          query={query} 
+                        />
+                      </p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+
               {totalResults === 0 && (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground">No results found for "{query}"</p>

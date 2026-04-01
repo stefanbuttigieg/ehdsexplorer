@@ -248,7 +248,17 @@ export const useSearch = (): UseSearchReturn => {
       normalizedContent: normalizeText(a.content),
       searchTerms: generateAnnexSearchTerms(a.id),
     })),
-  }), [rawArticles, rawRecitals, rawDefinitions, rawChapters, rawImplementingActs, rawAnnexes]);
+    faqs: rawFaqs.map(f => ({
+      id: f.id,
+      faq_number: f.faq_number,
+      question: f.question,
+      answer: f.answer,
+      normalizedAnswer: normalizeText(f.answer),
+      chapter: f.chapter,
+      searchTerms: `faq ${f.faq_number} FAQ ${f.faq_number} question ${f.faq_number}`,
+      source_articles: f.source_articles,
+    })),
+  }), [rawArticles, rawRecitals, rawDefinitions, rawChapters, rawImplementingActs, rawAnnexes, rawFaqs]);
 
   // Create Fuse instances with optimized options
   const fuseInstances = useMemo(() => ({

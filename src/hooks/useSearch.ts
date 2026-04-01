@@ -393,28 +393,24 @@ export const useSearch = (): UseSearchReturn => {
     return fuseInstances.annexes.search(query);
   };
 
+  const searchFaqs = (query: string): FuseResult<SearchableFaq>[] => {
+    if (!query.trim()) return [];
+    return fuseInstances.faqs.search(query);
+  };
+
   const search = (query: string): SearchResults => {
     if (!query.trim()) {
       return {
-        articles: [],
-        recitals: [],
-        definitions: [],
-        chapters: [],
-        implementingActs: [],
-        annexes: [],
+        articles: [], recitals: [], definitions: [], chapters: [],
+        implementingActs: [], annexes: [], faqs: [],
       };
     }
 
-    // Check for direct ID match first
     const directMatch = checkDirectMatch(query);
     if (directMatch) {
       const emptyResults: SearchResults = {
-        articles: [],
-        recitals: [],
-        definitions: [],
-        chapters: [],
-        implementingActs: [],
-        annexes: [],
+        articles: [], recitals: [], definitions: [], chapters: [],
+        implementingActs: [], annexes: [], faqs: [],
       };
       
       switch (directMatch.type) {
@@ -441,6 +437,7 @@ export const useSearch = (): UseSearchReturn => {
       chapters: searchChapters(query),
       implementingActs: searchImplementingActs(query),
       annexes: searchAnnexes(query),
+      faqs: searchFaqs(query),
     };
   };
 
@@ -452,6 +449,7 @@ export const useSearch = (): UseSearchReturn => {
     searchChapters,
     searchImplementingActs,
     searchAnnexes,
+    searchFaqs,
     isLoading,
     data: searchableData,
   };

@@ -150,6 +150,7 @@ export interface SearchResults {
   chapters: FuseResult<SearchableChapter>[];
   implementingActs: FuseResult<SearchableImplementingAct>[];
   annexes: FuseResult<SearchableAnnex>[];
+  faqs: FuseResult<SearchableFaq>[];
 }
 
 export interface UseSearchReturn {
@@ -160,6 +161,7 @@ export interface UseSearchReturn {
   searchChapters: (query: string) => FuseResult<SearchableChapter>[];
   searchImplementingActs: (query: string) => FuseResult<SearchableImplementingAct>[];
   searchAnnexes: (query: string) => FuseResult<SearchableAnnex>[];
+  searchFaqs: (query: string) => FuseResult<SearchableFaq>[];
   isLoading: boolean;
   data: {
     articles: SearchableArticle[];
@@ -168,6 +170,7 @@ export interface UseSearchReturn {
     chapters: SearchableChapter[];
     implementingActs: SearchableImplementingAct[];
     annexes: SearchableAnnex[];
+    faqs: SearchableFaq[];
   };
 }
 

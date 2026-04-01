@@ -132,6 +132,17 @@ export interface SearchableAnnex {
   searchTerms: string;
 }
 
+export interface SearchableFaq {
+  id: string;
+  faq_number: number;
+  question: string;
+  answer: string;
+  normalizedAnswer: string;
+  chapter: string;
+  searchTerms: string;
+  source_articles: string[] | null;
+}
+
 export interface SearchResults {
   articles: FuseResult<SearchableArticle>[];
   recitals: FuseResult<SearchableRecital>[];

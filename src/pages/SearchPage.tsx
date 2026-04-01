@@ -11,7 +11,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { HighlightedText } from "@/components/HighlightedText";
 import { useSearch, getMatchContext } from "@/hooks/useSearch";
 
-type FilterType = 'all' | 'articles' | 'recitals' | 'definitions' | 'chapters' | 'acts' | 'annexes';
+type FilterType = 'all' | 'articles' | 'recitals' | 'definitions' | 'chapters' | 'acts' | 'annexes' | 'faqs';
 
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();

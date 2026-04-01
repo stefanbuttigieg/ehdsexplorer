@@ -293,6 +293,12 @@ export const useSearch = (): UseSearchReturn => {
       { name: 'title', weight: 1.5 },
       { name: 'normalizedContent', weight: 1.0 },
     ])),
+    faqs: new Fuse(searchableData.faqs, createFuseOptions<SearchableFaq>([
+      { name: 'searchTerms', weight: 2.0 },
+      { name: 'question', weight: 1.5 },
+      { name: 'normalizedAnswer', weight: 1.0 },
+      { name: 'chapter', weight: 0.5 },
+    ])),
   }), [searchableData]);
 
   // Check for direct ID matches

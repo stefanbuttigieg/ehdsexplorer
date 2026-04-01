@@ -4,8 +4,10 @@ import { EhdsFaq } from "@/hooks/useEhdsFaqs";
 import { Recital } from "@/hooks/useRecitals";
 import { Annex } from "@/hooks/useAnnexes";
 import { ImplementingAct } from "@/hooks/useImplementingActs";
+import { JointActionDeliverable } from "@/hooks/useJointActionDeliverables";
+import { DownloadableResource } from "@/hooks/useDownloadableResources";
 
-export type ContentNodeType = "article" | "faq" | "recital" | "annex" | "implementing-act";
+export type ContentNodeType = "article" | "faq" | "recital" | "annex" | "implementing-act" | "deliverable" | "resource";
 
 export interface ContentNode {
   id: string;
@@ -18,7 +20,7 @@ export interface ContentNode {
 export interface ContentLink {
   source: string;
   target: string;
-  type: string; // e.g. "faq-article", "recital-article", "ia-article"
+  type: string;
 }
 
 const extractArticleRefsFromText = (text: string): number[] => {
@@ -37,7 +39,9 @@ export function useContentNetwork(
   faqs: EhdsFaq[] | undefined,
   recitals: Recital[] | undefined,
   annexes: Annex[] | undefined,
-  implementingActs: ImplementingAct[] | undefined
+  implementingActs: ImplementingAct[] | undefined,
+  deliverables?: JointActionDeliverable[] | undefined,
+  resources?: DownloadableResource[] | undefined
 ) {
   return useMemo(() => {
     const nodes: ContentNode[] = [];
@@ -63,14 +67,30 @@ export function useContentNetwork(
       nodes.push({ id, type: "article", label: `Art. ${a.article_number}`, title: a.title, degree: 0 });
     }
 
-    // Add FAQ nodes and links
+    // Build article-to-FAQ map for deliverable/resource indirect linking
+    const articleToFaqIds = new Map<number, string[]>();
+
+    // Add FAQ nodes and links (articles + recitals)
     for (const faq of faqs || []) {
       const faqId = `faq-${faq.faq_number}`;
       nodes.push({ id: faqId, type: "faq", label: `FAQ ${faq.faq_number}`, title: faq.question, degree: 0 });
+
+      // Link to articles
       for (const artStr of faq.source_articles || []) {
         const artNum = parseInt(artStr, 10);
         if (!isNaN(artNum) && articleIds.has(`art-${artNum}`)) {
           addLink(faqId, `art-${artNum}`, "faq-article");
+          // Track for indirect linking
+          if (!articleToFaqIds.has(artNum)) articleToFaqIds.set(artNum, []);
+          articleToFaqIds.get(artNum)!.push(faqId);
+        }
+      }
+
+      // Link to recitals
+      for (const recStr of faq.source_recitals || []) {
+        const recNum = parseInt(recStr, 10);
+        if (!isNaN(recNum)) {
+          addLink(faqId, `rec-${recNum}`, "faq-recital");
         }
       }
     }
@@ -86,7 +106,7 @@ export function useContentNetwork(
       }
     }
 
-    // Add annex nodes and links (extract article refs from content)
+    // Add annex nodes and links
     for (const annex of annexes || []) {
       const aId = `anx-${annex.id}`;
       nodes.push({ id: aId, type: "annex", label: `Annex ${annex.id}`, title: annex.title, degree: 0 });
@@ -99,12 +119,61 @@ export function useContentNetwork(
     }
 
     // Add implementing act nodes and links
+    const iaIds = new Set<string>();
     for (const ia of implementingActs || []) {
       const iaId = `ia-${ia.id}`;
+      iaIds.add(iaId);
       nodes.push({ id: iaId, type: "implementing-act", label: ia.articleReference, title: ia.title, degree: 0 });
       for (const artNum of ia.relatedArticles) {
         if (articleIds.has(`art-${artNum}`)) {
           addLink(iaId, `art-${artNum}`, "ia-article");
+        }
+      }
+    }
+
+    // Add deliverable nodes and links
+    for (const d of deliverables || []) {
+      const dId = `del-${d.id}`;
+      nodes.push({ id: dId, type: "deliverable", label: d.deliverable_name.slice(0, 30), title: `${d.joint_action_name}: ${d.deliverable_name}`, degree: 0 });
+
+      // Link to articles
+      for (const artNum of d.related_articles || []) {
+        if (articleIds.has(`art-${artNum}`)) {
+          addLink(dId, `art-${artNum}`, "deliverable-article");
+        }
+        // Indirect link: deliverable → FAQ (through shared articles)
+        for (const faqId of articleToFaqIds.get(artNum) || []) {
+          addLink(dId, faqId, "deliverable-faq");
+        }
+      }
+
+      // Link to implementing acts
+      for (const iaOrigId of d.related_implementing_acts || []) {
+        const iaNodeId = `ia-${iaOrigId}`;
+        if (iaIds.has(iaNodeId)) {
+          addLink(dId, iaNodeId, "deliverable-ia");
+        }
+      }
+    }
+
+    // Add resource nodes and links (extract article refs from description/tags)
+    for (const res of resources || []) {
+      const rId = `res-${res.id}`;
+      const tagRefs: number[] = [];
+      for (const tag of res.tags || []) {
+        const m = tag.match(/^article[- ]?(\d+)$/i);
+        if (m) tagRefs.push(parseInt(m[1], 10));
+      }
+      const descRefs = res.description ? extractArticleRefsFromText(res.description) : [];
+      const allRefs = [...new Set([...tagRefs, ...descRefs])];
+
+      // Only add resource if it has connections
+      if (allRefs.some(n => articleIds.has(`art-${n}`))) {
+        nodes.push({ id: rId, type: "resource", label: res.title.slice(0, 30), title: res.title, degree: 0 });
+        for (const artNum of allRefs) {
+          if (articleIds.has(`art-${artNum}`)) {
+            addLink(rId, `art-${artNum}`, "resource-article");
+          }
         }
       }
     }
@@ -116,14 +185,16 @@ export function useContentNetwork(
 
     // Stats
     const totalLinks = links.length;
-    const typeCounts = {
+    const typeCounts: Record<ContentNodeType, number> = {
       article: (articles || []).length,
       faq: (faqs || []).length,
       recital: (recitals || []).length,
       annex: (annexes || []).length,
       "implementing-act": (implementingActs || []).length,
+      deliverable: (deliverables || []).length,
+      resource: nodes.filter(n => n.type === "resource").length,
     };
 
     return { nodes, links, totalLinks, typeCounts };
-  }, [articles, faqs, recitals, annexes, implementingActs]);
+  }, [articles, faqs, recitals, annexes, implementingActs, deliverables, resources]);
 }

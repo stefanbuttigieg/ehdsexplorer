@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { Search, FileText, Scale, Book, Layers, ScrollText, FileStack } from "lucide-react";
+import { Search, FileText, Scale, Book, Layers, ScrollText, FileStack, HelpCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

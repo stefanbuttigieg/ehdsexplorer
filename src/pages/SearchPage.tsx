@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { Search, FileText, Scale, Book, Layers, ScrollText, FileStack } from "lucide-react";
+import { Search, FileText, Scale, Book, Layers, ScrollText, FileStack, HelpCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { HighlightedText } from "@/components/HighlightedText";
 import { useSearch, getMatchContext } from "@/hooks/useSearch";
 
-type FilterType = 'all' | 'articles' | 'recitals' | 'definitions' | 'chapters' | 'acts' | 'annexes';
+type FilterType = 'all' | 'articles' | 'recitals' | 'definitions' | 'chapters' | 'acts' | 'annexes' | 'faqs';
 
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -23,7 +23,7 @@ const SearchPage = () => {
 
   const results = useMemo(() => {
     if (!query.trim()) {
-      return { articles: [], recitals: [], definitions: [], chapters: [], implementingActs: [], annexes: [] };
+      return { articles: [], recitals: [], definitions: [], chapters: [], implementingActs: [], annexes: [], faqs: [] };
     }
     return search(query);
   }, [query, search]);
@@ -34,7 +34,7 @@ const SearchPage = () => {
   };
 
   const totalResults = results.articles.length + results.recitals.length + results.definitions.length + 
-                       results.chapters.length + results.implementingActs.length + results.annexes.length;
+                       results.chapters.length + results.implementingActs.length + results.annexes.length + results.faqs.length;
 
   return (
     <Layout>
@@ -83,6 +83,9 @@ const SearchPage = () => {
                 </Button>
                 <Button variant={filter === 'definitions' ? 'default' : 'outline'} size="sm" onClick={() => setFilter('definitions')}>
                   Definitions ({results.definitions.length})
+                </Button>
+                <Button variant={filter === 'faqs' ? 'default' : 'outline'} size="sm" onClick={() => setFilter('faqs')}>
+                  FAQs ({results.faqs.length})
                 </Button>
               </div>
             </div>
@@ -251,6 +254,34 @@ const SearchPage = () => {
                       <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
                         <HighlightedText 
                           text={getMatchContext(result.item.normalizedDefinition, query, 100)} 
+                          query={query} 
+                        />
+                      </p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+
+              {(filter === 'all' || filter === 'faqs') && results.faqs.map(result => (
+                <Link key={`faq-${result.item.id}`} to={`/faqs#faq-${result.item.faq_number}`}>
+                  <Card className="hover:border-primary transition-colors">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <HelpCircle className="h-4 w-4 text-primary" />
+                        <Badge variant="outline">FAQ {result.item.faq_number}</Badge>
+                        <Badge variant="secondary" className="text-xs">{result.item.chapter}</Badge>
+                        {result.score !== undefined && (
+                          <span className="text-xs text-muted-foreground ml-auto">
+                            {Math.round((1 - result.score) * 100)}% match
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="font-medium">
+                        <HighlightedText text={result.item.question} query={query} />
+                      </h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                        <HighlightedText 
+                          text={getMatchContext(result.item.normalizedAnswer, query, 100)} 
                           query={query} 
                         />
                       </p>

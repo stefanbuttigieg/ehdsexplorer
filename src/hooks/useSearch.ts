@@ -6,6 +6,7 @@ import { useDefinitions } from './useDefinitions';
 import { useChapters } from './useChapters';
 import { useImplementingActs } from './useImplementingActs';
 import { useAnnexes } from './useAnnexes';
+import { useEhdsFaqs } from './useEhdsFaqs';
 
 // Helper functions for Roman numerals
 export const romanToNumber = (roman: string): number => {
@@ -131,6 +132,17 @@ export interface SearchableAnnex {
   searchTerms: string;
 }
 
+export interface SearchableFaq {
+  id: string;
+  faq_number: number;
+  question: string;
+  answer: string;
+  normalizedAnswer: string;
+  chapter: string;
+  searchTerms: string;
+  source_articles: string[] | null;
+}
+
 export interface SearchResults {
   articles: FuseResult<SearchableArticle>[];
   recitals: FuseResult<SearchableRecital>[];
@@ -138,6 +150,7 @@ export interface SearchResults {
   chapters: FuseResult<SearchableChapter>[];
   implementingActs: FuseResult<SearchableImplementingAct>[];
   annexes: FuseResult<SearchableAnnex>[];
+  faqs: FuseResult<SearchableFaq>[];
 }
 
 export interface UseSearchReturn {
@@ -148,6 +161,7 @@ export interface UseSearchReturn {
   searchChapters: (query: string) => FuseResult<SearchableChapter>[];
   searchImplementingActs: (query: string) => FuseResult<SearchableImplementingAct>[];
   searchAnnexes: (query: string) => FuseResult<SearchableAnnex>[];
+  searchFaqs: (query: string) => FuseResult<SearchableFaq>[];
   isLoading: boolean;
   data: {
     articles: SearchableArticle[];
@@ -156,6 +170,7 @@ export interface UseSearchReturn {
     chapters: SearchableChapter[];
     implementingActs: SearchableImplementingAct[];
     annexes: SearchableAnnex[];
+    faqs: SearchableFaq[];
   };
 }
 
@@ -176,9 +191,10 @@ export const useSearch = (): UseSearchReturn => {
   const { data: rawChapters = [], isLoading: chaptersLoading } = useChapters();
   const { data: rawImplementingActs = [], isLoading: actsLoading } = useImplementingActs();
   const { data: rawAnnexes = [], isLoading: annexesLoading } = useAnnexes();
+  const { data: rawFaqs = [], isLoading: faqsLoading } = useEhdsFaqs();
 
   const isLoading = articlesLoading || recitalsLoading || definitionsLoading || 
-                    chaptersLoading || actsLoading || annexesLoading;
+                    chaptersLoading || actsLoading || annexesLoading || faqsLoading;
 
   // Prepare searchable data with normalized content
   const searchableData = useMemo(() => ({
@@ -232,7 +248,17 @@ export const useSearch = (): UseSearchReturn => {
       normalizedContent: normalizeText(a.content),
       searchTerms: generateAnnexSearchTerms(a.id),
     })),
-  }), [rawArticles, rawRecitals, rawDefinitions, rawChapters, rawImplementingActs, rawAnnexes]);
+    faqs: rawFaqs.map(f => ({
+      id: f.id,
+      faq_number: f.faq_number,
+      question: f.question,
+      answer: f.answer,
+      normalizedAnswer: normalizeText(f.answer),
+      chapter: f.chapter,
+      searchTerms: `faq ${f.faq_number} FAQ ${f.faq_number} question ${f.faq_number}`,
+      source_articles: f.source_articles,
+    })),
+  }), [rawArticles, rawRecitals, rawDefinitions, rawChapters, rawImplementingActs, rawAnnexes, rawFaqs]);
 
   // Create Fuse instances with optimized options
   const fuseInstances = useMemo(() => ({
@@ -266,6 +292,12 @@ export const useSearch = (): UseSearchReturn => {
       { name: 'searchTerms', weight: 2.0 },
       { name: 'title', weight: 1.5 },
       { name: 'normalizedContent', weight: 1.0 },
+    ])),
+    faqs: new Fuse(searchableData.faqs, createFuseOptions<SearchableFaq>([
+      { name: 'searchTerms', weight: 2.0 },
+      { name: 'question', weight: 1.5 },
+      { name: 'normalizedAnswer', weight: 1.0 },
+      { name: 'chapter', weight: 0.5 },
     ])),
   }), [searchableData]);
 
@@ -361,28 +393,24 @@ export const useSearch = (): UseSearchReturn => {
     return fuseInstances.annexes.search(query);
   };
 
+  const searchFaqs = (query: string): FuseResult<SearchableFaq>[] => {
+    if (!query.trim()) return [];
+    return fuseInstances.faqs.search(query);
+  };
+
   const search = (query: string): SearchResults => {
     if (!query.trim()) {
       return {
-        articles: [],
-        recitals: [],
-        definitions: [],
-        chapters: [],
-        implementingActs: [],
-        annexes: [],
+        articles: [], recitals: [], definitions: [], chapters: [],
+        implementingActs: [], annexes: [], faqs: [],
       };
     }
 
-    // Check for direct ID match first
     const directMatch = checkDirectMatch(query);
     if (directMatch) {
       const emptyResults: SearchResults = {
-        articles: [],
-        recitals: [],
-        definitions: [],
-        chapters: [],
-        implementingActs: [],
-        annexes: [],
+        articles: [], recitals: [], definitions: [], chapters: [],
+        implementingActs: [], annexes: [], faqs: [],
       };
       
       switch (directMatch.type) {
@@ -409,6 +437,7 @@ export const useSearch = (): UseSearchReturn => {
       chapters: searchChapters(query),
       implementingActs: searchImplementingActs(query),
       annexes: searchAnnexes(query),
+      faqs: searchFaqs(query),
     };
   };
 
@@ -420,6 +449,7 @@ export const useSearch = (): UseSearchReturn => {
     searchChapters,
     searchImplementingActs,
     searchAnnexes,
+    searchFaqs,
     isLoading,
     data: searchableData,
   };

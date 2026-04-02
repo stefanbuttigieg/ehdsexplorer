@@ -354,6 +354,19 @@
           "enforcement_measures": { "type": "array", "items": { "type": "string" } }
         }
       },
+      "FAQ": {
+        "type": "object",
+        "properties": {
+          "faq_number": { "type": "integer" },
+          "question": { "type": "string" },
+          "answer": { "type": "string" },
+          "chapter": { "type": "string" },
+          "sub_category": { "type": "string", "nullable": true },
+          "source_articles": { "type": "array", "items": { "type": "string" }, "nullable": true },
+          "source_recitals": { "type": "array", "items": { "type": "string" }, "nullable": true },
+          "source_references": { "type": "string", "nullable": true }
+        }
+      },
       "Error": {
         "type": "object",
         "properties": {

@@ -33,7 +33,7 @@
             "description": "The resource type to retrieve",
             "schema": {
               "type": "string",
-              "enum": ["articles", "recitals", "definitions", "chapters", "sections", "implementing-acts", "annexes", "health-authorities", "country-legislation", "metadata"]
+              "enum": ["articles", "recitals", "definitions", "chapters", "sections", "implementing-acts", "annexes", "health-authorities", "country-legislation", "faqs", "metadata"]
             }
           },
           {

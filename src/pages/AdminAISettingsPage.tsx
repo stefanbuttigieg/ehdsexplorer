@@ -81,7 +81,7 @@ const AdminAISettingsPage = () => {
   }, [settings]);
 
   // Fetch prompts
-  const { data: prompts = [], isLoading: promptsLoading } = useQuery({
+  const { data: prompts = [] } = useQuery({
     queryKey: ['ai-prompts'],
     queryFn: async () => {
       const { data, error } = await supabase

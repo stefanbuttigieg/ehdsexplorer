@@ -198,27 +198,29 @@ const ArticlePage = () => {
               </Card>
             )}
 
-            {/* Related Implementing Acts */}
-            {relatedActs.length > 0 && (
-              <Card className="mb-8">
-                <CardHeader>
-                  <CardTitle className="text-lg">Implementing Acts</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {relatedActs.map((act) => (
-                    <Link key={act.id} to={`/implementing-acts/${act.id}`} className="block">
-                      <div className="p-3 rounded-lg bg-muted hover:bg-accent transition-colors flex items-center justify-between">
-                        <div>
-                          <span className="font-medium">{act.articleReference}</span>
-                          <p className="text-sm text-muted-foreground">{act.title}</p>
+            {/* Related Implementing Acts - main column on mobile only */}
+            <div className="lg:hidden">
+              {relatedActs.length > 0 && (
+                <Card className="mb-8">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Implementing Acts</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {relatedActs.map((act) => (
+                      <Link key={act.id} to={`/implementing-acts/${act.id}`} className="block">
+                        <div className="p-3 rounded-lg bg-muted hover:bg-accent transition-colors flex items-center justify-between">
+                          <div>
+                            <span className="font-medium">{act.articleReference}</span>
+                            <p className="text-sm text-muted-foreground">{act.title}</p>
+                          </div>
+                          <Badge className={`status-${act.status}`}>{statusLabels[act.status]}</Badge>
                         </div>
-                        <Badge className={`status-${act.status}`}>{statusLabels[act.status]}</Badge>
-                      </div>
-                    </Link>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
+                      </Link>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
 
             {/* EU Project Deliverables */}
             {relatedDeliverables.length > 0 && (
@@ -285,7 +287,7 @@ const ArticlePage = () => {
               <CrossRegulationSection articleId={articleId} />
             </div>
 
-            {/* Mobile-only: Related FAQs & Legislation (shown below content on small screens) */}
+            {/* Mobile-only: Related FAQs */}
             <div className="lg:hidden">
               {relatedFaqs.length > 0 && (
                 <Card className="mb-8">
@@ -312,37 +314,38 @@ const ArticlePage = () => {
                   </CardContent>
                 </Card>
               )}
-
-              {nationalLegislation.length > 0 && (
-                <Card className="mb-8">
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Scale className="h-5 w-5" />
-                      National Implementation
-                    </CardTitle>
-                    <CardDescription>
-                      Member State legislation implementing or relating to this article ({nationalLegislation.length} {nationalLegislation.length === 1 ? 'country' : 'countries'})
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {nationalLegislation.slice(0, 5).map((leg) => (
-                      <CountryLegislationCard 
-                        key={leg.id} 
-                        legislation={leg} 
-                        compact 
-                      />
-                    ))}
-                    {nationalLegislation.length > 5 && (
-                      <Link to="/health-authorities" className="block">
-                        <Button variant="outline" size="sm" className="w-full">
-                          View all {nationalLegislation.length} entries
-                        </Button>
-                      </Link>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
             </div>
+
+            {/* National Implementation - always in main column */}
+            {nationalLegislation.length > 0 && (
+              <Card className="mb-8">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Scale className="h-5 w-5" />
+                    National Implementation
+                  </CardTitle>
+                  <CardDescription>
+                    Member State legislation implementing or relating to this article ({nationalLegislation.length} {nationalLegislation.length === 1 ? 'country' : 'countries'})
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {nationalLegislation.slice(0, 5).map((leg) => (
+                    <CountryLegislationCard 
+                      key={leg.id} 
+                      legislation={leg} 
+                      compact 
+                    />
+                  ))}
+                  {nationalLegislation.length > 5 && (
+                    <Link to="/health-authorities" className="block">
+                      <Button variant="outline" size="sm" className="w-full">
+                        View all {nationalLegislation.length} entries
+                      </Button>
+                    </Link>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Navigation */}
             <div className="flex items-center justify-between pt-6 border-t border-border">
@@ -365,10 +368,36 @@ const ArticlePage = () => {
             </div>
           </div>
 
-          {/* Right sidebar - visible on lg+ */}
-          {(relatedFaqs.length > 0 || nationalLegislation.length > 0) && (
+          {/* Right sidebar - Implementing Acts & FAQs on lg+ */}
+          {(relatedActs.length > 0 || relatedFaqs.length > 0) && (
             <aside className="hidden lg:block w-80 xl:w-96 shrink-0">
               <div className="sticky top-20 space-y-6 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
+                {relatedActs.length > 0 && (
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Scale className="h-4 w-4" />
+                        Implementing Acts
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      {relatedActs.map((act) => (
+                        <Link key={act.id} to={`/implementing-acts/${act.id}`} className="block">
+                          <div className="p-2.5 rounded-lg bg-muted hover:bg-accent transition-colors">
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="min-w-0">
+                                <span className="text-xs font-medium">{act.articleReference}</span>
+                                <p className="text-xs text-muted-foreground line-clamp-2">{act.title}</p>
+                              </div>
+                              <Badge className={`status-${act.status} text-[10px] shrink-0`}>{statusLabels[act.status]}</Badge>
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+
                 {relatedFaqs.length > 0 && (
                   <Card>
                     <CardHeader className="pb-3">
@@ -391,36 +420,6 @@ const ArticlePage = () => {
                           </div>
                         </Link>
                       ))}
-                    </CardContent>
-                  </Card>
-                )}
-
-                {nationalLegislation.length > 0 && (
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <Scale className="h-4 w-4" />
-                        National Implementation
-                      </CardTitle>
-                      <CardDescription className="text-xs">
-                        {nationalLegislation.length} {nationalLegislation.length === 1 ? 'country' : 'countries'}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      {nationalLegislation.slice(0, 5).map((leg) => (
-                        <CountryLegislationCard 
-                          key={leg.id} 
-                          legislation={leg} 
-                          compact 
-                        />
-                      ))}
-                      {nationalLegislation.length > 5 && (
-                        <Link to="/health-authorities" className="block">
-                          <Button variant="outline" size="sm" className="w-full text-xs">
-                            View all {nationalLegislation.length} entries
-                          </Button>
-                        </Link>
-                      )}
                     </CardContent>
                   </Card>
                 )}

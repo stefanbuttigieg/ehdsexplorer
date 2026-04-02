@@ -53,32 +53,47 @@
      }
    }, [open, totpFactorId]);
  
-   const handleSendEmailCode = async () => {
-     setIsSendingEmail(true);
-     try {
-       const { data, error } = await supabase.functions.invoke('send-email-otp', {
-         body: { action: 'send' },
-       });
- 
-       if (error) throw error;
-       if (data?.error) throw new Error(data.error);
- 
-       setEmailCodeSent(true);
-       toast({
-         title: 'Code sent',
-         description: `A verification code has been sent to ${userEmail}`,
-       });
-     } catch (error: any) {
-       console.error('Error sending email OTP:', error);
-       toast({
-         title: 'Failed to send code',
-         description: error.message || 'Could not send verification code',
-         variant: 'destructive',
-       });
-     } finally {
-       setIsSendingEmail(false);
-     }
-   };
+    const handleSendEmailCode = async () => {
+      // Prevent double-sends within 30 seconds
+      const now = Date.now();
+      if (now - lastSentAt < 30000) {
+        toast({
+          title: 'Please wait',
+          description: 'A new code can be requested every 30 seconds. Check your email for the latest code.',
+        });
+        return;
+      }
+
+      setIsSendingEmail(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('send-email-otp', {
+          body: { action: 'send' },
+        });
+
+        if (error) {
+          const errBody = await error?.context?.json?.().catch(() => null);
+          throw new Error(errBody?.error || error.message);
+        }
+        if (data?.error) throw new Error(data.error);
+
+        setEmailCodeSent(true);
+        setLastSentAt(Date.now());
+        setCode('');
+        toast({
+          title: 'Code sent',
+          description: `A new verification code has been sent to ${userEmail}. Use the latest code only.`,
+        });
+      } catch (error: any) {
+        console.error('Error sending email OTP:', error);
+        toast({
+          title: 'Failed to send code',
+          description: error.message || 'Could not send verification code',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsSendingEmail(false);
+      }
+    };
  
    const handleVerifyTOTP = async () => {
      if (!totpFactorId || code.length !== 6) return;

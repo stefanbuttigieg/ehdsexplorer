@@ -11,99 +11,30 @@ const DAILY_LIMIT = 30;
 const IP_RATE_LIMIT_PER_HOUR = 5;
 const IP_RATE_LIMIT_WINDOW_MS = 3600000;
 
-// Role-specific prompt additions
-const ROLE_PROMPTS: Record<string, string> = {
-  general: `
-USER ROLE: General User
-Focus on providing balanced, accessible explanations that cover the key points without assuming specialized knowledge. Use everyday language while maintaining accuracy. Provide practical examples when helpful.`,
-  healthcare: `
-USER ROLE: Healthcare Professional
-Focus on clinical implications, patient rights under EHDS, and how the regulation affects healthcare delivery. Emphasize:
-- Primary use of health data (Articles 3-14)
-- Patient access rights and control mechanisms
-- EHR system requirements and interoperability
-- MyHealth@EU cross-border data exchange
-- Data quality requirements for clinical use
-- Obligations for healthcare providers and data holders
-Use medical/clinical terminology where appropriate.`,
-  legal: `
-USER ROLE: Legal/Compliance Officer
-Focus on legal obligations, compliance requirements, and regulatory framework. Emphasize:
-- Specific obligations for different actors (manufacturers, data holders, data users)
-- Penalties and enforcement mechanisms
-- Relationship with GDPR and other EU regulations
-- Data governance and accountability requirements
-- Contractual and procedural requirements
-- Timeline for compliance and transitional provisions
-- Legal basis for data processing under primary and secondary use
-Cite specific articles and legal provisions precisely.`,
-  researcher: `
-USER ROLE: Researcher
-Focus on secondary use of health data for research purposes. Emphasize:
-- Chapter IV provisions on secondary use (Articles 33-50)
-- Health data access body procedures and requirements
-- Data permit application process
-- Eligible purposes for secondary use (Article 34)
-- Data minimization and secure processing environments
-- Cross-border research collaboration through HealthData@EU
-- Publication and result sharing requirements
-- Fees and access timelines
-Explain processes in practical, actionable terms.`,
-  developer: `
-USER ROLE: Health Tech Developer
-Focus on technical implementation requirements. Emphasize:
-- EHR system essential requirements (Article 6, Annex II)
-- EU self-declaration and conformity assessment procedures
-- Interoperability requirements and European EHR exchange format
-- API and data exchange standards
-- Certification and market surveillance
-- Cybersecurity and logging requirements
-- Wellness application voluntary labeling
-- Integration with existing health IT infrastructure
-Use technical terminology and reference specific technical annexes.`,
-  policy: `
-USER ROLE: Policy Maker
-Focus on governance structures and implementation strategy. Emphasize:
-- EHDS Board composition and responsibilities
-- National digital health authority roles
-- Cross-border cooperation mechanisms (MyHealth@EU, HealthData@EU)
-- Implementation timeline and key milestones
-- Member State obligations and flexibility
-- Relationship with national health systems
-- Funding and resource requirements
-- Monitoring and evaluation frameworks
-- Delegated and implementing acts timeline
-Provide strategic, high-level perspective while connecting to specific provisions.`
+// Fallback prompts (used if DB prompts not available)
+const FALLBACK_ROLE_PROMPTS: Record<string, string> = {
+  general: `USER ROLE: General User\nFocus on providing balanced, accessible explanations.`,
+  healthcare: `USER ROLE: Healthcare Professional\nFocus on clinical implications and patient rights under EHDS.`,
+  legal: `USER ROLE: Legal/Compliance Officer\nFocus on legal obligations and compliance requirements.`,
+  researcher: `USER ROLE: Researcher\nFocus on secondary use of health data for research purposes.`,
+  developer: `USER ROLE: Health Tech Developer\nFocus on technical implementation requirements.`,
+  policy: `USER ROLE: Policy Maker\nFocus on governance structures and implementation strategy.`,
 };
 
-const EXPLAIN_LEVEL_PROMPTS: Record<string, string> = {
-  expert: `
-EXPLANATION LEVEL: Expert
-Use precise legal and technical terminology without simplification. Assume deep familiarity with EU regulatory framework, health data governance, and legal concepts. Reference specific articles, recitals, and annexes with minimal context. Focus on nuances, exceptions, and edge cases.`,
-  professional: `
-EXPLANATION LEVEL: Professional
-Use clear professional language with appropriate technical terms. Provide context for legal references. Balance detail with accessibility. Include practical implications alongside regulatory text. Assume working knowledge of the healthcare or legal sector.`,
-  student: `
-EXPLANATION LEVEL: Student
-Use an educational tone that builds understanding step by step. Define technical and legal terms when first introduced. Include concrete examples to illustrate abstract concepts. Explain the "why" behind provisions, not just the "what". Connect concepts to real-world scenarios students might encounter.`,
-  beginner: `
-EXPLANATION LEVEL: Complete Beginner
-Use simple, everyday language. Avoid jargon or define all terms clearly. Use analogies and relatable examples extensively. Break complex concepts into small, digestible pieces. Focus on the big picture before details. Use phrases like "In simple terms..." or "Think of it like...". Make no assumptions about prior knowledge of EU law or health data governance.`
+const FALLBACK_LEVEL_PROMPTS: Record<string, string> = {
+  expert: `EXPLANATION LEVEL: Expert\nUse precise legal and technical terminology.`,
+  professional: `EXPLANATION LEVEL: Professional\nUse clear professional language.`,
+  student: `EXPLANATION LEVEL: Student\nUse an educational tone.`,
+  beginner: `EXPLANATION LEVEL: Complete Beginner\nUse simple, everyday language.`,
 };
 
 function getClientIp(req: Request): string {
   const cfConnectingIp = req.headers.get("cf-connecting-ip");
   if (cfConnectingIp) return cfConnectingIp;
-
   const xRealIp = req.headers.get("x-real-ip");
   if (xRealIp) return xRealIp;
-
   const xForwardedFor = req.headers.get("x-forwarded-for");
-  if (xForwardedFor) {
-    const ips = xForwardedFor.split(",").map((ip) => ip.trim());
-    return ips[0];
-  }
-
+  if (xForwardedFor) return xForwardedFor.split(",")[0].trim();
   return "unknown";
 }
 
@@ -132,27 +63,18 @@ async function checkIpRateLimit(
     if (existing.request_count >= IP_RATE_LIMIT_PER_HOUR) {
       return { allowed: false, remaining: 0 };
     }
-
     await supabase
       .from("api_rate_limits")
       .update({ request_count: existing.request_count + 1 })
       .eq("id", existing.id);
-
-    return {
-      allowed: true,
-      remaining: IP_RATE_LIMIT_PER_HOUR - existing.request_count - 1,
-    };
+    return { allowed: true, remaining: IP_RATE_LIMIT_PER_HOUR - existing.request_count - 1 };
   }
 
-  const { error: insertError } = await supabase.from("api_rate_limits").insert({
+  await supabase.from("api_rate_limits").insert({
     ip_address: identifier,
     request_count: 1,
     window_start: new Date().toISOString(),
   });
-
-  if (insertError) {
-    console.error("IP rate limit insert error:", insertError);
-  }
 
   return { allowed: true, remaining: IP_RATE_LIMIT_PER_HOUR - 1 };
 }
@@ -162,33 +84,34 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const startTime = Date.now();
+  let benchmarkData: any = {
+    model_used: "unknown",
+    role_used: "general",
+    explain_level: "professional",
+    error_occurred: false,
+  };
+
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const clientIp = getClientIp(req);
-    console.log("Processing AI assistant request from IP:", clientIp);
+    benchmarkData.ip_address = clientIp;
 
     const ipRateLimit = await checkIpRateLimit(supabase, clientIp);
-    
     if (!ipRateLimit.allowed) {
-      console.log("IP rate limit exceeded for:", clientIp);
       return new Response(JSON.stringify({ 
         error: "You've reached the hourly limit. Please try again later.",
         remaining: 0
       }), {
         status: 429,
-        headers: { 
-          ...corsHeaders, 
-          "Content-Type": "application/json",
-          "X-RateLimit-Remaining": "0"
-        },
+        headers: { ...corsHeaders, "Content-Type": "application/json", "X-RateLimit-Remaining": "0" },
       });
     }
 
     const today = new Date().toISOString().split('T')[0];
-    
     let { data: usageData, error: usageError } = await supabase
       .from("ai_daily_usage")
       .select("*")
@@ -201,23 +124,16 @@ serve(async (req) => {
         .insert({ usage_date: today, request_count: 0, daily_limit: DAILY_LIMIT })
         .select()
         .single();
-      
-      if (insertError) {
-        console.error("Error creating usage record:", insertError);
-        throw new Error("Failed to initialize usage tracking");
-      }
+      if (insertError) throw new Error("Failed to initialize usage tracking");
       usageData = newUsage;
     } else if (usageError) {
-      console.error("Error fetching usage:", usageError);
       throw new Error("Failed to check usage limits");
     }
 
     if (usageData.request_count >= usageData.daily_limit) {
-      console.log("Daily limit exceeded:", usageData.request_count, "/", usageData.daily_limit);
       return new Response(JSON.stringify({ 
         error: "Daily limit reached. The AI assistant will be available again tomorrow.",
-        remaining: 0,
-        limit: usageData.daily_limit
+        remaining: 0, limit: usageData.daily_limit
       }), {
         status: 429,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -226,90 +142,62 @@ serve(async (req) => {
 
     const body = await req.json();
     const { messages, role = 'general', explainLevel = 'professional' } = body;
-    
-    // Input validation
+    benchmarkData.role_used = role;
+    benchmarkData.explain_level = explainLevel;
+
     const VALID_ROLES = ['general', 'healthcare', 'legal', 'researcher', 'developer', 'policy'];
     const VALID_LEVELS = ['expert', 'professional', 'student', 'beginner'];
     const MAX_MESSAGES = 50;
     const MAX_MESSAGE_LENGTH = 10000;
-    
-    // Validate messages array
+
     if (!Array.isArray(messages)) {
-      return new Response(JSON.stringify({ 
-        error: "Invalid request: messages must be an array" 
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      return new Response(JSON.stringify({ error: "Invalid request: messages must be an array" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    
     if (messages.length === 0 || messages.length > MAX_MESSAGES) {
-      return new Response(JSON.stringify({ 
-        error: `Invalid request: messages array must have 1-${MAX_MESSAGES} items` 
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      return new Response(JSON.stringify({ error: `Invalid request: messages array must have 1-${MAX_MESSAGES} items` }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    
-    // Validate each message format and length
     for (const msg of messages) {
       if (!msg || typeof msg !== 'object') {
-        return new Response(JSON.stringify({ 
-          error: "Invalid request: each message must be an object" 
-        }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        return new Response(JSON.stringify({ error: "Invalid request: each message must be an object" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      
       if (!msg.role || !['user', 'assistant', 'system'].includes(msg.role)) {
-        return new Response(JSON.stringify({ 
-          error: "Invalid request: message role must be 'user', 'assistant', or 'system'" 
-        }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        return new Response(JSON.stringify({ error: "Invalid request: message role must be 'user', 'assistant', or 'system'" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      
       if (typeof msg.content !== 'string' || msg.content.length > MAX_MESSAGE_LENGTH) {
-        return new Response(JSON.stringify({ 
-          error: `Invalid request: message content must be a string with max ${MAX_MESSAGE_LENGTH} characters` 
-        }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        return new Response(JSON.stringify({ error: `Invalid request: message content must be a string with max ${MAX_MESSAGE_LENGTH} characters` }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
     }
-    
-    // Validate role parameter
     if (!VALID_ROLES.includes(role)) {
-      return new Response(JSON.stringify({ 
-        error: `Invalid role: must be one of ${VALID_ROLES.join(', ')}` 
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      return new Response(JSON.stringify({ error: `Invalid role: must be one of ${VALID_ROLES.join(', ')}` }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    
-    // Validate explainLevel parameter
     if (!VALID_LEVELS.includes(explainLevel)) {
-      return new Response(JSON.stringify({ 
-        error: `Invalid explainLevel: must be one of ${VALID_LEVELS.join(', ')}` 
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      return new Response(JSON.stringify({ error: `Invalid explainLevel: must be one of ${VALID_LEVELS.join(', ')}` }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-    }
-    
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    console.log("Fetching EHDS content for context... Role:", role, "Level:", explainLevel);
-    
-    const [articlesRes, recitalsRes, definitionsRes, chaptersRes, implementingActsRes, faqsRes, ehdsFaqsRes] = await Promise.all([
+    // Get user query preview for benchmarking
+    const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
+    benchmarkData.user_query_preview = lastUserMsg?.content?.substring(0, 200) || '';
+
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+    // Fetch prompts from DB and content in parallel
+    const [promptsRes, articlesRes, recitalsRes, definitionsRes, chaptersRes, implementingActsRes, faqsRes, ehdsFaqsRes] = await Promise.all([
+      supabase.from("ai_prompt_config").select("prompt_key, prompt_text, category").eq("is_active", true).order("sort_order"),
       supabase.from("articles").select("article_number, title, content").order("article_number"),
       supabase.from("recitals").select("recital_number, content, related_articles").order("recital_number"),
       supabase.from("definitions").select("term, definition, source_article").order("term"),
@@ -318,6 +206,20 @@ serve(async (req) => {
       supabase.from("help_center_faq").select("question, answer, category").eq("is_published", true).order("sort_order"),
       supabase.from("ehds_faqs").select("faq_number, question, answer, rich_content, chapter, source_articles, source_references").eq("is_published", true).order("faq_number"),
     ]);
+
+    // Build prompt maps from DB
+    const dbPrompts = promptsRes.data || [];
+    const promptMap: Record<string, string> = {};
+    for (const p of dbPrompts) {
+      promptMap[p.prompt_key] = p.prompt_text;
+    }
+
+    // Resolve role and level prompts (DB first, fallback second)
+    const roleKey = `role_${role}`;
+    const levelKey = `level_${explainLevel}`;
+    const rolePrompt = promptMap[roleKey] || FALLBACK_ROLE_PROMPTS[role] || FALLBACK_ROLE_PROMPTS.general;
+    const levelPrompt = promptMap[levelKey] || FALLBACK_LEVEL_PROMPTS[explainLevel] || FALLBACK_LEVEL_PROMPTS.professional;
+    const systemBase = promptMap['system'] || 'You are an expert AI assistant EXCLUSIVELY for the European Health Data Space (EHDS) Regulation (EU) 2025/327.';
 
     const articles = articlesRes.data || [];
     const recitals = recitalsRes.data || [];
@@ -330,70 +232,45 @@ serve(async (req) => {
     const articlesSummary = articles.map(a => 
       `Article ${a.article_number}: ${a.title}\n${a.content.substring(0, 500)}${a.content.length > 500 ? '...' : ''}`
     ).join("\n\n");
-
-    const definitionsList = definitions.map(d => 
-      `"${d.term}": ${d.definition}`
-    ).join("\n");
-
-    const chaptersList = chapters.map(c => 
-      `Chapter ${c.chapter_number}: ${c.title}${c.description ? ` - ${c.description}` : ''}`
-    ).join("\n");
-
-    const implementingActsList = implementingActs.map(ia => 
-      `${ia.id}: ${ia.title} (${ia.status}) - ${ia.type}, Theme: ${ia.theme}, Reference: ${ia.article_reference}`
-    ).join("\n");
-
-    const recitalsSummary = recitals.slice(0, 50).map(r => 
-      `Recital (${r.recital_number}): ${r.content.substring(0, 300)}${r.content.length > 300 ? '...' : ''}`
-    ).join("\n\n");
-
-    const faqsList = faqs.map(f => 
-      `Q: ${f.question}\nA: ${f.answer}`
-    ).join("\n\n");
-
+    const definitionsList = definitions.map(d => `"${d.term}": ${d.definition}`).join("\n");
+    const chaptersList = chapters.map(c => `Chapter ${c.chapter_number}: ${c.title}${c.description ? ` - ${c.description}` : ''}`).join("\n");
+    const implementingActsList = implementingActs.map(ia => `${ia.id}: ${ia.title} (${ia.status}) - ${ia.type}, Theme: ${ia.theme}, Reference: ${ia.article_reference}`).join("\n");
+    const recitalsSummary = recitals.slice(0, 50).map(r => `Recital (${r.recital_number}): ${r.content.substring(0, 300)}${r.content.length > 300 ? '...' : ''}`).join("\n\n");
+    const faqsList = faqs.map(f => `Q: ${f.question}\nA: ${f.answer}`).join("\n\n");
     const officialFaqsList = ehdsFaqs.map(f => 
       `FAQ #${f.faq_number} [Chapter: ${f.chapter}]: ${f.question}\nOFFICIAL ANSWER: ${f.rich_content || f.answer}\nSource articles: ${(f.source_articles || []).join(', ')}\n${f.source_references || ''}`
     ).join("\n\n---\n\n");
 
-    // Get role and level specific prompts
-    const rolePrompt = ROLE_PROMPTS[role] || ROLE_PROMPTS.general;
-    const levelPrompt = EXPLAIN_LEVEL_PROMPTS[explainLevel] || EXPLAIN_LEVEL_PROMPTS.professional;
-
-    const systemPrompt = `You are an expert AI assistant EXCLUSIVELY for the European Health Data Space (EHDS) Regulation (EU) 2025/327. Your ONLY purpose is to help users understand and navigate this specific regulation.
+    const systemPrompt = `${systemBase}
 
 ${rolePrompt}
 ${levelPrompt}
 
 STRICT TOPIC BOUNDARIES:
 - You MUST ONLY answer questions directly related to the EHDS Regulation, its articles, recitals, definitions, chapters, annexes, and implementing acts.
-- If a user asks about anything unrelated to EHDS (general health questions, other regulations, coding help, general knowledge, etc.), politely decline and redirect them to ask about the EHDS Regulation instead.
-- Example refusal: "I'm specifically designed to help with the EHDS Regulation (EU) 2025/327. I can't assist with that topic, but I'd be happy to help you understand any aspect of the European Health Data Space regulation. What would you like to know about EHDS?"
+- If a user asks about anything unrelated to EHDS, politely decline and redirect them.
 
 CRITICAL — FAQ-FIRST RESPONSE STRATEGY:
-You have access to 67 official European Commission FAQ answers below. These are the AUTHORITATIVE answers from DG SANTE.
+You have access to ${ehdsFaqs.length} official European Commission FAQ answers below. These are the AUTHORITATIVE answers from DG SANTE.
 **BEFORE composing your own answer, ALWAYS scan the OFFICIAL EHDS FAQ BANK for a matching or related question.**
-- If a matching FAQ exists: use the official FAQ answer as the PRIMARY basis of your response. Quote or closely paraphrase the official answer. Do NOT rephrase it in your own words if accuracy would be lost. Cite the FAQ number with a link.
+- If a matching FAQ exists: use the official FAQ answer as the PRIMARY basis of your response. Cite the FAQ number with a link.
 - If multiple FAQs are relevant: synthesize them and cite all relevant FAQ numbers.
-- If no FAQ matches: then use the regulation articles, recitals, and definitions to answer.
-- NEVER contradict the official FAQ answers. If an article text seems to conflict with an FAQ answer, defer to the FAQ as it represents the Commission's official interpretation.
+- If no FAQ matches: use the regulation articles, recitals, and definitions.
+- NEVER contradict the official FAQ answers.
 
 RESPONSE GUIDELINES:
 1. Only answer questions based on the EHDS regulation content provided below
 2. If you don't know or the information isn't in the regulation, say so clearly
-3. **ALWAYS include source citations** at the end of your response in a "Sources" section
-4. Provide clear, accurate information without speculation
-5. For navigation requests, guide users to the relevant articles or sections
-6. Keep answers concise but comprehensive
-7. Use plain language while maintaining legal accuracy
-8. Adapt your language complexity based on the explanation level setting
+3. **ALWAYS include source citations** at the end in a "Sources" section
+4. Keep answers concise but comprehensive
+5. Adapt language complexity based on the explanation level setting
 
-CITATION FORMAT (use these exact link formats):
-- For FAQs: [FAQ #N](/faq/N) — ALWAYS link to individual FAQ pages
+CITATION FORMAT:
+- For FAQs: [FAQ #N](/faq/N)
 - For articles: [Article X](/article/X)
 - For recitals: [Recital Y](/recital/Y)
-- For definitions: reference by term name
-- For implementing acts: reference by title and link to [Act Title](/implementing-acts/ID)
-- Always list sources at the end under "**Sources:**"
+- For implementing acts: [Act Title](/implementing-acts/ID)
+- Always list sources under "**Sources:**"
 
 EHDS REGULATION STRUCTURE:
 ${chaptersList}
@@ -410,35 +287,31 @@ ${recitalsSummary}
 IMPLEMENTING ACTS STATUS:
 ${implementingActsList}
 
-PLATFORM HELP CENTRE FAQs (about using the EHDS Explorer website):
+PLATFORM HELP CENTRE FAQs:
 ${faqsList}
 
 === OFFICIAL EHDS FAQ BANK ===
-(67 detailed Q&As from European Commission, DG SANTE Unit C.1 – Digital Health)
-These are the MOST AUTHORITATIVE source for answering user questions about the EHDS Regulation.
-When a user's question matches or relates to ANY of these FAQs, you MUST base your answer on this official content.
-
+(${ehdsFaqs.length} detailed Q&As from European Commission, DG SANTE Unit C.1)
 ${officialFaqsList}
 === END OFFICIAL FAQ BANK ===
 
-RESPONSE CHECKLIST (follow this order):
-1. Check the Official EHDS FAQ Bank above for a matching question
+RESPONSE CHECKLIST:
+1. Check the Official EHDS FAQ Bank for a matching question
 2. If found: base your answer on the FAQ content, cite [FAQ #N](/faq/N)
-3. Supplement with relevant articles [Article X](/article/X) and recitals [Recital Y](/recital/Y)
-4. End with a **Sources:** section listing all referenced FAQs, articles, recitals, and definitions`;
+3. Supplement with relevant articles and recitals
+4. End with a **Sources:** section`;
 
-    // Fetch configured AI model from site settings
+    // Fetch configured AI model
     let aiModel = "google/gemini-2.5-flash";
     const { data: siteSettings } = await supabase
       .from("site_settings")
       .select("ai_model")
       .eq("id", "default")
       .single();
-    if (siteSettings?.ai_model) {
-      aiModel = siteSettings.ai_model;
-    }
+    if (siteSettings?.ai_model) aiModel = siteSettings.ai_model;
+    benchmarkData.model_used = aiModel;
 
-    console.log("Calling Lovable AI gateway with model:", aiModel);
+    console.log("Calling AI gateway with model:", aiModel, "Role:", role, "Level:", explainLevel);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -457,36 +330,39 @@ RESPONSE CHECKLIST (follow this order):
     });
 
     if (!response.ok) {
+      benchmarkData.error_occurred = true;
+      benchmarkData.error_message = `HTTP ${response.status}`;
+      benchmarkData.response_time_ms = Date.now() - startTime;
+      
+      // Record benchmark even on error
+      await supabase.from("ai_assistant_benchmarks").insert(benchmarkData).then(() => {});
+
       if (response.status === 429) {
-        console.error("Rate limit exceeded");
         return new Response(JSON.stringify({ error: "Rate limits exceeded, please try again later." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
-        console.error("Payment required");
         return new Response(JSON.stringify({ error: "AI usage limit reached. Please try again later." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const errorText = await response.text();
       console.error("AI gateway error:", response.status, errorText);
       return new Response(JSON.stringify({ error: "AI gateway error" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const { error: updateError } = await supabase
+    // Update usage count
+    await supabase
       .from("ai_daily_usage")
       .update({ request_count: usageData.request_count + 1 })
       .eq("usage_date", today);
 
-    if (updateError) {
-      console.error("Error updating usage count:", updateError);
-    }
+    // Record successful benchmark
+    benchmarkData.response_time_ms = Date.now() - startTime;
+    supabase.from("ai_assistant_benchmarks").insert(benchmarkData).then(() => {});
 
     console.log("Streaming response... Usage:", usageData.request_count + 1, "/", usageData.daily_limit);
     return new Response(response.body, {
@@ -499,6 +375,18 @@ RESPONSE CHECKLIST (follow this order):
     });
   } catch (e) {
     console.error("EHDS assistant error:", e);
+    
+    // Try to record error benchmark
+    try {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const sb = createClient(supabaseUrl, supabaseServiceKey);
+      benchmarkData.error_occurred = true;
+      benchmarkData.error_message = e instanceof Error ? e.message : "Unknown error";
+      benchmarkData.response_time_ms = Date.now() - startTime;
+      await sb.from("ai_assistant_benchmarks").insert(benchmarkData);
+    } catch {} // Don't fail on benchmark recording
+
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

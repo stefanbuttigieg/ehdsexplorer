@@ -225,6 +225,7 @@ const App = () => (
             <Route path="/article-dependencies" element={<ArticleDependencyGraphPage />} />
             <Route path="/content-network" element={<ContentNetworkPage />} />
             <Route path="/faqs" element={<FAQsPage />} />
+            <Route path="/faq/:id" element={<FaqDetailPage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin/set-password" element={<AdminSetPasswordPage />} />
             <Route path="/profile" element={<ProfilePage />} />

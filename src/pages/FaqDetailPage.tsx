@@ -206,21 +206,21 @@ const FaqDetailPage = () => {
         </Card>
 
         {/* Bottom Navigation */}
-        <div className="flex items-center justify-between mt-6">
+        <div className="flex items-center justify-between mt-4 md:mt-6 gap-2">
           {prevFaq ? (
             <Link to={`/faq/${prevFaq.faq_number}`}>
-              <Button variant="outline" size="sm">
-                <ChevronLeft className="h-4 w-4 mr-1" /> FAQ {prevFaq.faq_number}
+              <Button variant="outline" size="sm" className="text-xs sm:text-sm">
+                <ChevronLeft className="h-4 w-4 mr-0.5" /> {prevFaq.faq_number}
               </Button>
             </Link>
           ) : <div />}
           <Link to="/faqs">
-            <Button variant="ghost" size="sm">All FAQs</Button>
+            <Button variant="ghost" size="sm" className="text-xs sm:text-sm">All FAQs</Button>
           </Link>
           {nextFaq ? (
             <Link to={`/faq/${nextFaq.faq_number}`}>
-              <Button variant="outline" size="sm">
-                FAQ {nextFaq.faq_number} <ChevronRight className="h-4 w-4 ml-1" />
+              <Button variant="outline" size="sm" className="text-xs sm:text-sm">
+                {nextFaq.faq_number} <ChevronRight className="h-4 w-4 ml-0.5" />
               </Button>
             </Link>
           ) : <div />}

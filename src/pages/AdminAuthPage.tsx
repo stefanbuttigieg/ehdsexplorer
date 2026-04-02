@@ -34,7 +34,22 @@ const AdminAuthPage = () => {
   const [mfaTotpFactorId, setMfaTotpFactorId] = useState<string | null>(null);
   const [mfaEmailEnabled, setMfaEmailEnabled] = useState(false);
   const [mfaUserEmail, setMfaUserEmail] = useState('');
-  const [awaitingMFA, setAwaitingMFA] = useState(false); // Block redirects while MFA pending
+  const [awaitingMFA, setAwaitingMFA] = useState(false);
+
+  // Restore MFA state from sessionStorage on mount (survives tab switches / navigation)
+  useEffect(() => {
+    const saved = sessionStorage.getItem('mfa_pending');
+    if (saved) {
+      try {
+        const s = JSON.parse(saved);
+        setMfaTotpFactorId(s.totpFactorId ?? null);
+        setMfaEmailEnabled(s.emailEnabled ?? false);
+        setMfaUserEmail(s.userEmail ?? '');
+        setAwaitingMFA(true);
+        setShowMFAVerify(true);
+      } catch { /* ignore corrupt data */ }
+    }
+  }, []);
   const { user, loading, signIn, isEditor } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();

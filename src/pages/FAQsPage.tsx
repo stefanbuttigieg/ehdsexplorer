@@ -72,14 +72,14 @@ function FAQItem({ faq, footnotes, isOpen, onToggle, implementingActs }: {
     <div id={`faq-${faq.faq_number}`} className="scroll-mt-20">
       <Collapsible open={isOpen} onOpenChange={onToggle}>
         <CollapsibleTrigger asChild>
-          <button className="w-full text-left p-4 rounded-lg hover:bg-accent/50 transition-colors flex items-start gap-3 group">
+          <button className="w-full text-left p-3 sm:p-4 rounded-lg hover:bg-accent/50 transition-colors flex items-start gap-2 sm:gap-3 group">
             <Link to={`/faq/${faq.faq_number}`} onClick={(e) => e.stopPropagation()}>
-              <Badge variant="outline" className="shrink-0 mt-0.5 font-mono hover:bg-primary hover:text-primary-foreground transition-colors">
+              <Badge variant="outline" className="shrink-0 mt-0.5 font-mono text-xs hover:bg-primary hover:text-primary-foreground transition-colors">
                 {faq.faq_number}
               </Badge>
             </Link>
-            <span className="font-medium flex-1 text-sm md:text-base">{faq.question}</span>
-            <ChevronDown className={cn("h-4 w-4 shrink-0 mt-1 transition-transform text-muted-foreground", isOpen && "rotate-180")} />
+            <span className="font-medium flex-1 text-xs sm:text-sm md:text-base leading-snug">{faq.question}</span>
+            <ChevronDown className={cn("h-4 w-4 shrink-0 mt-0.5 transition-transform text-muted-foreground", isOpen && "rotate-180")} />
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent>

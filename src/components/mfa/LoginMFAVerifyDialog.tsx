@@ -44,14 +44,16 @@
      totpFactorId ? 'totp' : 'email'
    );
  
-   // Reset state when dialog opens
-   useEffect(() => {
-     if (open) {
-       setCode('');
-       setEmailCodeSent(false);
-       setActiveMethod(totpFactorId ? 'totp' : 'email');
-     }
-   }, [open, totpFactorId]);
+    // Reset state when dialog opens
+    useEffect(() => {
+      if (open) {
+        setCode('');
+        // Restore emailCodeSent from sessionStorage (survives tab switch)
+        const wasSent = sessionStorage.getItem('mfa_email_code_sent') === 'true';
+        setEmailCodeSent(wasSent);
+        setActiveMethod(totpFactorId ? 'totp' : 'email');
+      }
+    }, [open, totpFactorId]);
  
     const handleSendEmailCode = async () => {
       // Prevent double-sends within 30 seconds
@@ -77,6 +79,7 @@
         if (data?.error) throw new Error(data.error);
 
         setEmailCodeSent(true);
+        sessionStorage.setItem('mfa_email_code_sent', 'true');
         setLastSentAt(Date.now());
         setCode('');
         toast({
@@ -114,8 +117,9 @@
  
        if (error) throw error;
  
-       onSuccess();
-       onOpenChange(false);
+        sessionStorage.removeItem('mfa_email_code_sent');
+        onSuccess();
+        onOpenChange(false);
      } catch (error: any) {
        toast({
          title: 'Verification failed',
@@ -144,6 +148,7 @@
         }
         if (data?.error) throw new Error(data.error);
 
+        sessionStorage.removeItem('mfa_email_code_sent');
         onSuccess();
         onOpenChange(false);
       } catch (error: any) {
@@ -172,10 +177,11 @@
      }
    };
  
-   const handleCancel = () => {
-     onOpenChange(false);
-     onCancel?.();
-   };
+    const handleCancel = () => {
+      sessionStorage.removeItem('mfa_email_code_sent');
+      onOpenChange(false);
+      onCancel?.();
+    };
  
    const handleKeyDown = (e: React.KeyboardEvent) => {
      if (e.key === 'Enter' && code.length === 6) {

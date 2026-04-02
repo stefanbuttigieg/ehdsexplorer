@@ -34,7 +34,22 @@ const AdminAuthPage = () => {
   const [mfaTotpFactorId, setMfaTotpFactorId] = useState<string | null>(null);
   const [mfaEmailEnabled, setMfaEmailEnabled] = useState(false);
   const [mfaUserEmail, setMfaUserEmail] = useState('');
-  const [awaitingMFA, setAwaitingMFA] = useState(false); // Block redirects while MFA pending
+  const [awaitingMFA, setAwaitingMFA] = useState(false);
+
+  // Restore MFA state from sessionStorage on mount (survives tab switches / navigation)
+  useEffect(() => {
+    const saved = sessionStorage.getItem('mfa_pending');
+    if (saved) {
+      try {
+        const s = JSON.parse(saved);
+        setMfaTotpFactorId(s.totpFactorId ?? null);
+        setMfaEmailEnabled(s.emailEnabled ?? false);
+        setMfaUserEmail(s.userEmail ?? '');
+        setAwaitingMFA(true);
+        setShowMFAVerify(true);
+      } catch { /* ignore corrupt data */ }
+    }
+  }, []);
   const { user, loading, signIn, isEditor } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -129,12 +144,18 @@ const AdminAuthPage = () => {
          
          if (hasTotp || hasEmailOtp) {
            // User has MFA enabled - block redirects and show verification dialog
-           setAwaitingMFA(true);
-           setMfaTotpFactorId(hasTotp ? verifiedTotpFactors[0].id : null);
-           setMfaEmailEnabled(hasEmailOtp);
-           setMfaUserEmail(data.user.email || email);
-          setShowMFAVerify(true);
-          return;
+            setAwaitingMFA(true);
+            setMfaTotpFactorId(hasTotp ? verifiedTotpFactors[0].id : null);
+            setMfaEmailEnabled(hasEmailOtp);
+            setMfaUserEmail(data.user.email || email);
+            setShowMFAVerify(true);
+            // Persist so state survives navigation (e.g. switching to email app)
+            sessionStorage.setItem('mfa_pending', JSON.stringify({
+              totpFactorId: hasTotp ? verifiedTotpFactors[0].id : null,
+              emailEnabled: hasEmailOtp,
+              userEmail: data.user.email || email,
+            }));
+           return;
         }
       }
 
@@ -152,12 +173,12 @@ const AdminAuthPage = () => {
 
   const handleMFASuccess = () => {
     setShowMFAVerify(false);
-    setAwaitingMFA(false); // Allow redirects now
+    setAwaitingMFA(false);
     setMfaTotpFactorId(null);
     setMfaEmailEnabled(false);
     setMfaUserEmail('');
+    sessionStorage.removeItem('mfa_pending');
     toast({ title: 'Signed in successfully' });
-    // Navigate after successful MFA
     if (isEditor) {
       navigate('/admin');
     } else {
@@ -166,13 +187,13 @@ const AdminAuthPage = () => {
   };
 
   const handleMFACancel = async () => {
-    // Sign out if MFA verification is cancelled
     await supabase.auth.signOut();
     setShowMFAVerify(false);
     setAwaitingMFA(false);
     setMfaTotpFactorId(null);
     setMfaEmailEnabled(false);
     setMfaUserEmail('');
+    sessionStorage.removeItem('mfa_pending');
   };
 
   const handleSignUp = async (e: React.FormEvent) => {

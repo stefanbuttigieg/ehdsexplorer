@@ -117,7 +117,7 @@ const ArticlePage = () => {
           { name: `Article ${article.article_number}`, url: pageUrl },
         ]}
       />
-      <div className="max-w-4xl mx-auto p-6 animate-fade-in">
+      <div className="max-w-7xl mx-auto p-4 md:p-6 animate-fade-in">
         <JsonLdMetadata
           type="article"
           articleNumber={article.article_number}
@@ -127,235 +127,305 @@ const ArticlePage = () => {
         />
         <Breadcrumbs items={breadcrumbItems} />
 
-        {/* Article Header */}
-        <div className="flex items-start justify-between gap-4 mb-4">
-          <div>
-            <Badge variant="outline" className="mb-2">Article {article.article_number}</Badge>
-            <h1 className="text-3xl font-bold font-serif">{article.title}</h1>
-            <div className="mt-2">
-              <EliReference type="article" number={article.article_number} />
+        {/* Two-column layout: main + sidebar on md+ */}
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Main content column */}
+          <div className="flex-1 min-w-0">
+            {/* Article Header */}
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <Badge variant="outline" className="mb-2">Article {article.article_number}</Badge>
+                <h1 className="text-3xl font-bold font-serif">{article.title}</h1>
+                <div className="mt-2">
+                  <EliReference type="article" number={article.article_number} />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <CompareButton
+                  item={{
+                    id: articleId.toString(),
+                    type: "article",
+                    title: `Article ${article.article_number}`,
+                    number: article.article_number,
+                  }}
+                />
+                <PrintButton />
+                <Button
+                  variant={isBookmarked('article', articleId) ? "default" : "outline"}
+                  size="icon"
+                  onClick={() => toggleBookmark('article', articleId)}
+                >
+                  <Bookmark className={isBookmarked('article', articleId) ? "fill-current" : ""} />
+                </Button>
+              </div>
             </div>
-          </div>
-          <div className="flex gap-2">
-            <CompareButton
-              item={{
-                id: articleId.toString(),
-                type: "article",
-                title: `Article ${article.article_number}`,
-                number: article.article_number,
-              }}
+
+            {/* Article Content with Plain Language View */}
+            <PlainLanguageView
+              contentType="article"
+              contentId={articleId}
+              originalContent={
+                <Card className="mb-8">
+                  <CardContent className="p-6">
+                    <AnnotatedContent
+                      content={article.content}
+                      contentType="article"
+                      contentId={articleId.toString()}
+                      className="article-content"
+                    />
+                    <FootnotesSection footnotes={footnotes} />
+                  </CardContent>
+                </Card>
+              }
             />
-            <PrintButton />
-            <Button
-              variant={isBookmarked('article', articleId) ? "default" : "outline"}
-              size="icon"
-              onClick={() => toggleBookmark('article', articleId)}
-            >
-              <Bookmark className={isBookmarked('article', articleId) ? "fill-current" : ""} />
-            </Button>
-          </div>
-        </div>
 
-        {/* Article Content with Plain Language View */}
-        <PlainLanguageView
-          contentType="article"
-          contentId={articleId}
-          originalContent={
-            <Card className="mb-8">
-              <CardContent className="p-6">
-                <AnnotatedContent
-                  content={article.content}
-                  contentType="article"
-                  contentId={articleId.toString()}
-                  className="article-content"
-                />
-                <FootnotesSection footnotes={footnotes} />
-              </CardContent>
-            </Card>
-          }
-        />
-
-        {/* Related Recitals */}
-        {relatedRecitals.length > 0 && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="text-lg">Related Recitals</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {relatedRecitals.slice(0, 3).map((recital) => (
-                <Link key={recital.id} to={`/recital/${recital.id}`} className="block">
-                  <div className="p-3 rounded-lg bg-muted hover:bg-accent transition-colors">
-                    <span className="font-medium">Recital {recital.id}</span>
-                    <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{recital.content}</p>
-                  </div>
-                </Link>
-              ))}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Related Implementing Acts */}
-        {relatedActs.length > 0 && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="text-lg">Implementing Acts</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {relatedActs.map((act) => (
-                <Link key={act.id} to={`/implementing-acts/${act.id}`} className="block">
-                  <div className="p-3 rounded-lg bg-muted hover:bg-accent transition-colors flex items-center justify-between">
-                    <div>
-                      <span className="font-medium">{act.articleReference}</span>
-                      <p className="text-sm text-muted-foreground">{act.title}</p>
-                    </div>
-                    <Badge className={`status-${act.status}`}>{statusLabels[act.status]}</Badge>
-                  </div>
-                </Link>
-              ))}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* EU Project Deliverables */}
-        {relatedDeliverables.length > 0 && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="text-lg">EU Project Deliverables</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {relatedDeliverables.map((deliverable) => (
-                <a 
-                  key={deliverable.id} 
-                  href={deliverable.deliverable_link} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="block"
-                >
-                  <div className="p-3 rounded-lg bg-muted hover:bg-accent transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="font-medium">{deliverable.deliverable_name}</span>
-                        <p className="text-sm text-muted-foreground">{deliverable.joint_action_name}</p>
+            {/* Related Recitals */}
+            {relatedRecitals.length > 0 && (
+              <Card className="mb-8">
+                <CardHeader>
+                  <CardTitle className="text-lg">Related Recitals</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {relatedRecitals.slice(0, 3).map((recital) => (
+                    <Link key={recital.id} to={`/recital/${recital.id}`} className="block">
+                      <div className="p-3 rounded-lg bg-muted hover:bg-accent transition-colors">
+                        <span className="font-medium">Recital {recital.id}</span>
+                        <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{recital.content}</p>
                       </div>
-                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </div>
-                </a>
-              ))}
-            </CardContent>
-          </Card>
-        )}
+                    </Link>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
 
-        {/* Published Works */}
-        {relatedPublishedWorks.length > 0 && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="text-lg">Published Works</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {relatedPublishedWorks.map((work) => (
-                <a 
-                  key={work.id} 
-                  href={work.link} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="block"
-                >
-                  <div className="p-3 rounded-lg bg-muted hover:bg-accent transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="font-medium">{work.name}</span>
-                        <p className="text-sm text-muted-foreground">{work.affiliated_organization}</p>
+            {/* Related Implementing Acts */}
+            {relatedActs.length > 0 && (
+              <Card className="mb-8">
+                <CardHeader>
+                  <CardTitle className="text-lg">Implementing Acts</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {relatedActs.map((act) => (
+                    <Link key={act.id} to={`/implementing-acts/${act.id}`} className="block">
+                      <div className="p-3 rounded-lg bg-muted hover:bg-accent transition-colors flex items-center justify-between">
+                        <div>
+                          <span className="font-medium">{act.articleReference}</span>
+                          <p className="text-sm text-muted-foreground">{act.title}</p>
+                        </div>
+                        <Badge className={`status-${act.status}`}>{statusLabels[act.status]}</Badge>
                       </div>
-                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </div>
-                </a>
-              ))}
-            </CardContent>
-          </Card>
-        )}
+                    </Link>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
 
-        {/* Cross-Regulation References */}
-        <div className="mb-8">
-          <CrossRegulationSection articleId={articleId} />
-        </div>
+            {/* EU Project Deliverables */}
+            {relatedDeliverables.length > 0 && (
+              <Card className="mb-8">
+                <CardHeader>
+                  <CardTitle className="text-lg">EU Project Deliverables</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {relatedDeliverables.map((deliverable) => (
+                    <a 
+                      key={deliverable.id} 
+                      href={deliverable.deliverable_link} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="block"
+                    >
+                      <div className="p-3 rounded-lg bg-muted hover:bg-accent transition-colors">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="font-medium">{deliverable.deliverable_name}</span>
+                            <p className="text-sm text-muted-foreground">{deliverable.joint_action_name}</p>
+                          </div>
+                          <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                      </div>
+                    </a>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
 
-        {/* Related Official FAQs */}
-        {relatedFaqs.length > 0 && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <MessageCircleQuestion className="h-5 w-5" />
-                Related Official FAQs
-              </CardTitle>
-              <CardDescription>
-                EU Commission Q&As referencing this article
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {relatedFaqs.map((faq) => (
-                <Link key={faq.id} to={`/faq/${faq.faq_number}`} className="block">
-                  <div className="p-3 rounded-lg bg-muted hover:bg-accent transition-colors">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="font-mono shrink-0">#{faq.faq_number}</Badge>
-                      <span className="text-sm line-clamp-2">{faq.question}</span>
-                    </div>
-                  </div>
+            {/* Published Works */}
+            {relatedPublishedWorks.length > 0 && (
+              <Card className="mb-8">
+                <CardHeader>
+                  <CardTitle className="text-lg">Published Works</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {relatedPublishedWorks.map((work) => (
+                    <a 
+                      key={work.id} 
+                      href={work.link} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="block"
+                    >
+                      <div className="p-3 rounded-lg bg-muted hover:bg-accent transition-colors">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="font-medium">{work.name}</span>
+                            <p className="text-sm text-muted-foreground">{work.affiliated_organization}</p>
+                          </div>
+                          <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                      </div>
+                    </a>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Cross-Regulation References */}
+            <div className="mb-8">
+              <CrossRegulationSection articleId={articleId} />
+            </div>
+
+            {/* Mobile-only: Related FAQs & Legislation (shown below content on small screens) */}
+            <div className="lg:hidden">
+              {relatedFaqs.length > 0 && (
+                <Card className="mb-8">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <MessageCircleQuestion className="h-5 w-5" />
+                      Related Official FAQs
+                    </CardTitle>
+                    <CardDescription>
+                      EU Commission Q&As referencing this article
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {relatedFaqs.map((faq) => (
+                      <Link key={faq.id} to={`/faq/${faq.faq_number}`} className="block">
+                        <div className="p-3 rounded-lg bg-muted hover:bg-accent transition-colors">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="font-mono shrink-0">#{faq.faq_number}</Badge>
+                            <span className="text-sm line-clamp-2">{faq.question}</span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {nationalLegislation.length > 0 && (
+                <Card className="mb-8">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Scale className="h-5 w-5" />
+                      National Implementation
+                    </CardTitle>
+                    <CardDescription>
+                      Member State legislation implementing or relating to this article ({nationalLegislation.length} {nationalLegislation.length === 1 ? 'country' : 'countries'})
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {nationalLegislation.slice(0, 5).map((leg) => (
+                      <CountryLegislationCard 
+                        key={leg.id} 
+                        legislation={leg} 
+                        compact 
+                      />
+                    ))}
+                    {nationalLegislation.length > 5 && (
+                      <Link to="/health-authorities" className="block">
+                        <Button variant="outline" size="sm" className="w-full">
+                          View all {nationalLegislation.length} entries
+                        </Button>
+                      </Link>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Navigation */}
+            <div className="flex items-center justify-between pt-6 border-t border-border">
+              {prevArticle ? (
+                <Link to={`/article/${prevArticle.article_number}`}>
+                  <Button variant="outline" className="gap-2">
+                    <ChevronLeft className="h-4 w-4" />
+                    Art. {prevArticle.article_number}
+                  </Button>
                 </Link>
-              ))}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* National Implementation */}
-        {nationalLegislation.length > 0 && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Scale className="h-5 w-5" />
-                National Implementation
-              </CardTitle>
-              <CardDescription>
-                Member State legislation implementing or relating to this article ({nationalLegislation.length} {nationalLegislation.length === 1 ? 'country' : 'countries'})
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {nationalLegislation.slice(0, 5).map((leg) => (
-                <CountryLegislationCard 
-                  key={leg.id} 
-                  legislation={leg} 
-                  compact 
-                />
-              ))}
-              {nationalLegislation.length > 5 && (
-                <Link to="/health-authorities" className="block">
-                  <Button variant="outline" size="sm" className="w-full">
-                    View all {nationalLegislation.length} entries
+              ) : <div />}
+              {nextArticle && (
+                <Link to={`/article/${nextArticle.article_number}`}>
+                  <Button variant="outline" className="gap-2">
+                    Art. {nextArticle.article_number}
+                    <ChevronRight className="h-4 w-4" />
                   </Button>
                 </Link>
               )}
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          </div>
 
-        {/* Navigation */}
-        <div className="flex items-center justify-between pt-6 border-t border-border">
-          {prevArticle ? (
-            <Link to={`/article/${prevArticle.article_number}`}>
-              <Button variant="outline" className="gap-2">
-                <ChevronLeft className="h-4 w-4" />
-                Art. {prevArticle.article_number}
-              </Button>
-            </Link>
-          ) : <div />}
-          {nextArticle && (
-            <Link to={`/article/${nextArticle.article_number}`}>
-              <Button variant="outline" className="gap-2">
-                Art. {nextArticle.article_number}
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </Link>
+          {/* Right sidebar - visible on lg+ */}
+          {(relatedFaqs.length > 0 || nationalLegislation.length > 0) && (
+            <aside className="hidden lg:block w-80 xl:w-96 shrink-0">
+              <div className="sticky top-20 space-y-6 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
+                {relatedFaqs.length > 0 && (
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <MessageCircleQuestion className="h-4 w-4" />
+                        Related Official FAQs
+                      </CardTitle>
+                      <CardDescription className="text-xs">
+                        EU Commission Q&As referencing this article
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      {relatedFaqs.map((faq) => (
+                        <Link key={faq.id} to={`/faq/${faq.faq_number}`} className="block">
+                          <div className="p-2.5 rounded-lg bg-muted hover:bg-accent transition-colors">
+                            <div className="flex items-start gap-2">
+                              <Badge variant="outline" className="font-mono shrink-0 text-xs">#{faq.faq_number}</Badge>
+                              <span className="text-xs leading-snug line-clamp-3">{faq.question}</span>
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {nationalLegislation.length > 0 && (
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Scale className="h-4 w-4" />
+                        National Implementation
+                      </CardTitle>
+                      <CardDescription className="text-xs">
+                        {nationalLegislation.length} {nationalLegislation.length === 1 ? 'country' : 'countries'}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      {nationalLegislation.slice(0, 5).map((leg) => (
+                        <CountryLegislationCard 
+                          key={leg.id} 
+                          legislation={leg} 
+                          compact 
+                        />
+                      ))}
+                      {nationalLegislation.length > 5 && (
+                        <Link to="/health-authorities" className="block">
+                          <Button variant="outline" size="sm" className="w-full text-xs">
+                            View all {nationalLegislation.length} entries
+                          </Button>
+                        </Link>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </aside>
           )}
         </div>
       </div>

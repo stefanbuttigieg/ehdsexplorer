@@ -34,11 +34,12 @@
    onSuccess,
    onCancel 
  }: LoginMFAVerifyDialogProps) {
-   const { toast } = useToast();
-   const [code, setCode] = useState('');
-   const [isVerifying, setIsVerifying] = useState(false);
-   const [isSendingEmail, setIsSendingEmail] = useState(false);
-   const [emailCodeSent, setEmailCodeSent] = useState(false);
+  const { toast } = useToast();
+  const [code, setCode] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [emailCodeSent, setEmailCodeSent] = useState(false);
+  const [lastSentAt, setLastSentAt] = useState<number>(0);
    const [activeMethod, setActiveMethod] = useState<'totp' | 'email'>(
      totpFactorId ? 'totp' : 'email'
    );

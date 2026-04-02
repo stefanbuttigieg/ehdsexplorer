@@ -34,11 +34,12 @@
    onSuccess,
    onCancel 
  }: LoginMFAVerifyDialogProps) {
-   const { toast } = useToast();
-   const [code, setCode] = useState('');
-   const [isVerifying, setIsVerifying] = useState(false);
-   const [isSendingEmail, setIsSendingEmail] = useState(false);
-   const [emailCodeSent, setEmailCodeSent] = useState(false);
+  const { toast } = useToast();
+  const [code, setCode] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [emailCodeSent, setEmailCodeSent] = useState(false);
+  const [lastSentAt, setLastSentAt] = useState<number>(0);
    const [activeMethod, setActiveMethod] = useState<'totp' | 'email'>(
      totpFactorId ? 'totp' : 'email'
    );
@@ -52,32 +53,47 @@
      }
    }, [open, totpFactorId]);
  
-   const handleSendEmailCode = async () => {
-     setIsSendingEmail(true);
-     try {
-       const { data, error } = await supabase.functions.invoke('send-email-otp', {
-         body: { action: 'send' },
-       });
- 
-       if (error) throw error;
-       if (data?.error) throw new Error(data.error);
- 
-       setEmailCodeSent(true);
-       toast({
-         title: 'Code sent',
-         description: `A verification code has been sent to ${userEmail}`,
-       });
-     } catch (error: any) {
-       console.error('Error sending email OTP:', error);
-       toast({
-         title: 'Failed to send code',
-         description: error.message || 'Could not send verification code',
-         variant: 'destructive',
-       });
-     } finally {
-       setIsSendingEmail(false);
-     }
-   };
+    const handleSendEmailCode = async () => {
+      // Prevent double-sends within 30 seconds
+      const now = Date.now();
+      if (now - lastSentAt < 30000) {
+        toast({
+          title: 'Please wait',
+          description: 'A new code can be requested every 30 seconds. Check your email for the latest code.',
+        });
+        return;
+      }
+
+      setIsSendingEmail(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('send-email-otp', {
+          body: { action: 'send' },
+        });
+
+        if (error) {
+          const errBody = await error?.context?.json?.().catch(() => null);
+          throw new Error(errBody?.error || error.message);
+        }
+        if (data?.error) throw new Error(data.error);
+
+        setEmailCodeSent(true);
+        setLastSentAt(Date.now());
+        setCode('');
+        toast({
+          title: 'Code sent',
+          description: `A new verification code has been sent to ${userEmail}. Use the latest code only.`,
+        });
+      } catch (error: any) {
+        console.error('Error sending email OTP:', error);
+        toast({
+          title: 'Failed to send code',
+          description: error.message || 'Could not send verification code',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsSendingEmail(false);
+      }
+    };
  
    const handleVerifyTOTP = async () => {
      if (!totpFactorId || code.length !== 6) return;
@@ -115,28 +131,37 @@
    const handleVerifyEmail = async () => {
      if (code.length !== 6) return;
  
-     setIsVerifying(true);
-     try {
-       const { data, error } = await supabase.functions.invoke('verify-email-otp-login', {
-         body: { code },
-       });
- 
-       if (error) throw error;
-       if (data?.error) throw new Error(data.error);
- 
-       onSuccess();
-       onOpenChange(false);
-     } catch (error: any) {
-       console.error('Error verifying email OTP:', error);
-       toast({
-         title: 'Verification failed',
-         description: error.message || 'Invalid code. Please try again.',
-         variant: 'destructive',
-       });
-     } finally {
-       setIsVerifying(false);
-       setCode('');
-     }
+      setIsVerifying(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('verify-email-otp-login', {
+          body: { code },
+        });
+
+        if (error) {
+          // Parse the actual error from the edge function response
+          const errBody = await error?.context?.json?.().catch(() => null);
+          throw new Error(errBody?.error || error.message);
+        }
+        if (data?.error) throw new Error(data.error);
+
+        onSuccess();
+        onOpenChange(false);
+      } catch (error: any) {
+        console.error('Error verifying email OTP:', error);
+        const msg = error.message || 'Invalid code. Please try again.';
+        toast({
+          title: 'Verification failed',
+          description: msg.includes('expired') 
+            ? msg + ' Click "Resend code" to get a new one.'
+            : msg === 'Invalid verification code'
+              ? 'The code you entered doesn\'t match. Make sure you\'re using the most recent code from your email.'
+              : msg,
+          variant: 'destructive',
+        });
+      } finally {
+        setIsVerifying(false);
+        setCode('');
+      }
    };
  
    const handleVerify = () => {

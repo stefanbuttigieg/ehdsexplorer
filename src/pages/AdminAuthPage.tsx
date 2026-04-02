@@ -144,12 +144,18 @@ const AdminAuthPage = () => {
          
          if (hasTotp || hasEmailOtp) {
            // User has MFA enabled - block redirects and show verification dialog
-           setAwaitingMFA(true);
-           setMfaTotpFactorId(hasTotp ? verifiedTotpFactors[0].id : null);
-           setMfaEmailEnabled(hasEmailOtp);
-           setMfaUserEmail(data.user.email || email);
-          setShowMFAVerify(true);
-          return;
+            setAwaitingMFA(true);
+            setMfaTotpFactorId(hasTotp ? verifiedTotpFactors[0].id : null);
+            setMfaEmailEnabled(hasEmailOtp);
+            setMfaUserEmail(data.user.email || email);
+            setShowMFAVerify(true);
+            // Persist so state survives navigation (e.g. switching to email app)
+            sessionStorage.setItem('mfa_pending', JSON.stringify({
+              totpFactorId: hasTotp ? verifiedTotpFactors[0].id : null,
+              emailEnabled: hasEmailOtp,
+              userEmail: data.user.email || email,
+            }));
+           return;
         }
       }
 

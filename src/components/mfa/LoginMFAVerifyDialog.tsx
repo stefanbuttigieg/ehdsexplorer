@@ -79,6 +79,7 @@
         if (data?.error) throw new Error(data.error);
 
         setEmailCodeSent(true);
+        sessionStorage.setItem('mfa_email_code_sent', 'true');
         setLastSentAt(Date.now());
         setCode('');
         toast({

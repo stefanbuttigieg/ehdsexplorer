@@ -352,7 +352,7 @@ serve(async (req) => {
     ).join("\n\n");
 
     const officialFaqsList = ehdsFaqs.map(f => 
-      `FAQ #${f.faq_number}: ${f.question}\n${f.rich_content || f.answer}\n${f.source_references || ''}`
+      `FAQ #${f.faq_number} [Chapter: ${f.chapter}]: ${f.question}\nOFFICIAL ANSWER: ${f.rich_content || f.answer}\nSource articles: ${(f.source_articles || []).join(', ')}\n${f.source_references || ''}`
     ).join("\n\n---\n\n");
 
     // Get role and level specific prompts

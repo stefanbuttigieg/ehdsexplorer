@@ -72,18 +72,18 @@ function FAQItem({ faq, footnotes, isOpen, onToggle, implementingActs }: {
     <div id={`faq-${faq.faq_number}`} className="scroll-mt-20">
       <Collapsible open={isOpen} onOpenChange={onToggle}>
         <CollapsibleTrigger asChild>
-          <button className="w-full text-left p-4 rounded-lg hover:bg-accent/50 transition-colors flex items-start gap-3 group">
+          <button className="w-full text-left p-3 sm:p-4 rounded-lg hover:bg-accent/50 transition-colors flex items-start gap-2 sm:gap-3 group">
             <Link to={`/faq/${faq.faq_number}`} onClick={(e) => e.stopPropagation()}>
-              <Badge variant="outline" className="shrink-0 mt-0.5 font-mono hover:bg-primary hover:text-primary-foreground transition-colors">
+              <Badge variant="outline" className="shrink-0 mt-0.5 font-mono text-xs hover:bg-primary hover:text-primary-foreground transition-colors">
                 {faq.faq_number}
               </Badge>
             </Link>
-            <span className="font-medium flex-1 text-sm md:text-base">{faq.question}</span>
-            <ChevronDown className={cn("h-4 w-4 shrink-0 mt-1 transition-transform text-muted-foreground", isOpen && "rotate-180")} />
+            <span className="font-medium flex-1 text-xs sm:text-sm md:text-base leading-snug">{faq.question}</span>
+            <ChevronDown className={cn("h-4 w-4 shrink-0 mt-0.5 transition-transform text-muted-foreground", isOpen && "rotate-180")} />
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div className="px-4 pb-4 ml-10">
+          <div className="px-3 sm:px-4 pb-3 sm:pb-4 ml-6 sm:ml-10">
             <FAQContent faq={faq} footnotes={footnotes} />
             <FaqDataTableDisplay faqId={faq.id} />
             {articleLinks.length > 0 && (
@@ -216,14 +216,14 @@ const FAQsPage = () => {
       />
       <FAQSchema items={faqSchemaItems} pageUrl="/faqs" />
 
-      <div className="max-w-7xl mx-auto p-4 md:p-6">
+      <div className="max-w-7xl mx-auto p-3 sm:p-4 md:p-6">
         <Breadcrumbs items={[{ label: "FAQs" }]} />
 
-        <div className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold font-serif mb-2">
+        <div className="mb-4 md:mb-6">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-serif mb-1 md:mb-2">
             EHDS Frequently Asked Questions
           </h1>
-          <p className="text-muted-foreground text-sm md:text-base">
+          <p className="text-muted-foreground text-xs sm:text-sm md:text-base">
             Official Q&A from the European Commission (DG SANTE, Unit C.1 – Digital Health).
             {faqs.length > 0 && ` ${faqs.length} questions across ${chapters.length} topics.`}
           </p>
@@ -231,27 +231,53 @@ const FAQsPage = () => {
             href="https://health.ec.europa.eu/ehealth-digital-health-and-care/ehds-action_en"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline mt-2"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-primary hover:underline mt-1.5 md:mt-2"
           >
-            <FileText className="h-4 w-4" />
-            View official source on the European Commission website ↗
+            <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            View official source ↗
           </a>
         </div>
 
         {/* Search */}
-        <div className="relative mb-6">
+        <div className="relative mb-4 md:mb-6">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search FAQs by keyword, question, or number..."
+            placeholder="Search FAQs..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
+            className="pl-10 text-sm"
           />
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Chapter Nav Sidebar */}
-          <aside className="lg:w-64 shrink-0">
+        {/* Mobile: horizontal scrolling chapter filter */}
+        <div className="lg:hidden mb-4 -mx-3 px-3">
+          <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none">
+            <Button
+              variant={activeChapter === null ? "secondary" : "outline"}
+              size="sm"
+              className="shrink-0 text-xs h-8"
+              onClick={() => setActiveChapter(null)}
+            >
+              All ({faqs.length})
+            </Button>
+            {chapters.map(({ chapter, count }) => (
+              <Button
+                key={chapter}
+                variant={activeChapter === chapter ? "secondary" : "outline"}
+                size="sm"
+                className="shrink-0 text-xs h-8 max-w-[200px]"
+                onClick={() => setActiveChapter(chapter)}
+              >
+                <span className="truncate">{chapter}</span>
+                <span className="ml-1 text-muted-foreground">({count})</span>
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
+          {/* Desktop: Chapter Nav Sidebar */}
+          <aside className="hidden lg:block lg:w-64 shrink-0">
             <div className="lg:sticky lg:top-4 space-y-1">
               <Button
                 variant={activeChapter === null ? "secondary" : "ghost"}

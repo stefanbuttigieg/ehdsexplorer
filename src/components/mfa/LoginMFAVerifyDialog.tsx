@@ -131,28 +131,37 @@
    const handleVerifyEmail = async () => {
      if (code.length !== 6) return;
  
-     setIsVerifying(true);
-     try {
-       const { data, error } = await supabase.functions.invoke('verify-email-otp-login', {
-         body: { code },
-       });
- 
-       if (error) throw error;
-       if (data?.error) throw new Error(data.error);
- 
-       onSuccess();
-       onOpenChange(false);
-     } catch (error: any) {
-       console.error('Error verifying email OTP:', error);
-       toast({
-         title: 'Verification failed',
-         description: error.message || 'Invalid code. Please try again.',
-         variant: 'destructive',
-       });
-     } finally {
-       setIsVerifying(false);
-       setCode('');
-     }
+      setIsVerifying(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('verify-email-otp-login', {
+          body: { code },
+        });
+
+        if (error) {
+          // Parse the actual error from the edge function response
+          const errBody = await error?.context?.json?.().catch(() => null);
+          throw new Error(errBody?.error || error.message);
+        }
+        if (data?.error) throw new Error(data.error);
+
+        onSuccess();
+        onOpenChange(false);
+      } catch (error: any) {
+        console.error('Error verifying email OTP:', error);
+        const msg = error.message || 'Invalid code. Please try again.';
+        toast({
+          title: 'Verification failed',
+          description: msg.includes('expired') 
+            ? msg + ' Click "Resend code" to get a new one.'
+            : msg === 'Invalid verification code'
+              ? 'The code you entered doesn\'t match. Make sure you\'re using the most recent code from your email.'
+              : msg,
+          variant: 'destructive',
+        });
+      } finally {
+        setIsVerifying(false);
+        setCode('');
+      }
    };
  
    const handleVerify = () => {

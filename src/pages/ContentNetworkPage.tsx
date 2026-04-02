@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 
 const typeConfig: Record<ContentNodeType, { color: string; icon: typeof FileText; label: string; route: (n: ContentNode) => string }> = {
   article: { color: "hsl(210 80% 55%)", icon: FileText, label: "Articles", route: (n) => `/article/${n.id.replace("art-", "")}` },
-  faq: { color: "hsl(45 90% 50%)", icon: HelpCircle, label: "FAQs", route: (n) => `/faqs#faq-${n.id.replace("faq-", "")}` },
+  faq: { color: "hsl(45 90% 50%)", icon: HelpCircle, label: "FAQs", route: (n) => `/faq/${n.id.replace("faq-", "")}` },
   recital: { color: "hsl(150 60% 45%)", icon: ScrollText, label: "Recitals", route: (n) => `/recital/${n.id.replace("rec-", "")}` },
   annex: { color: "hsl(270 60% 55%)", icon: Layers, label: "Annexes", route: (n) => `/annexes/${n.id.replace("anx-", "")}` },
   "implementing-act": { color: "hsl(340 75% 55%)", icon: BookOpen, label: "Impl. Acts", route: (n) => `/implementing-acts/${n.id.replace("ia-", "")}` },

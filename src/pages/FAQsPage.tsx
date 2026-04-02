@@ -26,7 +26,7 @@ function FAQContent({ faq, footnotes }: { faq: EhdsFaq; footnotes: { marker: str
   // Replace FAQ cross-references like "question 33" with links
   const processedContent = content.replace(
     /(?:see\s+)?question\s+(\d+)(?:\s+(?:below|above))?/gi,
-    (match, num) => `[${match}](/faqs#faq-${num})`
+    (match, num) => `[${match}](/faq/${num})`
   );
 
   return (

@@ -263,7 +263,7 @@ const SearchPage = () => {
               ))}
 
               {(filter === 'all' || filter === 'faqs') && results.faqs.map(result => (
-                <Link key={`faq-${result.item.id}`} to={`/faqs#faq-${result.item.faq_number}`}>
+                <Link key={`faq-${result.item.id}`} to={`/faq/${result.item.faq_number}`}>
                   <Card className="hover:border-primary transition-colors">
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-1">

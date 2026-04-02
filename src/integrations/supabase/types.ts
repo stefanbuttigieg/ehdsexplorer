@@ -56,6 +56,60 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_assistant_benchmarks: {
+        Row: {
+          conversation_id: string | null
+          created_at: string
+          error_message: string | null
+          error_occurred: boolean
+          explain_level: string
+          feedback_type: string | null
+          id: string
+          input_tokens: number | null
+          ip_address: string | null
+          model_used: string
+          output_tokens: number | null
+          response_time_ms: number | null
+          role_used: string
+          total_tokens: number | null
+          user_query_preview: string | null
+        }
+        Insert: {
+          conversation_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          error_occurred?: boolean
+          explain_level?: string
+          feedback_type?: string | null
+          id?: string
+          input_tokens?: number | null
+          ip_address?: string | null
+          model_used: string
+          output_tokens?: number | null
+          response_time_ms?: number | null
+          role_used?: string
+          total_tokens?: number | null
+          user_query_preview?: string | null
+        }
+        Update: {
+          conversation_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          error_occurred?: boolean
+          explain_level?: string
+          feedback_type?: string | null
+          id?: string
+          input_tokens?: number | null
+          ip_address?: string | null
+          model_used?: string
+          output_tokens?: number | null
+          response_time_ms?: number | null
+          role_used?: string
+          total_tokens?: number | null
+          user_query_preview?: string | null
+        }
+        Relationships: []
+      }
       ai_assistant_conversations: {
         Row: {
           created_at: string
@@ -178,6 +232,42 @@ export type Database = {
           request_count?: number
           updated_at?: string
           usage_date?: string
+        }
+        Relationships: []
+      }
+      ai_prompt_config: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          is_active: boolean
+          prompt_key: string
+          prompt_label: string
+          prompt_text: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          prompt_key: string
+          prompt_label: string
+          prompt_text: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          prompt_key?: string
+          prompt_label?: string
+          prompt_text?: string
+          sort_order?: number
+          updated_at?: string
         }
         Relationships: []
       }

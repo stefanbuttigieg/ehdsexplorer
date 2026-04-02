@@ -83,7 +83,7 @@ function FAQItem({ faq, footnotes, isOpen, onToggle, implementingActs }: {
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div className="px-4 pb-4 ml-10">
+          <div className="px-3 sm:px-4 pb-3 sm:pb-4 ml-6 sm:ml-10">
             <FAQContent faq={faq} footnotes={footnotes} />
             <FaqDataTableDisplay faqId={faq.id} />
             {articleLinks.length > 0 && (

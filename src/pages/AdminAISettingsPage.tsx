@@ -95,7 +95,7 @@ const AdminAISettingsPage = () => {
   });
 
   // Fetch benchmarks
-  const { data: benchmarks = [], isLoading: benchmarksLoading } = useQuery({
+  const { data: benchmarks = [] } = useQuery({
     queryKey: ['ai-benchmarks'],
     queryFn: async () => {
       const { data, error } = await supabase

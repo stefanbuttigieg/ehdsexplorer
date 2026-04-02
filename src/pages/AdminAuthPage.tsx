@@ -173,12 +173,12 @@ const AdminAuthPage = () => {
 
   const handleMFASuccess = () => {
     setShowMFAVerify(false);
-    setAwaitingMFA(false); // Allow redirects now
+    setAwaitingMFA(false);
     setMfaTotpFactorId(null);
     setMfaEmailEnabled(false);
     setMfaUserEmail('');
+    sessionStorage.removeItem('mfa_pending');
     toast({ title: 'Signed in successfully' });
-    // Navigate after successful MFA
     if (isEditor) {
       navigate('/admin');
     } else {
@@ -187,13 +187,13 @@ const AdminAuthPage = () => {
   };
 
   const handleMFACancel = async () => {
-    // Sign out if MFA verification is cancelled
     await supabase.auth.signOut();
     setShowMFAVerify(false);
     setAwaitingMFA(false);
     setMfaTotpFactorId(null);
     setMfaEmailEnabled(false);
     setMfaUserEmail('');
+    sessionStorage.removeItem('mfa_pending');
   };
 
   const handleSignUp = async (e: React.FormEvent) => {

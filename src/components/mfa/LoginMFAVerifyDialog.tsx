@@ -44,14 +44,16 @@
      totpFactorId ? 'totp' : 'email'
    );
  
-   // Reset state when dialog opens
-   useEffect(() => {
-     if (open) {
-       setCode('');
-       setEmailCodeSent(false);
-       setActiveMethod(totpFactorId ? 'totp' : 'email');
-     }
-   }, [open, totpFactorId]);
+    // Reset state when dialog opens
+    useEffect(() => {
+      if (open) {
+        setCode('');
+        // Restore emailCodeSent from sessionStorage (survives tab switch)
+        const wasSent = sessionStorage.getItem('mfa_email_code_sent') === 'true';
+        setEmailCodeSent(wasSent);
+        setActiveMethod(totpFactorId ? 'totp' : 'email');
+      }
+    }, [open, totpFactorId]);
  
     const handleSendEmailCode = async () => {
       // Prevent double-sends within 30 seconds

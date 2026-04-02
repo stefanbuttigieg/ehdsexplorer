@@ -148,6 +148,7 @@
         }
         if (data?.error) throw new Error(data.error);
 
+        sessionStorage.removeItem('mfa_email_code_sent');
         onSuccess();
         onOpenChange(false);
       } catch (error: any) {

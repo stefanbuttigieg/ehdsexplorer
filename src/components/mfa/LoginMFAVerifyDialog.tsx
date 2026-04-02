@@ -177,10 +177,11 @@
      }
    };
  
-   const handleCancel = () => {
-     onOpenChange(false);
-     onCancel?.();
-   };
+    const handleCancel = () => {
+      sessionStorage.removeItem('mfa_email_code_sent');
+      onOpenChange(false);
+      onCancel?.();
+    };
  
    const handleKeyDown = (e: React.KeyboardEvent) => {
      if (e.key === 'Enter' && code.length === 6) {

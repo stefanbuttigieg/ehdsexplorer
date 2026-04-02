@@ -295,7 +295,7 @@ const ArticlePage = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               {relatedFaqs.map((faq) => (
-                <Link key={faq.id} to={`/faqs#faq-${faq.faq_number}`} className="block">
+                <Link key={faq.id} to={`/faq/${faq.faq_number}`} className="block">
                   <div className="p-3 rounded-lg bg-muted hover:bg-accent transition-colors">
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="font-mono shrink-0">#{faq.faq_number}</Badge>

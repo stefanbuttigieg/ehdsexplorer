@@ -26,7 +26,7 @@ function FAQContent({ faq, footnotes }: { faq: EhdsFaq; footnotes: { marker: str
   // Replace FAQ cross-references like "question 33" with links
   const processedContent = content.replace(
     /(?:see\s+)?question\s+(\d+)(?:\s+(?:below|above))?/gi,
-    (match, num) => `[${match}](/faqs#faq-${num})`
+    (match, num) => `[${match}](/faq/${num})`
   );
 
   return (
@@ -73,9 +73,11 @@ function FAQItem({ faq, footnotes, isOpen, onToggle, implementingActs }: {
       <Collapsible open={isOpen} onOpenChange={onToggle}>
         <CollapsibleTrigger asChild>
           <button className="w-full text-left p-4 rounded-lg hover:bg-accent/50 transition-colors flex items-start gap-3 group">
-            <Badge variant="outline" className="shrink-0 mt-0.5 font-mono">
-              {faq.faq_number}
-            </Badge>
+            <Link to={`/faq/${faq.faq_number}`} onClick={(e) => e.stopPropagation()}>
+              <Badge variant="outline" className="shrink-0 mt-0.5 font-mono hover:bg-primary hover:text-primary-foreground transition-colors">
+                {faq.faq_number}
+              </Badge>
+            </Link>
             <span className="font-medium flex-1 text-sm md:text-base">{faq.question}</span>
             <ChevronDown className={cn("h-4 w-4 shrink-0 mt-1 transition-transform text-muted-foreground", isOpen && "rotate-180")} />
           </button>

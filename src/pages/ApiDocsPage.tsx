@@ -173,6 +173,23 @@ const endpoints = [
     },
   },
   {
+    resource: "faqs",
+    description: "Official EHDS FAQs from the European Commission",
+    parameters: [
+      { name: "id", type: "number", description: "Return a specific FAQ by number" },
+      { name: "format", type: "string", description: "Response format: json (default) or csv" },
+      { name: "fields", type: "string", description: "Comma-separated fields to return" },
+    ],
+    availableFields: ["faq_number", "question", "answer", "chapter", "sub_category", "source_articles", "source_recitals", "source_references"],
+    exampleResponse: {
+      "@context": "https://schema.org",
+      "@type": "Dataset",
+      name: "EHDS Regulation - faqs",
+      data: [{ faq_number: 1, question: "What is the EHDS?", answer: "The European Health Data Space...", chapter: "General" }],
+      recordCount: 67,
+    },
+  },
+  {
     resource: "metadata",
     description: "API metadata and regulation information",
     parameters: [],

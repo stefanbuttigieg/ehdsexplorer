@@ -117,8 +117,9 @@
  
        if (error) throw error;
  
-       onSuccess();
-       onOpenChange(false);
+        sessionStorage.removeItem('mfa_email_code_sent');
+        onSuccess();
+        onOpenChange(false);
      } catch (error: any) {
        toast({
          title: 'Verification failed',

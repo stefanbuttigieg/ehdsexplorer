@@ -4073,6 +4073,42 @@ export type Database = {
         }
         Relationships: []
       }
+      study_progress: {
+        Row: {
+          content_id: string
+          content_type: string
+          created_at: string
+          id: string
+          last_studied_at: string
+          review_count: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          created_at?: string
+          id?: string
+          last_studied_at?: string
+          review_count?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          created_at?: string
+          id?: string
+          last_studied_at?: string
+          review_count?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       team_activity: {
         Row: {
           action: string

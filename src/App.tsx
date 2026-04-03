@@ -37,6 +37,10 @@ const BookmarksPage = lazy(() => import("./pages/BookmarksPage"));
 const AnnexesPage = lazy(() => import("./pages/AnnexesPage"));
 const AnnexDetailPage = lazy(() => import("./pages/AnnexDetailPage"));
 const ComparePage = lazy(() => import("./pages/ComparePage"));
+const StudyModePage = lazy(() => import("./pages/StudyModePage"));
+const StudyReadPage = lazy(() => import("./pages/StudyReadPage"));
+const StudyFlashcardsPage = lazy(() => import("./pages/StudyFlashcardsPage"));
+const StudyQuizPage = lazy(() => import("./pages/StudyQuizPage"));
 const AdminAuthPage = lazy(() => import("./pages/AdminAuthPage"));
 const AdminSetPasswordPage = lazy(() => import("./pages/AdminSetPasswordPage"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
@@ -226,6 +230,10 @@ const App = () => (
             <Route path="/content-network" element={<ContentNetworkPage />} />
             <Route path="/faqs" element={<FAQsPage />} />
             <Route path="/faq/:id" element={<FaqDetailPage />} />
+            <Route path="/study" element={<StudyModePage />} />
+            <Route path="/study/read" element={<StudyReadPage />} />
+            <Route path="/study/flashcards" element={<StudyFlashcardsPage />} />
+            <Route path="/study/quiz" element={<StudyQuizPage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin/set-password" element={<AdminSetPasswordPage />} />
             <Route path="/profile" element={<ProfilePage />} />

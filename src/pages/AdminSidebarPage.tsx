@@ -102,6 +102,9 @@ const AdminSidebarPage = () => {
       section: item.section,
       requires_auth: item.requires_auth,
       open_external: item.open_external,
+      show_in_kids_mode: item.show_in_kids_mode,
+      show_in_mobile_nav: item.show_in_mobile_nav,
+      mobile_sort_order: item.mobile_sort_order,
     });
   };
 

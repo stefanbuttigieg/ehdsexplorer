@@ -244,7 +244,7 @@ const AdminSidebarPage = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
               <div className="flex items-center gap-2">
                 <Switch checked={form.requires_auth} onCheckedChange={v => setForm(f => ({ ...f, requires_auth: v }))} />
                 <Label>Requires Auth</Label>
@@ -253,7 +253,21 @@ const AdminSidebarPage = () => {
                 <Switch checked={form.open_external} onCheckedChange={v => setForm(f => ({ ...f, open_external: v }))} />
                 <Label>External Link</Label>
               </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={form.show_in_kids_mode} onCheckedChange={v => setForm(f => ({ ...f, show_in_kids_mode: v }))} />
+                <Label>Show in Kids Mode</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={form.show_in_mobile_nav} onCheckedChange={v => setForm(f => ({ ...f, show_in_mobile_nav: v }))} />
+                <Label>Show in Mobile Nav</Label>
+              </div>
             </div>
+            {form.show_in_mobile_nav && (
+              <div className="space-y-1">
+                <Label>Mobile Sort Order</Label>
+                <Input type="number" value={form.mobile_sort_order} onChange={e => setForm(f => ({ ...f, mobile_sort_order: parseInt(e.target.value) || 0 }))} />
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => { setEditingItem(null); setIsAddDialogOpen(false); }}>Cancel</Button>

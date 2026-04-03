@@ -290,6 +290,11 @@ export default function AdminCountryLegislationPage() {
               </p>
             </div>
           </div>
+          <div className="flex gap-2 self-start sm:self-auto">
+            <Button onClick={() => setIsBulkImportOpen(true)} size="sm" variant="outline">
+              <Upload className="h-4 w-4 mr-2" />
+              Bulk Import
+            </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={() => handleOpenDialog()} size="sm" className="self-start sm:self-auto">

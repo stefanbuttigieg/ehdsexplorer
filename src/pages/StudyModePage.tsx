@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { BookOpen, Brain, GraduationCap, RotateCcw, CheckCircle2, Eye, ArrowRight, Sparkles } from 'lucide-react';
+import { BookOpen, Brain, GraduationCap, RotateCcw, ArrowRight, Sparkles, Eye } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

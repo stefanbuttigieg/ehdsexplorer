@@ -230,6 +230,10 @@ const App = () => (
             <Route path="/content-network" element={<ContentNetworkPage />} />
             <Route path="/faqs" element={<FAQsPage />} />
             <Route path="/faq/:id" element={<FaqDetailPage />} />
+            <Route path="/study" element={<StudyModePage />} />
+            <Route path="/study/read" element={<StudyReadPage />} />
+            <Route path="/study/flashcards" element={<StudyFlashcardsPage />} />
+            <Route path="/study/quiz" element={<StudyQuizPage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin/set-password" element={<AdminSetPasswordPage />} />
             <Route path="/profile" element={<ProfilePage />} />

@@ -106,6 +106,7 @@ export default function AdminCountryLegislationPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
   const [editingLegislation, setEditingLegislation] = useState<CountryLegislation | null>(null);
   const [selectedArticles, setSelectedArticles] = useState<number[]>([]);
   const [selectedActs, setSelectedActs] = useState<string[]>([]);

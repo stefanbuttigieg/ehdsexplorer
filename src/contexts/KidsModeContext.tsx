@@ -1,43 +1,39 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useSidebarItems } from "@/hooks/useSidebarItems";
 
 interface KidsModeContextType {
   isKidsMode: boolean;
   toggleKidsMode: () => void;
   isKidsFriendlyRoute: (path: string) => boolean;
+  kidsFriendlyPaths: Set<string>;
 }
 
 const KidsModeContext = createContext<KidsModeContextType | undefined>(undefined);
 
-// Routes accessible in Kids Mode
-const KIDS_FRIENDLY_PATHS = new Set([
-  "/",
-  "/kids",
-  "/games",
-  "/match-game",
-  "/flashcards",
-  "/quiz",
-  "/word-search",
-  "/true-false",
-  "/who-am-i",
-  "/for/citizens",
-  "/help",
-  "/privacy-policy",
-  "/cookies-policy",
-  "/terms-of-service",
-  "/accessibility",
+// Static fallback used before DB loads
+const FALLBACK_KIDS_PATHS = new Set([
+  "/", "/kids", "/games", "/match-game", "/flashcards", "/quiz",
+  "/word-search", "/true-false", "/who-am-i", "/for/citizens",
+  "/help", "/privacy-policy", "/cookies-policy", "/terms-of-service", "/accessibility",
 ]);
 
-export const isKidsFriendlyRoute = (path: string) => KIDS_FRIENDLY_PATHS.has(path);
+export const isKidsFriendlyRoute = (path: string) => FALLBACK_KIDS_PATHS.has(path);
 
 export const KidsModeProvider = ({ children }: { children: ReactNode }) => {
   const [isKidsMode, setIsKidsMode] = useState(() => {
     return localStorage.getItem("ehds-kids-mode") === "true";
   });
 
+  const { data: sidebarItems } = useSidebarItems();
+
+  const kidsFriendlyPaths = sidebarItems && sidebarItems.length > 0
+    ? new Set(sidebarItems.filter(i => i.show_in_kids_mode).map(i => i.path))
+    : FALLBACK_KIDS_PATHS;
+
+  const checkKidsFriendly = (path: string) => kidsFriendlyPaths.has(path);
+
   useEffect(() => {
     localStorage.setItem("ehds-kids-mode", String(isKidsMode));
-    // Toggle the kids-mode CSS class on the root element
     if (isKidsMode) {
       document.documentElement.classList.add("kids-mode");
     } else {
@@ -45,7 +41,6 @@ export const KidsModeProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [isKidsMode]);
 
-  // Also apply on mount in case of page refresh
   useEffect(() => {
     if (localStorage.getItem("ehds-kids-mode") === "true") {
       document.documentElement.classList.add("kids-mode");
@@ -55,7 +50,7 @@ export const KidsModeProvider = ({ children }: { children: ReactNode }) => {
   const toggleKidsMode = () => setIsKidsMode((prev) => !prev);
 
   return (
-    <KidsModeContext.Provider value={{ isKidsMode, toggleKidsMode, isKidsFriendlyRoute }}>
+    <KidsModeContext.Provider value={{ isKidsMode, toggleKidsMode, isKidsFriendlyRoute: checkKidsFriendly, kidsFriendlyPaths }}>
       {children}
     </KidsModeContext.Provider>
   );

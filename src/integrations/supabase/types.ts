@@ -3968,10 +3968,13 @@ export type Database = {
           id: string
           is_visible: boolean
           label: string
+          mobile_sort_order: number
           open_external: boolean
           path: string
           requires_auth: boolean
           section: string
+          show_in_kids_mode: boolean
+          show_in_mobile_nav: boolean
           sort_order: number
           updated_at: string
         }
@@ -3982,10 +3985,13 @@ export type Database = {
           id?: string
           is_visible?: boolean
           label: string
+          mobile_sort_order?: number
           open_external?: boolean
           path: string
           requires_auth?: boolean
           section?: string
+          show_in_kids_mode?: boolean
+          show_in_mobile_nav?: boolean
           sort_order?: number
           updated_at?: string
         }
@@ -3996,10 +4002,13 @@ export type Database = {
           id?: string
           is_visible?: boolean
           label?: string
+          mobile_sort_order?: number
           open_external?: boolean
           path?: string
           requires_auth?: boolean
           section?: string
+          show_in_kids_mode?: boolean
+          show_in_mobile_nav?: boolean
           sort_order?: number
           updated_at?: string
         }

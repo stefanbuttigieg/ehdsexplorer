@@ -12,6 +12,9 @@ export interface SidebarItem {
   feature_flag_id: string | null;
   requires_auth: boolean;
   open_external: boolean;
+  show_in_kids_mode: boolean;
+  show_in_mobile_nav: boolean;
+  mobile_sort_order: number;
   created_at: string;
   updated_at: string;
 }

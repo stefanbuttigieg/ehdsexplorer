@@ -41,6 +41,9 @@ interface EditFormState {
   section: "main" | "legal" | "utility";
   requires_auth: boolean;
   open_external: boolean;
+  show_in_kids_mode: boolean;
+  show_in_mobile_nav: boolean;
+  mobile_sort_order: number;
 }
 
 const AdminSidebarPage = () => {
@@ -54,7 +57,7 @@ const AdminSidebarPage = () => {
   const [editingItem, setEditingItem] = useState<SidebarItem | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [form, setForm] = useState<EditFormState>({
-    label: "", path: "", icon_name: "FileText", section: "main", requires_auth: false, open_external: false,
+    label: "", path: "", icon_name: "FileText", section: "main", requires_auth: false, open_external: false, show_in_kids_mode: false, show_in_mobile_nav: false, mobile_sort_order: 0,
   });
 
   if (authLoading || !shouldRender) return null;
@@ -99,6 +102,9 @@ const AdminSidebarPage = () => {
       section: item.section,
       requires_auth: item.requires_auth,
       open_external: item.open_external,
+      show_in_kids_mode: item.show_in_kids_mode,
+      show_in_mobile_nav: item.show_in_mobile_nav,
+      mobile_sort_order: item.mobile_sort_order,
     });
   };
 
@@ -120,7 +126,7 @@ const AdminSidebarPage = () => {
       await createItem.mutateAsync({ ...form, sort_order: maxOrder + 1 } as any);
       toast({ title: "Item added" });
       setIsAddDialogOpen(false);
-      setForm({ label: "", path: "", icon_name: "FileText", section: "main", requires_auth: false, open_external: false });
+      setForm({ label: "", path: "", icon_name: "FileText", section: "main", requires_auth: false, open_external: false, show_in_kids_mode: false, show_in_mobile_nav: false, mobile_sort_order: 0 });
     } catch {
       toast({ title: "Error", description: "Failed to add item", variant: "destructive" });
     }
@@ -141,7 +147,7 @@ const AdminSidebarPage = () => {
       title="Sidebar Manager"
       description="Manage the left sidebar navigation items — reorder, show/hide, edit labels, and add new links."
       actions={
-        <Button onClick={() => { setIsAddDialogOpen(true); setForm({ label: "", path: "", icon_name: "FileText", section: "main", requires_auth: false, open_external: false }); }} size="sm">
+        <Button onClick={() => { setIsAddDialogOpen(true); setForm({ label: "", path: "", icon_name: "FileText", section: "main", requires_auth: false, open_external: false, show_in_kids_mode: false, show_in_mobile_nav: false, mobile_sort_order: 0 }); }} size="sm">
           <Plus className="h-4 w-4 mr-1" /> Add Item
         </Button>
       }
@@ -171,6 +177,8 @@ const AdminSidebarPage = () => {
                           <Badge variant="outline" className="text-[10px] shrink-0">{item.icon_name}</Badge>
                           {item.open_external && <ExternalLink className="h-3 w-3 text-muted-foreground" />}
                           {item.requires_auth && <Badge variant="secondary" className="text-[10px]">Auth</Badge>}
+                          {item.show_in_kids_mode && <Badge variant="secondary" className="text-[10px] bg-pink-100 text-pink-700">Kids</Badge>}
+                          {item.show_in_mobile_nav && <Badge variant="secondary" className="text-[10px] bg-blue-100 text-blue-700">Mobile</Badge>}
                         </div>
                         <span className="text-xs text-muted-foreground truncate block">{item.path}</span>
                       </div>
@@ -236,7 +244,7 @@ const AdminSidebarPage = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
               <div className="flex items-center gap-2">
                 <Switch checked={form.requires_auth} onCheckedChange={v => setForm(f => ({ ...f, requires_auth: v }))} />
                 <Label>Requires Auth</Label>
@@ -245,7 +253,21 @@ const AdminSidebarPage = () => {
                 <Switch checked={form.open_external} onCheckedChange={v => setForm(f => ({ ...f, open_external: v }))} />
                 <Label>External Link</Label>
               </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={form.show_in_kids_mode} onCheckedChange={v => setForm(f => ({ ...f, show_in_kids_mode: v }))} />
+                <Label>Show in Kids Mode</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={form.show_in_mobile_nav} onCheckedChange={v => setForm(f => ({ ...f, show_in_mobile_nav: v }))} />
+                <Label>Show in Mobile Nav</Label>
+              </div>
             </div>
+            {form.show_in_mobile_nav && (
+              <div className="space-y-1">
+                <Label>Mobile Sort Order</Label>
+                <Input type="number" value={form.mobile_sort_order} onChange={e => setForm(f => ({ ...f, mobile_sort_order: parseInt(e.target.value) || 0 }))} />
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => { setEditingItem(null); setIsAddDialogOpen(false); }}>Cancel</Button>

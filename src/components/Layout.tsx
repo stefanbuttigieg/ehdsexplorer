@@ -436,6 +436,13 @@ const Layout = ({
 
       {/* PWA Reload Prompt */}
       <ReloadPrompt />
+
+      {/* Preview freshness badge – only visible in preview/iframe */}
+      {(window.location.hostname.includes('id-preview--') || window.location.hostname.includes('lovableproject.com')) && (
+        <div className="fixed bottom-16 md:bottom-2 right-2 z-[9999] bg-black/80 text-white text-[10px] px-2 py-1 rounded font-mono pointer-events-none select-none">
+          Preview · {typeof __BUILD_HASH__ !== 'undefined' ? __BUILD_HASH__ : '?'} · Test
+        </div>
+      )}
     </div>;
 };
 export default Layout;

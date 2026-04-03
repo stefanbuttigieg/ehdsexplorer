@@ -90,7 +90,6 @@ export default function StudyModePage() {
       <SEOHead
         title="Study Mode — EHDS Explorer"
         description="Master the EHDS Regulation with interactive study tools: reading mode, flashcards, and quizzes."
-        path="/study"
       />
       <div className="max-w-6xl mx-auto p-3 sm:p-6 space-y-6 animate-fade-in">
         {/* Header */}

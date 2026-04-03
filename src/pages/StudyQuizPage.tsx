@@ -106,7 +106,7 @@ export default function StudyQuizPage() {
 
   return (
     <Layout>
-      <SEOHead title="Quiz Mode — Study" description="Test your EHDS knowledge with interactive quizzes." path="/study/quiz" />
+      <SEOHead title="Quiz Mode — Study" description="Test your EHDS knowledge with interactive quizzes." />
       <div className="max-w-3xl mx-auto p-3 sm:p-6 space-y-4 animate-fade-in">
         <div className="flex items-center gap-2">
           <Link to="/study">

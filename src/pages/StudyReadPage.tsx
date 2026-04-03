@@ -108,7 +108,7 @@ export default function StudyReadPage() {
 
   return (
     <Layout>
-      <SEOHead title="Reading Mode — Study" description="Read through EHDS content systematically." path="/study/read" />
+      <SEOHead title="Reading Mode — Study" description="Read through EHDS content systematically." />
       <div className="max-w-5xl mx-auto p-3 sm:p-6 space-y-4 animate-fade-in">
         <div className="flex items-center gap-2 mb-2">
           <Link to="/study">

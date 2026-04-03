@@ -147,7 +147,7 @@ const AdminSidebarPage = () => {
       title="Sidebar Manager"
       description="Manage the left sidebar navigation items — reorder, show/hide, edit labels, and add new links."
       actions={
-        <Button onClick={() => { setIsAddDialogOpen(true); setForm({ label: "", path: "", icon_name: "FileText", section: "main", requires_auth: false, open_external: false }); }} size="sm">
+        <Button onClick={() => { setIsAddDialogOpen(true); setForm({ label: "", path: "", icon_name: "FileText", section: "main", requires_auth: false, open_external: false, show_in_kids_mode: false, show_in_mobile_nav: false, mobile_sort_order: 0 }); }} size="sm">
           <Plus className="h-4 w-4 mr-1" /> Add Item
         </Button>
       }

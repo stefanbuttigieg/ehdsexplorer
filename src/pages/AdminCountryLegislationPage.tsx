@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Search, Trash2, Edit, ExternalLink, Filter, FileText, ArrowLeft } from 'lucide-react';
+import { Plus, Search, Trash2, Edit, ExternalLink, Filter, FileText, ArrowLeft, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -96,6 +96,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 import { CountryFlag } from '@/components/CountryFlag';
+import LegislationBulkImport from '@/components/admin/LegislationBulkImport';
 
 export default function AdminCountryLegislationPage() {
   const { user, loading, isEditor } = useAuth();
@@ -105,6 +106,7 @@ export default function AdminCountryLegislationPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
   const [editingLegislation, setEditingLegislation] = useState<CountryLegislation | null>(null);
   const [selectedArticles, setSelectedArticles] = useState<number[]>([]);
   const [selectedActs, setSelectedActs] = useState<string[]>([]);
@@ -288,6 +290,11 @@ export default function AdminCountryLegislationPage() {
               </p>
             </div>
           </div>
+          <div className="flex gap-2 self-start sm:self-auto">
+            <Button onClick={() => setIsBulkImportOpen(true)} size="sm" variant="outline">
+              <Upload className="h-4 w-4 mr-2" />
+              Bulk Import
+            </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={() => handleOpenDialog()} size="sm" className="self-start sm:self-auto">
@@ -626,6 +633,8 @@ export default function AdminCountryLegislationPage() {
               </Form>
             </DialogContent>
           </Dialog>
+          </div>
+          <LegislationBulkImport open={isBulkImportOpen} onOpenChange={setIsBulkImportOpen} />
         </div>
 
         {/* Filters */}

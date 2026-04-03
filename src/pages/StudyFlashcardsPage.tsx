@@ -31,7 +31,7 @@ export default function StudyFlashcardsPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [sessionStats, setSessionStats] = useState({ reviewed: 0, gotIt: 0, needsReview: 0 });
 
-  const { getStatus, updateProgress, getReviewItems, allProgress } = useStudyProgress();
+  const { getStatus, updateProgress, getReviewItems } = useStudyProgress();
   const { data: faqs } = useEhdsFaqs();
   const { data: articles } = useArticles();
   const { data: recitals } = useRecitals();

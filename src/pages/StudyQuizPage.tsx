@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Brain, ArrowLeft, CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';

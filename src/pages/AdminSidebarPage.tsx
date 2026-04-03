@@ -177,6 +177,8 @@ const AdminSidebarPage = () => {
                           <Badge variant="outline" className="text-[10px] shrink-0">{item.icon_name}</Badge>
                           {item.open_external && <ExternalLink className="h-3 w-3 text-muted-foreground" />}
                           {item.requires_auth && <Badge variant="secondary" className="text-[10px]">Auth</Badge>}
+                          {item.show_in_kids_mode && <Badge variant="secondary" className="text-[10px] bg-pink-100 text-pink-700">Kids</Badge>}
+                          {item.show_in_mobile_nav && <Badge variant="secondary" className="text-[10px] bg-blue-100 text-blue-700">Mobile</Badge>}
                         </div>
                         <span className="text-xs text-muted-foreground truncate block">{item.path}</span>
                       </div>

@@ -47,7 +47,7 @@ export default function StudyModePage() {
   const { data: articles } = useArticles();
   const { data: recitals } = useRecitals();
 
-  const publishedFaqs = faqs?.filter(f => f.is_published) || [];
+  const publishedFaqs = useMemo(() => faqs?.filter(f => f.is_published) || [], [faqs]);
   const totalCounts = {
     faq: publishedFaqs.length,
     article: articles?.length || 0,

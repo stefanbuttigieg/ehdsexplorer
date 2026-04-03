@@ -126,7 +126,7 @@ const AdminSidebarPage = () => {
       await createItem.mutateAsync({ ...form, sort_order: maxOrder + 1 } as any);
       toast({ title: "Item added" });
       setIsAddDialogOpen(false);
-      setForm({ label: "", path: "", icon_name: "FileText", section: "main", requires_auth: false, open_external: false });
+      setForm({ label: "", path: "", icon_name: "FileText", section: "main", requires_auth: false, open_external: false, show_in_kids_mode: false, show_in_mobile_nav: false, mobile_sort_order: 0 });
     } catch {
       toast({ title: "Error", description: "Failed to add item", variant: "destructive" });
     }

@@ -97,8 +97,6 @@ export default function StudyFlashcardsPage() {
     advance();
   };
 
-  const isComplete = currentIndex >= cards.length - 1 && cards.length > 0 && !currentCard;
-  const finished = currentIndex >= cards.length && cards.length > 0;
 
   return (
     <Layout>

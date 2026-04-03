@@ -35,7 +35,7 @@ export default function StudyReadPage() {
   const [chapterFilter, setChapterFilter] = useState(initialChapter);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const { getStatus, updateProgress, allProgress } = useStudyProgress();
+  const { getStatus, updateProgress } = useStudyProgress();
   const { data: faqs } = useEhdsFaqs();
   const { data: articles } = useArticles();
   const { data: recitals } = useRecitals();

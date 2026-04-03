@@ -83,7 +83,7 @@ const CookieConsentBanner = () => {
 
   return (
     <div 
-      className={`fixed z-50 transition-all duration-300 ease-out ${
+      className={`fixed z-[60] transition-all duration-300 ease-out ${
         isMobile 
           ? 'bottom-0 left-0 right-0 p-3' 
           : 'bottom-4 left-4 max-w-sm'

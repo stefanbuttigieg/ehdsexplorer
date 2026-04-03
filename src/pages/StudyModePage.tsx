@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, Brain, GraduationCap, RotateCcw, ArrowRight, Sparkles, Eye } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

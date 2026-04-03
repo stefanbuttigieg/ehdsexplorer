@@ -1,47 +1,59 @@
 
-# Study Mode for EHDS Explorer
+What I found
 
-## Overview
-A dedicated Study Hub at `/study` combining three learning modes across FAQs, Articles, and Recitals, with progress tracked locally (localStorage) and synced to the database when logged in.
+- The stale preview problem is very plausibly coming from the PWA/service-worker layer, not just the editor.
+- `vite.config.ts` enables PWA caching globally, including page caching and long-lived backend response caching.
+- `src/components/ReloadPrompt.tsx` tries to clean preview state, but it only attempts a hard reset once per session/build hash. If a tab is already running an old bundle, that one-shot guard can leave it stuck on old code.
+- `index.html` still contains a hardcoded preconnect to an older backend host. That is probably not the main stale-code bug, but it should be cleaned up.
+- Different preview vs published data can also be normal: preview uses the Test environment and published uses Live. Different data is expected; old frontend bundles are not.
 
-## Pages & Components
+Implementation plan
 
-### 1. Study Hub Page (`/study`)
-- Dashboard showing overall progress across all content types
-- Three study mode cards: **Read**, **Flashcards**, **Quiz**
-- Content filter: FAQs / Articles / Recitals
-- Progress rings showing completion percentage per content type
-- Recent activity / continue where you left off
+1. Make preview non-PWA by default
+- Stop registering/using the service worker for preview/test usage.
+- Keep PWA behavior only for the published site, or temporarily disable it completely until preview stability is restored.
 
-### 2. Reading Mode (`/study/read`)
-- Sequential chapter-by-chapter walkthrough
-- FAQ chapters as primary sections, with linked articles/recitals shown inline
-- "Mark as read" button per item
-- Progress bar per chapter
-- Next/Previous navigation
+2. Simplify the caching strategy
+- Remove backend/runtime caching from the service worker. In an actively edited app, backend responses should not be cached this aggressively.
+- Reduce or remove navigation caching for preview so HTML and JS are always fetched fresh.
 
-### 3. Flashcard Mode (`/study/flashcards`)
-- Cards showing question → reveal answer (FAQs), title → reveal content (Articles/Recitals)
-- Self-rating: "Got it" / "Needs review" / "Skip"
-- Spaced repetition: items marked "Needs review" appear more often
-- Filter by content type, chapter, or difficulty
-- Session stats (cards reviewed, accuracy)
+3. Replace the current preview reset with a stricter cleanup flow
+- Keep clearing service workers, caches, and non-auth browser storage.
+- Do not mark the reset as complete until the page is no longer controlled by a service worker.
+- Retry cleanup across reloads instead of relying on a single session-guarded attempt.
 
-### 4. Quiz Mode (`/study/quiz`)
-- Auto-generated questions from FAQ content
-- Multiple choice format using real FAQ answers + plausible distractors
-- Score tracking per session
-- Review incorrect answers with links to source FAQ/article
+4. Add a visible preview freshness indicator
+- Show a small preview-only badge with build hash/date and environment label.
+- This makes it obvious whether the preview is on the latest bundle or stuck on an older one.
 
-## Database Changes
-- New `study_progress` table: `user_id, content_type, content_id, status (read/reviewing/mastered), last_studied_at, review_count`
-- RLS: users can only access their own progress
+5. Remove leftover environment hints
+- Replace the hardcoded old backend preconnect entries in `index.html` with the current environment-driven value, or remove them entirely.
 
-## Progress Tracking
-- **Not logged in**: localStorage with same schema
-- **Logged in**: sync to database, merge on login
+6. Validate after implementation
+- Test repeated code edits in preview.
+- Reload the preview multiple times.
+- Close and reopen the preview.
+- Compare the preview build hash with the published build hash.
+- Confirm that preview still points to Test data and published points to Live data, but both show current code.
 
-## Integration
-- New route `/study` added to router
-- Link added to navigation/sidebar
-- Ties into existing achievement system
+When to raise a support ticket
+
+- Not as the first move.
+- I would raise one only if:
+  - the published site consistently shows the latest code,
+  - the preview still serves an older build after the cache/PWA cleanup above,
+  - and a fresh session/incognito window still reproduces it.
+- At that point, it is much more likely to be a platform-side preview caching issue rather than your app code.
+
+Technical details
+
+- `vite.config.ts`: PWA is enabled globally and currently caches navigations plus backend-origin requests.
+- `src/components/ReloadPrompt.tsx`: preview cleanup is reactive and one-shot (`sessionStorage` + `__BUILD_HASH__`), which can fail if the tab is already executing an old bundle.
+- `src/components/Layout.tsx`: the build hash is already rendered, so it can be reused for a clearer preview debug badge.
+- `index.html`: contains stale hardcoded preconnect/dns-prefetch entries to an older backend host.
+
+Expected outcome
+
+- Preview should stop reviving old UI/state after refreshes.
+- “Old environment” confusion should be reduced by separating true Test-vs-Live differences from actual stale frontend code.
+- If the issue remains after this cleanup, we will have a much stronger case for support with clear evidence.

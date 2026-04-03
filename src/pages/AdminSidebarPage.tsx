@@ -57,7 +57,7 @@ const AdminSidebarPage = () => {
   const [editingItem, setEditingItem] = useState<SidebarItem | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [form, setForm] = useState<EditFormState>({
-    label: "", path: "", icon_name: "FileText", section: "main", requires_auth: false, open_external: false,
+    label: "", path: "", icon_name: "FileText", section: "main", requires_auth: false, open_external: false, show_in_kids_mode: false, show_in_mobile_nav: false, mobile_sort_order: 0,
   });
 
   if (authLoading || !shouldRender) return null;

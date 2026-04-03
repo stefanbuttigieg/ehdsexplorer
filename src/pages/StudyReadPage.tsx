@@ -40,7 +40,7 @@ export default function StudyReadPage() {
   const { data: articles } = useArticles();
   const { data: recitals } = useRecitals();
 
-  const publishedFaqs = faqs?.filter(f => f.is_published) || [];
+  const publishedFaqs = useMemo(() => faqs?.filter(f => f.is_published) || [], [faqs]);
   const faqChapters = [...new Set(publishedFaqs.map(f => f.chapter))];
 
   const items: StudyItem[] = useMemo(() => {

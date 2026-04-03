@@ -36,7 +36,7 @@ export default function StudyFlashcardsPage() {
   const { data: articles } = useArticles();
   const { data: recitals } = useRecitals();
 
-  const publishedFaqs = faqs?.filter(f => f.is_published) || [];
+  const publishedFaqs = useMemo(() => faqs?.filter(f => f.is_published) || [], [faqs]);
 
   const cards: FlashcardItem[] = useMemo(() => {
     let items: FlashcardItem[] = [];

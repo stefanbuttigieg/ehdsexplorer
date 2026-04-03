@@ -633,6 +633,8 @@ export default function AdminCountryLegislationPage() {
               </Form>
             </DialogContent>
           </Dialog>
+          </div>
+          <LegislationBulkImport open={isBulkImportOpen} onOpenChange={setIsBulkImportOpen} />
         </div>
 
         {/* Filters */}

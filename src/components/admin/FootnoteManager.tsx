@@ -23,6 +23,8 @@ export function FootnoteManager({
   footnotes,
   articleId = null,
   recitalId = null,
+  implementingActArticleId = null,
+  implementingActRecitalId = null,
 }: FootnoteManagerProps) {
   const { toast } = useToast();
   const createFootnote = useCreateFootnote();

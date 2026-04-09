@@ -275,12 +275,7 @@ const ImplementingActContent = ({ implementingActId }: ImplementingActContentPro
                         <Badge variant="outline" className="shrink-0">
                           ({recital.recital_number})
                         </Badge>
-                        <AnnotatedContent
-                          content={recital.content}
-                          contentType="implementing_act"
-                          contentId={`${implementingActId}-rec-${recital.recital_number}`}
-                          className="legal-text"
-                        />
+                        <IARecitalFootnotes recitalId={recital.id} content={recital.content} />
                       </div>
                     </div>
                   ))}

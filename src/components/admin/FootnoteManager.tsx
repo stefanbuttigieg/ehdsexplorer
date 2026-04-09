@@ -11,6 +11,8 @@ interface FootnoteManagerProps {
   footnotes: Footnote[];
   articleId?: number | null;
   recitalId?: number | null;
+  implementingActArticleId?: string | null;
+  implementingActRecitalId?: string | null;
 }
 
 /**

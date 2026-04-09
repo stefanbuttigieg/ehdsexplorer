@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { ExternalLink, Calendar, Bookmark, Globe, Clock, CalendarClock, CalendarX } from "lucide-react";
+import { ExternalLink, Calendar, Bookmark, Globe, Clock, CalendarClock, CalendarX, CalendarCheck, Gavel, AlertTriangle, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,10 +8,11 @@ import { useImplementingAct, statusLabels, themeLabels } from "@/hooks/useImplem
 import { useArticles } from "@/hooks/useArticles";
 import { useJointActionDeliverables, getDeliverablesByImplementingAct } from "@/hooks/useJointActionDeliverables";
 import { usePublishedWorks, getPublishedWorksByImplementingAct } from "@/hooks/usePublishedWorks";
+import { useImplementingActChanges, CHANGE_TYPES } from "@/hooks/useImplementingActChanges";
 import Layout from "@/components/Layout";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { differenceInDays, parse, isAfter, isBefore } from "date-fns";
+import { differenceInDays, parse, isAfter, isBefore, format } from "date-fns";
 import ImplementingActContent from "@/components/ImplementingActContent";
 import { SubscribeAlertButton } from "@/components/SubscribeAlertButton";
 import { CompareButton } from "@/components/CompareButton";

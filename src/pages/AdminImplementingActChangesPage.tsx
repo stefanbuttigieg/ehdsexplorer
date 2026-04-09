@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Plus, Edit, Trash2, Save, X, AlertTriangle, ChevronUp, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Trash2, Save, X, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -154,7 +154,7 @@ const AdminImplementingActChangesPage = () => {
           </Card>
         ) : (
           <div className="space-y-3">
-            {changes.map((c, idx) => (
+            {changes.map((c) => (
               <Card key={c.id} className="hover:border-primary/50 transition-colors">
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-3">

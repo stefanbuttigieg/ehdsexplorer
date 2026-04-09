@@ -15,6 +15,33 @@ import {
   groupArticlesBySection,
 } from "@/hooks/useImplementingActContent";
 import { AnnotatedContent } from "@/components/AnnotatedContent";
+import { useFootnotesByIAArticle, useFootnotesByIARecital } from "@/hooks/useFootnotes";
+import ContentWithFootnotes from "@/components/ContentWithFootnotes";
+import FootnotesSection from "@/components/FootnotesSection";
+
+/** Inline wrapper: fetches & renders footnotes for a single IA article */
+function IAArticleFootnotes({ articleId, content }: { articleId: string; content: string }) {
+  const { data: footnotes = [] } = useFootnotesByIAArticle(articleId);
+  if (footnotes.length === 0) return <div className="whitespace-pre-wrap legal-text">{content}</div>;
+  return (
+    <div className="space-y-4">
+      <ContentWithFootnotes content={content} footnotes={footnotes} className="legal-text" />
+      <FootnotesSection footnotes={footnotes} />
+    </div>
+  );
+}
+
+/** Inline wrapper: fetches & renders footnotes for a single IA recital */
+function IARecitalFootnotes({ recitalId, content }: { recitalId: string; content: string }) {
+  const { data: footnotes = [] } = useFootnotesByIARecital(recitalId);
+  if (footnotes.length === 0) return <div className="whitespace-pre-wrap legal-text">{content}</div>;
+  return (
+    <div className="space-y-4">
+      <ContentWithFootnotes content={content} footnotes={footnotes} className="legal-text" />
+      <FootnotesSection footnotes={footnotes} />
+    </div>
+  );
+}
 
 interface ImplementingActContentProps {
   implementingActId: string;
@@ -188,12 +215,7 @@ const ImplementingActContent = ({ implementingActId }: ImplementingActContentPro
                                 </div>
                               </AccordionTrigger>
                               <AccordionContent className="px-4 pb-4">
-                                <AnnotatedContent
-                                  content={article.content}
-                                  contentType="implementing_act"
-                                  contentId={`${implementingActId}-art-${article.article_number}`}
-                                  className="legal-text"
-                                />
+                                <IAArticleFootnotes articleId={article.id} content={article.content} />
                               </AccordionContent>
                             </AccordionItem>
                           ))}
@@ -225,12 +247,7 @@ const ImplementingActContent = ({ implementingActId }: ImplementingActContentPro
                             </div>
                           </AccordionTrigger>
                           <AccordionContent className="px-4 pb-4">
-                            <AnnotatedContent
-                              content={article.content}
-                              contentType="implementing_act"
-                              contentId={`${implementingActId}-art-${article.article_number}`}
-                              className="legal-text"
-                            />
+                            <IAArticleFootnotes articleId={article.id} content={article.content} />
                           </AccordionContent>
                         </AccordionItem>
                       ))}
@@ -258,12 +275,7 @@ const ImplementingActContent = ({ implementingActId }: ImplementingActContentPro
                         <Badge variant="outline" className="shrink-0">
                           ({recital.recital_number})
                         </Badge>
-                        <AnnotatedContent
-                          content={recital.content}
-                          contentType="implementing_act"
-                          contentId={`${implementingActId}-rec-${recital.recital_number}`}
-                          className="legal-text"
-                        />
+                        <IARecitalFootnotes recitalId={recital.id} content={recital.content} />
                       </div>
                     </div>
                   ))}

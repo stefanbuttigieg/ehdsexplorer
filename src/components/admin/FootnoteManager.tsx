@@ -11,6 +11,8 @@ interface FootnoteManagerProps {
   footnotes: Footnote[];
   articleId?: number | null;
   recitalId?: number | null;
+  implementingActArticleId?: string | null;
+  implementingActRecitalId?: string | null;
 }
 
 /**
@@ -21,6 +23,8 @@ export function FootnoteManager({
   footnotes,
   articleId = null,
   recitalId = null,
+  implementingActArticleId = null,
+  implementingActRecitalId = null,
 }: FootnoteManagerProps) {
   const { toast } = useToast();
   const createFootnote = useCreateFootnote();
@@ -38,6 +42,8 @@ export function FootnoteManager({
         content,
         article_id: articleId,
         recital_id: recitalId,
+        implementing_act_article_id: implementingActArticleId,
+        implementing_act_recital_id: implementingActRecitalId,
       });
       setMarker('');
       setContent('');

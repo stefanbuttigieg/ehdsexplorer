@@ -70,6 +70,8 @@ const AdminFootnotesPage = () => {
       content: formData.content,
       article_id: formData.parentType === "article" ? parseInt(formData.parentId) : null,
       recital_id: formData.parentType === "recital" ? parseInt(formData.parentId) : null,
+      implementing_act_article_id: null,
+      implementing_act_recital_id: null,
     };
 
     try {

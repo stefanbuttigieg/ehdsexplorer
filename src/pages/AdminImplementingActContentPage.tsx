@@ -30,6 +30,22 @@ import MarkdownEditor from "@/components/MarkdownEditor";
 import { useImplementingActImport } from "@/hooks/useImplementingActImport";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { FootnoteManager } from "@/components/admin/FootnoteManager";
+import { useFootnotesByIAArticle, useFootnotesByIARecital } from "@/hooks/useFootnotes";
+
+/** Small wrapper that fetches footnotes for an IA article or recital and renders FootnoteManager */
+function IAFootnoteSection({ type, parentId }: { type: "article" | "recital"; parentId: string }) {
+  const { data: articleFootnotes = [] } = useFootnotesByIAArticle(type === "article" ? parentId : null);
+  const { data: recitalFootnotes = [] } = useFootnotesByIARecital(type === "recital" ? parentId : null);
+  const footnotes = type === "article" ? articleFootnotes : recitalFootnotes;
+  return (
+    <FootnoteManager
+      footnotes={footnotes}
+      implementingActArticleId={type === "article" ? parentId : null}
+      implementingActRecitalId={type === "recital" ? parentId : null}
+    />
+  );
+}
 import { Progress } from "@/components/ui/progress";
 
 const AdminImplementingActContentPage = () => {
@@ -510,6 +526,7 @@ const AdminImplementingActContentPage = () => {
                         onChange={(v) => setEditingArticle({ ...editingArticle, content: v })}
                       />
                     </div>
+                    <IAFootnoteSection type="article" parentId={editingArticle.id} />
                     <div className="flex gap-2">
                       <Button onClick={() => updateArticleMutation.mutate(editingArticle)}>
                         <Save className="h-4 w-4 mr-2" /> Save
@@ -621,6 +638,7 @@ const AdminImplementingActContentPage = () => {
                         onChange={(v) => setEditingRecital({ ...editingRecital, content: v })}
                       />
                     </div>
+                    <IAFootnoteSection type="recital" parentId={editingRecital.id} />
                     <div className="flex gap-2">
                       <Button onClick={() => updateRecitalMutation.mutate(editingRecital)}>
                         <Save className="h-4 w-4 mr-2" /> Save

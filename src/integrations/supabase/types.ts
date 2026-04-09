@@ -1754,6 +1754,8 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          implementing_act_article_id: string | null
+          implementing_act_recital_id: string | null
           marker: string
           recital_id: number | null
           updated_at: string
@@ -1763,6 +1765,8 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          implementing_act_article_id?: string | null
+          implementing_act_recital_id?: string | null
           marker: string
           recital_id?: number | null
           updated_at?: string
@@ -1772,6 +1776,8 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          implementing_act_article_id?: string | null
+          implementing_act_recital_id?: string | null
           marker?: string
           recital_id?: number | null
           updated_at?: string
@@ -1782,6 +1788,20 @@ export type Database = {
             columns: ["article_id"]
             isOneToOne: false
             referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "footnotes_implementing_act_article_id_fkey"
+            columns: ["implementing_act_article_id"]
+            isOneToOne: false
+            referencedRelation: "implementing_act_articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "footnotes_implementing_act_recital_id_fkey"
+            columns: ["implementing_act_recital_id"]
+            isOneToOne: false
+            referencedRelation: "implementing_act_recitals"
             referencedColumns: ["id"]
           },
           {

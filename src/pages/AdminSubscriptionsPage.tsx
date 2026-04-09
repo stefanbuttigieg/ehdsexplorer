@@ -129,6 +129,21 @@ const AdminSubscriptionsPage = () => {
     },
   });
 
+  const resendNewsletterMutation = useMutation({
+    mutationFn: async (subscriptionId: string) => {
+      const { error } = await supabase.functions.invoke('send-verification-email', {
+        body: { subscription_id: subscriptionId, type: 'newsletter' },
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({ title: 'Verification Email Sent', description: 'Newsletter verification email has been resent.' });
+    },
+    onError: () => {
+      toast({ title: 'Error', description: 'Failed to resend verification email.', variant: 'destructive' });
+    },
+  });
+
   const sendNewsletterMutation = useMutation({
     mutationFn: async ({ subject, body }: { subject: string; body: string }) => {
       const { data, error } = await supabase.functions.invoke('send-weekly-newsletter', {

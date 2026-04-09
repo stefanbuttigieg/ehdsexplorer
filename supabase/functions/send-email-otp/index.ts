@@ -20,6 +20,15 @@ function generateOTP(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
+// Hash a string with SHA-256
+async function hashOTP(otp: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const hashBuf = await crypto.subtle.digest("SHA-256", encoder.encode(otp));
+  return [...new Uint8Array(hashBuf)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 // OTP expires after 10 minutes
 const OTP_EXPIRY_MINUTES = 10;
 
@@ -62,14 +71,15 @@ serve(async (req: Request): Promise<Response> => {
     if (action === "send") {
       // Generate new OTP
       const otp = generateOTP();
+      const otpHash = await hashOTP(otp);
       const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000).toISOString();
 
-      // Store OTP in database (hashed for security would be better in production)
+      // Store hashed OTP in database
       const { error: upsertError } = await supabaseAdmin
         .from("user_mfa_preferences")
         .upsert({
           user_id: user.id,
-          email_otp_code: otp,
+          email_otp_code: otpHash,
           email_otp_expires_at: expiresAt,
           updated_at: new Date().toISOString(),
         }, { onConflict: "user_id" });
@@ -82,7 +92,7 @@ serve(async (req: Request): Promise<Response> => {
         );
       }
 
-      // Send email with OTP code
+      // Send email with plaintext OTP code (user needs to read it)
       const { error: emailError } = await resend.emails.send({
         from: "EHDS Explorer <noreply@ehdsexplorer.eu>",
         to: [user.email!],
@@ -135,7 +145,7 @@ serve(async (req: Request): Promise<Response> => {
         );
       }
 
-      // Get stored OTP and current enabled status
+      // Get stored OTP hash and current enabled status
       const { data: preferences, error: fetchError } = await supabaseAdmin
         .from("user_mfa_preferences")
         .select("email_otp_code, email_otp_expires_at, email_otp_enabled")
@@ -175,8 +185,9 @@ serve(async (req: Request): Promise<Response> => {
         );
       }
 
-      // Verify OTP
-      if (preferences.email_otp_code !== code) {
+      // Hash the provided code and compare with stored hash
+      const codeHash = await hashOTP(code);
+      if (preferences.email_otp_code !== codeHash) {
         return new Response(
           JSON.stringify({ error: "Invalid verification code" }),
           { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
@@ -216,7 +227,7 @@ serve(async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-email-otp:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "An unexpected error occurred" }),
       { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   }

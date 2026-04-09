@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Mail, Trash2, Globe, FileText, CheckCircle, XCircle, RefreshCw, Send, Loader2, Newspaper } from 'lucide-react';
+import { ArrowLeft, Mail, Trash2, Globe, FileText, CheckCircle, XCircle, RefreshCw, Send, Loader2, Newspaper, Sparkles, Wand2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import Layout from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
@@ -26,6 +27,9 @@ const AdminSubscriptionsPage = () => {
 
   const [newsletterSubject, setNewsletterSubject] = useState('');
   const [newsletterBody, setNewsletterBody] = useState('');
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiTone, setAiTone] = useState<'balanced' | 'formal' | 'casual'>('balanced');
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -236,6 +240,71 @@ const AdminSubscriptionsPage = () => {
                 </CardHeader>
               </Card>
             </div>
+
+            {/* AI Draft Generator */}
+            <Card className="border-dashed">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5" />
+                  AI Newsletter Assistant
+                </CardTitle>
+                <CardDescription>
+                  Generate a newsletter draft using AI based on recent platform updates
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">Custom instructions (optional)</label>
+                  <Textarea
+                    placeholder="e.g. Focus on the new implementing act adoption, mention the upcoming deadlines..."
+                    value={aiPrompt}
+                    onChange={e => setAiPrompt(e.target.value)}
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">Tone</label>
+                  <Select value={aiTone} onValueChange={(v: 'balanced' | 'formal' | 'casual') => setAiTone(v)}>
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="balanced">Balanced</SelectItem>
+                      <SelectItem value="formal">Formal</SelectItem>
+                      <SelectItem value="casual">Casual</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    setIsGenerating(true);
+                    try {
+                      const { data, error } = await supabase.functions.invoke('generate-newsletter-draft', {
+                        body: { prompt: aiPrompt || undefined, tone: aiTone },
+                      });
+                      if (error) throw error;
+                      if (data?.error) throw new Error(data.error);
+                      if (data?.draft) setNewsletterBody(data.draft);
+                      if (data?.suggestedSubject && !newsletterSubject) setNewsletterSubject(data.suggestedSubject);
+                      toast({ title: 'Draft Generated', description: 'AI draft loaded into the composer. Review and edit before sending.' });
+                    } catch (e: any) {
+                      toast({ title: 'Generation Failed', description: e.message || 'Could not generate draft.', variant: 'destructive' });
+                    } finally {
+                      setIsGenerating(false);
+                    }
+                  }}
+                  disabled={isGenerating}
+                >
+                  {isGenerating ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <Wand2 className="h-4 w-4 mr-2" />
+                  )}
+                  {isGenerating ? 'Generating...' : 'Generate Draft'}
+                </Button>
+              </CardContent>
+            </Card>
 
             {/* Send Newsletter */}
             <Card>

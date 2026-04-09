@@ -9,8 +9,10 @@ import { supabase } from "@/integrations/supabase/client";
 const VerifySubscriptionPage = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
+  const type = searchParams.get("type");
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("");
+  const [verifiedType, setVerifiedType] = useState<string | null>(null);
 
   useEffect(() => {
     const verifySubscription = async () => {
@@ -22,7 +24,7 @@ const VerifySubscriptionPage = () => {
 
       try {
         const { data, error } = await supabase.functions.invoke("verify-subscription", {
-          body: { token },
+          body: { token, type: type || undefined },
         });
 
         if (error || !data?.success) {
@@ -31,8 +33,16 @@ const VerifySubscriptionPage = () => {
           return;
         }
 
+        setVerifiedType(data.type || type);
         setStatus("success");
-        setMessage("Your email has been verified! You will now receive status change alerts.");
+
+        if (data.already_verified) {
+          setMessage("Your email was already verified. You're all set!");
+        } else if (data.type === "newsletter") {
+          setMessage("Your email has been verified! You will now receive our weekly newsletter updates.");
+        } else {
+          setMessage("Your email has been verified! You will now receive implementing act status change alerts.");
+        }
       } catch (err) {
         setStatus("error");
         setMessage("Something went wrong. Please try again later.");
@@ -40,7 +50,7 @@ const VerifySubscriptionPage = () => {
     };
 
     verifySubscription();
-  }, [token]);
+  }, [token, type]);
 
   return (
     <Layout>
@@ -70,8 +80,10 @@ const VerifySubscriptionPage = () => {
             )}
           </CardHeader>
           <CardContent className="text-center">
-            <Link to="/implementing-acts">
-              <Button>View Implementing Acts</Button>
+            <Link to={verifiedType === "newsletter" ? "/" : "/implementing-acts"}>
+              <Button>
+                {verifiedType === "newsletter" ? "Back to Home" : "View Implementing Acts"}
+              </Button>
             </Link>
           </CardContent>
         </Card>

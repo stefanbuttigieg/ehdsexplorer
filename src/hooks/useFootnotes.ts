@@ -7,9 +7,45 @@ export interface Footnote {
   content: string;
   article_id: number | null;
   recital_id: number | null;
+  implementing_act_article_id: string | null;
+  implementing_act_recital_id: string | null;
   created_at: string;
   updated_at: string;
 }
+
+export const useFootnotesByIAArticle = (iaArticleId: string | null) => {
+  return useQuery({
+    queryKey: ["footnotes", "ia-article", iaArticleId],
+    queryFn: async () => {
+      if (!iaArticleId) return [];
+      const { data, error } = await supabase
+        .from("footnotes")
+        .select("*")
+        .eq("implementing_act_article_id", iaArticleId)
+        .order("marker", { ascending: true });
+      if (error) throw error;
+      return data as Footnote[];
+    },
+    enabled: !!iaArticleId,
+  });
+};
+
+export const useFootnotesByIARecital = (iaRecitalId: string | null) => {
+  return useQuery({
+    queryKey: ["footnotes", "ia-recital", iaRecitalId],
+    queryFn: async () => {
+      if (!iaRecitalId) return [];
+      const { data, error } = await supabase
+        .from("footnotes")
+        .select("*")
+        .eq("implementing_act_recital_id", iaRecitalId)
+        .order("marker", { ascending: true });
+      if (error) throw error;
+      return data as Footnote[];
+    },
+    enabled: !!iaRecitalId,
+  });
+};
 
 export const useFootnotes = () => {
   return useQuery({

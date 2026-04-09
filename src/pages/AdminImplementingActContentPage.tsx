@@ -30,6 +30,22 @@ import MarkdownEditor from "@/components/MarkdownEditor";
 import { useImplementingActImport } from "@/hooks/useImplementingActImport";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { FootnoteManager } from "@/components/admin/FootnoteManager";
+import { useFootnotesByIAArticle, useFootnotesByIARecital } from "@/hooks/useFootnotes";
+
+/** Small wrapper that fetches footnotes for an IA article or recital and renders FootnoteManager */
+function IAFootnoteSection({ type, parentId }: { type: "article" | "recital"; parentId: string }) {
+  const { data: articleFootnotes = [] } = useFootnotesByIAArticle(type === "article" ? parentId : null);
+  const { data: recitalFootnotes = [] } = useFootnotesByIARecital(type === "recital" ? parentId : null);
+  const footnotes = type === "article" ? articleFootnotes : recitalFootnotes;
+  return (
+    <FootnoteManager
+      footnotes={footnotes}
+      implementingActArticleId={type === "article" ? parentId : null}
+      implementingActRecitalId={type === "recital" ? parentId : null}
+    />
+  );
+}
 import { Progress } from "@/components/ui/progress";
 
 const AdminImplementingActContentPage = () => {

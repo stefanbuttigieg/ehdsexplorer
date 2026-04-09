@@ -11,6 +11,7 @@ const corsHeaders = {
 
 interface VerificationRequest {
   subscription_id: string;
+  type?: "implementing_act" | "newsletter";
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -23,19 +24,83 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { subscription_id }: VerificationRequest = await req.json();
+    const { subscription_id, type }: VerificationRequest = await req.json();
 
     if (!subscription_id) {
-      console.error("Missing subscription_id");
       return new Response(
         JSON.stringify({ error: "subscription_id is required" }),
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
 
+    const baseUrl = Deno.env.get("SITE_URL") || "https://ehdsexplorer.eu";
+
+    // Handle newsletter subscriptions
+    if (type === "newsletter") {
+      const { data: sub, error: fetchError } = await supabase
+        .from("newsletter_subscriptions")
+        .select("email, verification_token")
+        .eq("id", subscription_id)
+        .single();
+
+      if (fetchError || !sub) {
+        return new Response(
+          JSON.stringify({ error: "Subscription not found" }),
+          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        );
+      }
+
+      const verifyUrl = `${baseUrl}/verify-subscription?token=${sub.verification_token}&type=newsletter`;
+
+      const { error: emailError } = await resend.emails.send({
+        from: "EHDS Explorer <notifications@ehdsexplorer.eu>",
+        to: [sub.email],
+        subject: "Verify your EHDS Explorer newsletter subscription",
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 30px; border-radius: 12px 12px 0 0;">
+              <h1 style="color: white; margin: 0; font-size: 24px;">EHDS Explorer</h1>
+              <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">Verify Your Newsletter Subscription</p>
+            </div>
+            <div style="background: #f8fafc; padding: 30px; border: 1px solid #e2e8f0; border-top: none;">
+              <h2 style="color: #1e40af; margin-top: 0;">Confirm Your Subscription</h2>
+              <p>You have subscribed to receive the weekly EHDS Explorer newsletter.</p>
+              <p>Please click the button below to verify your email address:</p>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${verifyUrl}" style="display: inline-block; background: #1e40af; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 500;">Verify My Email</a>
+              </div>
+              <p style="color: #64748b; font-size: 14px;">If the button doesn't work, copy and paste this link:</p>
+              <p style="color: #64748b; font-size: 12px; word-break: break-all;">${verifyUrl}</p>
+            </div>
+            <div style="padding: 20px; text-align: center; color: #64748b; font-size: 12px;">
+              <p>If you didn't request this subscription, you can safely ignore this email.</p>
+            </div>
+          </body>
+          </html>
+        `,
+      });
+
+      if (emailError) {
+        console.error("Resend error for newsletter verification:", JSON.stringify(emailError));
+        return new Response(
+          JSON.stringify({ error: "Failed to send email" }),
+          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+        );
+      }
+
+      console.log(`Newsletter verification email sent to ${sub.email}`);
+      return new Response(
+        JSON.stringify({ success: true, message: "Verification email sent" }),
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Default: implementing act subscriptions
     console.log(`Sending verification email for subscription: ${subscription_id}`);
 
-    // Get subscription details
     const { data: subscription, error: fetchError } = await supabase
       .from("implementing_act_subscriptions")
       .select("email, verification_token, subscribe_all, implementing_act_id")
@@ -50,7 +115,6 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Get implementing act title separately to avoid join issues
     let actTitle = "an implementing act";
     if (!subscription.subscribe_all && subscription.implementing_act_id) {
       const { data: actData } = await supabase
@@ -58,76 +122,55 @@ const handler = async (req: Request): Promise<Response> => {
         .select("title")
         .eq("id", subscription.implementing_act_id)
         .single();
-      if (actData) {
-        actTitle = actData.title;
-      }
+      if (actData) actTitle = actData.title;
     }
 
-    const subscriptionType = subscription.subscribe_all 
-      ? "all implementing act updates" 
+    const subscriptionType = subscription.subscribe_all
+      ? "all implementing act updates"
       : `updates for "${actTitle}"`;
 
-    const baseUrl = Deno.env.get("SITE_URL") || "https://ehdsexplorer.eu";
     const verifyUrl = `${baseUrl}/verify-subscription?token=${subscription.verification_token}`;
 
-    try {
-      const emailResponse = await resend.emails.send({
-        from: "EHDS Explorer <notifications@ehdsexplorer.eu>",
-        to: [subscription.email],
-        subject: "Verify your EHDS Explorer subscription",
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          </head>
-          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 30px; border-radius: 12px 12px 0 0;">
-              <h1 style="color: white; margin: 0; font-size: 24px;">EHDS Explorer</h1>
-              <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">Verify Your Email Subscription</p>
+    const { error: emailError } = await resend.emails.send({
+      from: "EHDS Explorer <notifications@ehdsexplorer.eu>",
+      to: [subscription.email],
+      subject: "Verify your EHDS Explorer subscription",
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 30px; border-radius: 12px 12px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 24px;">EHDS Explorer</h1>
+            <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">Verify Your Email Subscription</p>
+          </div>
+          <div style="background: #f8fafc; padding: 30px; border: 1px solid #e2e8f0; border-top: none;">
+            <h2 style="color: #1e40af; margin-top: 0;">Confirm Your Subscription</h2>
+            <p>You have subscribed to receive ${subscriptionType} from EHDS Explorer.</p>
+            <p>Please click the button below to verify your email address and activate your subscription:</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${verifyUrl}" style="display: inline-block; background: #1e40af; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 500;">Verify My Email</a>
             </div>
-            
-            <div style="background: #f8fafc; padding: 30px; border: 1px solid #e2e8f0; border-top: none;">
-              <h2 style="color: #1e40af; margin-top: 0;">Confirm Your Subscription</h2>
-              
-              <p>You have subscribed to receive ${subscriptionType} from EHDS Explorer.</p>
-              
-              <p>Please click the button below to verify your email address and activate your subscription:</p>
-              
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${verifyUrl}" style="display: inline-block; background: #1e40af; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 500;">Verify My Email</a>
-              </div>
-              
-              <p style="color: #64748b; font-size: 14px;">If the button doesn't work, copy and paste this link into your browser:</p>
-              <p style="color: #64748b; font-size: 12px; word-break: break-all;">${verifyUrl}</p>
-            </div>
-            
-            <div style="padding: 20px; text-align: center; color: #64748b; font-size: 12px;">
-              <p>If you didn't request this subscription, you can safely ignore this email.</p>
-            </div>
-          </body>
-          </html>
-        `,
-      });
+            <p style="color: #64748b; font-size: 14px;">If the button doesn't work, copy and paste this link into your browser:</p>
+            <p style="color: #64748b; font-size: 12px; word-break: break-all;">${verifyUrl}</p>
+          </div>
+          <div style="padding: 20px; text-align: center; color: #64748b; font-size: 12px;">
+            <p>If you didn't request this subscription, you can safely ignore this email.</p>
+          </div>
+        </body>
+        </html>
+      `,
+    });
 
-      if (emailResponse.error) {
-        console.error(`Resend API error for verification email:`, JSON.stringify(emailResponse.error));
-        return new Response(
-          JSON.stringify({ error: "Failed to send email", details: emailResponse.error }),
-          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
-        );
-      }
-
-      console.log(`Verification email sent to ${subscription.email}, Resend ID: ${emailResponse.data?.id}`);
-    } catch (emailError) {
-      console.error(`Failed to send verification email:`, emailError);
+    if (emailError) {
+      console.error(`Resend API error for verification email:`, JSON.stringify(emailError));
       return new Response(
         JSON.stringify({ error: "Failed to send email" }),
         { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
 
+    console.log(`Verification email sent to ${subscription.email}`);
     return new Response(
       JSON.stringify({ success: true, message: "Verification email sent" }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
@@ -135,7 +178,7 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-verification-email function:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "An unexpected error occurred" }),
       { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   }

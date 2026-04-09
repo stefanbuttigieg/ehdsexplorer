@@ -150,11 +150,11 @@ const ImplementingActDetail = () => {
               <div className="mt-6 p-4 rounded-lg bg-primary/10 border border-primary/20">
                 <div className="flex items-center gap-2 text-primary mb-1">
                   <Globe className="h-5 w-5" />
-                  <span className="font-medium">Live Deliverable</span>
+                  <span className="font-medium">Implementing Act</span>
                 </div>
                 <p className="text-sm text-muted-foreground mb-2">{act.deliverableName || act.title}</p>
                 <a href={act.deliverableLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm text-primary hover:underline">
-                  View platform <ExternalLink className="h-4 w-4" />
+                  View on EUR-Lex <ExternalLink className="h-4 w-4" />
                 </a>
               </div>
             )}

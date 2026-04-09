@@ -46,11 +46,13 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **33 implementing/delegated acts** identified in the regulation
 - **6 thematic categories**: Primary Use, EHR Systems, Secondary Use, Health Data Access Bodies, Cross-Border Infrastructure, EHDS Board & Governance
 - **Status tracking**: Pending, Open for Feedback, In Progress, Adopted
+- **Adoption lifecycle dates** — adopted_date, entry_into_force_date, and date_of_effect per implementing act
 - **Feedback period countdowns** with "days remaining" indicators
+- **Feedback changes tracking** — Admin-managed changelog of modifications between feedback and adopted versions
 - **"Open for Feedback" section** highlighting acts with active feedback windows
-- **Live deliverable links** to EHDS acceptance data platform
+- **EUR-Lex integration** — Direct links to adopted implementing acts on EUR-Lex
 - **Related articles** and official document links
-- **Detailed act pages** with dedicated articles and recitals per implementing act
+- **Detailed act pages** with dedicated articles, recitals, and footnotes per implementing act
 - **Searchable content** within each implementing act
 - **Section-based article organization** for complex acts
 - **Data Tables** — Structured data element tables per implementing act with search, CSV/JSON export, FHIR mapping fields
@@ -125,6 +127,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Open Graph and Twitter cards** for social sharing optimization
 - **Admin SEO Management** at `/admin/seo` for page-level configuration
 - **Newsletter signup** for email capture and user retention
+- **Weekly newsletter management** — AI-assisted newsletter composer with subscriber management and bulk distribution
 - **Downloadable resources** with email gating for lead generation
 
 ### ♿ Accessibility

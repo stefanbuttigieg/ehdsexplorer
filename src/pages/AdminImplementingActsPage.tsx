@@ -49,6 +49,9 @@ interface DbImplementingAct {
   official_link: string | null;
   deliverable_link: string | null;
   feedback_deadline: string | null;
+  adoption_date: string | null;
+  entry_into_force_date: string | null;
+  date_of_effect: string | null;
   related_articles: number[] | null;
   created_at: string;
   updated_at: string;
@@ -72,6 +75,9 @@ const AdminImplementingActsPage = () => {
   const [editedOfficialLink, setEditedOfficialLink] = useState('');
   const [editedDeliverableLink, setEditedDeliverableLink] = useState('');
   const [editedFeedbackDeadline, setEditedFeedbackDeadline] = useState('');
+  const [editedAdoptionDate, setEditedAdoptionDate] = useState('');
+  const [editedEntryIntoForceDate, setEditedEntryIntoForceDate] = useState('');
+  const [editedDateOfEffect, setEditedDateOfEffect] = useState('');
   const [editedRelatedArticles, setEditedRelatedArticles] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [deletingAct, setDeletingAct] = useState<DbImplementingAct | null>(null);
@@ -95,7 +101,7 @@ const AdminImplementingActsPage = () => {
         .order('id', { ascending: true });
       
       if (error) throw error;
-      return data as DbImplementingAct[];
+      return data as unknown as DbImplementingAct[];
     },
     enabled: !!user && isEditor
   });
@@ -127,6 +133,9 @@ const AdminImplementingActsPage = () => {
     setEditedOfficialLink('');
     setEditedDeliverableLink('');
     setEditedFeedbackDeadline('');
+    setEditedAdoptionDate('');
+    setEditedEntryIntoForceDate('');
+    setEditedDateOfEffect('');
     setEditedRelatedArticles('');
   };
 
@@ -149,6 +158,9 @@ const AdminImplementingActsPage = () => {
     setEditedOfficialLink(act.official_link || '');
     setEditedDeliverableLink(act.deliverable_link || '');
     setEditedFeedbackDeadline(act.feedback_deadline || '');
+    setEditedAdoptionDate(act.adoption_date || '');
+    setEditedEntryIntoForceDate(act.entry_into_force_date || '');
+    setEditedDateOfEffect(act.date_of_effect || '');
     setEditedRelatedArticles(act.related_articles?.join(', ') || '');
   };
 
@@ -194,6 +206,9 @@ const AdminImplementingActsPage = () => {
           official_link: editedOfficialLink || null,
           deliverable_link: editedDeliverableLink || null,
           feedback_deadline: editedFeedbackDeadline || null,
+          adoption_date: editedAdoptionDate || null,
+          entry_into_force_date: editedEntryIntoForceDate || null,
+          date_of_effect: editedDateOfEffect || null,
           related_articles: relatedArticlesArray.length > 0 ? relatedArticlesArray : null,
         });
 
@@ -267,6 +282,9 @@ const AdminImplementingActsPage = () => {
         official_link: editedOfficialLink || null,
         deliverable_link: editedDeliverableLink || null,
         feedback_deadline: editedFeedbackDeadline || null,
+        adoption_date: editedAdoptionDate || null,
+        entry_into_force_date: editedEntryIntoForceDate || null,
+        date_of_effect: editedDateOfEffect || null,
         related_articles: relatedArticlesArray.length > 0 ? relatedArticlesArray : null,
         previous_status: statusChanged ? oldStatus : editingAct.status
       };
@@ -604,6 +622,32 @@ const AdminImplementingActsPage = () => {
                   onChange={(e) => setEditedFeedbackDeadline(e.target.value)}
                   placeholder="e.g., 06 January 2026"
                 />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>Adoption Date</Label>
+                  <Input
+                    type="date"
+                    value={editedAdoptionDate}
+                    onChange={(e) => setEditedAdoptionDate(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Entry into Force Date</Label>
+                  <Input
+                    type="date"
+                    value={editedEntryIntoForceDate}
+                    onChange={(e) => setEditedEntryIntoForceDate(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Date of Effect</Label>
+                  <Input
+                    type="date"
+                    value={editedDateOfEffect}
+                    onChange={(e) => setEditedDateOfEffect(e.target.value)}
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>Related Articles (comma-separated)</Label>

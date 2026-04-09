@@ -22,6 +22,8 @@ export interface ImplementingAct {
   status: ActStatus;
   feedbackDeadline?: string | null;
   adoptionDate?: string | null;
+  entryIntoForceDate?: string | null;
+  dateOfEffect?: string | null;
   officialLink?: string | null;
   deliverableLink?: string | null;
   deliverableName?: string | null;
@@ -57,10 +59,13 @@ const mapDbToAct = (row: any): ImplementingAct => {
     title: row.title,
     description: row.description,
     type: row.type as 'implementing' | 'delegated',
-    theme: themesArray[0] || row.theme as ActTheme, // Keep for backward compatibility
+    theme: themesArray[0] || row.theme as ActTheme,
     themes: themesArray,
     status: row.status as ActStatus,
     feedbackDeadline: row.feedback_deadline,
+    adoptionDate: row.adoption_date,
+    entryIntoForceDate: row.entry_into_force_date,
+    dateOfEffect: row.date_of_effect,
     officialLink: row.official_link,
     deliverableLink: row.deliverable_link,
     relatedArticles: row.related_articles || [],

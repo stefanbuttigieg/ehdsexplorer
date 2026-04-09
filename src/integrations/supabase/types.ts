@@ -2277,6 +2277,56 @@ export type Database = {
           },
         ]
       }
+      implementing_act_changes: {
+        Row: {
+          change_type: string
+          created_at: string
+          id: string
+          implementing_act_id: string
+          is_significant: boolean
+          original_text: string | null
+          revised_text: string | null
+          section_reference: string | null
+          sort_order: number
+          summary: string
+          updated_at: string
+        }
+        Insert: {
+          change_type?: string
+          created_at?: string
+          id?: string
+          implementing_act_id: string
+          is_significant?: boolean
+          original_text?: string | null
+          revised_text?: string | null
+          section_reference?: string | null
+          sort_order?: number
+          summary: string
+          updated_at?: string
+        }
+        Update: {
+          change_type?: string
+          created_at?: string
+          id?: string
+          implementing_act_id?: string
+          is_significant?: boolean
+          original_text?: string | null
+          revised_text?: string | null
+          section_reference?: string | null
+          sort_order?: number
+          summary?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "implementing_act_changes_implementing_act_id_fkey"
+            columns: ["implementing_act_id"]
+            isOneToOne: false
+            referencedRelation: "implementing_acts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       implementing_act_data_columns: {
         Row: {
           column_key: string

@@ -59,6 +59,7 @@ const ImplementingActDetail = () => {
   const { isBookmarked, toggleBookmark } = useBookmarks();
   const relatedDeliverables = act ? getDeliverablesByImplementingAct(jointActionDeliverables, act.id) : [];
   const relatedPublishedWorks = act ? getPublishedWorksByImplementingAct(publishedWorks, act.id) : [];
+  const { data: feedbackChanges = [] } = useImplementingActChanges(act?.id ?? null);
 
   if (isLoading) {
     return (

@@ -215,12 +215,7 @@ const ImplementingActContent = ({ implementingActId }: ImplementingActContentPro
                                 </div>
                               </AccordionTrigger>
                               <AccordionContent className="px-4 pb-4">
-                                <AnnotatedContent
-                                  content={article.content}
-                                  contentType="implementing_act"
-                                  contentId={`${implementingActId}-art-${article.article_number}`}
-                                  className="legal-text"
-                                />
+                                <IAArticleFootnotes articleId={article.id} content={article.content} />
                               </AccordionContent>
                             </AccordionItem>
                           ))}
@@ -252,12 +247,7 @@ const ImplementingActContent = ({ implementingActId }: ImplementingActContentPro
                             </div>
                           </AccordionTrigger>
                           <AccordionContent className="px-4 pb-4">
-                            <AnnotatedContent
-                              content={article.content}
-                              contentType="implementing_act"
-                              contentId={`${implementingActId}-art-${article.article_number}`}
-                              className="legal-text"
-                            />
+                            <IAArticleFootnotes articleId={article.id} content={article.content} />
                           </AccordionContent>
                         </AccordionItem>
                       ))}

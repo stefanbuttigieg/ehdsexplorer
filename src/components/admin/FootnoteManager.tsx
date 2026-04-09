@@ -42,6 +42,8 @@ export function FootnoteManager({
         content,
         article_id: articleId,
         recital_id: recitalId,
+        implementing_act_article_id: implementingActArticleId,
+        implementing_act_recital_id: implementingActRecitalId,
       });
       setMarker('');
       setContent('');

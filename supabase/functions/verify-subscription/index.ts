@@ -12,7 +12,7 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { token } = await req.json();
+    const { token, type } = await req.json();
 
     if (!token || typeof token !== "string") {
       return new Response(
@@ -26,6 +26,44 @@ serve(async (req: Request) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
+    // Handle newsletter subscriptions
+    if (type === "newsletter") {
+      const { data, error } = await supabase
+        .from("newsletter_subscriptions")
+        .update({ is_verified: true, verified_at: new Date().toISOString() })
+        .eq("verification_token", token)
+        .is("unsubscribed_at", null)
+        .select("id")
+        .single();
+
+      if (error || !data) {
+        // Check if already verified
+        const { data: existing } = await supabase
+          .from("newsletter_subscriptions")
+          .select("id, is_verified")
+          .eq("verification_token", token)
+          .single();
+
+        if (existing?.is_verified) {
+          return new Response(
+            JSON.stringify({ success: true, already_verified: true }),
+            { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        return new Response(
+          JSON.stringify({ error: "This verification link is invalid or has already been used." }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({ success: true, type: "newsletter" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Default: implementing act subscriptions
     const { data, error } = await supabase
       .from("implementing_act_subscriptions")
       .update({ verified: true })
@@ -34,6 +72,22 @@ serve(async (req: Request) => {
       .single();
 
     if (error || !data) {
+      // Also try newsletter table as fallback (in case type param was missing)
+      const { data: nlData, error: nlError } = await supabase
+        .from("newsletter_subscriptions")
+        .update({ is_verified: true, verified_at: new Date().toISOString() })
+        .eq("verification_token", token)
+        .is("unsubscribed_at", null)
+        .select("id")
+        .single();
+
+      if (!nlError && nlData) {
+        return new Response(
+          JSON.stringify({ success: true, type: "newsletter" }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
       return new Response(
         JSON.stringify({ error: "This verification link is invalid or has already been used." }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -41,7 +95,7 @@ serve(async (req: Request) => {
     }
 
     return new Response(
-      JSON.stringify({ success: true }),
+      JSON.stringify({ success: true, type: "implementing_act" }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {

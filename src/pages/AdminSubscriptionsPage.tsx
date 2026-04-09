@@ -438,30 +438,48 @@ const AdminSubscriptionsPage = () => {
                               {format(new Date(sub.created_at), 'MMM d, yyyy')}
                             </TableCell>
                             <TableCell>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Remove Subscriber?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      This will remove {sub.email} from the newsletter. This action cannot be undone.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction
-                                      onClick={() => deleteNewsletterMutation.mutate(sub.id)}
-                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                    >
-                                      Remove
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
+                              <div className="flex items-center gap-1">
+                                {!sub.is_verified && !sub.unsubscribed_at && (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8"
+                                        onClick={() => resendNewsletterMutation.mutate(sub.id)}
+                                        disabled={resendNewsletterMutation.isPending}
+                                      >
+                                        <RefreshCw className={`h-4 w-4 ${resendNewsletterMutation.isPending ? 'animate-spin' : ''}`} />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>Resend verification email</TooltipContent>
+                                  </Tooltip>
+                                )}
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Remove Subscriber?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This will remove {sub.email} from the newsletter. This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() => deleteNewsletterMutation.mutate(sub.id)}
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                      >
+                                        Remove
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}

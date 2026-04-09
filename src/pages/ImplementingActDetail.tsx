@@ -189,6 +189,94 @@ const ImplementingActDetail = () => {
           </CardContent>
         </Card>
 
+        {/* Key Dates */}
+        {(act.adoptionDate || act.entryIntoForceDate || act.dateOfEffect) && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <CalendarCheck className="h-5 w-5 text-primary" />
+                Key Dates
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {act.adoptionDate && (
+                  <div className="p-3 rounded-lg bg-muted">
+                    <p className="text-xs text-muted-foreground mb-1">Adoption Date</p>
+                    <p className="font-medium">{format(new Date(act.adoptionDate), 'dd MMMM yyyy')}</p>
+                  </div>
+                )}
+                {act.entryIntoForceDate && (
+                  <div className="p-3 rounded-lg bg-muted">
+                    <p className="text-xs text-muted-foreground mb-1">Entry into Force</p>
+                    <p className="font-medium">{format(new Date(act.entryIntoForceDate), 'dd MMMM yyyy')}</p>
+                  </div>
+                )}
+                {act.dateOfEffect && (
+                  <div className="p-3 rounded-lg bg-muted">
+                    <p className="text-xs text-muted-foreground mb-1">Date of Effect</p>
+                    <p className="font-medium">{format(new Date(act.dateOfEffect), 'dd MMMM yyyy')}</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Changes from Feedback Period */}
+        {feedbackChanges.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Gavel className="h-5 w-5 text-primary" />
+                Changes from Feedback Period
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Summary of modifications made between the feedback draft and the adopted version.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {feedbackChanges.map((change) => {
+                const typeConfig = CHANGE_TYPES.find(t => t.value === change.change_type);
+                return (
+                  <div key={change.id} className={`p-4 rounded-lg border ${change.is_significant ? 'border-primary/40 bg-primary/5' : 'border-border'}`}>
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <Badge variant={change.is_significant ? 'default' : 'outline'} className="text-xs">
+                        {typeConfig?.label || change.change_type}
+                      </Badge>
+                      {change.section_reference && (
+                        <span className="text-xs text-muted-foreground font-mono">{change.section_reference}</span>
+                      )}
+                      {change.is_significant && (
+                        <Badge variant="secondary" className="text-xs">
+                          <AlertTriangle className="h-3 w-3 mr-1" />
+                          Significant
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-sm font-medium mb-2">{change.summary}</p>
+                    {(change.original_text || change.revised_text) && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+                        {change.original_text && (
+                          <div className="p-3 rounded bg-destructive/10 border border-destructive/20">
+                            <p className="text-xs font-medium text-destructive mb-1">Draft version</p>
+                            <p className="text-xs">{change.original_text}</p>
+                          </div>
+                        )}
+                        {change.revised_text && (
+                          <div className="p-3 rounded bg-green-500/10 border border-green-500/20">
+                            <p className="text-xs font-medium text-green-700 dark:text-green-400 mb-1">Adopted version</p>
+                            <p className="text-xs">{change.revised_text}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        )}
         {/* Implementing Act Content (Articles & Recitals) */}
         <div className="mb-6">
           <ImplementingActContent implementingActId={act.id} />

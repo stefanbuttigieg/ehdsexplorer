@@ -15,6 +15,33 @@ import {
   groupArticlesBySection,
 } from "@/hooks/useImplementingActContent";
 import { AnnotatedContent } from "@/components/AnnotatedContent";
+import { useFootnotesByIAArticle, useFootnotesByIARecital } from "@/hooks/useFootnotes";
+import ContentWithFootnotes from "@/components/ContentWithFootnotes";
+import FootnotesSection from "@/components/FootnotesSection";
+
+/** Inline wrapper: fetches & renders footnotes for a single IA article */
+function IAArticleFootnotes({ articleId, content }: { articleId: string; content: string }) {
+  const { data: footnotes = [] } = useFootnotesByIAArticle(articleId);
+  if (footnotes.length === 0) return <div className="whitespace-pre-wrap legal-text">{content}</div>;
+  return (
+    <div className="space-y-4">
+      <ContentWithFootnotes content={content} footnotes={footnotes} className="legal-text" />
+      <FootnotesSection footnotes={footnotes} />
+    </div>
+  );
+}
+
+/** Inline wrapper: fetches & renders footnotes for a single IA recital */
+function IARecitalFootnotes({ recitalId, content }: { recitalId: string; content: string }) {
+  const { data: footnotes = [] } = useFootnotesByIARecital(recitalId);
+  if (footnotes.length === 0) return <div className="whitespace-pre-wrap legal-text">{content}</div>;
+  return (
+    <div className="space-y-4">
+      <ContentWithFootnotes content={content} footnotes={footnotes} className="legal-text" />
+      <FootnotesSection footnotes={footnotes} />
+    </div>
+  );
+}
 
 interface ImplementingActContentProps {
   implementingActId: string;

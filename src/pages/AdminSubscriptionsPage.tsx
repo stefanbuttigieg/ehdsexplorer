@@ -26,6 +26,9 @@ const AdminSubscriptionsPage = () => {
 
   const [newsletterSubject, setNewsletterSubject] = useState('');
   const [newsletterBody, setNewsletterBody] = useState('');
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiTone, setAiTone] = useState<'balanced' | 'formal' | 'casual'>('balanced');
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {

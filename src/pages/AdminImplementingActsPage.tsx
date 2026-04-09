@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Search, Edit, Save, X, ArrowLeft, Plus, Trash2, FileText } from 'lucide-react';
+import { Search, Edit, Save, X, ArrowLeft, Plus, Trash2, FileText, GitCompareArrows } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -486,6 +486,12 @@ const AdminImplementingActsPage = () => {
                         <Button variant="outline" size="sm" className="text-xs sm:text-sm">
                           <FileText className="h-4 w-4 sm:mr-1" />
                           <span className="hidden sm:inline">Content</span>
+                        </Button>
+                      </Link>
+                      <Link to={`/admin/implementing-acts/${act.id}/changes`}>
+                        <Button variant="outline" size="sm" className="text-xs sm:text-sm">
+                          <GitCompareArrows className="h-4 w-4 sm:mr-1" />
+                          <span className="hidden sm:inline">Changes</span>
                         </Button>
                       </Link>
                       <Button variant="outline" size="sm" onClick={() => handleEdit(act)} className="text-xs sm:text-sm">

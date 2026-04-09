@@ -49,6 +49,9 @@ interface DbImplementingAct {
   official_link: string | null;
   deliverable_link: string | null;
   feedback_deadline: string | null;
+  adoption_date: string | null;
+  entry_into_force_date: string | null;
+  date_of_effect: string | null;
   related_articles: number[] | null;
   created_at: string;
   updated_at: string;
@@ -72,6 +75,9 @@ const AdminImplementingActsPage = () => {
   const [editedOfficialLink, setEditedOfficialLink] = useState('');
   const [editedDeliverableLink, setEditedDeliverableLink] = useState('');
   const [editedFeedbackDeadline, setEditedFeedbackDeadline] = useState('');
+  const [editedAdoptionDate, setEditedAdoptionDate] = useState('');
+  const [editedEntryIntoForceDate, setEditedEntryIntoForceDate] = useState('');
+  const [editedDateOfEffect, setEditedDateOfEffect] = useState('');
   const [editedRelatedArticles, setEditedRelatedArticles] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [deletingAct, setDeletingAct] = useState<DbImplementingAct | null>(null);
@@ -127,6 +133,9 @@ const AdminImplementingActsPage = () => {
     setEditedOfficialLink('');
     setEditedDeliverableLink('');
     setEditedFeedbackDeadline('');
+    setEditedAdoptionDate('');
+    setEditedEntryIntoForceDate('');
+    setEditedDateOfEffect('');
     setEditedRelatedArticles('');
   };
 
@@ -149,6 +158,9 @@ const AdminImplementingActsPage = () => {
     setEditedOfficialLink(act.official_link || '');
     setEditedDeliverableLink(act.deliverable_link || '');
     setEditedFeedbackDeadline(act.feedback_deadline || '');
+    setEditedAdoptionDate(act.adoption_date || '');
+    setEditedEntryIntoForceDate(act.entry_into_force_date || '');
+    setEditedDateOfEffect(act.date_of_effect || '');
     setEditedRelatedArticles(act.related_articles?.join(', ') || '');
   };
 

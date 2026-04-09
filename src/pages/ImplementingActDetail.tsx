@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { ExternalLink, Calendar, Bookmark, Globe, Clock, CalendarClock, CalendarX, CalendarCheck, Gavel, AlertTriangle, ArrowRight } from "lucide-react";
+import { ExternalLink, Calendar, Bookmark, Globe, Clock, CalendarClock, CalendarX, CalendarCheck, Gavel, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

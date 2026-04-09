@@ -510,6 +510,7 @@ const AdminImplementingActContentPage = () => {
                         onChange={(v) => setEditingArticle({ ...editingArticle, content: v })}
                       />
                     </div>
+                    <IAFootnoteSection type="article" parentId={editingArticle.id} />
                     <div className="flex gap-2">
                       <Button onClick={() => updateArticleMutation.mutate(editingArticle)}>
                         <Save className="h-4 w-4 mr-2" /> Save
@@ -621,6 +622,7 @@ const AdminImplementingActContentPage = () => {
                         onChange={(v) => setEditingRecital({ ...editingRecital, content: v })}
                       />
                     </div>
+                    <IAFootnoteSection type="recital" parentId={editingRecital.id} />
                     <div className="flex gap-2">
                       <Button onClick={() => updateRecitalMutation.mutate(editingRecital)}>
                         <Save className="h-4 w-4 mr-2" /> Save

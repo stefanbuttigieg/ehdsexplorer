@@ -5,6 +5,48 @@ All notable changes to the EHDS Regulation Explorer will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-04-09
+
+### Added
+
+#### Implementing Act Adoption Lifecycle
+- **Adoption date fields** — `adopted_date`, `entry_into_force_date`, and `date_of_effect` columns on implementing acts for tracking the full legislative lifecycle
+- **Feedback Changes Tracker** — New `implementing_act_feedback_changes` table to document modifications between feedback period and adopted versions
+- **Admin Feedback Changes UI** — Dedicated management page at `/admin/implementing-act-changes` for recording, categorizing, and describing changes (Added, Removed, Modified, Clarified)
+- **Public display** — Feedback changes tab on implementing act detail pages showing categorized changelog
+- **EUR-Lex links** — "View on EUR-Lex" button replacing "View platform" on adopted implementing acts
+
+#### Implementing Act Footnotes
+- **Footnotes support** extended to implementing act articles and recitals
+- **Foreign key references** — `footnotes` table now supports `implementing_act_article_id` and `implementing_act_recital_id` columns
+- **Inline rendering** — Footnote markers and tooltips display within implementing act content pages
+
+#### Newsletter Management System
+- **Admin Subscriptions Dashboard** — Tabbed interface at `/admin/subscriptions` for managing Newsletter and IA Alert subscribers
+- **Real-time statistics** — Total, Verified, Pending, and Unsubscribed counts per subscription type
+- **Newsletter Composer** — HTML content editor with subject line, confirmation dialog, and bulk send via Resend API
+- **AI Newsletter Assistant** — Auto-generates weekly newsletter drafts by aggregating news, implementing acts, and national legislation from the past 7 days
+- **Tone selection** — Balanced, Formal, or Casual newsletter style
+- **Rate-limited distribution** — Edge function (`send-weekly-newsletter`) with per-email throttling and admin role enforcement
+- **Newsletter verification fix** — `verify-subscription` edge function now correctly handles both newsletter and IA alert verification tokens
+
+### Security
+
+#### OTP Code Hashing
+- Email MFA OTP codes are now hashed with SHA-256 before database storage
+- Verification compares hashes instead of plaintext codes
+- Error messages sanitized to prevent information leakage
+
+#### Session-Scoped Data Access Hardening
+- `readiness_assessments` and `toolkit_profiles` SELECT/UPDATE policies restricted so session-based records are only accessible to anonymous users
+- Prevents authenticated users from reading other sessions' assessment data
+
+#### Obligation Evidence Storage Restriction
+- Storage SELECT policy on `obligation-evidence` bucket now restricts file access to country-assigned users and admins
+- Aligns with the existing INSERT policy that already enforced country-scoped uploads
+
+---
+
 ## [2.1.0] - 2026-03-31
 
 ### Added

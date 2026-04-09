@@ -77,6 +77,7 @@ const NewsPage = lazy(() => import("./pages/NewsPage"));
 const NewsDetailPage = lazy(() => import("./pages/NewsDetailPage"));
 const AdminNewsPage = lazy(() => import("./pages/AdminNewsPage"));
 const AdminImplementingActContentPage = lazy(() => import("./pages/AdminImplementingActContentPage"));
+const AdminImplementingActChangesPage = lazy(() => import("./pages/AdminImplementingActChangesPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const HelpCenterPage = lazy(() => import("./pages/HelpCenterPage"));
 const AdminPlainLanguagePage = lazy(() => import("./pages/AdminPlainLanguagePage"));
@@ -245,6 +246,7 @@ const App = () => (
             <Route path="/admin/annexes" element={<AdminAnnexesPage />} />
             <Route path="/admin/implementing-acts" element={<AdminImplementingActsPage />} />
             <Route path="/admin/implementing-acts/:id/content" element={<AdminImplementingActContentPage />} />
+            <Route path="/admin/implementing-acts/:id/changes" element={<AdminImplementingActChangesPage />} />
             <Route path="/admin/bulk-import" element={<AdminBulkImportPage />} />
             <Route path="/admin/chapters" element={<AdminChaptersPage />} />
             <Route path="/admin/overview" element={<AdminOverviewPage />} />

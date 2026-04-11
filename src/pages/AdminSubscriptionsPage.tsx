@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import NewsletterRichEditor from '@/components/admin/NewsletterRichEditor';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -342,12 +343,11 @@ const AdminSubscriptionsPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-1.5 block">Body (HTML supported)</label>
-                  <Textarea
-                    placeholder="Write your newsletter content here... HTML tags are supported."
+                  <label className="text-sm font-medium mb-1.5 block">Body</label>
+                  <NewsletterRichEditor
                     value={newsletterBody}
-                    onChange={e => setNewsletterBody(e.target.value)}
-                    rows={10}
+                    onChange={setNewsletterBody}
+                    placeholder="Write your newsletter content here..."
                   />
                 </div>
                 <AlertDialog>

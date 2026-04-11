@@ -72,6 +72,7 @@
     "react-hook-form": "^7.61.1",
     "react-joyride": "^2.9.3",
     "react-markdown": "^10.1.0",
+    "react-quill-new": "^3.3.4",
     "react-resizable-panels": "^2.1.9",
     "react-router-dom": "^6.30.1",
     "recharts": "^2.15.4",

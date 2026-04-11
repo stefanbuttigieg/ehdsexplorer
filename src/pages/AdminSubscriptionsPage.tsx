@@ -343,12 +343,11 @@ const AdminSubscriptionsPage = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-1.5 block">Body (HTML supported)</label>
-                  <Textarea
-                    placeholder="Write your newsletter content here... HTML tags are supported."
+                  <label className="text-sm font-medium mb-1.5 block">Body</label>
+                  <NewsletterRichEditor
                     value={newsletterBody}
-                    onChange={e => setNewsletterBody(e.target.value)}
-                    rows={10}
+                    onChange={setNewsletterBody}
+                    placeholder="Write your newsletter content here..."
                   />
                 </div>
                 <AlertDialog>

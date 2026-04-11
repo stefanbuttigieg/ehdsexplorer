@@ -691,6 +691,95 @@ const AdminSubscriptionsPage = () => {
                 )}
               </CardContent>
             </Card>
+        </TabsContent>
+
+          {/* Email Logs Tab */}
+          <TabsContent value="email-logs" className="space-y-6">
+            {/* Stats */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardDescription>Total Sent</CardDescription>
+                  <CardTitle className="text-3xl">{emailLogs.filter(l => l.status === 'sent').length}</CardTitle>
+                </CardHeader>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardDescription>Failed</CardDescription>
+                  <CardTitle className="text-3xl text-destructive">{emailLogs.filter(l => l.status === 'failed' || l.status === 'dlq').length}</CardTitle>
+                </CardHeader>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardDescription>Pending</CardDescription>
+                  <CardTitle className="text-3xl">{emailLogs.filter(l => l.status === 'pending').length}</CardTitle>
+                </CardHeader>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardDescription>Total Logs</CardDescription>
+                  <CardTitle className="text-3xl">{emailLogs.length}</CardTitle>
+                </CardHeader>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-5 w-5" />
+                  Email Send History
+                </CardTitle>
+                <CardDescription>Log of all outgoing emails (deduplicated by message)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {emailLogsLoading ? (
+                  <div className="space-y-2">
+                    {[1, 2, 3, 4, 5].map(i => (
+                      <Skeleton key={i} className="h-12 w-full" />
+                    ))}
+                  </div>
+                ) : emailLogs.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">No email logs yet. Logs will appear after you send a newsletter.</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Template</TableHead>
+                          <TableHead>Recipient</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Sent At</TableHead>
+                          <TableHead>Error</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {emailLogs.map((log) => (
+                          <TableRow key={log.id}>
+                            <TableCell>
+                              <Badge variant="outline">{log.template_name}</Badge>
+                            </TableCell>
+                            <TableCell className="font-mono text-sm">{log.recipient_email}</TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={log.status === 'sent' ? 'default' : log.status === 'pending' ? 'secondary' : 'destructive'}
+                              >
+                                {log.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {format(new Date(log.created_at), 'MMM d, yyyy HH:mm')}
+                            </TableCell>
+                            <TableCell className="text-sm text-destructive max-w-[200px] truncate">
+                              {log.error_message || '—'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

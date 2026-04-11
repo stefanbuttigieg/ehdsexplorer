@@ -81,6 +81,31 @@ const AdminSubscriptionsPage = () => {
     enabled: !!user && isAdmin,
   });
 
+  // Email send logs
+  const { data: emailLogs = [], isLoading: emailLogsLoading } = useQuery({
+    queryKey: ['admin-email-logs'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('email_send_log')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(200);
+
+      if (error) throw error;
+      
+      // Deduplicate by message_id, keeping the latest status
+      const byMessageId = new Map<string, typeof data[0]>();
+      for (const row of data) {
+        const key = row.message_id || row.id;
+        if (!byMessageId.has(key)) {
+          byMessageId.set(key, row);
+        }
+      }
+      return Array.from(byMessageId.values());
+    },
+    enabled: !!user && isAdmin,
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase

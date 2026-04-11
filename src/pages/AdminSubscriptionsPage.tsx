@@ -242,6 +242,10 @@ const AdminSubscriptionsPage = () => {
               <Mail className="h-4 w-4" />
               IA Alerts ({subscriptions.length})
             </TabsTrigger>
+            <TabsTrigger value="email-logs" className="flex items-center gap-2">
+              <Activity className="h-4 w-4" />
+              Email Logs
+            </TabsTrigger>
           </TabsList>
 
           {/* Newsletter Tab */}

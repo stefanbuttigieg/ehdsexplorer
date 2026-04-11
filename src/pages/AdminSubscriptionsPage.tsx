@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Mail, Trash2, Globe, FileText, CheckCircle, XCircle, RefreshCw, Send, Loader2, Newspaper, Sparkles, Wand2 } from 'lucide-react';
+import { ArrowLeft, Mail, Trash2, Globe, FileText, CheckCircle, XCircle, RefreshCw, Send, Loader2, Newspaper, Sparkles, Wand2, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -77,6 +77,31 @@ const AdminSubscriptionsPage = () => {
 
       if (error) throw error;
       return data;
+    },
+    enabled: !!user && isAdmin,
+  });
+
+  // Email send logs
+  const { data: emailLogs = [], isLoading: emailLogsLoading } = useQuery({
+    queryKey: ['admin-email-logs'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('email_send_log')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(200);
+
+      if (error) throw error;
+      
+      // Deduplicate by message_id, keeping the latest status
+      const byMessageId = new Map<string, typeof data[0]>();
+      for (const row of data) {
+        const key = row.message_id || row.id;
+        if (!byMessageId.has(key)) {
+          byMessageId.set(key, row);
+        }
+      }
+      return Array.from(byMessageId.values());
     },
     enabled: !!user && isAdmin,
   });
@@ -216,6 +241,10 @@ const AdminSubscriptionsPage = () => {
             <TabsTrigger value="alerts" className="flex items-center gap-2">
               <Mail className="h-4 w-4" />
               IA Alerts ({subscriptions.length})
+            </TabsTrigger>
+            <TabsTrigger value="email-logs" className="flex items-center gap-2">
+              <Activity className="h-4 w-4" />
+              Email Logs
             </TabsTrigger>
           </TabsList>
 
@@ -653,6 +682,95 @@ const AdminSubscriptionsPage = () => {
                                   </AlertDialogContent>
                                 </AlertDialog>
                               </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+        </TabsContent>
+
+          {/* Email Logs Tab */}
+          <TabsContent value="email-logs" className="space-y-6">
+            {/* Stats */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardDescription>Total Sent</CardDescription>
+                  <CardTitle className="text-3xl">{emailLogs.filter(l => l.status === 'sent').length}</CardTitle>
+                </CardHeader>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardDescription>Failed</CardDescription>
+                  <CardTitle className="text-3xl text-destructive">{emailLogs.filter(l => l.status === 'failed' || l.status === 'dlq').length}</CardTitle>
+                </CardHeader>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardDescription>Pending</CardDescription>
+                  <CardTitle className="text-3xl">{emailLogs.filter(l => l.status === 'pending').length}</CardTitle>
+                </CardHeader>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardDescription>Total Logs</CardDescription>
+                  <CardTitle className="text-3xl">{emailLogs.length}</CardTitle>
+                </CardHeader>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-5 w-5" />
+                  Email Send History
+                </CardTitle>
+                <CardDescription>Log of all outgoing emails (deduplicated by message)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {emailLogsLoading ? (
+                  <div className="space-y-2">
+                    {[1, 2, 3, 4, 5].map(i => (
+                      <Skeleton key={i} className="h-12 w-full" />
+                    ))}
+                  </div>
+                ) : emailLogs.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">No email logs yet. Logs will appear after you send a newsletter.</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Template</TableHead>
+                          <TableHead>Recipient</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Sent At</TableHead>
+                          <TableHead>Error</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {emailLogs.map((log) => (
+                          <TableRow key={log.id}>
+                            <TableCell>
+                              <Badge variant="outline">{log.template_name}</Badge>
+                            </TableCell>
+                            <TableCell className="font-mono text-sm">{log.recipient_email}</TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={log.status === 'sent' ? 'default' : log.status === 'pending' ? 'secondary' : 'destructive'}
+                              >
+                                {log.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {format(new Date(log.created_at), 'MMM d, yyyy HH:mm')}
+                            </TableCell>
+                            <TableCell className="text-sm text-destructive max-w-[200px] truncate">
+                              {log.error_message || '—'}
                             </TableCell>
                           </TableRow>
                         ))}

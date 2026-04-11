@@ -15,7 +15,6 @@ serve(async (req: Request) => {
   }
 
   try {
-    // Verify the caller is an admin
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(
@@ -28,7 +27,6 @@ serve(async (req: Request) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // Verify caller is admin using their JWT
     const userClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -40,7 +38,6 @@ serve(async (req: Request) => {
       );
     }
 
-    // Check admin role
     const serviceClient = createClient(supabaseUrl, supabaseServiceKey);
     const { data: roleData } = await serviceClient
       .from("user_roles")
@@ -72,7 +69,6 @@ serve(async (req: Request) => {
       );
     }
 
-    // Fetch all verified, non-unsubscribed newsletter subscribers
     const { data: subscribers, error: fetchError } = await serviceClient
       .from("newsletter_subscriptions")
       .select("id, email")
@@ -95,11 +91,13 @@ serve(async (req: Request) => {
     }
 
     const baseUrl = Deno.env.get("SITE_URL") || "https://ehdsexplorer.eu";
+    const batchId = crypto.randomUUID();
     let sentCount = 0;
     const errors: string[] = [];
 
     for (const subscriber of subscribers) {
       const unsubscribeUrl = `${baseUrl}/unsubscribe?email=${encodeURIComponent(subscriber.email)}&type=newsletter`;
+      const messageId = `newsletter-${batchId}-${subscriber.id}`;
 
       const htmlContent = `
         <!DOCTYPE html>
@@ -126,6 +124,15 @@ serve(async (req: Request) => {
         </html>
       `;
 
+      // Log pending
+      await serviceClient.from("email_send_log").insert({
+        message_id: messageId,
+        template_name: "newsletter",
+        recipient_email: subscriber.email,
+        status: "pending",
+        metadata: { subject, batch_id: batchId, sent_by: user.id },
+      });
+
       try {
         const emailResponse = await resend.emails.send({
           from: "EHDS Explorer <notifications@ehdsexplorer.eu>",
@@ -137,15 +144,37 @@ serve(async (req: Request) => {
         if (emailResponse.error) {
           console.error(`Failed to send to ${subscriber.email}:`, emailResponse.error);
           errors.push(subscriber.email);
+          await serviceClient.from("email_send_log").insert({
+            message_id: messageId,
+            template_name: "newsletter",
+            recipient_email: subscriber.email,
+            status: "failed",
+            error_message: JSON.stringify(emailResponse.error),
+            metadata: { subject, batch_id: batchId },
+          });
         } else {
           sentCount++;
+          await serviceClient.from("email_send_log").insert({
+            message_id: messageId,
+            template_name: "newsletter",
+            recipient_email: subscriber.email,
+            status: "sent",
+            metadata: { subject, batch_id: batchId, resend_id: emailResponse.data?.id },
+          });
         }
-      } catch (emailError) {
+      } catch (emailError: any) {
         console.error(`Error sending to ${subscriber.email}:`, emailError);
         errors.push(subscriber.email);
+        await serviceClient.from("email_send_log").insert({
+          message_id: messageId,
+          template_name: "newsletter",
+          recipient_email: subscriber.email,
+          status: "failed",
+          error_message: emailError?.message || "Unknown error",
+          metadata: { subject, batch_id: batchId },
+        });
       }
 
-      // Small delay to avoid rate limiting
       await new Promise(resolve => setTimeout(resolve, 100));
     }
 

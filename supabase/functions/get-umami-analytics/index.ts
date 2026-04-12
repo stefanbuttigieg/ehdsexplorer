@@ -13,7 +13,7 @@ serve(async (req) => {
   try {
     const apiToken = Deno.env.get("UMAMI_API_TOKEN");
     const websiteId = Deno.env.get("VITE_UMAMI_WEBSITE_ID");
-    
+
     if (!apiToken || !websiteId) {
       return new Response(
         JSON.stringify({ error: "Umami not configured", configured: false }),
@@ -21,16 +21,15 @@ serve(async (req) => {
       );
     }
 
-    // Parse optional custom date range from request body
     let customStartAt: number | null = null;
     let customEndAt: number | null = null;
-    
+
     if (req.method === "POST") {
       try {
         const body = await req.json();
         if (body.startAt) customStartAt = body.startAt;
         if (body.endAt) customEndAt = body.endAt;
-      } catch { /* ignore parse errors, use defaults */ }
+      } catch { /* ignore */ }
     }
 
     const now = new Date();
@@ -39,7 +38,6 @@ serve(async (req) => {
     startOfWeek.setDate(startOfDay.getDate() - 7);
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    // Custom range defaults to last 7 days if not provided
     const rangeStart = customStartAt ?? startOfWeek.getTime();
     const rangeEnd = customEndAt ?? now.getTime();
 
@@ -80,21 +78,36 @@ serve(async (req) => {
       }
     };
 
-    // Determine appropriate unit for chart based on range size
     const rangeDays = (rangeEnd - rangeStart) / (1000 * 60 * 60 * 24);
     const unit = rangeDays > 90 ? 'month' : rangeDays > 14 ? 'week' : 'day';
 
+    const baseUrl = `https://api.umami.is/v1/websites/${websiteId}`;
+
+    // First batch: stats
     const [todayStats, weekStats, monthStats, activeVisitors, rangeStats] = await Promise.all([
-      safeFetch(`https://api.umami.is/v1/websites/${websiteId}/stats?startAt=${startOfDay.getTime()}&endAt=${now.getTime()}`, "today stats"),
-      safeFetch(`https://api.umami.is/v1/websites/${websiteId}/stats?startAt=${startOfWeek.getTime()}&endAt=${now.getTime()}`, "week stats"),
-      safeFetch(`https://api.umami.is/v1/websites/${websiteId}/stats?startAt=${startOfMonth.getTime()}&endAt=${now.getTime()}`, "month stats"),
-      safeFetch(`https://api.umami.is/v1/websites/${websiteId}/active`, "active visitors"),
-      safeFetch(`https://api.umami.is/v1/websites/${websiteId}/stats?startAt=${rangeStart}&endAt=${rangeEnd}`, "custom range stats"),
+      safeFetch(`${baseUrl}/stats?startAt=${startOfDay.getTime()}&endAt=${now.getTime()}`, "today stats"),
+      safeFetch(`${baseUrl}/stats?startAt=${startOfWeek.getTime()}&endAt=${now.getTime()}`, "week stats"),
+      safeFetch(`${baseUrl}/stats?startAt=${startOfMonth.getTime()}&endAt=${now.getTime()}`, "month stats"),
+      safeFetch(`${baseUrl}/active`, "active visitors"),
+      safeFetch(`${baseUrl}/stats?startAt=${rangeStart}&endAt=${rangeEnd}`, "custom range stats"),
     ]);
 
-    const [pageviewsData, topPages] = await Promise.all([
-      safeFetch(`https://api.umami.is/v1/websites/${websiteId}/pageviews?startAt=${rangeStart}&endAt=${rangeEnd}&unit=${unit}`, "pageviews"),
-      safeFetch(`https://api.umami.is/v1/websites/${websiteId}/metrics?startAt=${rangeStart}&endAt=${rangeEnd}&type=url`, "top pages"),
+    // Second batch: detailed metrics
+    const metricsRange = `startAt=${rangeStart}&endAt=${rangeEnd}`;
+    const [
+      pageviewsData, topPages, countries, browsers, os, devices, referrers,
+      languages, events, queryParams,
+    ] = await Promise.all([
+      safeFetch(`${baseUrl}/pageviews?${metricsRange}&unit=${unit}`, "pageviews"),
+      safeFetch(`${baseUrl}/metrics?${metricsRange}&type=url`, "top pages"),
+      safeFetch(`${baseUrl}/metrics?${metricsRange}&type=country`, "countries"),
+      safeFetch(`${baseUrl}/metrics?${metricsRange}&type=browser`, "browsers"),
+      safeFetch(`${baseUrl}/metrics?${metricsRange}&type=os`, "os"),
+      safeFetch(`${baseUrl}/metrics?${metricsRange}&type=device`, "devices"),
+      safeFetch(`${baseUrl}/metrics?${metricsRange}&type=referrer`, "referrers"),
+      safeFetch(`${baseUrl}/metrics?${metricsRange}&type=language`, "languages"),
+      safeFetch(`${baseUrl}/metrics?${metricsRange}&type=event`, "events"),
+      safeFetch(`${baseUrl}/metrics?${metricsRange}&type=query`, "query params"),
     ]);
 
     return new Response(
@@ -108,7 +121,15 @@ serve(async (req) => {
           ? (activeVisitors.x ?? activeVisitors.visitors ?? 0) : 0,
         pageviewsChart: pageviewsData?.pageviews ?? [],
         sessionsChart: pageviewsData?.sessions ?? [],
-        topPages: (topPages ?? []).slice(0, 10),
+        topPages: (topPages ?? []).slice(0, 20),
+        countries: (countries ?? []).slice(0, 30),
+        browsers: (browsers ?? []).slice(0, 10),
+        os: (os ?? []).slice(0, 10),
+        devices: (devices ?? []).slice(0, 10),
+        referrers: (referrers ?? []).slice(0, 20),
+        languages: (languages ?? []).slice(0, 15),
+        events: (events ?? []).slice(0, 20),
+        queryParams: (queryParams ?? []).slice(0, 15),
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

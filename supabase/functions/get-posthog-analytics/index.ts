@@ -6,7 +6,6 @@ const corsHeaders = {
 };
 
 const POSTHOG_HOST = "https://eu.i.posthog.com";
-const POSTHOG_PROJECT_ID_PLACEHOLDER = "current"; // uses personal API key scoped project
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -33,7 +32,6 @@ serve(async (req) => {
       } catch { /* ignore */ }
     }
 
-    // Default to last 7 days
     if (!startDate) {
       const d = new Date();
       d.setDate(d.getDate() - 7);
@@ -43,7 +41,7 @@ serve(async (req) => {
       endDate = new Date().toISOString().split("T")[0];
     }
 
-    const headers = {
+    const headers: Record<string, string> = {
       "Authorization": `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     };
@@ -63,7 +61,29 @@ serve(async (req) => {
       }
     };
 
-    // Use the Query endpoint for trends
+    // Discover the project/environment ID
+    const orgsData = await safeFetch(`${POSTHOG_HOST}/api/organizations/`, "organizations");
+    if (!orgsData?.results?.length) {
+      return new Response(
+        JSON.stringify({ error: "No PostHog organization found", configured: false }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Get first org's projects
+    const orgId = orgsData.results[0].id;
+    const projectsData = await safeFetch(`${POSTHOG_HOST}/api/organizations/${orgId}/projects/`, "projects");
+    if (!projectsData?.results?.length) {
+      return new Response(
+        JSON.stringify({ error: "No PostHog project found", configured: false }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const projectId = projectsData.results[0].id;
+    const baseUrl = `${POSTHOG_HOST}/api/projects/${projectId}`;
+
+    // Fetch trends via query API
     const trendsQuery = {
       query: {
         kind: "TrendsQuery",
@@ -76,32 +96,16 @@ serve(async (req) => {
       }
     };
 
-    const topEventsQuery = {
-      query: {
-        kind: "TrendsQuery",
-        series: [
-          { event: null, kind: "EventsNode", math: "total" },
-        ],
-        dateRange: { date_from: startDate, date_to: endDate },
-        breakdownFilter: { breakdown: "$event_type", breakdown_type: "event" },
-      }
-    };
-
-    const baseUrl = `${POSTHOG_HOST}/api/environments/${POSTHOG_PROJECT_ID_PLACEHOLDER}`;
-
-    // Fetch trends and insights in parallel
     const [trendsData, eventsData, personsData] = await Promise.all([
       safeFetch(`${baseUrl}/query/`, "trends", {
         method: "POST",
         body: JSON.stringify(trendsQuery),
       }),
-      // Get recent events summary
-      safeFetch(`${baseUrl}/events/?limit=100&after=${startDate}T00:00:00Z&before=${endDate}T23:59:59Z`, "events"),
-      // Get persons count
+      safeFetch(`${baseUrl}/events/?limit=200&after=${startDate}T00:00:00Z&before=${endDate}T23:59:59Z`, "events"),
       safeFetch(`${baseUrl}/persons/?limit=1`, "persons"),
     ]);
 
-    // Process event counts by type
+    // Process event counts
     const eventCounts: Record<string, number> = {};
     if (eventsData?.results) {
       for (const event of eventsData.results) {
@@ -115,7 +119,6 @@ serve(async (req) => {
       .sort((a, b) => b.count - a.count)
       .slice(0, 15);
 
-    // Extract trends data
     const trendsSeries = trendsData?.results || [];
     const pageviewTrend = trendsSeries[0] || null;
     const pageLeaveTrend = trendsSeries[1] || null;

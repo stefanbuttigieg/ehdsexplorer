@@ -636,6 +636,12 @@ const AdminDashboard = () => {
         {/* Analytics Widget */}
         {isAdmin && (
           <div className="mb-8" data-tour="admin-analytics">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-lg font-semibold">Analytics</h2>
+              <Link to="/admin/analytics">
+                <Button variant="outline" size="sm">Full Analytics →</Button>
+              </Link>
+            </div>
             <AnalyticsWidget />
           </div>
         )}

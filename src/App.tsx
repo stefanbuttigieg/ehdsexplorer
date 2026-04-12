@@ -52,6 +52,7 @@ const AdminImplementingActsPage = lazy(() => import("./pages/AdminImplementingAc
 const AdminBulkImportPage = lazy(() => import("./pages/AdminBulkImportPage"));
 const AdminChaptersPage = lazy(() => import("./pages/AdminChaptersPage"));
 const AdminOverviewPage = lazy(() => import("./pages/AdminOverviewPage"));
+const AdminAnalyticsPage = lazy(() => import("./pages/AdminAnalyticsPage"));
 const AdminJointActionDeliverablesPage = lazy(() => import("./pages/AdminJointActionDeliverablesPage"));
 const AdminPublishedWorksPage = lazy(() => import("./pages/AdminPublishedWorksPage"));
 const AdminNotificationsPage = lazy(() => import("./pages/AdminNotificationsPage"));
@@ -250,6 +251,7 @@ const App = () => (
             <Route path="/admin/bulk-import" element={<AdminBulkImportPage />} />
             <Route path="/admin/chapters" element={<AdminChaptersPage />} />
             <Route path="/admin/overview" element={<AdminOverviewPage />} />
+            <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
             <Route path="/admin/joint-action-deliverables" element={<AdminJointActionDeliverablesPage />} />
             <Route path="/admin/published-works" element={<AdminPublishedWorksPage />} />
             <Route path="/admin/notifications" element={<AdminNotificationsPage />} />

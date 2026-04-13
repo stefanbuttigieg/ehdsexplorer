@@ -282,7 +282,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
   - Notifications
   - Footnotes (inline and attached)
   - Plain Language Translations
-- **AI Settings** — manage available models, default model, and system prompt
+- **AI Settings** — manage available models, default model, system prompt, and **Knowledge Base dashboard** with content coverage reports and test queries
 - **Implementation Tracker** with inline evidence management per obligation
 - **Markdown WYSIWYG editor** with live preview
 - **Bulk editing** with multi-select for recitals and articles

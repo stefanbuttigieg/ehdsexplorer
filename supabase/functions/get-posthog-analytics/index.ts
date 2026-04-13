@@ -14,7 +14,8 @@ serve(async (req) => {
 
   try {
     const apiKey = Deno.env.get("POSTHOG_PERSONAL_API_KEY");
-    if (!apiKey) {
+    const projectId = Deno.env.get("POSTHOG_PROJECT_ID");
+    if (!apiKey || !projectId) {
       return new Response(
         JSON.stringify({ error: "PostHog not configured", configured: false }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -41,14 +42,14 @@ serve(async (req) => {
       endDate = new Date().toISOString().split("T")[0];
     }
 
-    const headers: Record<string, string> = {
+    const authHeaders: Record<string, string> = {
       "Authorization": `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     };
 
     const safeFetch = async (url: string, label: string, options?: RequestInit) => {
       try {
-        const response = await fetch(url, { headers, ...options });
+        const response = await fetch(url, { headers: authHeaders, ...options });
         if (!response.ok) {
           const text = await response.text();
           console.error(`${label} failed: ${response.status} - ${text}`);
@@ -61,26 +62,6 @@ serve(async (req) => {
       }
     };
 
-    // Discover the project/environment ID
-    const orgsData = await safeFetch(`${POSTHOG_HOST}/api/organizations/`, "organizations");
-    if (!orgsData?.results?.length) {
-      return new Response(
-        JSON.stringify({ error: "No PostHog organization found", configured: false }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Get first org's projects
-    const orgId = orgsData.results[0].id;
-    const projectsData = await safeFetch(`${POSTHOG_HOST}/api/organizations/${orgId}/projects/`, "projects");
-    if (!projectsData?.results?.length) {
-      return new Response(
-        JSON.stringify({ error: "No PostHog project found", configured: false }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const projectId = projectsData.results[0].id;
     const baseUrl = `${POSTHOG_HOST}/api/projects/${projectId}`;
 
     // Fetch trends via query API

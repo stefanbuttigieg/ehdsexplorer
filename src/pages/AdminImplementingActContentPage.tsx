@@ -88,53 +88,92 @@ const AdminImplementingActContentPage = () => {
   } = useImplementingActImport();
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [importText, setImportText] = useState("");
-  const [isPdfLoading, setIsPdfLoading] = useState(false);
-  const pdfInputRef = useRef<HTMLInputElement>(null);
+  const [isFileLoading, setIsFileLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handlePdfUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || file.type !== "application/pdf") {
-      toast.error("Please select a PDF file");
+    if (!file) return;
+
+    const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    const isDocx = file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" || file.name.toLowerCase().endsWith(".docx");
+
+    if (!isPdf && !isDocx) {
+      toast.error("Please select a PDF or Word (.docx) file");
       return;
     }
-    setIsPdfLoading(true);
-    try {
-      const pdfjsLib = await import("pdfjs-dist");
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
-      const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      let fullText = "";
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const content = await page.getTextContent();
-        
-        // Group text items by Y-coordinate to reconstruct lines
-        const lineMap = new Map<number, Array<{ x: number; str: string }>>();
-        for (const item of content.items as any[]) {
-          if (!item.str) continue;
-          // Round Y to nearest integer to group items on the same line
-          const y = Math.round(item.transform[5]);
-          if (!lineMap.has(y)) lineMap.set(y, []);
-          lineMap.get(y)!.push({ x: item.transform[4], str: item.str });
+    setIsFileLoading(true);
+    try {
+      if (isDocx) {
+        const mammoth = await import("mammoth");
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.convertToHtml({ arrayBuffer });
+        // Convert HTML to clean text preserving structure
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = result.value;
+        // Walk the DOM to extract structured text
+        const lines: string[] = [];
+        const walk = (node: Node) => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.textContent?.trim();
+            if (text) lines.push(text);
+          } else if (node.nodeType === Node.ELEMENT_NODE) {
+            const el = node as HTMLElement;
+            const tag = el.tagName.toLowerCase();
+            // Block elements get their own line
+            if (["p", "h1", "h2", "h3", "h4", "h5", "h6", "li", "tr", "div", "br"].includes(tag)) {
+              const text = el.textContent?.trim();
+              if (text) lines.push(text);
+            } else {
+              for (const child of Array.from(node.childNodes)) {
+                walk(child);
+              }
+            }
+          }
+        };
+        for (const child of Array.from(tempDiv.childNodes)) {
+          walk(child);
         }
-        
-        // Sort lines by Y descending (PDF Y goes bottom-up), then items by X ascending
-        const sortedYs = Array.from(lineMap.keys()).sort((a, b) => b - a);
-        const pageLines: string[] = [];
-        for (const y of sortedYs) {
-          const items = lineMap.get(y)!.sort((a, b) => a.x - b.x);
-          pageLines.push(items.map(it => it.str).join(" "));
+        const fullText = lines.join("\n");
+        setImportText(fullText);
+        toast.success(`Extracted text from Word document`);
+      } else {
+        // PDF path
+        const pdfjsLib = await import("pdfjs-dist");
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let fullText = "";
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+
+          const lineMap = new Map<number, Array<{ x: number; str: string }>>();
+          for (const item of content.items as any[]) {
+            if (!item.str) continue;
+            const y = Math.round(item.transform[5]);
+            if (!lineMap.has(y)) lineMap.set(y, []);
+            lineMap.get(y)!.push({ x: item.transform[4], str: item.str });
+          }
+
+          const sortedYs = Array.from(lineMap.keys()).sort((a, b) => b - a);
+          const pageLines: string[] = [];
+          for (const y of sortedYs) {
+            const items = lineMap.get(y)!.sort((a, b) => a.x - b.x);
+            pageLines.push(items.map(it => it.str).join(" "));
+          }
+          fullText += pageLines.join("\n") + "\n\n";
         }
-        fullText += pageLines.join("\n") + "\n\n";
+        setImportText(fullText);
+        toast.success(`Extracted text from ${pdf.numPages} pages`);
       }
-      setImportText(fullText);
-      toast.success(`Extracted text from ${pdf.numPages} pages`);
     } catch (err) {
-      toast.error("Failed to read PDF: " + (err as Error).message);
+      toast.error("Failed to read file: " + (err as Error).message);
     } finally {
-      setIsPdfLoading(false);
-      if (pdfInputRef.current) pdfInputRef.current.value = "";
+      setIsFileLoading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }, []);
 
@@ -363,21 +402,21 @@ const AdminImplementingActContentPage = () => {
                       <Button
                         variant="outline"
                         className="flex-1"
-                        onClick={() => pdfInputRef.current?.click()}
-                        disabled={isImportParsing || isPdfLoading}
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isImportParsing || isFileLoading}
                       >
-                        {isPdfLoading ? (
-                          <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Reading PDF...</>
+                        {isFileLoading ? (
+                          <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Reading file...</>
                         ) : (
-                          <><FileText className="h-4 w-4 mr-2" />Upload PDF</>
+                          <><FileText className="h-4 w-4 mr-2" />Upload PDF or Word</>
                         )}
                       </Button>
                       <input
-                        ref={pdfInputRef}
+                        ref={fileInputRef}
                         type="file"
-                        accept="application/pdf"
+                        accept="application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx"
                         className="hidden"
-                        onChange={handlePdfUpload}
+                        onChange={handleFileUpload}
                       />
                     </div>
                     <div className="relative">
@@ -392,12 +431,12 @@ const AdminImplementingActContentPage = () => {
                       value={importText}
                       onChange={(e) => setImportText(e.target.value)}
                       className="h-64 font-mono text-sm"
-                      disabled={isImportParsing || isPdfLoading}
+                      disabled={isImportParsing || isFileLoading}
                     />
                     <Button
                       className="w-full"
                       onClick={handleImportParse}
-                      disabled={isImportParsing || isPdfLoading || !importText.trim()}
+                      disabled={isImportParsing || isFileLoading || !importText.trim()}
                     >
                       {isImportParsing ? (
                         <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Parsing...</>

@@ -723,20 +723,17 @@ export function parseFootnotes(text: string, analysis: StructureAnalysis): Parse
   const footnotes: ParsedFootnote[] = [];
   const seenMarkers = new Set<string>();
   
-  // EUR-Lex footnotes at the end of document
-  // Look for sections with multiple (n) OJ L... patterns
   const lines = text.split('\n');
+  const legalRefPattern = /OJ|ABl\.|GU|DO|Dz\.U\.|HL|JO|Regulation|Directive|Decision|Verordnung|Richtlinie|Beschluss|Règlement|Décision|EUR-Lex|CELEX|Commission|ELI:/i;
   
-  // Find the footnote section - usually at very end after annexes
+  // EUR-Lex footnotes at the end of document
   let footnoteStart = lines.length;
   for (let i = lines.length - 1; i >= Math.max(0, lines.length - 300); i--) {
     const line = lines[i].trim();
-    // Footnotes look like: (1) OJ L 257, 28.8.2014, p. 73.
     if (/^\([\d*]+\)\s+(?:OJ|ABl\.|GU|DO|Dz\.U\.|HL|JO)/i.test(line)) {
       footnoteStart = Math.min(footnoteStart, i);
     }
-    // Also check for regulation/directive references
-    if (/^\([\d*]+\)\s+(?:Regulation|Verordnung|Règlement|Reglamento|Regolamento|Rozporządzenie|Nařízení|Regulamentul|Регламент|Κανονισμός)/i.test(line)) {
+    if (/^\([\d*]+\)\s+(?:Regulation|Verordnung|Règlement|Reglamento|Regolamento|Rozporządzenie|Nařízení|Regulamentul|Регламент|Κανονισμός|Commission)/i.test(line)) {
       footnoteStart = Math.min(footnoteStart, i);
     }
   }
@@ -750,13 +747,9 @@ export function parseFootnotes(text: string, analysis: StructureAnalysis): Parse
   while ((match = footnotePattern.exec(footnoteSection)) !== null) {
     const marker = match[1];
     const content = match[2].trim();
-    
-    // Validate it looks like a legal reference
-    if (content.length > 10 && !seenMarkers.has(marker)) {
-      if (/OJ|ABl\.|GU|DO|Dz\.U\.|HL|JO|Regulation|Directive|Decision|Verordnung|Richtlinie|Beschluss|Règlement|Directive|Décision|EUR-Lex|CELEX/i.test(content)) {
-        footnotes.push({ marker, content });
-        seenMarkers.add(marker);
-      }
+    if (content.length > 10 && !seenMarkers.has(marker) && legalRefPattern.test(content)) {
+      footnotes.push({ marker, content });
+      seenMarkers.add(marker);
     }
   }
   
@@ -766,6 +759,18 @@ export function parseFootnotes(text: string, analysis: StructureAnalysis): Parse
     const marker = match[1];
     const content = match[2].trim();
     if (content.length > 5 && !seenMarkers.has(marker)) {
+      footnotes.push({ marker, content });
+      seenMarkers.add(marker);
+    }
+  }
+  
+  // PDF-style standalone footnotes: lines like "4 Commission Decision (EU)..." or "1 OJ L..."
+  // These appear scattered throughout the document (at page boundaries)
+  const pdfFootnotePattern = /^(\d{1,2})\s+((?:OJ|Commission|Regulation|Directive|Decision)\s.{15,})$/gm;
+  while ((match = pdfFootnotePattern.exec(text)) !== null) {
+    const marker = match[1];
+    const content = match[2].trim();
+    if (!seenMarkers.has(marker) && legalRefPattern.test(content)) {
       footnotes.push({ marker, content });
       seenMarkers.add(marker);
     }

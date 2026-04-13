@@ -333,6 +333,7 @@ const AdminDashboard = () => {
       icon: Mail,
       href: '/admin/email-templates',
       badge: 'Admin Only',
+      count: counts?.email_templates,
     },
     {
       title: 'AI Feedback',

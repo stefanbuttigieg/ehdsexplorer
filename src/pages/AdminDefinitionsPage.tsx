@@ -408,7 +408,7 @@ const AdminDefinitionsPage = () => {
               <Label>Source *</Label>
               <select
                 value={newSource}
-                onChange={(e) => setNewSource(e.target.value as DefinitionSource)}
+                onChange={(e) => { setNewSource(e.target.value as DefinitionSource); setNewImplementingActId(''); }}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="ehds_regulation">EHDS Regulation</option>
@@ -417,6 +417,21 @@ const AdminDefinitionsPage = () => {
                 <option value="implementing_act">Implementing Act</option>
               </select>
             </div>
+            {newSource === 'implementing_act' && (
+              <div className="space-y-2">
+                <Label>Implementing Act *</Label>
+                <select
+                  value={newImplementingActId}
+                  onChange={(e) => setNewImplementingActId(e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <option value="">Select an implementing act...</option>
+                  {implementingActs.map(ia => (
+                    <option key={ia.id} value={ia.id}>{ia.title}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Source Article (optional)</Label>
               <Input

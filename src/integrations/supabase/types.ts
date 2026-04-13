@@ -1023,6 +1023,7 @@ export type Database = {
           created_at: string
           definition_id: number
           id: string
+          implementing_act_id: string | null
           source: string
           source_article: number | null
           source_text: string
@@ -1032,6 +1033,7 @@ export type Database = {
           created_at?: string
           definition_id: number
           id?: string
+          implementing_act_id?: string | null
           source: string
           source_article?: number | null
           source_text: string
@@ -1041,6 +1043,7 @@ export type Database = {
           created_at?: string
           definition_id?: number
           id?: string
+          implementing_act_id?: string | null
           source?: string
           source_article?: number | null
           source_text?: string
@@ -1052,6 +1055,13 @@ export type Database = {
             columns: ["definition_id"]
             isOneToOne: false
             referencedRelation: "definitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "definition_sources_implementing_act_id_fkey"
+            columns: ["implementing_act_id"]
+            isOneToOne: false
+            referencedRelation: "implementing_acts"
             referencedColumns: ["id"]
           },
         ]

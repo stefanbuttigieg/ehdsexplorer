@@ -17,7 +17,7 @@ import {
   type DefinitionSourceRecord,
 } from '@/hooks/useDefinitionSources';
 
-const ALL_SOURCES: DefinitionSource[] = ['ehds_regulation', 'eu_ehr_glossary', 'xt_ehr'];
+const ALL_SOURCES: DefinitionSource[] = ['ehds_regulation', 'eu_ehr_glossary', 'xt_ehr', 'implementing_act'];
 
 interface DefinitionSourceEditorProps {
   definitionId: number;
@@ -247,6 +247,8 @@ function getSourceColor(source: DefinitionSource): string {
       return 'hsl(142, 76%, 36%)';
     case 'xt_ehr':
       return 'hsl(262, 83%, 58%)';
+    case 'implementing_act':
+      return 'hsl(25, 95%, 53%)';
     default:
       return 'hsl(var(--muted))';
   }

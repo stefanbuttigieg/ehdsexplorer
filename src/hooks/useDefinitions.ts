@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export type DefinitionSource = 'ehds_regulation' | 'eu_ehr_glossary' | 'xt_ehr';
+export type DefinitionSource = 'ehds_regulation' | 'eu_ehr_glossary' | 'xt_ehr' | 'implementing_act';
 
 export interface Definition {
   id: number;
@@ -51,6 +51,8 @@ export const getSourceLabel = (source: DefinitionSource | null): string => {
       return 'EU EHR Database';
     case 'xt_ehr':
       return 'Xt-EHR';
+    case 'implementing_act':
+      return 'Implementing Act';
     default:
       return 'EHDS Regulation';
   }

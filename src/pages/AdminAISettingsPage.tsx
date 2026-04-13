@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bot, Save, Edit2, BarChart3, Clock, Zap, AlertTriangle, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Bot, Save, Edit2, BarChart3, Clock, Zap, AlertTriangle, ThumbsUp, ThumbsDown, Database, CheckCircle2, XCircle, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';

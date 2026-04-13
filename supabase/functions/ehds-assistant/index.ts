@@ -196,15 +196,18 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     // Fetch prompts from DB and content in parallel
-    const [promptsRes, articlesRes, recitalsRes, definitionsRes, chaptersRes, implementingActsRes, faqsRes, ehdsFaqsRes] = await Promise.all([
+    const [promptsRes, articlesRes, recitalsRes, definitionsRes, chaptersRes, implementingActsRes, faqsRes, ehdsFaqsRes, iaArticlesRes, iaRecitalsRes, iaSectionsRes] = await Promise.all([
       supabase.from("ai_prompt_config").select("prompt_key, prompt_text, category").eq("is_active", true).order("sort_order"),
       supabase.from("articles").select("article_number, title, content").order("article_number"),
       supabase.from("recitals").select("recital_number, content, related_articles").order("recital_number"),
       supabase.from("definitions").select("term, definition, source_article").order("term"),
       supabase.from("chapters").select("chapter_number, title, description").order("chapter_number"),
-      supabase.from("implementing_acts").select("id, title, description, status, article_reference, type, theme"),
+      supabase.from("implementing_acts").select("id, title, description, status, article_reference, type, theme, feedback_deadline, feedback_link"),
       supabase.from("help_center_faq").select("question, answer, category").eq("is_published", true).order("sort_order"),
       supabase.from("ehds_faqs").select("faq_number, question, answer, rich_content, chapter, source_articles, source_references").eq("is_published", true).order("faq_number"),
+      supabase.from("implementing_act_articles").select("implementing_act_id, article_number, title, content").order("article_number"),
+      supabase.from("implementing_act_recitals").select("implementing_act_id, recital_number, content").order("recital_number"),
+      supabase.from("implementing_act_sections").select("implementing_act_id, section_number, title").order("section_number"),
     ]);
 
     // Build prompt maps from DB
@@ -228,18 +231,62 @@ serve(async (req) => {
     const implementingActs = implementingActsRes.data || [];
     const faqs = faqsRes.data || [];
     const ehdsFaqs = ehdsFaqsRes.data || [];
+    const iaArticles = iaArticlesRes.data || [];
+    const iaRecitals = iaRecitalsRes.data || [];
+    const iaSections = iaSectionsRes.data || [];
 
     const articlesSummary = articles.map(a => 
       `Article ${a.article_number}: ${a.title}\n${a.content.substring(0, 500)}${a.content.length > 500 ? '...' : ''}`
     ).join("\n\n");
     const definitionsList = definitions.map(d => `"${d.term}": ${d.definition}`).join("\n");
     const chaptersList = chapters.map(c => `Chapter ${c.chapter_number}: ${c.title}${c.description ? ` - ${c.description}` : ''}`).join("\n");
-    const implementingActsList = implementingActs.map(ia => `${ia.id}: ${ia.title} (${ia.status}) - ${ia.type}, Theme: ${ia.theme}, Reference: ${ia.article_reference}`).join("\n");
+    const implementingActsList = implementingActs.map(ia => {
+      let entry = `${ia.id}: ${ia.title} (Status: ${ia.status}) - ${ia.type}, Theme: ${ia.theme}, Reference: ${ia.article_reference}`;
+      if (ia.feedback_deadline) entry += `, Feedback period: ${ia.feedback_deadline}`;
+      if (ia.feedback_link) entry += `, Feedback: ${ia.feedback_link}`;
+      return entry;
+    }).join("\n");
     const recitalsSummary = recitals.slice(0, 50).map(r => `Recital (${r.recital_number}): ${r.content.substring(0, 300)}${r.content.length > 300 ? '...' : ''}`).join("\n\n");
     const faqsList = faqs.map(f => `Q: ${f.question}\nA: ${f.answer}`).join("\n\n");
     const officialFaqsList = ehdsFaqs.map(f => 
       `FAQ #${f.faq_number} [Chapter: ${f.chapter}]: ${f.question}\nOFFICIAL ANSWER: ${f.rich_content || f.answer}\nSource articles: ${(f.source_articles || []).join(', ')}\n${f.source_references || ''}`
     ).join("\n\n---\n\n");
+
+    // Build detailed implementing act content grouped by act
+    const iaContentByAct: Record<string, { sections: any[]; articles: any[]; recitals: any[] }> = {};
+    for (const ia of implementingActs) {
+      iaContentByAct[ia.id] = { sections: [], articles: [], recitals: [] };
+    }
+    for (const s of iaSections) {
+      if (iaContentByAct[s.implementing_act_id]) iaContentByAct[s.implementing_act_id].sections.push(s);
+    }
+    for (const a of iaArticles) {
+      if (iaContentByAct[a.implementing_act_id]) iaContentByAct[a.implementing_act_id].articles.push(a);
+    }
+    for (const r of iaRecitals) {
+      if (iaContentByAct[r.implementing_act_id]) iaContentByAct[r.implementing_act_id].recitals.push(r);
+    }
+
+    // Only include detailed content for acts that have articles/recitals
+    const iaDetailedContent = implementingActs
+      .filter(ia => {
+        const c = iaContentByAct[ia.id];
+        return c && (c.articles.length > 0 || c.recitals.length > 0);
+      })
+      .map(ia => {
+        const c = iaContentByAct[ia.id];
+        let block = `\n### Implementing Act: ${ia.title} (${ia.id})\nStatus: ${ia.status} | Reference: ${ia.article_reference}\n${ia.description || ''}\n`;
+        if (c.sections.length > 0) {
+          block += `\nSections:\n${c.sections.map(s => `  Chapter/Section ${s.section_number}: ${s.title}`).join('\n')}\n`;
+        }
+        if (c.recitals.length > 0) {
+          block += `\nRecitals:\n${c.recitals.map(r => `  Recital (${r.recital_number}): ${r.content.substring(0, 400)}${r.content.length > 400 ? '...' : ''}`).join('\n')}\n`;
+        }
+        if (c.articles.length > 0) {
+          block += `\nArticles:\n${c.articles.map(a => `  Article ${a.article_number}: ${a.title}\n  ${a.content.substring(0, 600)}${a.content.length > 600 ? '...' : ''}`).join('\n\n')}\n`;
+        }
+        return block;
+      }).join("\n---\n");
 
     const systemPrompt = `${systemBase}
 

@@ -60,6 +60,7 @@ const AdminDefinitionsPage = () => {
   const [newDefinitionText, setNewDefinitionText] = useState('');
   const [newSource, setNewSource] = useState<DefinitionSource>('ehds_regulation');
   const [newSourceArticle, setNewSourceArticle] = useState('');
+  const [newImplementingActId, setNewImplementingActId] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
   // Delete dialog

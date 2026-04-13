@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Linkedin } from "lucide-react";
+import { Linkedin, BookOpen } from "lucide-react";
 import { Plus, Trash2, Edit, Save, X, ArrowLeft, Upload, Loader2, Check, FileText } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,6 +32,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FootnoteManager } from "@/components/admin/FootnoteManager";
 import { useFootnotesByIAArticle, useFootnotesByIARecital } from "@/hooks/useFootnotes";
+import { useDefinitions } from "@/hooks/useDefinitions";
+import { Checkbox } from "@/components/ui/checkbox";
 
 /** Small wrapper that fetches footnotes for an IA article or recital and renders FootnoteManager */
 function IAFootnoteSection({ type, parentId }: { type: "article" | "recital"; parentId: string }) {
@@ -76,6 +78,105 @@ const AdminImplementingActContentPage = () => {
   const [newLinkedInPost, setNewLinkedInPost] = useState({ post_url: "", title: "", description: "", author_name: "", posted_at: "" });
 
   const isLoading = loadingAct || loadingRecitals || loadingSections || loadingArticles;
+
+  // Definition extraction from articles titled "Definitions"
+  const { data: allDefinitions = [] } = useDefinitions();
+  const [selectedDefTerms, setSelectedDefTerms] = useState<Set<string>>(new Set());
+  const [isImportingDefs, setIsImportingDefs] = useState(false);
+
+  const extractedDefinitions = useMemo(() => {
+    const defArticles = articles.filter(a => a.title.toLowerCase().includes('definition'));
+    const defs: Array<{ term: string; definition: string; alreadyExists: boolean }> = [];
+    const existingTermsLower = new Set(allDefinitions.map(d => d.term.toLowerCase()));
+
+    for (const article of defArticles) {
+      // Parse "'term' means definition;" patterns
+      const regex = /['\u2018\u2019']([^'\u2018\u2019']+)['\u2018\u2019']\s+means\s+([\s\S]*?)(?:;\s*$|;\s*(?=['\u2018\u2019']))/gm;
+      let match;
+      while ((match = regex.exec(article.content)) !== null) {
+        const term = match[1].trim();
+        let definition = match[2].trim();
+        // Clean up definition - remove trailing semicolons and whitespace
+        definition = definition.replace(/;\s*$/, '').trim();
+        if (term && definition) {
+          defs.push({
+            term,
+            definition,
+            alreadyExists: existingTermsLower.has(term.toLowerCase()),
+          });
+        }
+      }
+      
+      // Also try numbered list pattern: (a) 'term' means ...
+      if (defs.length === 0) {
+        const altRegex = /(?:\([a-z]\)\s*)?['\u2018\u2019']([^'\u2018\u2019']+)['\u2018\u2019']\s+means\s+([\s\S]*?)(?:;\s*$|;\s*(?=\([a-z]\)))/gm;
+        let altMatch;
+        while ((altMatch = altRegex.exec(article.content)) !== null) {
+          const term = altMatch[1].trim();
+          let definition = altMatch[2].trim().replace(/;\s*$/, '').trim();
+          if (term && definition && !defs.some(d => d.term.toLowerCase() === term.toLowerCase())) {
+            defs.push({
+              term,
+              definition,
+              alreadyExists: existingTermsLower.has(term.toLowerCase()),
+            });
+          }
+        }
+      }
+    }
+    return defs;
+  }, [articles, allDefinitions]);
+
+  const newDefinitions = extractedDefinitions.filter(d => !d.alreadyExists);
+
+  const toggleDefSelection = (term: string) => {
+    setSelectedDefTerms(prev => {
+      const next = new Set(prev);
+      if (next.has(term)) next.delete(term); else next.add(term);
+      return next;
+    });
+  };
+
+  const selectAllNewDefs = () => {
+    setSelectedDefTerms(new Set(newDefinitions.map(d => d.term)));
+  };
+
+  const handleImportDefinitions = async () => {
+    if (selectedDefTerms.size === 0) return;
+    setIsImportingDefs(true);
+    try {
+      const toImport = extractedDefinitions.filter(d => selectedDefTerms.has(d.term) && !d.alreadyExists);
+      // Get max id
+      const { data: maxRow } = await supabase.from("definitions").select("id").order("id", { ascending: false }).limit(1).single();
+      let nextId = (maxRow?.id || 159) + 1;
+
+      for (const def of toImport) {
+        const defId = nextId++;
+        const { error: defError } = await supabase.from("definitions").insert({
+          id: defId,
+          term: def.term,
+          definition: def.definition,
+          source: 'implementing_act' as any,
+        });
+        if (defError) throw defError;
+
+        const { error: srcError } = await supabase.from("definition_sources").insert({
+          definition_id: defId,
+          source: 'implementing_act' as any,
+          source_text: def.definition,
+        });
+        if (srcError) throw srcError;
+      }
+
+      toast.success(`Imported ${toImport.length} definitions to the glossary`);
+      setSelectedDefTerms(new Set());
+      queryClient.invalidateQueries({ queryKey: ["definitions"] });
+    } catch (e) {
+      toast.error(`Failed to import: ${(e as Error).message}`);
+    } finally {
+      setIsImportingDefs(false);
+    }
+  };
 
   // Import functionality
   const {
@@ -478,6 +579,10 @@ const AdminImplementingActContentPage = () => {
             <TabsTrigger value="articles">Articles ({articles.length})</TabsTrigger>
             <TabsTrigger value="recitals">Recitals ({recitals.length})</TabsTrigger>
             <TabsTrigger value="sections">Sections ({sections.length})</TabsTrigger>
+            <TabsTrigger value="definitions" className="gap-1.5">
+              <BookOpen className="h-3.5 w-3.5" />
+              Definitions ({extractedDefinitions.length})
+            </TabsTrigger>
             <TabsTrigger value="linkedin" className="gap-1.5">
               <Linkedin className="h-3.5 w-3.5" />
               LinkedIn ({linkedInPosts.length})
@@ -1000,6 +1105,75 @@ const AdminImplementingActContentPage = () => {
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Definitions Tab */}
+          <TabsContent value="definitions">
+            <Card>
+              <CardHeader className="flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Extracted Definitions</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Definitions found in articles titled "Definitions". Import new ones to the glossary.
+                  </p>
+                </div>
+                {newDefinitions.length > 0 && (
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={selectAllNewDefs}>
+                      Select All New ({newDefinitions.length})
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleImportDefinitions}
+                      disabled={selectedDefTerms.size === 0 || isImportingDefs}
+                    >
+                      {isImportingDefs ? (
+                        <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Importing...</>
+                      ) : (
+                        <><Upload className="h-4 w-4 mr-2" />Import Selected ({selectedDefTerms.size})</>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </CardHeader>
+              <CardContent>
+                {extractedDefinitions.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">
+                    No definitions article found. Definitions are extracted from articles with "Definitions" in the title.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {extractedDefinitions.map((def) => (
+                      <div
+                        key={def.term}
+                        className={`flex items-start gap-3 p-3 rounded-lg border ${
+                          def.alreadyExists ? 'bg-muted/50 opacity-60' : 'bg-background'
+                        }`}
+                      >
+                        {!def.alreadyExists && (
+                          <Checkbox
+                            checked={selectedDefTerms.has(def.term)}
+                            onCheckedChange={() => toggleDefSelection(def.term)}
+                            className="mt-1"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold">{def.term}</span>
+                            {def.alreadyExists ? (
+                              <Badge variant="secondary" className="text-xs">Already in glossary</Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-xs border-green-500 text-green-700 dark:text-green-400">New</Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground">{def.definition}</p>
                         </div>
                       </div>
                     ))}

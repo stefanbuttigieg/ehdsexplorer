@@ -79,30 +79,30 @@ const ARTICLE_PATTERNS: Record<string, RegExp> = {
 };
 
 const CHAPTER_PATTERNS: Record<string, RegExp> = {
-  en: /^CHAPTER\s+([IVXLCDM]+)/i,
-  de: /^KAPITEL\s+([IVXLCDM]+)/i,
-  fr: /^CHAPITRE\s+([IVXLCDM]+)/i,
-  es: /^CAPÍTULO\s+([IVXLCDM]+)/i,
-  it: /^CAPO\s+([IVXLCDM]+)/i,
-  pt: /^CAPÍTULO\s+([IVXLCDM]+)/i,
-  nl: /^HOOFDSTUK\s+([IVXLCDM]+)/i,
-  pl: /^ROZDZIAŁ\s+([IVXLCDM]+)/i,
-  cs: /^KAPITOLA\s+([IVXLCDM]+)/i,
-  sk: /^KAPITOLA\s+([IVXLCDM]+)/i,
-  hu: /^([IVXLCDM]+)\.\s*FEJEZET/i,
-  ro: /^CAPITOLUL\s+([IVXLCDM]+)/i,
-  bg: /^ГЛАВА\s+([IVXLCDM]+)/i,
-  el: /^ΚΕΦΑΛΑΙΟ\s+([IVXLCDM]+)/i,
-  sv: /^KAPITEL\s+([IVXLCDM]+)/i,
-  da: /^KAPITEL\s+([IVXLCDM]+)/i,
-  fi: /^([IVXLCDM]+)\s*LUKU/i,
-  et: /^([IVXLCDM]+)\s*PEATÜKK/i,
-  lv: /^([IVXLCDM]+)\s*NODAĻA/i,
-  lt: /^([IVXLCDM]+)\s*SKYRIUS/i,
-  sl: /^POGLAVJE\s+([IVXLCDM]+)/i,
-  hr: /^POGLAVLJE\s+([IVXLCDM]+)/i,
-  mt: /^KAPITOLU\s+([IVXLCDM]+)/i,
-  ga: /^CAIBIDIL\s+([IVXLCDM]+)/i,
+  en: /^CHAPTER\s+([IVXLCDM\d]+)/i,
+  de: /^KAPITEL\s+([IVXLCDM\d]+)/i,
+  fr: /^CHAPITRE\s+([IVXLCDM\d]+)/i,
+  es: /^CAPÍTULO\s+([IVXLCDM\d]+)/i,
+  it: /^CAPO\s+([IVXLCDM\d]+)/i,
+  pt: /^CAPÍTULO\s+([IVXLCDM\d]+)/i,
+  nl: /^HOOFDSTUK\s+([IVXLCDM\d]+)/i,
+  pl: /^ROZDZIAŁ\s+([IVXLCDM\d]+)/i,
+  cs: /^KAPITOLA\s+([IVXLCDM\d]+)/i,
+  sk: /^KAPITOLA\s+([IVXLCDM\d]+)/i,
+  hu: /^([IVXLCDM\d]+)\.\s*FEJEZET/i,
+  ro: /^CAPITOLUL\s+([IVXLCDM\d]+)/i,
+  bg: /^ГЛАВА\s+([IVXLCDM\d]+)/i,
+  el: /^ΚΕΦΑΛΑΙΟ\s+([IVXLCDM\d]+)/i,
+  sv: /^KAPITEL\s+([IVXLCDM\d]+)/i,
+  da: /^KAPITEL\s+([IVXLCDM\d]+)/i,
+  fi: /^([IVXLCDM\d]+)\s*LUKU/i,
+  et: /^([IVXLCDM\d]+)\s*PEATÜKK/i,
+  lv: /^([IVXLCDM\d]+)\s*NODAĻA/i,
+  lt: /^([IVXLCDM\d]+)\s*SKYRIUS/i,
+  sl: /^POGLAVJE\s+([IVXLCDM\d]+)/i,
+  hr: /^POGLAVLJE\s+([IVXLCDM\d]+)/i,
+  mt: /^KAPITOLU\s+([IVXLCDM\d]+)/i,
+  ga: /^CAIBIDIL\s+([IVXLCDM\d]+)/i,
 };
 
 const ANNEX_PATTERNS: Record<string, RegExp> = {
@@ -161,6 +161,10 @@ const ADOPTION_MARKERS: RegExp[] = [
 
 // === Helper functions ===
 function romanToNumber(roman: string): number {
+  // Handle Arabic numerals directly
+  if (/^\d+$/.test(roman.trim())) {
+    return parseInt(roman.trim(), 10);
+  }
   const romanMap: Record<string, number> = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
   let result = 0;
   const upper = roman.toUpperCase();

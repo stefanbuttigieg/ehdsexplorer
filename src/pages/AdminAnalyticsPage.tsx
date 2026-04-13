@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { format, subDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdminGuard } from "@/hooks/useAdminGuard";
 import { AdminPageLayout, AdminPageLoading } from "@/components/admin/AdminPageLayout";
@@ -8,8 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { Globe, Monitor, Smartphone, Users, Eye, Activity, TrendingUp, ArrowUpRight, Clock, MousePointer } from "lucide-react";
+import { Globe, Monitor, Smartphone, Users, Eye, Activity, TrendingUp, ArrowUpRight, Clock, MousePointer, CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const RANGE_OPTIONS = [
   { value: "today", label: "Today" },
@@ -17,6 +22,7 @@ const RANGE_OPTIONS = [
   { value: "30d", label: "Last 30 days" },
   { value: "90d", label: "Last 90 days" },
   { value: "month", label: "This month" },
+  { value: "custom", label: "Custom range" },
 ];
 
 const CHART_COLORS = [
@@ -99,12 +105,27 @@ function MetricsTable({ data, nameLabel = "Name", valueLabel = "Views" }: { data
 export default function AdminAnalyticsPage() {
   const { loading, shouldRender } = useAdminGuard({ requireSuperAdmin: true });
   const [range, setRange] = useState("7d");
+  const [customFrom, setCustomFrom] = useState<Date | undefined>(subDays(new Date(), 7));
+  const [customTo, setCustomTo] = useState<Date | undefined>(new Date());
 
-  const { startAt, endAt } = getDateRange(range);
-  const { startDate, endDate } = formatDate(range);
+  const { startAt, endAt } = useMemo(() => {
+    if (range === "custom") {
+      const now = new Date();
+      return {
+        startAt: (customFrom ?? subDays(now, 7)).getTime(),
+        endAt: (customTo ?? now).getTime(),
+      };
+    }
+    return getDateRange(range);
+  }, [range, customFrom, customTo]);
+
+  const { startDate, endDate } = useMemo(() => ({
+    startDate: new Date(startAt).toISOString().split("T")[0],
+    endDate: new Date(endAt).toISOString().split("T")[0],
+  }), [startAt, endAt]);
 
   const { data: umami, isLoading: umamiLoading } = useQuery({
-    queryKey: ["admin-analytics-umami", range],
+    queryKey: ["admin-analytics-umami", startAt, endAt],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("get-umami-analytics", {
         method: "POST",
@@ -117,7 +138,7 @@ export default function AdminAnalyticsPage() {
   });
 
   const { data: posthog, isLoading: posthogLoading } = useQuery({
-    queryKey: ["admin-analytics-posthog", range],
+    queryKey: ["admin-analytics-posthog", startDate, endDate],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("get-posthog-analytics", {
         method: "POST",
@@ -175,16 +196,45 @@ export default function AdminAnalyticsPage() {
       description="Unified analytics from Umami and PostHog"
       backTo="/admin"
       actions={
-        <Select value={range} onValueChange={setRange}>
-          <SelectTrigger className="w-[150px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {RANGE_OPTIONS.map(o => (
-              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Select value={range} onValueChange={setRange}>
+            <SelectTrigger className="w-[150px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {RANGE_OPTIONS.map(o => (
+                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {range === "custom" && (
+            <>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className={cn("text-xs h-9", !customFrom && "text-muted-foreground")}>
+                    <CalendarIcon className="h-3.5 w-3.5 mr-1" />
+                    {customFrom ? format(customFrom, "MMM dd, yyyy") : "Start"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={customFrom} onSelect={setCustomFrom} disabled={(d) => d > new Date()} className="p-3 pointer-events-auto" />
+                </PopoverContent>
+              </Popover>
+              <span className="text-xs text-muted-foreground">to</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className={cn("text-xs h-9", !customTo && "text-muted-foreground")}>
+                    <CalendarIcon className="h-3.5 w-3.5 mr-1" />
+                    {customTo ? format(customTo, "MMM dd, yyyy") : "End"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={customTo} onSelect={setCustomTo} disabled={(d) => d > new Date()} className="p-3 pointer-events-auto" />
+                </PopoverContent>
+              </Popover>
+            </>
+          )}
+        </div>
       }
     >
       <Tabs defaultValue="overview" className="space-y-4">

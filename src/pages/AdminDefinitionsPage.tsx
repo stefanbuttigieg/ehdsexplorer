@@ -181,7 +181,8 @@ const AdminDefinitionsPage = () => {
         source: newSource,
         source_text: newDefinitionText.trim(),
         source_article: newSourceArticle ? parseInt(newSourceArticle) : null,
-      });
+        ...(newSource === 'implementing_act' && newImplementingActId ? { implementing_act_id: newImplementingActId } : {}),
+      } as any);
 
       toast({
         title: 'Definition Created',
@@ -196,6 +197,7 @@ const AdminDefinitionsPage = () => {
       setNewDefinitionText('');
       setNewSource('ehds_regulation');
       setNewSourceArticle('');
+      setNewImplementingActId('');
     } catch (error: any) {
       toast({
         title: 'Error',

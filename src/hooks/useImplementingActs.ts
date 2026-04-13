@@ -21,6 +21,7 @@ export interface ImplementingAct {
   themes: ActTheme[];
   status: ActStatus;
   feedbackDeadline?: string | null;
+  feedbackLink?: string | null;
   adoptionDate?: string | null;
   entryIntoForceDate?: string | null;
   dateOfEffect?: string | null;
@@ -63,6 +64,7 @@ const mapDbToAct = (row: any): ImplementingAct => {
     themes: themesArray,
     status: row.status as ActStatus,
     feedbackDeadline: row.feedback_deadline,
+    feedbackLink: row.feedback_link,
     adoptionDate: row.adoption_date,
     entryIntoForceDate: row.entry_into_force_date,
     dateOfEffect: row.date_of_effect,

@@ -48,6 +48,7 @@ interface DbImplementingAct {
   status: string;
   official_link: string | null;
   deliverable_link: string | null;
+  feedback_link: string | null;
   feedback_deadline: string | null;
   adoption_date: string | null;
   entry_into_force_date: string | null;
@@ -74,6 +75,7 @@ const AdminImplementingActsPage = () => {
   const [editedStatus, setEditedStatus] = useState('');
   const [editedOfficialLink, setEditedOfficialLink] = useState('');
   const [editedDeliverableLink, setEditedDeliverableLink] = useState('');
+  const [editedFeedbackLink, setEditedFeedbackLink] = useState('');
   const [editedFeedbackDeadline, setEditedFeedbackDeadline] = useState('');
   const [editedAdoptionDate, setEditedAdoptionDate] = useState('');
   const [editedEntryIntoForceDate, setEditedEntryIntoForceDate] = useState('');
@@ -132,6 +134,7 @@ const AdminImplementingActsPage = () => {
     setEditedStatus('pending');
     setEditedOfficialLink('');
     setEditedDeliverableLink('');
+    setEditedFeedbackLink('');
     setEditedFeedbackDeadline('');
     setEditedAdoptionDate('');
     setEditedEntryIntoForceDate('');
@@ -157,6 +160,7 @@ const AdminImplementingActsPage = () => {
     setEditedStatus(act.status);
     setEditedOfficialLink(act.official_link || '');
     setEditedDeliverableLink(act.deliverable_link || '');
+    setEditedFeedbackLink(act.feedback_link || '');
     setEditedFeedbackDeadline(act.feedback_deadline || '');
     setEditedAdoptionDate(act.adoption_date || '');
     setEditedEntryIntoForceDate(act.entry_into_force_date || '');
@@ -205,6 +209,7 @@ const AdminImplementingActsPage = () => {
           status: editedStatus,
           official_link: editedOfficialLink || null,
           deliverable_link: editedDeliverableLink || null,
+          feedback_link: editedFeedbackLink || null,
           feedback_deadline: editedFeedbackDeadline || null,
           adoption_date: editedAdoptionDate || null,
           entry_into_force_date: editedEntryIntoForceDate || null,
@@ -281,6 +286,7 @@ const AdminImplementingActsPage = () => {
         status: editedStatus,
         official_link: editedOfficialLink || null,
         deliverable_link: editedDeliverableLink || null,
+        feedback_link: editedFeedbackLink || null,
         feedback_deadline: editedFeedbackDeadline || null,
         adoption_date: editedAdoptionDate || null,
         entry_into_force_date: editedEntryIntoForceDate || null,
@@ -618,6 +624,14 @@ const AdminImplementingActsPage = () => {
                 <Input
                   value={editedDeliverableLink}
                   onChange={(e) => setEditedDeliverableLink(e.target.value)}
+                  placeholder="https://..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Feedback Link (optional)</Label>
+                <Input
+                  value={editedFeedbackLink}
+                  onChange={(e) => setEditedFeedbackLink(e.target.value)}
                   placeholder="https://..."
                 />
               </div>

@@ -178,8 +178,8 @@ const ImplementingActDetail = () => {
                       </Badge>
                     )}
                   </div>
-                  {act.officialLink && (
-                    <a href={act.officialLink} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1 text-sm text-primary hover:underline">
+                  {(act.feedbackLink || act.officialLink) && (
+                    <a href={act.feedbackLink || act.officialLink!} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1 text-sm text-primary hover:underline">
                       Submit feedback <ExternalLink className="h-4 w-4" />
                     </a>
                   )}

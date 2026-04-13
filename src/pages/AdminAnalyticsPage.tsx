@@ -105,9 +105,24 @@ function MetricsTable({ data, nameLabel = "Name", valueLabel = "Views" }: { data
 export default function AdminAnalyticsPage() {
   const { loading, shouldRender } = useAdminGuard({ requireSuperAdmin: true });
   const [range, setRange] = useState("7d");
+  const [customFrom, setCustomFrom] = useState<Date | undefined>(subDays(new Date(), 7));
+  const [customTo, setCustomTo] = useState<Date | undefined>(new Date());
 
-  const { startAt, endAt } = getDateRange(range);
-  const { startDate, endDate } = formatDate(range);
+  const { startAt, endAt } = useMemo(() => {
+    if (range === "custom") {
+      const now = new Date();
+      return {
+        startAt: (customFrom ?? subDays(now, 7)).getTime(),
+        endAt: (customTo ?? now).getTime(),
+      };
+    }
+    return getDateRange(range);
+  }, [range, customFrom, customTo]);
+
+  const { startDate, endDate } = useMemo(() => ({
+    startDate: new Date(startAt).toISOString().split("T")[0],
+    endDate: new Date(endAt).toISOString().split("T")[0],
+  }), [startAt, endAt]);
 
   const { data: umami, isLoading: umamiLoading } = useQuery({
     queryKey: ["admin-analytics-umami", range],

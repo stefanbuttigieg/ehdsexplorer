@@ -579,6 +579,10 @@ const AdminImplementingActContentPage = () => {
             <TabsTrigger value="articles">Articles ({articles.length})</TabsTrigger>
             <TabsTrigger value="recitals">Recitals ({recitals.length})</TabsTrigger>
             <TabsTrigger value="sections">Sections ({sections.length})</TabsTrigger>
+            <TabsTrigger value="definitions" className="gap-1.5">
+              <BookOpen className="h-3.5 w-3.5" />
+              Definitions ({extractedDefinitions.length})
+            </TabsTrigger>
             <TabsTrigger value="linkedin" className="gap-1.5">
               <Linkedin className="h-3.5 w-3.5" />
               LinkedIn ({linkedInPosts.length})

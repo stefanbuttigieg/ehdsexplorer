@@ -29,7 +29,28 @@ export function useSidebarItems() {
         .eq("is_visible", true)
         .order("sort_order");
       if (error) throw error;
-      return data as unknown as SidebarItem[];
+
+      const items = (data ?? []) as unknown as SidebarItem[];
+      const featureFlagIds = [...new Set(items.flatMap((item) => item.feature_flag_id ? [item.feature_flag_id] : []))];
+
+      if (featureFlagIds.length === 0) {
+        return items;
+      }
+
+      const { data: flags, error: flagsError } = await supabase
+        .from("feature_flags")
+        .select("id, is_enabled")
+        .in("id", featureFlagIds);
+
+      if (flagsError) throw flagsError;
+
+      const enabledFlags = new Map(
+        (flags ?? []).map((flag) => [flag.id, flag.is_enabled])
+      );
+
+      return items.filter(
+        (item) => !item.feature_flag_id || enabledFlags.get(item.feature_flag_id) === true
+      );
     },
     staleTime: 5 * 60 * 1000, // 5 min cache
   });

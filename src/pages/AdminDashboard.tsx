@@ -181,6 +181,7 @@ const AdminDashboard = () => {
       description: 'AI-generated weekly EHDS news summaries',
       icon: Newspaper,
       href: '/admin/news',
+      count: counts?.news_summaries,
     },
     {
       title: 'Plain Language',
@@ -211,18 +212,21 @@ const AdminDashboard = () => {
       description: 'Manage Digital Health Authorities (DHAs) and Health Data Access Bodies (HDABs)',
       icon: MapPin,
       href: '/admin/health-authorities',
+      count: counts?.health_authorities,
     },
     {
       title: 'National Legislation',
       description: 'Manage national EHDS-linked legislation across member states',
       icon: Scale,
       href: '/admin/country-legislation',
+      count: counts?.country_legislation,
     },
     {
       title: 'Cross-Regulation Links',
       description: 'Link EHDS articles to GDPR, AI Act, MDR, Data Act provisions',
       icon: Link2,
       href: '/admin/cross-regulation',
+      count: counts?.cross_regulation_references,
     },
     {
       title: 'Implementation Tracker',
@@ -241,6 +245,7 @@ const AdminDashboard = () => {
       description: 'Manage obligations tracked per member state',
       icon: ClipboardList,
       href: '/admin/obligations',
+      count: counts?.ehds_obligations,
     },
     {
       title: 'Legal Pages',
@@ -259,12 +264,14 @@ const AdminDashboard = () => {
       description: 'Map topics to EHDS articles for quick reference on landing pages',
       icon: TableProperties,
       href: '/admin/topic-index',
+      count: counts?.topic_index,
     },
     {
       title: 'Downloadable Resources',
       description: 'Manage compliance templates, checklists, and guides for the Tools Hub',
       icon: Download,
       href: '/admin/resources',
+      count: counts?.downloadable_resources,
     },
     {
       title: 'Toolkit Questions',
@@ -301,8 +308,9 @@ const AdminDashboard = () => {
       description: 'Pre-generate and manage AI comic panel artwork for Comics section',
       icon: Sparkles,
       href: '/admin/comic-panels',
+      count: counts?.comic_panel_images,
     },
-  ], []);
+  ], [counts]);
 
   const adminOnlySections = isAdmin ? [
     {

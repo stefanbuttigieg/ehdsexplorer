@@ -97,7 +97,7 @@ function MetricsTable({ data, nameLabel = "Name", valueLabel = "Views" }: { data
 }
 
 export default function AdminAnalyticsPage() {
-  const { loading, shouldRender } = useAdminGuard({ requireAdmin: true });
+  const { loading, shouldRender } = useAdminGuard({ requireSuperAdmin: true });
   const [range, setRange] = useState("7d");
 
   const { startAt, endAt } = getDateRange(range);

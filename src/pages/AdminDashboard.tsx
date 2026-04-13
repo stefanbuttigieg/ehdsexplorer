@@ -1,4 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Link, useNavigate } from 'react-router-dom';
 import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote, HelpCircle, BookOpenCheck, Mail, Newspaper, UserCircle, Languages, ClipboardCheck, Bot, Globe, Sparkles, MapPin, Shield, ShieldCheck, Gavel, Settings2, UserCog, ToggleRight, ClipboardList, TableProperties, Activity, Key, Code, Search, Download, AlertTriangle, MessageCircleQuestion } from 'lucide-react';
 import { Button } from '@/components/ui/button';

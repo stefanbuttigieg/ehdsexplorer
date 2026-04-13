@@ -122,6 +122,13 @@ const TopicIndexPage = () => {
                 >
                   EU EHR Database ({sourceCounts['eu_ehr_glossary'] || 0})
                 </Badge>
+                <Badge 
+                  variant={sourceFilter === 'implementing_act' ? 'default' : 'outline'}
+                  className="cursor-pointer"
+                  onClick={() => setSourceFilter('implementing_act')}
+                >
+                  Implementing Acts ({sourceCounts['implementing_act'] || 0})
+                </Badge>
               </div>
             </div>
 

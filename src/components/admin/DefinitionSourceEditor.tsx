@@ -6,8 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { getSourceLabel, type DefinitionSource } from '@/hooks/useDefinitions';
 import {
   useDefinitionSources,
@@ -34,10 +35,24 @@ export const DefinitionSourceEditor = ({ definitionId, definitionTerm }: Definit
   const [editingSource, setEditingSource] = useState<DefinitionSourceRecord | null>(null);
   const [editedText, setEditedText] = useState('');
   const [editedArticle, setEditedArticle] = useState('');
+  const [editedImplementingActId, setEditedImplementingActId] = useState('');
   
   const [addingSource, setAddingSource] = useState<DefinitionSource | null>(null);
   const [newSourceText, setNewSourceText] = useState('');
   const [newSourceArticle, setNewSourceArticle] = useState('');
+  const [newImplementingActId, setNewImplementingActId] = useState('');
+
+  const { data: implementingActs = [] } = useQuery({
+    queryKey: ['implementing-acts-list'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('implementing_acts')
+        .select('id, title')
+        .order('title');
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const existingSources = sources.map(s => s.source);
   const availableSources = ALL_SOURCES.filter(s => !existingSources.includes(s));
@@ -46,6 +61,7 @@ export const DefinitionSourceEditor = ({ definitionId, definitionTerm }: Definit
     setEditingSource(source);
     setEditedText(source.source_text);
     setEditedArticle(source.source_article?.toString() || '');
+    setEditedImplementingActId(source.implementing_act_id || '');
   };
 
   const handleSaveEdit = async () => {
@@ -56,6 +72,7 @@ export const DefinitionSourceEditor = ({ definitionId, definitionTerm }: Definit
         id: editingSource.id,
         source_text: editedText,
         source_article: editedArticle ? parseInt(editedArticle) : null,
+        implementing_act_id: editingSource.source === 'implementing_act' ? (editedImplementingActId || null) : null,
       });
       toast({ title: 'Source updated successfully' });
       setEditingSource(null);
@@ -73,11 +90,13 @@ export const DefinitionSourceEditor = ({ definitionId, definitionTerm }: Definit
         source: addingSource,
         source_text: newSourceText,
         source_article: newSourceArticle ? parseInt(newSourceArticle) : null,
+        implementing_act_id: addingSource === 'implementing_act' ? (newImplementingActId || null) : null,
       });
       toast({ title: 'Source added successfully' });
       setAddingSource(null);
       setNewSourceText('');
       setNewSourceArticle('');
+      setNewImplementingActId('');
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     }
@@ -93,6 +112,22 @@ export const DefinitionSourceEditor = ({ definitionId, definitionTerm }: Definit
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     }
   };
+
+  const renderImplementingActSelector = (value: string, onChange: (val: string) => void) => (
+    <div className="flex items-center gap-2">
+      <Label className="text-xs whitespace-nowrap">Implementing Act:</Label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="flex h-8 w-full max-w-xs rounded-md border border-input bg-background px-2 py-1 text-xs ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <option value="">Select...</option>
+        {implementingActs.map(ia => (
+          <option key={ia.id} value={ia.id}>{ia.title}</option>
+        ))}
+      </select>
+    </div>
+  );
 
   if (isLoading) {
     return <div className="text-muted-foreground">Loading sources...</div>;
@@ -128,6 +163,11 @@ export const DefinitionSourceEditor = ({ definitionId, definitionTerm }: Definit
                 {source.source_article && (
                   <span className="text-xs text-muted-foreground">Art. {source.source_article}</span>
                 )}
+                {source.implementing_act_id && (
+                  <span className="text-xs text-muted-foreground">
+                    ({implementingActs.find(ia => ia.id === source.implementing_act_id)?.title || 'Linked IA'})
+                  </span>
+                )}
               </CardTitle>
               <div className="flex gap-1">
                 {editingSource?.id !== source.id && (
@@ -157,7 +197,7 @@ export const DefinitionSourceEditor = ({ definitionId, definitionTerm }: Definit
                   rows={6}
                   className="font-mono text-sm"
                 />
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 flex-wrap">
                   <div className="flex items-center gap-2">
                     <Label className="text-xs">Article:</Label>
                     <Input
@@ -168,6 +208,7 @@ export const DefinitionSourceEditor = ({ definitionId, definitionTerm }: Definit
                       placeholder="e.g. 2"
                     />
                   </div>
+                  {source.source === 'implementing_act' && renderImplementingActSelector(editedImplementingActId, setEditedImplementingActId)}
                   <div className="flex gap-2 ml-auto">
                     <Button variant="outline" size="sm" onClick={() => setEditingSource(null)}>
                       <X className="h-4 w-4 mr-1" />
@@ -204,7 +245,7 @@ export const DefinitionSourceEditor = ({ definitionId, definitionTerm }: Definit
               placeholder={`Enter the definition of "${definitionTerm}" as written in ${getSourceLabel(addingSource)}...`}
               className="font-mono text-sm"
             />
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
               <div className="flex items-center gap-2">
                 <Label className="text-xs">Article:</Label>
                 <Input
@@ -215,8 +256,9 @@ export const DefinitionSourceEditor = ({ definitionId, definitionTerm }: Definit
                   placeholder="e.g. 2"
                 />
               </div>
+              {addingSource === 'implementing_act' && renderImplementingActSelector(newImplementingActId, setNewImplementingActId)}
               <div className="flex gap-2 ml-auto">
-                <Button variant="outline" size="sm" onClick={() => setAddingSource(null)}>
+                <Button variant="outline" size="sm" onClick={() => { setAddingSource(null); setNewImplementingActId(''); }}>
                   <X className="h-4 w-4 mr-1" />
                   Cancel
                 </Button>

@@ -1113,6 +1113,75 @@ const AdminImplementingActContentPage = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Definitions Tab */}
+          <TabsContent value="definitions">
+            <Card>
+              <CardHeader className="flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Extracted Definitions</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Definitions found in articles titled "Definitions". Import new ones to the glossary.
+                  </p>
+                </div>
+                {newDefinitions.length > 0 && (
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={selectAllNewDefs}>
+                      Select All New ({newDefinitions.length})
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleImportDefinitions}
+                      disabled={selectedDefTerms.size === 0 || isImportingDefs}
+                    >
+                      {isImportingDefs ? (
+                        <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Importing...</>
+                      ) : (
+                        <><Upload className="h-4 w-4 mr-2" />Import Selected ({selectedDefTerms.size})</>
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </CardHeader>
+              <CardContent>
+                {extractedDefinitions.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">
+                    No definitions article found. Definitions are extracted from articles with "Definitions" in the title.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {extractedDefinitions.map((def) => (
+                      <div
+                        key={def.term}
+                        className={`flex items-start gap-3 p-3 rounded-lg border ${
+                          def.alreadyExists ? 'bg-muted/50 opacity-60' : 'bg-background'
+                        }`}
+                      >
+                        {!def.alreadyExists && (
+                          <Checkbox
+                            checked={selectedDefTerms.has(def.term)}
+                            onCheckedChange={() => toggleDefSelection(def.term)}
+                            className="mt-1"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold">{def.term}</span>
+                            {def.alreadyExists ? (
+                              <Badge variant="secondary" className="text-xs">Already in glossary</Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-xs border-green-500 text-green-700 dark:text-green-400">New</Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground">{def.definition}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
     </Layout>

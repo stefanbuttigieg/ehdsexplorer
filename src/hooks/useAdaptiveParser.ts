@@ -161,6 +161,10 @@ const ADOPTION_MARKERS: RegExp[] = [
 
 // === Helper functions ===
 function romanToNumber(roman: string): number {
+  // Handle Arabic numbers directly
+  if (/^\d+$/.test(roman.trim())) {
+    return parseInt(roman.trim(), 10);
+  }
   const romanMap: Record<string, number> = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
   let result = 0;
   const upper = roman.toUpperCase();

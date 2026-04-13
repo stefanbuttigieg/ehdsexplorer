@@ -210,8 +210,14 @@ export function analyzeStructure(text: string): StructureAnalysis {
   const recitalCount = Math.max(recitalMatches.length, tableRecitalMatches.length);
   
   // Count articles - match standalone article headings only (not inline references like "Article 23(4) of...")
+  // Also handle markdown-formatted headings like "### Article 1" or "*Article 3*"
   const articleLines = text.split('\n').filter(l => {
-    const trimmed = l.trim();
+    // Strip markdown heading markers and emphasis before matching
+    let trimmed = l.trim()
+      .replace(/^#{1,6}\s+/, '')
+      .replace(/^\*{1,2}/, '')
+      .replace(/\*{1,2}$/, '')
+      .trim();
     const artMatch = /^(?:Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Članak|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu|Člen)\s+(\d+)/i.exec(trimmed);
     if (!artMatch) return false;
     const after = trimmed.slice(artMatch[0].length).trim();

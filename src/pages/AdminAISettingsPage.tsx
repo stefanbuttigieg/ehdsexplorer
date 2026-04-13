@@ -487,6 +487,125 @@ const AdminAISettingsPage = () => {
             </Card>
           </div>
         </TabsContent>
+
+        {/* KNOWLEDGE BASE TAB */}
+        <TabsContent value="knowledge">
+          <div className="space-y-6">
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { label: 'Articles', count: kbStats?.articleCount ?? '—' },
+                { label: 'Recitals', count: kbStats?.recitalCount ?? '—' },
+                { label: 'Definitions', count: kbStats?.definitionCount ?? '—' },
+                { label: 'Official FAQs', count: kbStats?.ehdsFaqCount ?? '—' },
+                { label: 'Help Centre FAQs', count: kbStats?.helpFaqCount ?? '—' },
+                { label: 'Implementing Acts', count: kbStats ? `${kbStats.iaWithContent}/${kbStats.iaTotal}` : '—', sub: 'with content' },
+              ].map(s => (
+                <Card key={s.label}>
+                  <CardContent className="pt-4">
+                    <p className="text-xs text-muted-foreground mb-1">{s.label}</p>
+                    <p className="text-2xl font-bold">{s.count}</p>
+                    {(s as any).sub && <p className="text-[10px] text-muted-foreground">{(s as any).sub}</p>}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Implementing Acts Coverage */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Implementing Acts Content Coverage</CardTitle>
+                <CardDescription>Shows which implementing acts have detailed articles, recitals, or sections loaded into the AI knowledge base.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {kbLoading ? (
+                  <p className="text-sm text-muted-foreground py-4">Loading...</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left p-2">Title</th>
+                          <th className="text-left p-2">Status</th>
+                          <th className="text-center p-2">Articles</th>
+                          <th className="text-center p-2">Recitals</th>
+                          <th className="text-center p-2">Sections</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(kbStats?.iaCoverage || []).map((ia: any) => (
+                          <tr key={ia.id} className="border-b hover:bg-muted/50">
+                            <td className="p-2 max-w-[300px] truncate">{ia.title}</td>
+                            <td className="p-2"><Badge variant="outline" className="text-[10px]">{ia.status}</Badge></td>
+                            <td className="p-2 text-center">{ia.hasArticles ? <CheckCircle2 className="h-4 w-4 text-green-600 mx-auto" /> : <XCircle className="h-4 w-4 text-muted-foreground/40 mx-auto" />}</td>
+                            <td className="p-2 text-center">{ia.hasRecitals ? <CheckCircle2 className="h-4 w-4 text-green-600 mx-auto" /> : <XCircle className="h-4 w-4 text-muted-foreground/40 mx-auto" />}</td>
+                            <td className="p-2 text-center">{ia.hasSections ? <CheckCircle2 className="h-4 w-4 text-green-600 mx-auto" /> : <XCircle className="h-4 w-4 text-muted-foreground/40 mx-auto" />}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {(kbStats?.iaCoverage || []).length === 0 && (
+                      <p className="text-sm text-muted-foreground text-center py-8">No implementing acts found.</p>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Prompt Config Status */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Prompt Configuration Status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {(kbStats?.promptConfigs || []).map((p: any) => (
+                    <div key={p.id} className="flex items-center justify-between text-sm">
+                      <span>{p.prompt_label}</span>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={p.is_active ? 'default' : 'secondary'} className="text-[10px]">
+                          {p.is_active ? 'Active' : 'Inactive'}
+                        </Badge>
+                        <span className="text-[10px] text-muted-foreground">
+                          Updated {new Date(p.updated_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Test AI Knowledge */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Test AI Knowledge</CardTitle>
+                <CardDescription>Send a test query to verify the AI assistant recognizes recently added content.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="e.g. What does the implementing act on EHR say about interoperability?"
+                    value={testQuery}
+                    onChange={(e) => setTestQuery(e.target.value)}
+                    className="flex-1"
+                    onKeyDown={(e) => e.key === 'Enter' && !isTesting && testQuery.trim() && handleTestKnowledge()}
+                  />
+                  <Button onClick={handleTestKnowledge} disabled={isTesting || !testQuery.trim()}>
+                    {isTesting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Send className="h-4 w-4 mr-1" />}
+                    Test
+                  </Button>
+                </div>
+                {testResponse && (
+                  <div className="rounded-md border p-4 bg-muted/50">
+                    <p className="text-xs font-medium text-muted-foreground mb-2">AI Response:</p>
+                    <pre className="text-sm whitespace-pre-wrap">{testResponse}</pre>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
       </Tabs>
     </AdminPageLayout>
   );

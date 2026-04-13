@@ -60,6 +60,7 @@ const AdminDefinitionsPage = () => {
   const [newDefinitionText, setNewDefinitionText] = useState('');
   const [newSource, setNewSource] = useState<DefinitionSource>('ehds_regulation');
   const [newSourceArticle, setNewSourceArticle] = useState('');
+  const [newImplementingActId, setNewImplementingActId] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
   // Delete dialog
@@ -87,6 +88,19 @@ const AdminDefinitionsPage = () => {
 
   const { data: allSources = [] } = useAllDefinitionSources();
   const sourcesByDefinition = groupSourcesByDefinition(allSources);
+
+  const { data: implementingActs = [] } = useQuery({
+    queryKey: ['implementing-acts-list'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('implementing_acts')
+        .select('id, title')
+        .order('title');
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user && isEditor,
+  });
 
   const filteredDefinitions = definitions?.filter(def => {
     const matchesSearch = def.term.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -167,7 +181,8 @@ const AdminDefinitionsPage = () => {
         source: newSource,
         source_text: newDefinitionText.trim(),
         source_article: newSourceArticle ? parseInt(newSourceArticle) : null,
-      });
+        ...(newSource === 'implementing_act' && newImplementingActId ? { implementing_act_id: newImplementingActId } : {}),
+      } as any);
 
       toast({
         title: 'Definition Created',
@@ -182,6 +197,7 @@ const AdminDefinitionsPage = () => {
       setNewDefinitionText('');
       setNewSource('ehds_regulation');
       setNewSourceArticle('');
+      setNewImplementingActId('');
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -392,7 +408,7 @@ const AdminDefinitionsPage = () => {
               <Label>Source *</Label>
               <select
                 value={newSource}
-                onChange={(e) => setNewSource(e.target.value as DefinitionSource)}
+                onChange={(e) => { setNewSource(e.target.value as DefinitionSource); setNewImplementingActId(''); }}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="ehds_regulation">EHDS Regulation</option>
@@ -401,6 +417,21 @@ const AdminDefinitionsPage = () => {
                 <option value="implementing_act">Implementing Act</option>
               </select>
             </div>
+            {newSource === 'implementing_act' && (
+              <div className="space-y-2">
+                <Label>Implementing Act *</Label>
+                <select
+                  value={newImplementingActId}
+                  onChange={(e) => setNewImplementingActId(e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <option value="">Select an implementing act...</option>
+                  {implementingActs.map(ia => (
+                    <option key={ia.id} value={ia.id}>{ia.title}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Source Article (optional)</Label>
               <Input
@@ -412,7 +443,7 @@ const AdminDefinitionsPage = () => {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
-              <Button onClick={handleCreate} disabled={isCreating || !newTerm.trim() || !newDefinitionText.trim()}>
+              <Button onClick={handleCreate} disabled={isCreating || !newTerm.trim() || !newDefinitionText.trim() || (newSource === 'implementing_act' && !newImplementingActId)}>
                 {isCreating ? 'Creating...' : 'Create Definition'}
               </Button>
             </div>

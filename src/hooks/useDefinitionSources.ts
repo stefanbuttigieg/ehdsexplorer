@@ -8,6 +8,7 @@ export interface DefinitionSourceRecord {
   source: DefinitionSource;
   source_text: string;
   source_article: number | null;
+  implementing_act_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -55,6 +56,7 @@ export const useAddDefinitionSource = () => {
       source: DefinitionSource;
       source_text: string;
       source_article?: number | null;
+      implementing_act_id?: string | null;
     }) => {
       const { data, error } = await supabase
         .from("definition_sources")
@@ -63,6 +65,7 @@ export const useAddDefinitionSource = () => {
           source: params.source,
           source_text: params.source_text,
           source_article: params.source_article || null,
+          implementing_act_id: params.implementing_act_id || null,
         })
         .select()
         .single();
@@ -85,12 +88,14 @@ export const useUpdateDefinitionSource = () => {
       id: string;
       source_text: string;
       source_article?: number | null;
+      implementing_act_id?: string | null;
     }) => {
       const { data, error } = await supabase
         .from("definition_sources")
         .update({
           source_text: params.source_text,
           source_article: params.source_article,
+          implementing_act_id: params.implementing_act_id !== undefined ? params.implementing_act_id : undefined,
         })
         .eq("id", params.id)
         .select()

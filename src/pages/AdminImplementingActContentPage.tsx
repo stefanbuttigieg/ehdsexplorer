@@ -79,6 +79,105 @@ const AdminImplementingActContentPage = () => {
 
   const isLoading = loadingAct || loadingRecitals || loadingSections || loadingArticles;
 
+  // Definition extraction from articles titled "Definitions"
+  const { data: allDefinitions = [] } = useDefinitions();
+  const [selectedDefTerms, setSelectedDefTerms] = useState<Set<string>>(new Set());
+  const [isImportingDefs, setIsImportingDefs] = useState(false);
+
+  const extractedDefinitions = useMemo(() => {
+    const defArticles = articles.filter(a => a.title.toLowerCase().includes('definition'));
+    const defs: Array<{ term: string; definition: string; alreadyExists: boolean }> = [];
+    const existingTermsLower = new Set(allDefinitions.map(d => d.term.toLowerCase()));
+
+    for (const article of defArticles) {
+      // Parse "'term' means definition;" patterns
+      const regex = /['\u2018\u2019']([^'\u2018\u2019']+)['\u2018\u2019']\s+means\s+([\s\S]*?)(?:;\s*$|;\s*(?=['\u2018\u2019']))/gm;
+      let match;
+      while ((match = regex.exec(article.content)) !== null) {
+        const term = match[1].trim();
+        let definition = match[2].trim();
+        // Clean up definition - remove trailing semicolons and whitespace
+        definition = definition.replace(/;\s*$/, '').trim();
+        if (term && definition) {
+          defs.push({
+            term,
+            definition,
+            alreadyExists: existingTermsLower.has(term.toLowerCase()),
+          });
+        }
+      }
+      
+      // Also try numbered list pattern: (a) 'term' means ...
+      if (defs.length === 0) {
+        const altRegex = /(?:\([a-z]\)\s*)?['\u2018\u2019']([^'\u2018\u2019']+)['\u2018\u2019']\s+means\s+([\s\S]*?)(?:;\s*$|;\s*(?=\([a-z]\)))/gm;
+        let altMatch;
+        while ((altMatch = altRegex.exec(article.content)) !== null) {
+          const term = altMatch[1].trim();
+          let definition = altMatch[2].trim().replace(/;\s*$/, '').trim();
+          if (term && definition && !defs.some(d => d.term.toLowerCase() === term.toLowerCase())) {
+            defs.push({
+              term,
+              definition,
+              alreadyExists: existingTermsLower.has(term.toLowerCase()),
+            });
+          }
+        }
+      }
+    }
+    return defs;
+  }, [articles, allDefinitions]);
+
+  const newDefinitions = extractedDefinitions.filter(d => !d.alreadyExists);
+
+  const toggleDefSelection = (term: string) => {
+    setSelectedDefTerms(prev => {
+      const next = new Set(prev);
+      if (next.has(term)) next.delete(term); else next.add(term);
+      return next;
+    });
+  };
+
+  const selectAllNewDefs = () => {
+    setSelectedDefTerms(new Set(newDefinitions.map(d => d.term)));
+  };
+
+  const handleImportDefinitions = async () => {
+    if (selectedDefTerms.size === 0) return;
+    setIsImportingDefs(true);
+    try {
+      const toImport = extractedDefinitions.filter(d => selectedDefTerms.has(d.term) && !d.alreadyExists);
+      // Get max id
+      const { data: maxRow } = await supabase.from("definitions").select("id").order("id", { ascending: false }).limit(1).single();
+      let nextId = (maxRow?.id || 159) + 1;
+
+      for (const def of toImport) {
+        const defId = nextId++;
+        const { error: defError } = await supabase.from("definitions").insert({
+          id: defId,
+          term: def.term,
+          definition: def.definition,
+          source: 'implementing_act' as any,
+        });
+        if (defError) throw defError;
+
+        const { error: srcError } = await supabase.from("definition_sources").insert({
+          definition_id: defId,
+          source: 'implementing_act' as any,
+          source_text: def.definition,
+        });
+        if (srcError) throw srcError;
+      }
+
+      toast.success(`Imported ${toImport.length} definitions to the glossary`);
+      setSelectedDefTerms(new Set());
+      queryClient.invalidateQueries({ queryKey: ["definitions"] });
+    } catch (e) {
+      toast.error(`Failed to import: ${(e as Error).message}`);
+    } finally {
+      setIsImportingDefs(false);
+    }
+  };
+
   // Import functionality
   const {
     isParsing: isImportParsing,

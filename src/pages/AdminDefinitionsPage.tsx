@@ -89,6 +89,19 @@ const AdminDefinitionsPage = () => {
   const { data: allSources = [] } = useAllDefinitionSources();
   const sourcesByDefinition = groupSourcesByDefinition(allSources);
 
+  const { data: implementingActs = [] } = useQuery({
+    queryKey: ['implementing-acts-list'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('implementing_acts')
+        .select('id, title')
+        .order('title');
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user && isEditor,
+  });
+
   const filteredDefinitions = definitions?.filter(def => {
     const matchesSearch = def.term.toLowerCase().includes(searchQuery.toLowerCase()) ||
       def.definition.toLowerCase().includes(searchQuery.toLowerCase());

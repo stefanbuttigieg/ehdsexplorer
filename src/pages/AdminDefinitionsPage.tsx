@@ -443,7 +443,7 @@ const AdminDefinitionsPage = () => {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
-              <Button onClick={handleCreate} disabled={isCreating || !newTerm.trim() || !newDefinitionText.trim()}>
+              <Button onClick={handleCreate} disabled={isCreating || !newTerm.trim() || !newDefinitionText.trim() || (newSource === 'implementing_act' && !newImplementingActId)}>
                 {isCreating ? 'Creating...' : 'Create Definition'}
               </Button>
             </div>

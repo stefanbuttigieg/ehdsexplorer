@@ -5,6 +5,18 @@ All notable changes to the EHDS Regulation Explorer will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1] - 2026-04-13
+
+### Added
+
+#### Admin Definitions CRUD
+- **Full CRUD operations** — Create, Read, Update, and Delete definitions directly from the admin interface
+- **Source selector on create** — Choose the source (EHDS Regulation, EU EHR Database, Xt-EHR, Implementing Act) when adding a new definition
+- **Delete with cascade** — Deleting a definition also removes all associated source entries
+- **Confirmation dialog** — Destructive delete action requires explicit confirmation
+
+---
+
 ## [2.3.0] - 2026-04-13
 
 ### Added

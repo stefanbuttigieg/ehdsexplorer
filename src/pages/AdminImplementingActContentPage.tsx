@@ -1,7 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Linkedin } from "lucide-react";
-import { Plus, Trash2, Edit, Save, X, ArrowLeft, Upload, Loader2, Check } from "lucide-react";
+import { Plus, Trash2, Edit, Save, X, ArrowLeft, Upload, Loader2, Check, FileText } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -88,6 +88,40 @@ const AdminImplementingActContentPage = () => {
   } = useImplementingActImport();
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [importText, setImportText] = useState("");
+  const [isPdfLoading, setIsPdfLoading] = useState(false);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePdfUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || file.type !== "application/pdf") {
+      toast.error("Please select a PDF file");
+      return;
+    }
+    setIsPdfLoading(true);
+    try {
+      const pdfjsLib = await import("pdfjs-dist");
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      let fullText = "";
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        const pageText = content.items
+          .map((item: any) => item.str)
+          .join(" ");
+        fullText += pageText + "\n\n";
+      }
+      setImportText(fullText);
+      toast.success(`Extracted text from ${pdf.numPages} pages`);
+    } catch (err) {
+      toast.error("Failed to read PDF: " + (err as Error).message);
+    } finally {
+      setIsPdfLoading(false);
+      if (pdfInputRef.current) pdfInputRef.current.value = "";
+    }
+  }, []);
 
   const handleImportParse = useCallback(async () => {
     if (importText.trim()) {
@@ -310,17 +344,45 @@ const AdminImplementingActContentPage = () => {
               <div className="space-y-4">
                 {!importParsed ? (
                   <>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => pdfInputRef.current?.click()}
+                        disabled={isImportParsing || isPdfLoading}
+                      >
+                        {isPdfLoading ? (
+                          <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Reading PDF...</>
+                        ) : (
+                          <><FileText className="h-4 w-4 mr-2" />Upload PDF</>
+                        )}
+                      </Button>
+                      <input
+                        ref={pdfInputRef}
+                        type="file"
+                        accept="application/pdf"
+                        className="hidden"
+                        onChange={handlePdfUpload}
+                      />
+                    </div>
+                    <div className="relative">
+                      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
+                        <div className="flex-1 border-t border-muted" />
+                        <span className="text-xs text-muted-foreground bg-background px-2">or paste text</span>
+                        <div className="flex-1 border-t border-muted" />
+                      </div>
+                    </div>
                     <Textarea
                       placeholder="Paste the full text of the implementing act here..."
                       value={importText}
                       onChange={(e) => setImportText(e.target.value)}
                       className="h-64 font-mono text-sm"
-                      disabled={isImportParsing}
+                      disabled={isImportParsing || isPdfLoading}
                     />
                     <Button
                       className="w-full"
                       onClick={handleImportParse}
-                      disabled={isImportParsing || !importText.trim()}
+                      disabled={isImportParsing || isPdfLoading || !importText.trim()}
                     >
                       {isImportParsing ? (
                         <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Parsing...</>

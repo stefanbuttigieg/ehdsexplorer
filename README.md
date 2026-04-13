@@ -55,6 +55,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Detailed act pages** with dedicated articles, recitals, and footnotes per implementing act
 - **Import from Document** — PDF and Word (.docx) file upload with adaptive parsing for articles, recitals, and sections
 - **Definition extraction** — Auto-detect definitions from "Definitions" articles in implementing acts with admin review and glossary import
+- **Full definitions CRUD** — Create, edit, delete definitions from the admin interface with source selection (Regulation, EU EHR, Xt-EHR, Implementing Act)
 - **Searchable content** within each implementing act
 - **Section-based article organization** for complex acts
 - **Data Tables** — Structured data element tables per implementing act with search, CSV/JSON export, FHIR mapping fields

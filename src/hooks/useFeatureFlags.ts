@@ -111,7 +111,7 @@ export const useFeatureFlags = () => {
   // Helper to check if a specific feature is enabled
   const isFeatureEnabled = (featureId: string): boolean => {
     const flag = flags.find(f => f.id === featureId);
-    return flag?.is_enabled ?? true; // Default to enabled if not found
+    return flag?.is_enabled ?? false; // Default to disabled if not found
   };
 
   return {
@@ -138,13 +138,13 @@ export const useIsFeatureEnabled = (featureId: string) => {
         .maybeSingle();
 
       if (error) throw error;
-      return data?.is_enabled ?? true; // Default to enabled if not found
+      return data?.is_enabled ?? false; // Default to disabled if not found
     },
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
   return {
-    isEnabled: data ?? true,
+    isEnabled: data ?? false,
     isLoading,
   };
 };

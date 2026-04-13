@@ -370,6 +370,9 @@ export function adaptivePreprocess(text: string, analysis: StructureAnalysis): s
   // Step 7: Remove images
   processed = processed.replace(/!\[([^\]]*)\]\([^)]+\)/g, '');
   
+  // Step 7b: Remove HTML comments (e.g. <!-- layout: ... -->)
+  processed = processed.replace(/<!--[\s\S]*?-->/g, '');
+  
   // Step 8: Clean HTML tags — add line breaks for block elements first
   processed = processed.replace(/<\/(?:p|div|tr|li|h[1-6]|dt|dd|blockquote|section|td|th)>/gi, '\n');
   processed = processed.replace(/<(?:p|div|tr|li|h[1-6]|dt|dd|blockquote|section)\b[^>]*>/gi, '\n');
@@ -386,6 +389,17 @@ export function adaptivePreprocess(text: string, analysis: StructureAnalysis): s
     const code = parseInt(m.slice(2, -1));
     return String.fromCharCode(code);
   });
+  
+  // Step 8b: Strip markdown heading markers and emphasis from structural lines
+  // e.g. "### Article 1" → "Article 1", "## CHAPTER 2" → "CHAPTER 2", "*Article 3*" → "Article 3"
+  processed = processed.replace(/^#{1,6}\s+/gm, '');
+  // Strip wrapping emphasis markers: *text* or **text** (but not bullet points like "* item")
+  processed = processed.replace(/^\*{1,2}([^*\n]+)\*{1,2}\s*$/gm, '$1');
+  
+  // Step 8c: Remove PDF page markers like "## Page N", "EN N EN", "**EN** N **EN**", "EN" standalone
+  processed = processed.replace(/^##\s*Page\s+\d+\s*$/gm, '');
+  processed = processed.replace(/^\*{0,2}EN\*{0,2}\s+\d+\s+\*{0,2}EN\*{0,2}\s*$/gm, '');
+  processed = processed.replace(/^\*{0,2}EN\*{0,2}\s*$/gm, '');
   
   // Step 9: Remove horizontal rules
   processed = processed.replace(/^\s*\*\s*\*\s*\*\s*$/gm, '');

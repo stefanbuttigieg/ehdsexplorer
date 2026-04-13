@@ -114,6 +114,13 @@ const DefinitionsPage = () => {
             >
               Xt-EHR ({definitionsWithSource('xt_ehr')})
             </Badge>
+            <Badge 
+              variant={sourceFilter === 'implementing_act' ? 'default' : 'outline'}
+              className="cursor-pointer"
+              onClick={() => setSourceFilter('implementing_act')}
+            >
+              Implementing Acts ({definitionsWithSource('implementing_act')})
+            </Badge>
           </div>
         </div>
 

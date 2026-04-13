@@ -5,6 +5,28 @@ All notable changes to the EHDS Regulation Explorer will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-04-13
+
+### Added
+
+#### Implementing Act Document Import
+- **Word (.docx) support** — Upload Word documents for implementing act content import using mammoth.js, in addition to existing PDF support
+- **Adaptive parsing** — Improved document parser with markdown/HTML cleanup, better article, recital, and chapter/section detection
+
+#### Implementing Act Definition Extraction
+- **Definitions tab** in implementing act admin content page — auto-extracts defined terms from articles titled "Definitions"
+- **Review & import workflow** — shows which terms are new vs already in the glossary, with checkbox selection and bulk import
+- **`implementing_act` source type** — new source category for definitions, with orange badge in the glossary UI
+- **Definition source constraint updated** — `definition_sources` table now accepts `implementing_act` as a valid source
+- **Filter badges** — "Implementing Acts" filter added to Definitions page, Admin Definitions page, and Topic Index page
+
+#### AI Assistant — Implementing Act Knowledge
+- **Full implementing act content** injected into AI assistant system prompt (articles, recitals, sections)
+- **Dynamic enrichment** — as new implementing act content is imported, the assistant automatically picks it up
+- **Citation support** — assistant can cite implementing act articles and link to act detail pages
+
+---
+
 ## [2.2.0] - 2026-04-09
 
 ### Added

@@ -29,8 +29,8 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Article Dependency Graph** — interactive visualization showing how articles reference each other, with spiral layout, pan/zoom, filtering, and detail panel
 - **115 Recitals** with individual detail pages and related article links
 - **4 Annexes** with detailed technical requirements and specifications
-- **170+ Definitions** from Article 2, EU EHR Glossary, and Xt-EHR with multi-source support
-- **Multi-source definitions** - See how the same term is defined across EHDS Regulation, EU EHR Glossary, and Xt-EHR
+- **170+ Definitions** from Article 2, EU EHR Glossary, Xt-EHR, and Implementing Acts with multi-source support
+- **Multi-source definitions** - See how the same term is defined across EHDS Regulation, EU EHR Glossary, Xt-EHR, and Implementing Acts
 - **Smart legal reference linking** - Internal article/recital references are auto-linked; external regulation references (e.g., "Article 6 of Regulation (EU) 2016/679") are correctly left as plain text
 
 ### 🔍 Advanced Search
@@ -53,6 +53,8 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **EUR-Lex integration** — Direct links to adopted implementing acts on EUR-Lex
 - **Related articles** and official document links
 - **Detailed act pages** with dedicated articles, recitals, and footnotes per implementing act
+- **Import from Document** — PDF and Word (.docx) file upload with adaptive parsing for articles, recitals, and sections
+- **Definition extraction** — Auto-detect definitions from "Definitions" articles in implementing acts with admin review and glossary import
 - **Searchable content** within each implementing act
 - **Section-based article organization** for complex acts
 - **Data Tables** — Structured data element tables per implementing act with search, CSV/JSON export, FHIR mapping fields
@@ -272,7 +274,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Content management** for all content types:
   - Articles, Recitals, Chapters, Sections
   - Definitions, Annexes
-  - Implementing Acts (with dedicated article/recital/section content and data tables)
+  - Implementing Acts (with dedicated article/recital/section content, data tables, and definition extraction)
   - EHDS FAQs (separate from Help Center FAQs) with PDF parser and auto-sync
   - Joint Action Deliverables
   - Published Works

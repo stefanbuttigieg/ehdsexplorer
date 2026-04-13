@@ -402,21 +402,21 @@ const AdminImplementingActContentPage = () => {
                       <Button
                         variant="outline"
                         className="flex-1"
-                        onClick={() => pdfInputRef.current?.click()}
-                        disabled={isImportParsing || isPdfLoading}
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isImportParsing || isFileLoading}
                       >
-                        {isPdfLoading ? (
-                          <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Reading PDF...</>
+                        {isFileLoading ? (
+                          <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Reading file...</>
                         ) : (
-                          <><FileText className="h-4 w-4 mr-2" />Upload PDF</>
+                          <><FileText className="h-4 w-4 mr-2" />Upload PDF or Word</>
                         )}
                       </Button>
                       <input
-                        ref={pdfInputRef}
+                        ref={fileInputRef}
                         type="file"
-                        accept="application/pdf"
+                        accept="application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx"
                         className="hidden"
-                        onChange={handlePdfUpload}
+                        onChange={handleFileUpload}
                       />
                     </div>
                     <div className="relative">
@@ -431,7 +431,7 @@ const AdminImplementingActContentPage = () => {
                       value={importText}
                       onChange={(e) => setImportText(e.target.value)}
                       className="h-64 font-mono text-sm"
-                      disabled={isImportParsing || isPdfLoading}
+                      disabled={isImportParsing || isFileLoading}
                     />
                     <Button
                       className="w-full"

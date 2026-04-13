@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Linkedin } from "lucide-react";
+import { Linkedin, BookOpen } from "lucide-react";
 import { Plus, Trash2, Edit, Save, X, ArrowLeft, Upload, Loader2, Check, FileText } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

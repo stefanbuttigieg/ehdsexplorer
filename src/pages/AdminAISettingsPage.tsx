@@ -75,6 +75,9 @@ const AdminAISettingsPage = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [editingPrompt, setEditingPrompt] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
+  const [testQuery, setTestQuery] = useState('');
+  const [testResponse, setTestResponse] = useState('');
+  const [isTesting, setIsTesting] = useState(false);
 
   useEffect(() => {
     if ((settings as any)?.ai_model) {

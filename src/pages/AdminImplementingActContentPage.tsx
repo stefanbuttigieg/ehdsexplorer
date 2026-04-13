@@ -436,7 +436,7 @@ const AdminImplementingActContentPage = () => {
                     <Button
                       className="w-full"
                       onClick={handleImportParse}
-                      disabled={isImportParsing || isPdfLoading || !importText.trim()}
+                      disabled={isImportParsing || isFileLoading || !importText.trim()}
                     >
                       {isImportParsing ? (
                         <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Parsing...</>

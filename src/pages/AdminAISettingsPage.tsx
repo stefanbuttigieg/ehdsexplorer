@@ -127,6 +127,52 @@ const AdminAISettingsPage = () => {
     },
   });
 
+  // Knowledge Base counts
+  const { data: kbStats, isLoading: kbLoading } = useQuery({
+    queryKey: ['kb-stats'],
+    queryFn: async () => {
+      const [articles, recitals, definitions, ias, iaArticles, iaRecitals, iaSections, ehdsFaqs, helpFaqs, promptConfigs] = await Promise.all([
+        supabase.from('articles').select('*', { count: 'exact', head: true }),
+        supabase.from('recitals').select('*', { count: 'exact', head: true }),
+        supabase.from('definitions').select('*', { count: 'exact', head: true }),
+        supabase.from('implementing_acts').select('id, title, status'),
+        supabase.from('implementing_act_articles').select('implementing_act_id'),
+        supabase.from('implementing_act_recitals').select('implementing_act_id'),
+        supabase.from('implementing_act_sections').select('implementing_act_id'),
+        supabase.from('ehds_faqs').select('*', { count: 'exact', head: true }).eq('is_published', true),
+        supabase.from('help_center_faq').select('*', { count: 'exact', head: true }),
+        supabase.from('ai_prompt_config').select('id, prompt_label, is_active, updated_at').order('category').order('sort_order'),
+      ]);
+
+      // Build IA coverage map
+      const iaList = ias.data || [];
+      const iaArticleIds = new Set((iaArticles.data || []).map((r: any) => r.implementing_act_id));
+      const iaRecitalIds = new Set((iaRecitals.data || []).map((r: any) => r.implementing_act_id));
+      const iaSectionIds = new Set((iaSections.data || []).map((r: any) => r.implementing_act_id));
+
+      const iaCoverage = iaList.map((ia: any) => ({
+        id: ia.id,
+        title: ia.title,
+        status: ia.status,
+        hasArticles: iaArticleIds.has(ia.id),
+        hasRecitals: iaRecitalIds.has(ia.id),
+        hasSections: iaSectionIds.has(ia.id),
+      }));
+
+      return {
+        articleCount: articles.count || 0,
+        recitalCount: recitals.count || 0,
+        definitionCount: definitions.count || 0,
+        iaTotal: iaList.length,
+        iaWithContent: iaCoverage.filter((ia: any) => ia.hasArticles || ia.hasRecitals).length,
+        ehdsFaqCount: ehdsFaqs.count || 0,
+        helpFaqCount: helpFaqs.count || 0,
+        iaCoverage,
+        promptConfigs: promptConfigs.data || [],
+      };
+    },
+  });
+
   const handleSaveModel = async () => {
     setIsSaving(true);
     try {

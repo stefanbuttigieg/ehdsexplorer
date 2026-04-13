@@ -393,10 +393,10 @@ export function adaptivePreprocess(text: string, analysis: StructureAnalysis): s
   // For number-first languages (Hungarian, Finnish, Latvian, Lithuanian)
   processed = processed.replace(/([.;:!?])\s*(\d+)\.\s*(cikk|artikla|pants|straipsnis)/gim, '$1\n$2. $3');
   
-  const chapterWords = 'CHAPTER|KAPITEL|CHAPITRE|CAPÍTULO|CAPO|HOOFDSTUK|ROZDZIAŁ|KAPITOLA|CAPITOLUL|ГЛАВА|ΚΕΦΑΛΑΙΟ|PEATÜKK|NODAĻA|SKYRIUS|POGLAVJE|POGLAVLJE|KAPITOLU|CAIBIDIL|FEJEZET|LUKU';
-  processed = processed.replace(new RegExp(`([.;:!?\\n])\\s*((?:${chapterWords})\\s+[IVXLCDM]+)`, 'gim'), '$1\n$2');
+  const chapterWords = 'CHAPTER|KAPITEL|CHAPITRE|CAPÍTULO|CAPO|HOOFDSTUK|ROZDZIAŁ|KAPITOLA|CAPITOLUL|ГЛАВА|ΚΕΦΑΛΑΙΟ|PEATÜKK|NODAΛA|SKYRIUS|POGLAVJE|POGLAVLJE|KAPITOLU|CAIBIDIL|FEJEZET|LUKU';
+  processed = processed.replace(new RegExp(`([.;:!?\\n])\\s*((?:${chapterWords})\\s+[IVXLCDM\\d]+)`, 'gim'), '$1\n$2');
   // Also handle number-first chapter patterns (Hungarian, Finnish, Estonian, Latvian, Lithuanian)
-  processed = processed.replace(/([.;:!?\n])\s*([IVXLCDM]+)\.\s*(FEJEZET|LUKU|PEATÜKK|NODAĻA|SKYRIUS)/gim, '$1\n$2. $3');
+  processed = processed.replace(/([.;:!?\n])\s*([IVXLCDM\d]+)\.\s*(FEJEZET|LUKU|PEATÜKK|NODAĻA|SKYRIUS)/gim, '$1\n$2. $3');
   
   const annexWords = 'ANNEX|ANHANG|ANNEXE|ANEXO|ALLEGATO|BIJLAGE|ZAŁĄCZNIK|PŘÍLOHA|PRÍLOHA|ANEXA|ПРИЛОЖЕНИЕ|ΠΑΡΑΡΤΗΜΑ|BILAGA|BILAG|LIITE|LISA|PIELIKUMS|PRIEDAS|PRILOGA|PRILOG|ANNESS|IARSCRÍBHINN|MELLÉKLET';
   processed = processed.replace(new RegExp(`([.;:!?\\n])\\s*((?:${annexWords})\\s+[IVXLCDM]+)`, 'gim'), '$1\n$2');

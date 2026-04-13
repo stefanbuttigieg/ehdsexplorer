@@ -252,6 +252,7 @@ const AdminAISettingsPage = () => {
           <TabsTrigger value="model"><Bot className="h-4 w-4 mr-1" />Model</TabsTrigger>
           <TabsTrigger value="prompts"><Edit2 className="h-4 w-4 mr-1" />Prompts</TabsTrigger>
           <TabsTrigger value="benchmarks"><BarChart3 className="h-4 w-4 mr-1" />Benchmarks</TabsTrigger>
+          <TabsTrigger value="knowledge"><Database className="h-4 w-4 mr-1" />Knowledge Base</TabsTrigger>
         </TabsList>
 
         {/* MODEL TAB */}

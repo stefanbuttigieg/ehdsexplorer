@@ -125,7 +125,7 @@ export default function AdminAnalyticsPage() {
   }), [startAt, endAt]);
 
   const { data: umami, isLoading: umamiLoading } = useQuery({
-    queryKey: ["admin-analytics-umami", range],
+    queryKey: ["admin-analytics-umami", startAt, endAt],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("get-umami-analytics", {
         method: "POST",
@@ -138,7 +138,7 @@ export default function AdminAnalyticsPage() {
   });
 
   const { data: posthog, isLoading: posthogLoading } = useQuery({
-    queryKey: ["admin-analytics-posthog", range],
+    queryKey: ["admin-analytics-posthog", startDate, endDate],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("get-posthog-analytics", {
         method: "POST",

@@ -26,6 +26,45 @@ const AdminDashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { isTourOpen, startTour, completeTour, closeTour } = useAdminTour();
 
+  // Fetch live counts for dashboard tiles
+  const { data: counts } = useQuery({
+    queryKey: ['admin-dashboard-counts'],
+    queryFn: async () => {
+      const tables = [
+        { key: 'articles', table: 'articles' as const },
+        { key: 'recitals', table: 'recitals' as const },
+        { key: 'definitions', table: 'definitions' as const },
+        { key: 'annexes', table: 'annexes' as const },
+        { key: 'implementing_acts', table: 'implementing_acts' as const },
+        { key: 'footnotes', table: 'footnotes' as const },
+        { key: 'ehds_faqs', table: 'ehds_faqs' as const },
+        { key: 'notifications', table: 'notifications' as const },
+        { key: 'disclaimers', table: 'disclaimers' as const },
+        { key: 'news_summaries', table: 'news_summaries' as const },
+        { key: 'country_legislation', table: 'country_legislation' as const },
+        { key: 'cross_regulation_references', table: 'cross_regulation_references' as const },
+        { key: 'ehds_obligations', table: 'ehds_obligations' as const },
+        { key: 'downloadable_resources', table: 'downloadable_resources' as const },
+        { key: 'health_authorities', table: 'health_authorities' as const },
+        { key: 'help_center_faqs', table: 'help_center_faqs' as const },
+        { key: 'feature_flags', table: 'feature_flags' as const },
+        { key: 'email_templates', table: 'email_templates' as const },
+        { key: 'comic_panel_images', table: 'comic_panel_images' as const },
+        { key: 'topic_index', table: 'topic_index' as const },
+        { key: 'published_works', table: 'published_works' as const },
+        { key: 'joint_action_deliverables', table: 'joint_action_deliverables' as const },
+      ];
+      const results = await Promise.all(
+        tables.map(async ({ key, table }) => {
+          const { count } = await supabase.from(table).select('*', { count: 'exact', head: true });
+          return [key, count ?? 0] as const;
+        })
+      );
+      return Object.fromEntries(results) as Record<string, number>;
+    },
+    staleTime: 60_000,
+  });
+
   useEffect(() => {
     if (settings?.maintenance_message) {
       setMaintenanceMessage(settings.maintenance_message);

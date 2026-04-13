@@ -42,6 +42,7 @@ export const useFeatureFlags = () => {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['feature-flags'] });
+      queryClient.invalidateQueries({ queryKey: ['sidebar-items'] });
       toast.success(`${data.name} ${data.is_enabled ? 'enabled' : 'disabled'}`);
     },
     onError: (error) => {
@@ -63,6 +64,7 @@ export const useFeatureFlags = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feature-flags'] });
+      queryClient.invalidateQueries({ queryKey: ['sidebar-items'] });
       toast.success('Feature flag updated');
     },
     onError: (error) => {
@@ -83,6 +85,7 @@ export const useFeatureFlags = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feature-flags'] });
+      queryClient.invalidateQueries({ queryKey: ['sidebar-items'] });
       toast.success('Feature flag created');
     },
     onError: (error) => {
@@ -101,6 +104,7 @@ export const useFeatureFlags = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['feature-flags'] });
+      queryClient.invalidateQueries({ queryKey: ['sidebar-items'] });
       toast.success('Feature flag deleted');
     },
     onError: (error) => {

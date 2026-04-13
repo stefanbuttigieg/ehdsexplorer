@@ -1,4 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Link, useNavigate } from 'react-router-dom';
 import { FileText, BookOpen, Scale, Files, ListChecks, Users, LogOut, Upload, Construction, Save, Layers, LayoutDashboard, Link2, Bell, BookMarked, StickyNote, HelpCircle, BookOpenCheck, Mail, Newspaper, UserCircle, Languages, ClipboardCheck, Bot, Globe, Sparkles, MapPin, Shield, ShieldCheck, Gavel, Settings2, UserCog, ToggleRight, ClipboardList, TableProperties, Activity, Key, Code, Search, Download, AlertTriangle, MessageCircleQuestion } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -23,6 +25,29 @@ const AdminDashboard = () => {
   const [maintenanceMessage, setMaintenanceMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const { isTourOpen, startTour, completeTour, closeTour } = useAdminTour();
+
+  // Fetch live counts for dashboard tiles
+  const { data: counts } = useQuery({
+    queryKey: ['admin-dashboard-counts'],
+    queryFn: async () => {
+      const tableNames = [
+        'articles', 'recitals', 'definitions', 'annexes', 'implementing_acts',
+        'footnotes', 'ehds_faqs', 'notifications', 'disclaimers', 'news_summaries',
+        'country_legislation', 'cross_regulation_references', 'ehds_obligations',
+        'downloadable_resources', 'health_authorities', 'help_center_faqs',
+        'feature_flags', 'email_templates', 'comic_panel_images', 'topic_index',
+        'published_works', 'joint_action_deliverables',
+      ];
+      const results = await Promise.all(
+        tableNames.map(async (table) => {
+          const { count } = await supabase.from(table as any).select('*', { count: 'exact', head: true });
+          return [table, count ?? 0] as const;
+        })
+      );
+      return Object.fromEntries(results) as Record<string, number>;
+    },
+    staleTime: 60_000,
+  });
 
   useEffect(() => {
     if (settings?.maintenance_message) {
@@ -63,80 +88,87 @@ const AdminDashboard = () => {
     },
     {
       title: 'Articles',
-      description: 'Manage the 105 articles of the EHDS Regulation',
+      description: 'Manage the articles of the EHDS Regulation',
       icon: FileText,
       href: '/admin/articles',
-      count: 105,
+      count: counts?.articles,
     },
     {
       title: 'Recitals',
-      description: 'Manage all 115 recitals providing context',
+      description: 'Manage all recitals providing context',
       icon: BookOpen,
       href: '/admin/recitals',
-      count: 115,
+      count: counts?.recitals,
     },
     {
       title: 'Definitions',
       description: 'Manage legal definitions from Article 2',
       icon: Scale,
       href: '/admin/definitions',
-      count: 67,
+      count: counts?.definitions,
     },
     {
       title: 'Annexes',
-      description: 'Manage the 4 technical annexes',
+      description: 'Manage the technical annexes',
       icon: Files,
       href: '/admin/annexes',
-      count: 4,
+      count: counts?.annexes,
     },
     {
       title: 'Implementing Acts',
       description: 'Manage implementing and delegated acts tracker',
       icon: ListChecks,
       href: '/admin/implementing-acts',
-      count: 33,
+      count: counts?.implementing_acts,
     },
     {
       title: 'EU Project Deliverables',
       description: 'Link articles and acts to EU project deliverables',
       icon: Link2,
       href: '/admin/joint-action-deliverables',
+      count: counts?.joint_action_deliverables,
     },
     {
       title: 'Published Works',
       description: 'Link articles and acts to published works',
       icon: BookMarked,
       href: '/admin/published-works',
+      count: counts?.published_works,
     },
     {
       title: 'Notifications',
       description: 'Push notifications to site visitors',
       icon: Bell,
       href: '/admin/notifications',
+      count: counts?.notifications,
     },
     {
       title: 'Disclaimers',
       description: 'Manage disclaimer banners across the site',
       icon: AlertTriangle,
       href: '/admin/disclaimers',
+      count: counts?.disclaimers,
     },
     {
       title: 'Footnotes',
       description: 'Manage footnotes for articles and recitals',
       icon: StickyNote,
       href: '/admin/footnotes',
+      count: counts?.footnotes,
     },
     {
       title: 'EHDS FAQs',
-      description: 'Manage the 67 official EU Commission EHDS FAQs and PDF parser',
+      description: 'Manage official EU Commission EHDS FAQs and PDF parser',
       icon: MessageCircleQuestion,
       href: '/admin/ehds-faqs',
+      count: counts?.ehds_faqs,
     },
     {
       title: 'Help Center FAQs',
       description: 'Manage FAQ content for the public help page',
       icon: HelpCircle,
       href: '/admin/help-center-faqs',
+      count: counts?.help_center_faqs,
     },
     {
       title: 'Onboarding Flow',
@@ -149,6 +181,7 @@ const AdminDashboard = () => {
       description: 'AI-generated weekly EHDS news summaries',
       icon: Newspaper,
       href: '/admin/news',
+      count: counts?.news_summaries,
     },
     {
       title: 'Plain Language',
@@ -179,18 +212,21 @@ const AdminDashboard = () => {
       description: 'Manage Digital Health Authorities (DHAs) and Health Data Access Bodies (HDABs)',
       icon: MapPin,
       href: '/admin/health-authorities',
+      count: counts?.health_authorities,
     },
     {
       title: 'National Legislation',
       description: 'Manage national EHDS-linked legislation across member states',
       icon: Scale,
       href: '/admin/country-legislation',
+      count: counts?.country_legislation,
     },
     {
       title: 'Cross-Regulation Links',
       description: 'Link EHDS articles to GDPR, AI Act, MDR, Data Act provisions',
       icon: Link2,
       href: '/admin/cross-regulation',
+      count: counts?.cross_regulation_references,
     },
     {
       title: 'Implementation Tracker',
@@ -209,6 +245,7 @@ const AdminDashboard = () => {
       description: 'Manage obligations tracked per member state',
       icon: ClipboardList,
       href: '/admin/obligations',
+      count: counts?.ehds_obligations,
     },
     {
       title: 'Legal Pages',
@@ -227,12 +264,14 @@ const AdminDashboard = () => {
       description: 'Map topics to EHDS articles for quick reference on landing pages',
       icon: TableProperties,
       href: '/admin/topic-index',
+      count: counts?.topic_index,
     },
     {
       title: 'Downloadable Resources',
       description: 'Manage compliance templates, checklists, and guides for the Tools Hub',
       icon: Download,
       href: '/admin/resources',
+      count: counts?.downloadable_resources,
     },
     {
       title: 'Toolkit Questions',
@@ -269,8 +308,9 @@ const AdminDashboard = () => {
       description: 'Pre-generate and manage AI comic panel artwork for Comics section',
       icon: Sparkles,
       href: '/admin/comic-panels',
+      count: counts?.comic_panel_images,
     },
-  ], []);
+  ], [counts]);
 
   const adminOnlySections = isAdmin ? [
     {
@@ -293,6 +333,7 @@ const AdminDashboard = () => {
       icon: Mail,
       href: '/admin/email-templates',
       badge: 'Admin Only',
+      count: counts?.email_templates,
     },
     {
       title: 'AI Feedback',
@@ -369,14 +410,14 @@ const AdminDashboard = () => {
     },
   ] : [];
 
-  const allSections = [...contentSections, ...adminOnlySections, ...superAdminSections] as Array<{
+  const allSections = useMemo(() => [...contentSections, ...adminOnlySections, ...superAdminSections] as Array<{
     title: string;
     description: string;
     icon: any;
     href: string;
     count?: number;
     badge?: string;
-  }>;
+  }>, [contentSections, adminOnlySections, superAdminSections]);
 
   const filteredSections = useMemo(() => {
     if (!searchQuery.trim()) return null;

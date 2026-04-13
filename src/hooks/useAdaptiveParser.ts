@@ -319,6 +319,36 @@ export function adaptivePreprocess(text: string, analysis: StructureAnalysis): s
   // Step 0: Normalize non-breaking spaces and other Unicode whitespace to regular spaces
   let processed = text.replace(/[\u00A0\u2007\u202F\u2060]/g, ' ');
   
+  // Step 0b: Remove PDF page markers (## Page N), HTML comments, and image references
+  processed = processed.replace(/^##\s*Page\s+\d+\s*$/gm, '');
+  processed = processed.replace(/<!--[^>]*-->/g, '');
+  processed = processed.replace(/!\[[^\]]*\]\([^)]*\)/g, '');
+  
+  // Step 0c: Remove EU document page number patterns (EN 0 EN, **EN** 15 **EN**, EN\n12\nEN)
+  processed = processed.replace(/\*{0,2}EN\*{0,2}\s+\d+\s+\*{0,2}EN\*{0,2}/g, '');
+  // Also handle multi-line page numbers at page boundaries
+  processed = processed.replace(/\nEN\n+\d+\n+EN\n/g, '\n');
+  
+  // Step 0d: Remove <mark> tags but keep content
+  processed = processed.replace(/<\/?mark>/gi, '');
+  
+  // Step 0e: Convert <sup>N</sup> to [^N] footnote refs for consistent parsing
+  processed = processed.replace(/<sup>(\d+)<\/sup>/gi, '[^$1]');
+  
+  // Step 0f: Strip markdown heading syntax from article/chapter lines
+  // ### Article 1 -> Article 1, # CHAPTER 2 -> CHAPTER 2, *Article 3* -> Article 3
+  const structuralWords = 'Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Članak|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu|Člen|CHAPTER|KAPITEL|CHAPITRE|CAPÍTULO|CAPO|HOOFDSTUK|ROZDZIAŁ|KAPITOLA|CAPITOLUL|ГЛАВА|ΚΕΦΑΛΑΙΟ|PEATÜKK|NODAĽA|SKYRIUS|POGLAVJE|POGLAVLJE|KAPITOLU|CAIBIDIL|FEJEZET|LUKU|Chapter';
+  // Remove leading # marks from structural lines
+  processed = processed.replace(new RegExp(`^#{1,6}\\s+((?:${structuralWords})\\s*.*)$`, 'gim'), '$1');
+  // Remove italic/bold wrapping: *Article 3* or **Article 5** or ***Article 7***
+  processed = processed.replace(new RegExp(`^(\\*{1,3})((?:${structuralWords})\\s+\\d+.*)\\1\\s*$`, 'gim'), '$2');
+  // Also handle bold article titles on the line after the article header: **Subject matter** -> Subject matter
+  processed = processed.replace(/^\*{2,3}([^*\n]+)\*{2,3}\s*$/gm, '$1');
+  
+  // Step 0g: Remove standalone superscript footnote numbers (³, ⁴, etc.) inline
+  // These are Unicode superscript digits sometimes left by PDF extraction
+  processed = processed.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, '');
+  
   // Step 1: Handle markdown tables based on detected format
   if (analysis.tableFormat === 'two-column') {
     // EUR-Lex table format for recitals: | (1) | content |
@@ -354,7 +384,7 @@ export function adaptivePreprocess(text: string, analysis: StructureAnalysis): s
   // Step 6: Clean markdown links but keep text
   processed = processed.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
   
-  // Step 7: Remove images
+  // Step 7: Remove images (redundant with 0b but catches edge cases)
   processed = processed.replace(/!\[([^\]]*)\]\([^)]+\)/g, '');
   
   // Step 8: Clean HTML tags — add line breaks for block elements first
@@ -379,7 +409,6 @@ export function adaptivePreprocess(text: string, analysis: StructureAnalysis): s
   processed = processed.replace(/^\s*-{3,}\s*$/gm, '');
   
   // Step 10: Add line breaks before structural markers
-  // Use a simpler approach that doesn't need variable-length lookbehinds
   const articleWords = 'Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Članak|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu|Člen';
   // Break before "Article N" when NOT already at start of line
   processed = processed.replace(new RegExp(`([.;:!?])\\s*((?:${articleWords})\\s+\\d+)`, 'gim'), '$1\n$2');
@@ -400,7 +429,12 @@ export function adaptivePreprocess(text: string, analysis: StructureAnalysis): s
   // Step 11: Ensure recitals are on new lines
   processed = processed.replace(/([.;:])(\s*)\((\d{1,3})\)\s+/g, '$1\n($3) ');
   
-  // Step 12: Normalize whitespace
+  // Step 12: Remove standalone page/footer noise lines
+  // Lines that are just a number (page number) or "EN" alone
+  processed = processed.replace(/^\s*\d{1,3}\s*$/gm, '');
+  processed = processed.replace(/^\s*EN\s*$/gm, '');
+  
+  // Step 13: Normalize whitespace
   processed = processed.replace(/  +/g, ' ');
   processed = processed.replace(/\n{3,}/g, '\n\n');
   processed = processed.split('\n').map(line => line.trim()).join('\n');

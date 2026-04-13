@@ -410,14 +410,14 @@ const AdminDashboard = () => {
     },
   ] : [];
 
-  const allSections = [...contentSections, ...adminOnlySections, ...superAdminSections] as Array<{
+  const allSections = useMemo(() => [...contentSections, ...adminOnlySections, ...superAdminSections] as Array<{
     title: string;
     description: string;
     icon: any;
     href: string;
     count?: number;
     badge?: string;
-  }>;
+  }>, [contentSections, adminOnlySections, superAdminSections]);
 
   const filteredSections = useMemo(() => {
     if (!searchQuery.trim()) return null;

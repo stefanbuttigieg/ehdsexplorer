@@ -209,10 +209,19 @@ export function analyzeStructure(text: string): StructureAnalysis {
   const tableRecitalMatches = text.match(/^\|\s*\((\d+)\)\s*\|/gm) || [];
   const recitalCount = Math.max(recitalMatches.length, tableRecitalMatches.length);
   
-  // Count articles - include both word-first and number-first patterns
-  const articleMatches = text.match(/(?:^|\n)\s*(?:Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Članak|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu|Člen)\s+\d+/gi) || [];
+  // Count articles - match standalone article headings only (not inline references like "Article 23(4) of...")
+  const articleLines = text.split('\n').filter(l => {
+    const trimmed = l.trim();
+    const artMatch = /^(?:Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Članak|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu|Člen)\s+(\d+)/i.exec(trimmed);
+    if (!artMatch) return false;
+    const after = trimmed.slice(artMatch[0].length).trim();
+    // Reject inline references: "(4) of Regulation", "of Regulation", etc.
+    if (/^\(\d+\)/.test(after)) return false;
+    if (after.length > 50 && /\b(of|Regulation|Directive|Decision|referred|paragraph|pursuant)\b/i.test(after)) return false;
+    return true;
+  });
   const numberFirstMatches = text.match(/(?:^|\n)\s*\d+\.\s*(?:cikk|artikla|pants|straipsnis)\b/gi) || [];
-  const articleCount = articleMatches.length + numberFirstMatches.length;
+  const articleCount = articleLines.length + numberFirstMatches.length;
   
   // Detect footnote format
   let footnoteFormat: 'eurlex-link' | 'numbered-paren' | 'caret' | 'none' = 'none';

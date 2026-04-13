@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bot, Save, Edit2, BarChart3, Clock, Zap, AlertTriangle, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Bot, Save, Edit2, BarChart3, Clock, Zap, AlertTriangle, ThumbsUp, ThumbsDown, Database, CheckCircle2, XCircle, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+
 
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
@@ -73,6 +75,9 @@ const AdminAISettingsPage = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [editingPrompt, setEditingPrompt] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
+  const [testQuery, setTestQuery] = useState('');
+  const [testResponse, setTestResponse] = useState('');
+  const [isTesting, setIsTesting] = useState(false);
 
   useEffect(() => {
     if ((settings as any)?.ai_model) {
@@ -121,6 +126,105 @@ const AdminAISettingsPage = () => {
       return { positive, negative, total: positive + negative };
     },
   });
+
+  // Knowledge Base counts
+  const { data: kbStats, isLoading: kbLoading } = useQuery({
+    queryKey: ['kb-stats'],
+    queryFn: async () => {
+      const [articles, recitals, definitions, ias, iaArticles, iaRecitals, iaSections, ehdsFaqs, helpFaqs, promptConfigs] = await Promise.all([
+        supabase.from('articles').select('*', { count: 'exact', head: true }),
+        supabase.from('recitals').select('*', { count: 'exact', head: true }),
+        supabase.from('definitions').select('*', { count: 'exact', head: true }),
+        supabase.from('implementing_acts').select('id, title, status'),
+        supabase.from('implementing_act_articles').select('implementing_act_id'),
+        supabase.from('implementing_act_recitals').select('implementing_act_id'),
+        supabase.from('implementing_act_sections').select('implementing_act_id'),
+        supabase.from('ehds_faqs').select('*', { count: 'exact', head: true }).eq('is_published', true),
+        supabase.from('help_center_faq').select('*', { count: 'exact', head: true }),
+        supabase.from('ai_prompt_config').select('id, prompt_label, is_active, updated_at').order('category').order('sort_order'),
+      ]);
+
+      // Build IA coverage map
+      const iaList = ias.data || [];
+      const iaArticleIds = new Set((iaArticles.data || []).map((r: any) => r.implementing_act_id));
+      const iaRecitalIds = new Set((iaRecitals.data || []).map((r: any) => r.implementing_act_id));
+      const iaSectionIds = new Set((iaSections.data || []).map((r: any) => r.implementing_act_id));
+
+      const iaCoverage = iaList.map((ia: any) => ({
+        id: ia.id,
+        title: ia.title,
+        status: ia.status,
+        hasArticles: iaArticleIds.has(ia.id),
+        hasRecitals: iaRecitalIds.has(ia.id),
+        hasSections: iaSectionIds.has(ia.id),
+      }));
+
+      return {
+        articleCount: articles.count || 0,
+        recitalCount: recitals.count || 0,
+        definitionCount: definitions.count || 0,
+        iaTotal: iaList.length,
+        iaWithContent: iaCoverage.filter((ia: any) => ia.hasArticles || ia.hasRecitals).length,
+        ehdsFaqCount: ehdsFaqs.count || 0,
+        helpFaqCount: helpFaqs.count || 0,
+        iaCoverage,
+        promptConfigs: promptConfigs.data || [],
+      };
+    },
+  });
+
+  const handleTestKnowledge = async () => {
+    if (!testQuery.trim() || isTesting) return;
+    setIsTesting(true);
+    setTestResponse('');
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ehds-assistant`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({
+            messages: [{ role: 'user', content: testQuery }],
+            role: 'general',
+            explainLevel: 'professional',
+          }),
+        }
+      );
+      if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+      if (!response.body) throw new Error('No response body');
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let result = '';
+      let buffer = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let idx: number;
+        while ((idx = buffer.indexOf('\n')) !== -1) {
+          let line = buffer.slice(0, idx);
+          buffer = buffer.slice(idx + 1);
+          if (line.endsWith('\r')) line = line.slice(0, -1);
+          if (!line.startsWith('data: ')) continue;
+          const json = line.slice(6).trim();
+          if (json === '[DONE]') continue;
+          try {
+            const parsed = JSON.parse(json);
+            const content = parsed.choices?.[0]?.delta?.content;
+            if (content) { result += content; setTestResponse(result); }
+          } catch { /* partial */ }
+        }
+      }
+      if (!result) setTestResponse('(No response received)');
+    } catch (e: any) {
+      setTestResponse(`Error: ${e.message}`);
+    } finally {
+      setIsTesting(false);
+    }
+  };
 
   const handleSaveModel = async () => {
     setIsSaving(true);
@@ -201,6 +305,7 @@ const AdminAISettingsPage = () => {
           <TabsTrigger value="model"><Bot className="h-4 w-4 mr-1" />Model</TabsTrigger>
           <TabsTrigger value="prompts"><Edit2 className="h-4 w-4 mr-1" />Prompts</TabsTrigger>
           <TabsTrigger value="benchmarks"><BarChart3 className="h-4 w-4 mr-1" />Benchmarks</TabsTrigger>
+          <TabsTrigger value="knowledge"><Database className="h-4 w-4 mr-1" />Knowledge Base</TabsTrigger>
         </TabsList>
 
         {/* MODEL TAB */}
@@ -431,6 +536,125 @@ const AdminAISettingsPage = () => {
                     <p className="text-sm text-muted-foreground text-center py-8">No benchmark data yet. Data will appear after users interact with the AI assistant.</p>
                   )}
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* KNOWLEDGE BASE TAB */}
+        <TabsContent value="knowledge">
+          <div className="space-y-6">
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { label: 'Articles', count: kbStats?.articleCount ?? '—' },
+                { label: 'Recitals', count: kbStats?.recitalCount ?? '—' },
+                { label: 'Definitions', count: kbStats?.definitionCount ?? '—' },
+                { label: 'Official FAQs', count: kbStats?.ehdsFaqCount ?? '—' },
+                { label: 'Help Centre FAQs', count: kbStats?.helpFaqCount ?? '—' },
+                { label: 'Implementing Acts', count: kbStats ? `${kbStats.iaWithContent}/${kbStats.iaTotal}` : '—', sub: 'with content' },
+              ].map(s => (
+                <Card key={s.label}>
+                  <CardContent className="pt-4">
+                    <p className="text-xs text-muted-foreground mb-1">{s.label}</p>
+                    <p className="text-2xl font-bold">{s.count}</p>
+                    {(s as any).sub && <p className="text-[10px] text-muted-foreground">{(s as any).sub}</p>}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Implementing Acts Coverage */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Implementing Acts Content Coverage</CardTitle>
+                <CardDescription>Shows which implementing acts have detailed articles, recitals, or sections loaded into the AI knowledge base.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {kbLoading ? (
+                  <p className="text-sm text-muted-foreground py-4">Loading...</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left p-2">Title</th>
+                          <th className="text-left p-2">Status</th>
+                          <th className="text-center p-2">Articles</th>
+                          <th className="text-center p-2">Recitals</th>
+                          <th className="text-center p-2">Sections</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(kbStats?.iaCoverage || []).map((ia: any) => (
+                          <tr key={ia.id} className="border-b hover:bg-muted/50">
+                            <td className="p-2 max-w-[300px] truncate">{ia.title}</td>
+                            <td className="p-2"><Badge variant="outline" className="text-[10px]">{ia.status}</Badge></td>
+                            <td className="p-2 text-center">{ia.hasArticles ? <CheckCircle2 className="h-4 w-4 text-green-600 mx-auto" /> : <XCircle className="h-4 w-4 text-muted-foreground/40 mx-auto" />}</td>
+                            <td className="p-2 text-center">{ia.hasRecitals ? <CheckCircle2 className="h-4 w-4 text-green-600 mx-auto" /> : <XCircle className="h-4 w-4 text-muted-foreground/40 mx-auto" />}</td>
+                            <td className="p-2 text-center">{ia.hasSections ? <CheckCircle2 className="h-4 w-4 text-green-600 mx-auto" /> : <XCircle className="h-4 w-4 text-muted-foreground/40 mx-auto" />}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {(kbStats?.iaCoverage || []).length === 0 && (
+                      <p className="text-sm text-muted-foreground text-center py-8">No implementing acts found.</p>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Prompt Config Status */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Prompt Configuration Status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {(kbStats?.promptConfigs || []).map((p: any) => (
+                    <div key={p.id} className="flex items-center justify-between text-sm">
+                      <span>{p.prompt_label}</span>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={p.is_active ? 'default' : 'secondary'} className="text-[10px]">
+                          {p.is_active ? 'Active' : 'Inactive'}
+                        </Badge>
+                        <span className="text-[10px] text-muted-foreground">
+                          Updated {new Date(p.updated_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Test AI Knowledge */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Test AI Knowledge</CardTitle>
+                <CardDescription>Send a test query to verify the AI assistant recognizes recently added content.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="e.g. What does the implementing act on EHR say about interoperability?"
+                    value={testQuery}
+                    onChange={(e) => setTestQuery(e.target.value)}
+                    className="flex-1"
+                    onKeyDown={(e) => e.key === 'Enter' && !isTesting && testQuery.trim() && handleTestKnowledge()}
+                  />
+                  <Button onClick={handleTestKnowledge} disabled={isTesting || !testQuery.trim()}>
+                    {isTesting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Send className="h-4 w-4 mr-1" />}
+                    Test
+                  </Button>
+                </div>
+                {testResponse && (
+                  <div className="rounded-md border p-4 bg-muted/50">
+                    <p className="text-xs font-medium text-muted-foreground mb-2">AI Response:</p>
+                    <pre className="text-sm whitespace-pre-wrap">{testResponse}</pre>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

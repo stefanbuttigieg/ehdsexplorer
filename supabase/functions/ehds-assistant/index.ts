@@ -333,6 +333,7 @@ ${recitalsSummary}
 
 IMPLEMENTING ACTS STATUS:
 ${implementingActsList}
+${iaDetailedContent ? `\n=== IMPLEMENTING ACTS DETAILED CONTENT ===\nThe following implementing acts have full article and recital text available. Use this content to answer detailed questions about specific implementing act provisions.\n${iaDetailedContent}\n=== END IMPLEMENTING ACTS CONTENT ===` : ''}
 
 PLATFORM HELP CENTRE FAQs:
 ${faqsList}
@@ -346,7 +347,8 @@ RESPONSE CHECKLIST:
 1. Check the Official EHDS FAQ Bank for a matching question
 2. If found: base your answer on the FAQ content, cite [FAQ #N](/faq/N)
 3. Supplement with relevant articles and recitals
-4. End with a **Sources:** section`;
+4. For implementing act questions: use the detailed implementing act content above
+5. End with a **Sources:** section`;
 
     // Fetch configured AI model
     let aiModel = "google/gemini-2.5-flash";

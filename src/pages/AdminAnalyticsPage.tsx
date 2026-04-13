@@ -196,16 +196,45 @@ export default function AdminAnalyticsPage() {
       description="Unified analytics from Umami and PostHog"
       backTo="/admin"
       actions={
-        <Select value={range} onValueChange={setRange}>
-          <SelectTrigger className="w-[150px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {RANGE_OPTIONS.map(o => (
-              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Select value={range} onValueChange={setRange}>
+            <SelectTrigger className="w-[150px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {RANGE_OPTIONS.map(o => (
+                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {range === "custom" && (
+            <>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className={cn("text-xs h-9", !customFrom && "text-muted-foreground")}>
+                    <CalendarIcon className="h-3.5 w-3.5 mr-1" />
+                    {customFrom ? format(customFrom, "MMM dd, yyyy") : "Start"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={customFrom} onSelect={setCustomFrom} disabled={(d) => d > new Date()} className="p-3 pointer-events-auto" />
+                </PopoverContent>
+              </Popover>
+              <span className="text-xs text-muted-foreground">to</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className={cn("text-xs h-9", !customTo && "text-muted-foreground")}>
+                    <CalendarIcon className="h-3.5 w-3.5 mr-1" />
+                    {customTo ? format(customTo, "MMM dd, yyyy") : "End"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={customTo} onSelect={setCustomTo} disabled={(d) => d > new Date()} className="p-3 pointer-events-auto" />
+                </PopoverContent>
+              </Popover>
+            </>
+          )}
+        </div>
       }
     >
       <Tabs defaultValue="overview" className="space-y-4">

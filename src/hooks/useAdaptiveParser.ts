@@ -385,8 +385,10 @@ export function adaptivePreprocess(text: string, analysis: StructureAnalysis): s
   // Step 10: Add line breaks before structural markers
   // Use a simpler approach that doesn't need variable-length lookbehinds
   const articleWords = 'Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Članak|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu|Člen';
-  // Break before "Article N" when NOT already at start of line
-  processed = processed.replace(new RegExp(`([.;:!?])\\s*((?:${articleWords})\\s+\\d+)`, 'gim'), '$1\n$2');
+  // Break before "Article N" when NOT already at start of line, but NOT before inline refs like "Article 23(4)"
+  processed = processed.replace(new RegExp(`([.;:!?])\\s*((?:${articleWords})\\s+\\d+)(?!\\s*\\()`, 'gim'), '$1\n$2');
+  // Also ensure standalone "Article N" that happens to be mid-line gets separated, but only if followed by end-of-line or just a short title
+  processed = processed.replace(new RegExp(`([.;:!?])\\s*((?:${articleWords})\\s+\\d+)\\s*$`, 'gim'), '$1\n$2');
   
   // For number-first languages (Hungarian, Finnish, Latvian, Lithuanian)
   processed = processed.replace(/([.;:!?])\s*(\d+)\.\s*(cikk|artikla|pants|straipsnis)/gim, '$1\n$2. $3');

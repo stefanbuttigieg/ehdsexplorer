@@ -108,10 +108,25 @@ const AdminImplementingActContentPage = () => {
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const content = await page.getTextContent();
-        const pageText = content.items
-          .map((item: any) => item.str)
-          .join(" ");
-        fullText += pageText + "\n\n";
+        
+        // Group text items by Y-coordinate to reconstruct lines
+        const lineMap = new Map<number, Array<{ x: number; str: string }>>();
+        for (const item of content.items as any[]) {
+          if (!item.str) continue;
+          // Round Y to nearest integer to group items on the same line
+          const y = Math.round(item.transform[5]);
+          if (!lineMap.has(y)) lineMap.set(y, []);
+          lineMap.get(y)!.push({ x: item.transform[4], str: item.str });
+        }
+        
+        // Sort lines by Y descending (PDF Y goes bottom-up), then items by X ascending
+        const sortedYs = Array.from(lineMap.keys()).sort((a, b) => b - a);
+        const pageLines: string[] = [];
+        for (const y of sortedYs) {
+          const items = lineMap.get(y)!.sort((a, b) => a.x - b.x);
+          pageLines.push(items.map(it => it.str).join(" "));
+        }
+        fullText += pageLines.join("\n") + "\n\n";
       }
       setImportText(fullText);
       toast.success(`Extracted text from ${pdf.numPages} pages`);

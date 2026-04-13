@@ -32,6 +32,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FootnoteManager } from "@/components/admin/FootnoteManager";
 import { useFootnotesByIAArticle, useFootnotesByIARecital } from "@/hooks/useFootnotes";
+import { useDefinitions } from "@/hooks/useDefinitions";
+import { Checkbox } from "@/components/ui/checkbox";
 
 /** Small wrapper that fetches footnotes for an IA article or recital and renders FootnoteManager */
 function IAFootnoteSection({ type, parentId }: { type: "article" | "recital"; parentId: string }) {

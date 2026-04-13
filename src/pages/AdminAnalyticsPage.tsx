@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { format, subDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdminGuard } from "@/hooks/useAdminGuard";
 import { AdminPageLayout, AdminPageLoading } from "@/components/admin/AdminPageLayout";
@@ -8,8 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { Globe, Monitor, Smartphone, Users, Eye, Activity, TrendingUp, ArrowUpRight, Clock, MousePointer } from "lucide-react";
+import { Globe, Monitor, Smartphone, Users, Eye, Activity, TrendingUp, ArrowUpRight, Clock, MousePointer, CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const RANGE_OPTIONS = [
   { value: "today", label: "Today" },
@@ -17,6 +22,7 @@ const RANGE_OPTIONS = [
   { value: "30d", label: "Last 30 days" },
   { value: "90d", label: "Last 90 days" },
   { value: "month", label: "This month" },
+  { value: "custom", label: "Custom range" },
 ];
 
 const CHART_COLORS = [

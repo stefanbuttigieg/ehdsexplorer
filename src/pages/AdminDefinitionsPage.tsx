@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Edit, Save, X, Merge, Download } from 'lucide-react';
+import { Edit, Save, X, Merge, Download, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
@@ -12,6 +13,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,6 +54,17 @@ const AdminDefinitionsPage = () => {
   const [editedTerm, setEditedTerm] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   
+  // Create dialog
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [newTerm, setNewTerm] = useState('');
+  const [newDefinitionText, setNewDefinitionText] = useState('');
+  const [newSourceArticle, setNewSourceArticle] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
+
+  // Delete dialog
+  const [deleteTarget, setDeleteTarget] = useState<DbDefinition | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  
   // Merge & Import dialogs
   const [mergeDialogOpen, setMergeDialogOpen] = useState(false);
   const [mergeTarget, setMergeTarget] = useState<DbDefinition | null>(null);
@@ -62,11 +84,13 @@ const AdminDefinitionsPage = () => {
     enabled: !!user && isEditor
   });
 
+  const { data: allSources = [] } = useAllDefinitionSources();
+  const sourcesByDefinition = groupSourcesByDefinition(allSources);
+
   const filteredDefinitions = definitions?.filter(def => {
     const matchesSearch = def.term.toLowerCase().includes(searchQuery.toLowerCase()) ||
       def.definition.toLowerCase().includes(searchQuery.toLowerCase());
     
-    // Filter by source using the sources table
     if (sourceFilter !== 'all') {
       const defSources = sourcesByDefinition[def.id] || [];
       const hasSource = defSources.some(s => s.source === sourceFilter);
@@ -118,17 +142,93 @@ const AdminDefinitionsPage = () => {
     }
   };
 
-  // Get source counts from the sources table
-  const { data: allSources = [] } = useAllDefinitionSources();
-  const sourcesByDefinition = groupSourcesByDefinition(allSources);
-  
-  // Calculate actual source counts
-  const actualSourceCounts = allSources.reduce((acc, src) => {
-    acc[src.source] = (acc[src.source] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const handleCreate = async () => {
+    if (!newTerm.trim() || !newDefinitionText.trim()) return;
 
-  // Get unique definition IDs that have each source
+    setIsCreating(true);
+    try {
+      const { data, error } = await supabase
+        .from('definitions')
+        .insert({
+          term: newTerm.trim(),
+          definition: newDefinitionText.trim(),
+          source: 'ehds_regulation' as const,
+          source_article: newSourceArticle ? parseInt(newSourceArticle) : null,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Also create a source entry
+      await supabase.from('definition_sources').insert({
+        definition_id: data.id,
+        source: 'ehds_regulation',
+        source_text: newDefinitionText.trim(),
+        source_article: newSourceArticle ? parseInt(newSourceArticle) : null,
+      });
+
+      toast({
+        title: 'Definition Created',
+        description: `"${newTerm.trim()}" has been added.`,
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['admin-definitions'] });
+      queryClient.invalidateQueries({ queryKey: ['definitions'] });
+      queryClient.invalidateQueries({ queryKey: ['definition-sources'] });
+      setCreateDialogOpen(false);
+      setNewTerm('');
+      setNewDefinitionText('');
+      setNewSourceArticle('');
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to create definition',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+
+    setIsDeleting(true);
+    try {
+      // Delete sources first (foreign key)
+      await supabase
+        .from('definition_sources')
+        .delete()
+        .eq('definition_id', deleteTarget.id);
+
+      const { error } = await supabase
+        .from('definitions')
+        .delete()
+        .eq('id', deleteTarget.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Definition Deleted',
+        description: `"${deleteTarget.term}" has been removed.`,
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['admin-definitions'] });
+      queryClient.invalidateQueries({ queryKey: ['definitions'] });
+      queryClient.invalidateQueries({ queryKey: ['definition-sources'] });
+      setDeleteTarget(null);
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to delete definition',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const definitionsWithSource = (source: DefinitionSource) => {
     return new Set(allSources.filter(s => s.source === source).map(s => s.definition_id)).size;
   };
@@ -140,15 +240,21 @@ const AdminDefinitionsPage = () => {
   return (
     <AdminPageLayout
       title="Manage Definitions"
-      description="Edit, merge, and import glossary terms"
+      description="Create, edit, merge, and delete glossary terms"
       searchQuery={searchQuery}
       onSearchChange={setSearchQuery}
       searchPlaceholder="Search definitions by term or content..."
       actions={
-        <Button onClick={() => setImportDialogOpen(true)}>
-          <Download className="h-4 w-4 mr-2" />
-          Import Xt-EHR
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+            <Download className="h-4 w-4 mr-2" />
+            Import
+          </Button>
+          <Button onClick={() => setCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Definition
+          </Button>
+        </div>
       }
     >
       {/* Source filter */}
@@ -204,7 +310,7 @@ const AdminDefinitionsPage = () => {
       ) : filteredDefinitions.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center text-muted-foreground">
-            No definitions found. Use the Import button to add Xt-EHR glossary terms.
+            No definitions found. Use the "Add Definition" button or Import to get started.
           </CardContent>
         </Card>
       ) : (
@@ -216,7 +322,6 @@ const AdminDefinitionsPage = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <Badge variant="outline">{definition.term}</Badge>
-                      {/* Show all sources for this definition */}
                       {(sourcesByDefinition[definition.id] || []).map(src => (
                         <Badge key={src.id} variant="secondary" className="text-xs">
                           {getSourceLabel(src.source)}
@@ -241,6 +346,14 @@ const AdminDefinitionsPage = () => {
                       <Edit className="h-4 w-4 mr-1" />
                       Edit
                     </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setDeleteTarget(definition)}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -248,6 +361,49 @@ const AdminDefinitionsPage = () => {
           ))}
         </div>
       )}
+
+      {/* Create Dialog */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add New Definition</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label>Term *</Label>
+              <Input
+                value={newTerm}
+                onChange={(e) => setNewTerm(e.target.value)}
+                placeholder="e.g. Electronic health record"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Definition *</Label>
+              <Textarea
+                value={newDefinitionText}
+                onChange={(e) => setNewDefinitionText(e.target.value)}
+                placeholder="The official definition text..."
+                rows={5}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Source Article (optional)</Label>
+              <Input
+                type="number"
+                value={newSourceArticle}
+                onChange={(e) => setNewSourceArticle(e.target.value)}
+                placeholder="e.g. 2"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleCreate} disabled={isCreating || !newTerm.trim() || !newDefinitionText.trim()}>
+                {isCreating ? 'Creating...' : 'Create Definition'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Edit Dialog */}
       <Dialog open={!!editingDefinition} onOpenChange={() => setEditingDefinition(null)}>
@@ -271,7 +427,6 @@ const AdminDefinitionsPage = () => {
               </div>
             </div>
             
-            {/* Source-specific definitions */}
             {editingDefinition && (
               <DefinitionSourceEditor 
                 definitionId={editingDefinition.id} 
@@ -288,6 +443,24 @@ const AdminDefinitionsPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete "{deleteTarget?.term}"?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove this definition and all its source entries. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={isDeleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Merge Dialog */}
       <DefinitionMergeDialog

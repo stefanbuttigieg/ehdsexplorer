@@ -58,6 +58,7 @@ const AdminDefinitionsPage = () => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [newTerm, setNewTerm] = useState('');
   const [newDefinitionText, setNewDefinitionText] = useState('');
+  const [newSource, setNewSource] = useState<DefinitionSource>('ehds_regulation');
   const [newSourceArticle, setNewSourceArticle] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
@@ -152,7 +153,7 @@ const AdminDefinitionsPage = () => {
         .insert({
           term: newTerm.trim(),
           definition: newDefinitionText.trim(),
-          source: 'ehds_regulation' as const,
+          source: newSource,
           source_article: newSourceArticle ? parseInt(newSourceArticle) : null,
         })
         .select()
@@ -163,7 +164,7 @@ const AdminDefinitionsPage = () => {
       // Also create a source entry
       await supabase.from('definition_sources').insert({
         definition_id: data.id,
-        source: 'ehds_regulation',
+        source: newSource,
         source_text: newDefinitionText.trim(),
         source_article: newSourceArticle ? parseInt(newSourceArticle) : null,
       });
@@ -179,6 +180,7 @@ const AdminDefinitionsPage = () => {
       setCreateDialogOpen(false);
       setNewTerm('');
       setNewDefinitionText('');
+      setNewSource('ehds_regulation');
       setNewSourceArticle('');
     } catch (error: any) {
       toast({
@@ -385,6 +387,19 @@ const AdminDefinitionsPage = () => {
                 placeholder="The official definition text..."
                 rows={5}
               />
+            </div>
+            <div className="space-y-2">
+              <Label>Source *</Label>
+              <select
+                value={newSource}
+                onChange={(e) => setNewSource(e.target.value as DefinitionSource)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="ehds_regulation">EHDS Regulation</option>
+                <option value="eu_ehr_glossary">EU EHR Database</option>
+                <option value="xt_ehr">Xt-EHR</option>
+                <option value="implementing_act">Implementing Act</option>
+              </select>
             </div>
             <div className="space-y-2">
               <Label>Source Article (optional)</Label>

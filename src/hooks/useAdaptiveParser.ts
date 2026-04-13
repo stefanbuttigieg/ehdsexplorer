@@ -79,30 +79,30 @@ const ARTICLE_PATTERNS: Record<string, RegExp> = {
 };
 
 const CHAPTER_PATTERNS: Record<string, RegExp> = {
-  en: /^CHAPTER\s+([IVXLCDM]+)/i,
-  de: /^KAPITEL\s+([IVXLCDM]+)/i,
-  fr: /^CHAPITRE\s+([IVXLCDM]+)/i,
-  es: /^CAPÍTULO\s+([IVXLCDM]+)/i,
-  it: /^CAPO\s+([IVXLCDM]+)/i,
-  pt: /^CAPÍTULO\s+([IVXLCDM]+)/i,
-  nl: /^HOOFDSTUK\s+([IVXLCDM]+)/i,
-  pl: /^ROZDZIAŁ\s+([IVXLCDM]+)/i,
-  cs: /^KAPITOLA\s+([IVXLCDM]+)/i,
-  sk: /^KAPITOLA\s+([IVXLCDM]+)/i,
-  hu: /^([IVXLCDM]+)\.\s*FEJEZET/i,
-  ro: /^CAPITOLUL\s+([IVXLCDM]+)/i,
-  bg: /^ГЛАВА\s+([IVXLCDM]+)/i,
-  el: /^ΚΕΦΑΛΑΙΟ\s+([IVXLCDM]+)/i,
-  sv: /^KAPITEL\s+([IVXLCDM]+)/i,
-  da: /^KAPITEL\s+([IVXLCDM]+)/i,
-  fi: /^([IVXLCDM]+)\s*LUKU/i,
-  et: /^([IVXLCDM]+)\s*PEATÜKK/i,
-  lv: /^([IVXLCDM]+)\s*NODAĻA/i,
-  lt: /^([IVXLCDM]+)\s*SKYRIUS/i,
-  sl: /^POGLAVJE\s+([IVXLCDM]+)/i,
-  hr: /^POGLAVLJE\s+([IVXLCDM]+)/i,
-  mt: /^KAPITOLU\s+([IVXLCDM]+)/i,
-  ga: /^CAIBIDIL\s+([IVXLCDM]+)/i,
+  en: /^CHAPTER\s+([IVXLCDM]+|\d+)/i,
+  de: /^KAPITEL\s+([IVXLCDM]+|\d+)/i,
+  fr: /^CHAPITRE\s+([IVXLCDM]+|\d+)/i,
+  es: /^CAPÍTULO\s+([IVXLCDM]+|\d+)/i,
+  it: /^CAPO\s+([IVXLCDM]+|\d+)/i,
+  pt: /^CAPÍTULO\s+([IVXLCDM]+|\d+)/i,
+  nl: /^HOOFDSTUK\s+([IVXLCDM]+|\d+)/i,
+  pl: /^ROZDZIAŁ\s+([IVXLCDM]+|\d+)/i,
+  cs: /^KAPITOLA\s+([IVXLCDM]+|\d+)/i,
+  sk: /^KAPITOLA\s+([IVXLCDM]+|\d+)/i,
+  hu: /^([IVXLCDM]+|\d+)\.\s*FEJEZET/i,
+  ro: /^CAPITOLUL\s+([IVXLCDM]+|\d+)/i,
+  bg: /^ГЛАВА\s+([IVXLCDM]+|\d+)/i,
+  el: /^ΚΕΦΑΛΑΙΟ\s+([IVXLCDM]+|\d+)/i,
+  sv: /^KAPITEL\s+([IVXLCDM]+|\d+)/i,
+  da: /^KAPITEL\s+([IVXLCDM]+|\d+)/i,
+  fi: /^([IVXLCDM]+|\d+)\s*LUKU/i,
+  et: /^([IVXLCDM]+|\d+)\s*PEATÜKK/i,
+  lv: /^([IVXLCDM]+|\d+)\s*NODAĻA/i,
+  lt: /^([IVXLCDM]+|\d+)\s*SKYRIUS/i,
+  sl: /^POGLAVJE\s+([IVXLCDM]+|\d+)/i,
+  hr: /^POGLAVLJE\s+([IVXLCDM]+|\d+)/i,
+  mt: /^KAPITOLU\s+([IVXLCDM]+|\d+)/i,
+  ga: /^CAIBIDIL\s+([IVXLCDM]+|\d+)/i,
 };
 
 const ANNEX_PATTERNS: Record<string, RegExp> = {
@@ -161,6 +161,10 @@ const ADOPTION_MARKERS: RegExp[] = [
 
 // === Helper functions ===
 function romanToNumber(roman: string): number {
+  // Handle Arabic numbers directly
+  if (/^\d+$/.test(roman.trim())) {
+    return parseInt(roman.trim(), 10);
+  }
   const romanMap: Record<string, number> = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
   let result = 0;
   const upper = roman.toUpperCase();
@@ -214,9 +218,12 @@ export function analyzeStructure(text: string): StructureAnalysis {
   let footnoteFormat: 'eurlex-link' | 'numbered-paren' | 'caret' | 'none' = 'none';
   if (/\[\(\d+\)\]\([^)]*#ntr/.test(text)) {
     footnoteFormat = 'eurlex-link';
-  } else if (/\[\^\d+\]/.test(text)) {
+  } else if (/\[\^\d+\]/.test(text) || /<sup>\d+<\/sup>/i.test(text)) {
     footnoteFormat = 'caret';
   } else if (/\(\d+\)\s+OJ\s/i.test(text)) {
+    footnoteFormat = 'numbered-paren';
+  } else if (/^\d+\s+(?:OJ|Commission|Regulation|Directive|Decision)\s/im.test(text)) {
+    // PDF-style standalone footnotes: "4 Commission Decision..."
     footnoteFormat = 'numbered-paren';
   }
   
@@ -319,6 +326,36 @@ export function adaptivePreprocess(text: string, analysis: StructureAnalysis): s
   // Step 0: Normalize non-breaking spaces and other Unicode whitespace to regular spaces
   let processed = text.replace(/[\u00A0\u2007\u202F\u2060]/g, ' ');
   
+  // Step 0b: Remove PDF page markers (## Page N), HTML comments, and image references
+  processed = processed.replace(/^##\s*Page\s+\d+\s*$/gm, '');
+  processed = processed.replace(/<!--[^>]*-->/g, '');
+  processed = processed.replace(/!\[[^\]]*\]\([^)]*\)/g, '');
+  
+  // Step 0c: Remove EU document page number patterns (EN 0 EN, **EN** 15 **EN**, EN\n12\nEN)
+  processed = processed.replace(/\*{0,2}EN\*{0,2}\s+\d+\s+\*{0,2}EN\*{0,2}/g, '');
+  // Also handle multi-line page numbers at page boundaries
+  processed = processed.replace(/\nEN\n+\d+\n+EN\n/g, '\n');
+  
+  // Step 0d: Remove <mark> tags but keep content
+  processed = processed.replace(/<\/?mark>/gi, '');
+  
+  // Step 0e: Convert <sup>N</sup> to [^N] footnote refs for consistent parsing
+  processed = processed.replace(/<sup>(\d+)<\/sup>/gi, '[^$1]');
+  
+  // Step 0f: Strip markdown heading syntax from article/chapter lines
+  // ### Article 1 -> Article 1, # CHAPTER 2 -> CHAPTER 2, *Article 3* -> Article 3
+  const structuralWords = 'Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Članak|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu|Člen|CHAPTER|KAPITEL|CHAPITRE|CAPÍTULO|CAPO|HOOFDSTUK|ROZDZIAŁ|KAPITOLA|CAPITOLUL|ГЛАВА|ΚΕΦΑΛΑΙΟ|PEATÜKK|NODAĽA|SKYRIUS|POGLAVJE|POGLAVLJE|KAPITOLU|CAIBIDIL|FEJEZET|LUKU|Chapter';
+  // Remove leading # marks from structural lines
+  processed = processed.replace(new RegExp(`^#{1,6}\\s+((?:${structuralWords})\\s*.*)$`, 'gim'), '$1');
+  // Remove italic/bold wrapping: *Article 3* or **Article 5** or ***Article 7***
+  processed = processed.replace(new RegExp(`^(\\*{1,3})((?:${structuralWords})\\s+\\d+.*)\\1\\s*$`, 'gim'), '$2');
+  // Also handle bold article titles on the line after the article header: **Subject matter** -> Subject matter
+  processed = processed.replace(/^\*{2,3}([^*\n]+)\*{2,3}\s*$/gm, '$1');
+  
+  // Step 0g: Remove standalone superscript footnote numbers (³, ⁴, etc.) inline
+  // These are Unicode superscript digits sometimes left by PDF extraction
+  processed = processed.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, '');
+  
   // Step 1: Handle markdown tables based on detected format
   if (analysis.tableFormat === 'two-column') {
     // EUR-Lex table format for recitals: | (1) | content |
@@ -354,7 +391,7 @@ export function adaptivePreprocess(text: string, analysis: StructureAnalysis): s
   // Step 6: Clean markdown links but keep text
   processed = processed.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
   
-  // Step 7: Remove images
+  // Step 7: Remove images (redundant with 0b but catches edge cases)
   processed = processed.replace(/!\[([^\]]*)\]\([^)]+\)/g, '');
   
   // Step 8: Clean HTML tags — add line breaks for block elements first
@@ -379,7 +416,6 @@ export function adaptivePreprocess(text: string, analysis: StructureAnalysis): s
   processed = processed.replace(/^\s*-{3,}\s*$/gm, '');
   
   // Step 10: Add line breaks before structural markers
-  // Use a simpler approach that doesn't need variable-length lookbehinds
   const articleWords = 'Article|Artikel|Artículo|Articolo|Artigo|Artykuł|Článek|Článok|Članak|Articolul|Член|Άρθρο|Artikkel|Airteagal|Artikolu|Člen';
   // Break before "Article N" when NOT already at start of line
   processed = processed.replace(new RegExp(`([.;:!?])\\s*((?:${articleWords})\\s+\\d+)`, 'gim'), '$1\n$2');
@@ -400,7 +436,12 @@ export function adaptivePreprocess(text: string, analysis: StructureAnalysis): s
   // Step 11: Ensure recitals are on new lines
   processed = processed.replace(/([.;:])(\s*)\((\d{1,3})\)\s+/g, '$1\n($3) ');
   
-  // Step 12: Normalize whitespace
+  // Step 12: Remove standalone page/footer noise lines
+  // Lines that are just a number (page number) or "EN" alone
+  processed = processed.replace(/^\s*\d{1,3}\s*$/gm, '');
+  processed = processed.replace(/^\s*EN\s*$/gm, '');
+  
+  // Step 13: Normalize whitespace
   processed = processed.replace(/  +/g, ' ');
   processed = processed.replace(/\n{3,}/g, '\n\n');
   processed = processed.split('\n').map(line => line.trim()).join('\n');
@@ -682,20 +723,17 @@ export function parseFootnotes(text: string, analysis: StructureAnalysis): Parse
   const footnotes: ParsedFootnote[] = [];
   const seenMarkers = new Set<string>();
   
-  // EUR-Lex footnotes at the end of document
-  // Look for sections with multiple (n) OJ L... patterns
   const lines = text.split('\n');
+  const legalRefPattern = /OJ|ABl\.|GU|DO|Dz\.U\.|HL|JO|Regulation|Directive|Decision|Verordnung|Richtlinie|Beschluss|Règlement|Décision|EUR-Lex|CELEX|Commission|ELI:/i;
   
-  // Find the footnote section - usually at very end after annexes
+  // EUR-Lex footnotes at the end of document
   let footnoteStart = lines.length;
   for (let i = lines.length - 1; i >= Math.max(0, lines.length - 300); i--) {
     const line = lines[i].trim();
-    // Footnotes look like: (1) OJ L 257, 28.8.2014, p. 73.
     if (/^\([\d*]+\)\s+(?:OJ|ABl\.|GU|DO|Dz\.U\.|HL|JO)/i.test(line)) {
       footnoteStart = Math.min(footnoteStart, i);
     }
-    // Also check for regulation/directive references
-    if (/^\([\d*]+\)\s+(?:Regulation|Verordnung|Règlement|Reglamento|Regolamento|Rozporządzenie|Nařízení|Regulamentul|Регламент|Κανονισμός)/i.test(line)) {
+    if (/^\([\d*]+\)\s+(?:Regulation|Verordnung|Règlement|Reglamento|Regolamento|Rozporządzenie|Nařízení|Regulamentul|Регламент|Κανονισμός|Commission)/i.test(line)) {
       footnoteStart = Math.min(footnoteStart, i);
     }
   }
@@ -709,13 +747,9 @@ export function parseFootnotes(text: string, analysis: StructureAnalysis): Parse
   while ((match = footnotePattern.exec(footnoteSection)) !== null) {
     const marker = match[1];
     const content = match[2].trim();
-    
-    // Validate it looks like a legal reference
-    if (content.length > 10 && !seenMarkers.has(marker)) {
-      if (/OJ|ABl\.|GU|DO|Dz\.U\.|HL|JO|Regulation|Directive|Decision|Verordnung|Richtlinie|Beschluss|Règlement|Directive|Décision|EUR-Lex|CELEX/i.test(content)) {
-        footnotes.push({ marker, content });
-        seenMarkers.add(marker);
-      }
+    if (content.length > 10 && !seenMarkers.has(marker) && legalRefPattern.test(content)) {
+      footnotes.push({ marker, content });
+      seenMarkers.add(marker);
     }
   }
   
@@ -725,6 +759,18 @@ export function parseFootnotes(text: string, analysis: StructureAnalysis): Parse
     const marker = match[1];
     const content = match[2].trim();
     if (content.length > 5 && !seenMarkers.has(marker)) {
+      footnotes.push({ marker, content });
+      seenMarkers.add(marker);
+    }
+  }
+  
+  // PDF-style standalone footnotes: lines like "4 Commission Decision (EU)..." or "1 OJ L..."
+  // These appear scattered throughout the document (at page boundaries)
+  const pdfFootnotePattern = /^(\d{1,2})\s+((?:OJ|Commission|Regulation|Directive|Decision)\s.{15,})$/gm;
+  while ((match = pdfFootnotePattern.exec(text)) !== null) {
+    const marker = match[1];
+    const content = match[2].trim();
+    if (!seenMarkers.has(marker) && legalRefPattern.test(content)) {
       footnotes.push({ marker, content });
       seenMarkers.add(marker);
     }

@@ -108,10 +108,29 @@ const AdminImplementingActContentPage = () => {
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const content = await page.getTextContent();
-        const pageText = content.items
-          .map((item: any) => item.str)
-          .join(" ");
-        fullText += pageText + "\n\n";
+        // Group text items by Y position to reconstruct lines
+        const items = content.items as any[];
+        if (items.length === 0) continue;
+        
+        let lastY: number | null = null;
+        let pageLines: string[] = [];
+        let currentLine = "";
+        
+        for (const item of items) {
+          const y = Math.round(item.transform?.[5] ?? 0);
+          if (lastY !== null && Math.abs(y - lastY) > 3) {
+            // New line detected
+            pageLines.push(currentLine.trim());
+            currentLine = item.str;
+          } else {
+            // Same line - add space if needed
+            currentLine += (currentLine && !currentLine.endsWith(" ") && !item.str.startsWith(" ") ? " " : "") + item.str;
+          }
+          lastY = y;
+        }
+        if (currentLine.trim()) pageLines.push(currentLine.trim());
+        
+        fullText += pageLines.join("\n") + "\n\n";
       }
       setImportText(fullText);
       toast.success(`Extracted text from ${pdf.numPages} pages`);

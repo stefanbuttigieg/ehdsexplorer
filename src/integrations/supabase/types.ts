@@ -2746,11 +2746,16 @@ export type Database = {
       }
       implementing_acts: {
         Row: {
+          adoption_date: string | null
           article_reference: string
           created_at: string
+          date_of_effect: string | null
           deliverable_link: string | null
+          deliverable_name: string | null
           description: string
+          entry_into_force_date: string | null
           feedback_deadline: string | null
+          feedback_link: string | null
           id: string
           official_link: string | null
           previous_status: string | null
@@ -2763,11 +2768,16 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          adoption_date?: string | null
           article_reference: string
           created_at?: string
+          date_of_effect?: string | null
           deliverable_link?: string | null
+          deliverable_name?: string | null
           description: string
+          entry_into_force_date?: string | null
           feedback_deadline?: string | null
+          feedback_link?: string | null
           id: string
           official_link?: string | null
           previous_status?: string | null
@@ -2780,11 +2790,16 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          adoption_date?: string | null
           article_reference?: string
           created_at?: string
+          date_of_effect?: string | null
           deliverable_link?: string | null
+          deliverable_name?: string | null
           description?: string
+          entry_into_force_date?: string | null
           feedback_deadline?: string | null
+          feedback_link?: string | null
           id?: string
           official_link?: string | null
           previous_status?: string | null

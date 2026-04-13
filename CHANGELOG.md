@@ -5,6 +5,18 @@ All notable changes to the EHDS Regulation Explorer will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-04-13
+
+### Added
+
+#### AI Knowledge Base Management
+- **Knowledge Base dashboard** on AI Settings page — real-time counts of all content the AI assistant has access to (articles, recitals, definitions, implementing acts, FAQs)
+- **Content coverage report** — table showing which implementing acts have detailed articles, recitals, and sections loaded into the AI knowledge base
+- **Test AI Knowledge** — send test queries directly to the AI assistant from the admin panel and see streamed responses to verify new content is recognized
+- **Prompt config status** — quick overview of active/inactive prompts with last-updated timestamps
+
+---
+
 ## [2.3.1] - 2026-04-13
 
 ### Added

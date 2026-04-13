@@ -218,9 +218,12 @@ export function analyzeStructure(text: string): StructureAnalysis {
   let footnoteFormat: 'eurlex-link' | 'numbered-paren' | 'caret' | 'none' = 'none';
   if (/\[\(\d+\)\]\([^)]*#ntr/.test(text)) {
     footnoteFormat = 'eurlex-link';
-  } else if (/\[\^\d+\]/.test(text)) {
+  } else if (/\[\^\d+\]/.test(text) || /<sup>\d+<\/sup>/i.test(text)) {
     footnoteFormat = 'caret';
   } else if (/\(\d+\)\s+OJ\s/i.test(text)) {
+    footnoteFormat = 'numbered-paren';
+  } else if (/^\d+\s+(?:OJ|Commission|Regulation|Directive|Decision)\s/im.test(text)) {
+    // PDF-style standalone footnotes: "4 Commission Decision..."
     footnoteFormat = 'numbered-paren';
   }
   

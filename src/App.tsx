@@ -137,6 +137,7 @@ const AdminImplementingActDataTablesPage = lazy(() => import("./pages/AdminImple
 const AdminFaqDataTablesPage = lazy(() => import("./pages/AdminFaqDataTablesPage"));
 const AdminSidebarPage = lazy(() => import("./pages/AdminSidebarPage"));
 const AdminUITranslationsPage = lazy(() => import("./pages/AdminUITranslationsPage"));
+const AssistantPage = lazy(() => import("./pages/AssistantPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -236,6 +237,7 @@ const App = () => (
             <Route path="/study/read" element={<StudyReadPage />} />
             <Route path="/study/flashcards" element={<StudyFlashcardsPage />} />
             <Route path="/study/quiz" element={<StudyQuizPage />} />
+            <Route path="/assistant" element={<AssistantPage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin/set-password" element={<AdminSetPasswordPage />} />
             <Route path="/profile" element={<ProfilePage />} />

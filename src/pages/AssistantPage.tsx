@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
 import { useEHDSAssistant } from '@/hooks/useEHDSAssistant';
 import { useAIPreferences } from '@/hooks/useAIPreferences';
 import { useStakeholderAIRole } from '@/contexts/StakeholderContext';

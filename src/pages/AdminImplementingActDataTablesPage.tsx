@@ -221,11 +221,84 @@ function RowManager({ tableId }: { tableId: string }) {
   const [editingRow, setEditingRow] = useState<{ id: string; values: Record<string, string> } | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [newValues, setNewValues] = useState<Record<string, string>>({});
+  const [showPaste, setShowPaste] = useState(false);
+  const [pasteText, setPasteText] = useState("");
+  const [pasteHasHeader, setPasteHasHeader] = useState(true);
+  const [pastePreview, setPastePreview] = useState<Record<string, string>[]>([]);
+  const { toast } = useToast();
 
   const handleAddRow = () => {
     createRow.mutate({ values: newValues, sort_order: rows.length });
     setNewValues({});
     setShowAdd(false);
+  };
+
+  const parsePasteText = useCallback((text: string, hasHeader: boolean) => {
+    if (!text.trim()) { setPastePreview([]); return; }
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if (lines.length === 0) { setPastePreview([]); return; }
+
+    const delimiter = lines[0].includes("\t") ? "\t" : ",";
+    const parsed = lines.map(line => {
+      if (delimiter === ",") {
+        const fields: string[] = [];
+        let current = "";
+        let inQuotes = false;
+        for (const char of line) {
+          if (char === '"') { inQuotes = !inQuotes; }
+          else if (char === "," && !inQuotes) { fields.push(current.trim()); current = ""; }
+          else { current += char; }
+        }
+        fields.push(current.trim());
+        return fields;
+      }
+      return line.split(delimiter).map(f => f.trim());
+    });
+
+    let headerKeys: string[];
+    let dataRows: string[][];
+
+    if (hasHeader) {
+      const headerRow = parsed[0];
+      headerKeys = headerRow.map(h => {
+        const match = columns.find(c =>
+          c.name.toLowerCase() === h.toLowerCase() ||
+          c.column_key.toLowerCase() === h.toLowerCase()
+        );
+        return match ? match.column_key : h.toLowerCase().replace(/\s+/g, "_");
+      });
+      dataRows = parsed.slice(1);
+    } else {
+      headerKeys = columns.map(c => c.column_key);
+      dataRows = parsed;
+    }
+
+    const result = dataRows.map(cells => {
+      const values: Record<string, string> = {};
+      headerKeys.forEach((key, i) => {
+        if (i < cells.length && cells[i]) values[key] = cells[i];
+      });
+      return values;
+    }).filter(v => Object.values(v).some(val => val.trim()));
+
+    setPastePreview(result);
+  }, [columns]);
+
+  const handlePasteImport = async () => {
+    if (pastePreview.length === 0) return;
+    let successCount = 0;
+    for (let i = 0; i < pastePreview.length; i++) {
+      try {
+        await createRow.mutateAsync({ values: pastePreview[i], sort_order: rows.length + i });
+        successCount++;
+      } catch (e: any) {
+        toast({ title: "Error on row " + (i + 1), description: e.message, variant: "destructive" });
+      }
+    }
+    toast({ title: `Imported ${successCount} row${successCount !== 1 ? "s" : ""}` });
+    setPasteText("");
+    setPastePreview([]);
+    setShowPaste(false);
   };
 
   if (isLoading) return <Skeleton className="h-20 w-full" />;
@@ -236,9 +309,14 @@ function RowManager({ tableId }: { tableId: string }) {
 
   return (
     <div className="space-y-3 mt-3">
-      <Button size="sm" onClick={() => setShowAdd(true)}>
-        <Plus className="h-4 w-4 mr-1" />Add Row
-      </Button>
+      <div className="flex gap-2">
+        <Button size="sm" onClick={() => setShowAdd(true)}>
+          <Plus className="h-4 w-4 mr-1" />Add Row
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => setShowPaste(true)}>
+          <ClipboardPaste className="h-4 w-4 mr-1" />Paste from Excel
+        </Button>
+      </div>
 
       {rows.length > 0 && (
         <div className="border rounded-lg overflow-x-auto">
@@ -289,6 +367,78 @@ function RowManager({ tableId }: { tableId: string }) {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAdd(false)}>Cancel</Button>
             <Button onClick={handleAddRow}>Add</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Paste from Excel Dialog */}
+      <Dialog open={showPaste} onOpenChange={(v) => { setShowPaste(v); if (!v) { setPasteText(""); setPastePreview([]); } }}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ClipboardPaste className="h-5 w-5" />
+              Paste from Excel / Spreadsheet
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Copy rows from Excel or Google Sheets and paste below. Supports tab-separated (TSV) and comma-separated (CSV) formats.
+            </p>
+            <div className="flex items-center gap-2">
+              <Switch checked={pasteHasHeader} onCheckedChange={(v) => { setPasteHasHeader(v); parsePasteText(pasteText, v); }} />
+              <Label className="text-sm">First row is header</Label>
+            </div>
+            <div>
+              <Label className="text-xs">Pasted data</Label>
+              <Textarea
+                placeholder={"Paste spreadsheet data here...\ne.g.\nName\tType\tDescription\nPatient ID\tII\tUnique identifier"}
+                value={pasteText}
+                onChange={e => { setPasteText(e.target.value); parsePasteText(e.target.value, pasteHasHeader); }}
+                rows={6}
+                className="font-mono text-xs"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Expected columns: {columns.map(c => c.name).join(", ")}
+            </p>
+            {pastePreview.length > 0 && (
+              <div>
+                <Label className="text-xs mb-1 block">Preview ({pastePreview.length} rows)</Label>
+                <div className="border rounded-lg overflow-x-auto max-h-48">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        {columns.map(c => <TableHead key={c.id} className="text-xs whitespace-nowrap py-1.5">{c.name}</TableHead>)}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {pastePreview.slice(0, 10).map((row, i) => (
+                        <TableRow key={i}>
+                          {columns.map(c => (
+                            <TableCell key={c.id} className="text-xs py-1.5 max-w-[150px]">
+                              <span className="line-clamp-1">{row[c.column_key] || <span className="text-muted-foreground italic">—</span>}</span>
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))}
+                      {pastePreview.length > 10 && (
+                        <TableRow>
+                          <TableCell colSpan={columns.length} className="text-xs text-center text-muted-foreground py-1.5">
+                            ...and {pastePreview.length - 10} more rows
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowPaste(false); setPasteText(""); setPastePreview([]); }}>Cancel</Button>
+            <Button onClick={handlePasteImport} disabled={pastePreview.length === 0 || createRow.isPending}>
+              Import {pastePreview.length} Row{pastePreview.length !== 1 ? "s" : ""}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

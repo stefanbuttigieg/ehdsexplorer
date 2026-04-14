@@ -137,6 +137,7 @@ const AdminImplementingActDataTablesPage = lazy(() => import("./pages/AdminImple
 const AdminFaqDataTablesPage = lazy(() => import("./pages/AdminFaqDataTablesPage"));
 const AdminSidebarPage = lazy(() => import("./pages/AdminSidebarPage"));
 const AdminUITranslationsPage = lazy(() => import("./pages/AdminUITranslationsPage"));
+const AssistantPage = lazy(() => import("./pages/AssistantPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {

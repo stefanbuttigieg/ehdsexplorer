@@ -40,7 +40,7 @@ const AssistantPage: React.FC = () => {
   const isMobile = useIsMobile();
 
   const {
-    messages, isLoading, error, sendMessage, clearMessages,
+    messages, isLoading, error, sendMessage,
     conversations, conversationsLoading, currentConversationId,
     loadConversation, startNewConversation, deleteConversation,
     usageInfo, isFavorite, toggleFavorite,

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export type ActStatus = 'pending' | 'feedback' | 'progress' | 'adopted' | 'feedback-closed';
+export type ActStatus = 'pending' | 'preparation' | 'feedback' | 'progress' | 'adopted' | 'feedback-closed';
 
 export type ActTheme = 
   | 'primary-use'
@@ -42,6 +42,7 @@ export const themeLabels: Record<ActTheme, string> = {
 
 export const statusLabels: Record<ActStatus, string> = {
   pending: 'Pending',
+  preparation: 'In Preparation',
   feedback: 'Open for Feedback',
   'feedback-closed': 'Feedback Closed',
   progress: 'In Progress',

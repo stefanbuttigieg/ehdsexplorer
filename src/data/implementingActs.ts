@@ -1,4 +1,4 @@
-export type ActStatus = 'pending' | 'feedback' | 'progress' | 'adopted';
+export type ActStatus = 'pending' | 'preparation' | 'feedback' | 'progress' | 'adopted';
 
 export type ActTheme = 
   | 'primary-use'
@@ -320,6 +320,7 @@ export const themeLabels: Record<ActTheme, string> = {
 
 export const statusLabels: Record<ActStatus, string> = {
   pending: 'Pending',
+  preparation: 'In Preparation',
   feedback: 'Open for Feedback',
   progress: 'In Progress',
   adopted: 'Adopted',

@@ -191,8 +191,8 @@ const ImplementingActsPage = () => {
         <ComitologyUpdatesCard />
 
         {/* Stats - scrollable on mobile */}
-        <div className="flex gap-3 mb-8 overflow-x-auto pb-2 -mx-2 px-2 snap-x snap-mandatory md:grid md:grid-cols-5 md:overflow-visible md:pb-0 md:mx-0 md:px-0">
-          {(['pending', 'feedback', 'feedback-closed', 'progress', 'adopted'] as ActStatus[]).map(status => (
+        <div className="flex gap-3 mb-8 overflow-x-auto pb-2 -mx-2 px-2 snap-x snap-mandatory md:grid md:grid-cols-6 md:overflow-visible md:pb-0 md:mx-0 md:px-0">
+          {(['pending', 'preparation', 'feedback', 'feedback-closed', 'progress', 'adopted'] as ActStatus[]).map(status => (
             <Card key={status} className={`cursor-pointer min-w-[120px] snap-start flex-shrink-0 md:min-w-0 md:flex-shrink ${filterStatus === status ? 'border-primary' : ''}`} onClick={() => setFilterStatus(filterStatus === status ? 'all' : status)}>
               <CardContent className="p-3 sm:p-4 text-center">
                 <div className={`text-2xl sm:text-3xl font-bold status-${status}`}>{stats[status] || 0}</div>

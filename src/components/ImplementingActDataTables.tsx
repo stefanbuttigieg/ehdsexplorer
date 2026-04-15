@@ -10,6 +10,59 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { usePublishedDataTables, useDataColumns, useDataRows, type DataTable, type DataColumn, type DataRow } from "@/hooks/useImplementingActDataTables";
 import { cn } from "@/lib/utils";
 
+const URL_REGEX = /https?:\/\/[^\s)]+/g;
+const MD_LINK_REGEX = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
+
+function CellValue({ value }: { value: string }) {
+  if (!value) return null;
+
+  // Check for markdown-style links: [text](url)
+  if (MD_LINK_REGEX.test(value)) {
+    MD_LINK_REGEX.lastIndex = 0;
+    const parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+    let key = 0;
+    while ((match = MD_LINK_REGEX.exec(value)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(value.slice(lastIndex, match.index));
+      }
+      parts.push(
+        <a key={key++} href={match[2]} target="_blank" rel="noopener noreferrer" className="text-primary underline hover:text-primary/80 break-all">
+          {match[1]}
+        </a>
+      );
+      lastIndex = match.index + match[0].length;
+    }
+    if (lastIndex < value.length) parts.push(value.slice(lastIndex));
+    return <span className="line-clamp-3">{parts}</span>;
+  }
+
+  // Check for plain URLs
+  if (URL_REGEX.test(value)) {
+    URL_REGEX.lastIndex = 0;
+    const parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+    let key = 0;
+    while ((match = URL_REGEX.exec(value)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(value.slice(lastIndex, match.index));
+      }
+      parts.push(
+        <a key={key++} href={match[0]} target="_blank" rel="noopener noreferrer" className="text-primary underline hover:text-primary/80 break-all">
+          {match[0]}
+        </a>
+      );
+      lastIndex = match.index + match[0].length;
+    }
+    if (lastIndex < value.length) parts.push(value.slice(lastIndex));
+    return <span className="line-clamp-3">{parts}</span>;
+  }
+
+  return <span className="line-clamp-3">{value}</span>;
+}
+
 function DataTableView({ table }: { table: DataTable }) {
   const { data: columns = [], isLoading: colsLoading } = useDataColumns(table.id);
   const { data: rows = [], isLoading: rowsLoading } = useDataRows(table.id);
@@ -105,7 +158,7 @@ function DataTableView({ table }: { table: DataTable }) {
                       <TableRow key={row.id}>
                         {columns.map(col => (
                           <TableCell key={col.id} className="text-sm max-w-xs">
-                            <span className="line-clamp-3">{row.values[col.column_key] || ""}</span>
+                            <CellValue value={row.values[col.column_key] || ""} />
                           </TableCell>
                         ))}
                       </TableRow>

@@ -449,12 +449,36 @@ function RowManager({ tableId }: { tableId: string }) {
           <DialogHeader><DialogTitle>Edit Row</DialogTitle></DialogHeader>
           {editingRow && (
             <div className="space-y-3">
-              {columns.map(c => (
-                <div key={c.id}>
-                  <Label className="text-xs">{c.name}</Label>
-                  <Input value={editingRow.values[c.column_key] || ""} onChange={e => setEditingRow(prev => prev ? { ...prev, values: { ...prev.values, [c.column_key]: e.target.value } } : null)} />
-                </div>
-              ))}
+              {columns.map(c => {
+                const val = editingRow.values[c.column_key] || "";
+                const mdMatch = val.match(/^\[([^\]]*)\]\((https?:\/\/[^)]*)\)$/);
+                const isUrl = /^https?:\/\//.test(val);
+                const showLinkEditor = mdMatch || isUrl;
+                return (
+                  <div key={c.id} className="space-y-1">
+                    <Label className="text-xs">{c.name}</Label>
+                    <Input value={val} onChange={e => setEditingRow(prev => prev ? { ...prev, values: { ...prev.values, [c.column_key]: e.target.value } } : null)} placeholder="Text or URL" />
+                    {showLinkEditor && (
+                      <div className="pl-3 border-l-2 border-primary/20 space-y-1">
+                        <p className="text-[10px] text-muted-foreground">Link detected — add display text:</p>
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="Display text (optional)"
+                            className="h-7 text-xs"
+                            defaultValue={mdMatch ? mdMatch[1] : ""}
+                            onChange={e => {
+                              const url = mdMatch ? mdMatch[2] : val;
+                              const display = e.target.value.trim();
+                              const newVal = display ? `[${display}](${url})` : url;
+                              setEditingRow(prev => prev ? { ...prev, values: { ...prev.values, [c.column_key]: newVal } } : null);
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
           <DialogFooter>

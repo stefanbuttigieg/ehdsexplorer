@@ -602,8 +602,9 @@ const AdminImplementingActsPage = () => {
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                   <SelectContent>
                     <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="preparation">In Preparation</SelectItem>
                     <SelectItem value="feedback">Open for Feedback</SelectItem>
                     <SelectItem value="feedback-closed">Feedback Closed</SelectItem>
                     <SelectItem value="progress">In Progress</SelectItem>

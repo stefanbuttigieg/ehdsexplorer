@@ -1710,6 +1710,84 @@ export type Database = {
         }
         Relationships: []
       }
+      eu_regulation_check_config: {
+        Row: {
+          check_times: string[]
+          created_at: string
+          id: string
+          is_enabled: boolean
+          last_checked_at: string | null
+          last_content_hash: string | null
+          target_url: string
+          updated_at: string
+        }
+        Insert: {
+          check_times?: string[]
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          last_checked_at?: string | null
+          last_content_hash?: string | null
+          target_url?: string
+          updated_at?: string
+        }
+        Update: {
+          check_times?: string[]
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          last_checked_at?: string | null
+          last_content_hash?: string | null
+          target_url?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      eu_regulation_updates: {
+        Row: {
+          content_hash: string | null
+          created_at: string
+          description: string | null
+          detected_at: string
+          id: string
+          review_notes: string | null
+          reviewed_by: string | null
+          scraped_content: string | null
+          source_url: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content_hash?: string | null
+          created_at?: string
+          description?: string | null
+          detected_at?: string
+          id?: string
+          review_notes?: string | null
+          reviewed_by?: string | null
+          scraped_content?: string | null
+          source_url: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content_hash?: string | null
+          created_at?: string
+          description?: string | null
+          detected_at?: string
+          id?: string
+          review_notes?: string | null
+          reviewed_by?: string | null
+          scraped_content?: string | null
+          source_url?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       feature_flags: {
         Row: {
           created_at: string

@@ -184,6 +184,12 @@ const AdminDashboard = () => {
       count: counts?.news_summaries,
     },
     {
+      title: 'EU Regulation Updates',
+      description: 'Monitor EC Better Regulation portal for EHDS dataset updates',
+      icon: AlertTriangle,
+      href: '/admin/eu-regulation-updates',
+    },
+    {
       title: 'Plain Language',
       description: 'AI plain language translations for legal content',
       icon: Languages,

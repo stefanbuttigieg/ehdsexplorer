@@ -32,6 +32,7 @@ export default function AdminEuRegulationUpdatesPage() {
   const [reviewNotes, setReviewNotes] = useState('');
   const [showConfig, setShowConfig] = useState(false);
   const [configCheckTimes, setConfigCheckTimes] = useState('');
+  const [configTargetUrl, setConfigTargetUrl] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   if (authLoading || !shouldRender) return null;
@@ -88,7 +89,26 @@ export default function AdminEuRegulationUpdatesPage() {
                   <label className="text-sm font-medium flex items-center gap-1">
                     <Globe className="h-3.5 w-3.5" /> Target URL
                   </label>
-                  <Input value={config.target_url} disabled className="text-xs" />
+                  <div className="flex gap-2">
+                    <Input
+                      defaultValue={config.target_url}
+                      onChange={(e) => setConfigTargetUrl(e.target.value)}
+                      placeholder="https://..."
+                      className="text-xs"
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        const url = configTargetUrl.trim();
+                        if (url && url !== config.target_url) {
+                          updateConfig.mutate({ target_url: url });
+                        }
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium flex items-center gap-1">

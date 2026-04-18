@@ -5,6 +5,37 @@ All notable changes to the EHDS Regulation Explorer will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-04-18
+
+### Added
+
+#### Andrea — Personalized AI Assistant
+- **Andrea persona** — The EHDS Assistant now has a name, voice, and friendly personality. Updated `ai_prompt_config` system prompt to introduce Andrea as a warm, knowledgeable EHDS guide
+- **Adaptive avatar by role** — Andrea's avatar visually adapts to the active perspective:
+  - General → default Andrea
+  - Citizen / Patient → casual cardigan look
+  - Healthcare Professional → white coat with stethoscope
+  - Legal / Compliance Officer → formal blazer
+  - Researcher → lab coat with safety glasses
+  - Health Tech Developer → casual hoodie
+  - Policy Maker → diplomatic suit with EU pin
+- **`getAndreaAvatar()` helper** in `src/lib/andreaAvatars.ts` maps the effective AI role to the right avatar across both the floating chat widget and the full Assistant page
+- **AI disclaimers on Assistant page** — Prominent info card on the welcome screen and a persistent reminder under the input field clarify that AI responses may be inaccurate and should be verified against the official regulation
+
+#### Admin — EU Regulation Updates Tile
+- Added a navigation tile on the Admin Dashboard linking to `/admin/eu-regulation-updates` for monitoring the EC Better Regulation portal for EHDS dataset updates
+
+### Security
+
+#### Pen-test Remediation
+- Fixed privilege-escalation gap in `team_memberships` INSERT policy (now correctly validates owner/admin role via `has_team_role`)
+- Recreated `leaderboard_contributions_public` and `site_settings_public` views with `security_invoker = true` so RLS respects the calling user
+- Tightened RLS on `ai_assistant_benchmarks`, `ai_assistant_feedback`, and `plain_language_feedback` to authenticated users only
+- Restricted `leaderboard_contributions` and EHDS FAQ tables (`ehds_faqs`, `ehds_faq_footnotes`, `ehds_faq_sync_log`) to admin/editor roles
+- `implementing_act_subscriptions` inserts now enforced as `verified = false` to prevent pre-verified subscription creation
+
+---
+
 ## [2.4.1] - 2026-04-13
 
 ### Added

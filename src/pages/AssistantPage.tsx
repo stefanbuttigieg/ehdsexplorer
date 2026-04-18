@@ -408,6 +408,12 @@ const AssistantPage: React.FC = () => {
                 compare provisions, clarify obligations, and help you navigate the legislation.
               </p>
               <AIContextSuggestions onSendMessage={handleQuickSend} isLoading={isLoading} />
+              <div className="mt-6 flex items-start gap-2 p-3 rounded-lg bg-muted/50 border border-border text-left max-w-md">
+                <Info className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  <strong className="text-foreground">AI-generated responses.</strong> Despite our best efforts to curate accurate EHDS knowledge, answers may be incomplete or inaccurate. Always verify against the official regulation. We're continuously working to improve.
+                </p>
+              </div>
             </div>
           ) : (
             <div className="max-w-3xl mx-auto py-4 px-4 space-y-4">
@@ -546,6 +552,9 @@ const AssistantPage: React.FC = () => {
                 {usageInfo.remaining}/{usageInfo.limit} remaining today
               </p>
             )}
+            <p className="text-[10px] text-muted-foreground text-center mt-1.5">
+              Andrea can make mistakes. Verify important information against the official EHDS regulation.
+            </p>
           </form>
         </div>
       </div>

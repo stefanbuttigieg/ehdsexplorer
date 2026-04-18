@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { MessageCircle, X, Send, Trash2, Loader2, Bot, User, AlertCircle, ThumbsUp, ThumbsDown, History, Plus, ChevronLeft, Mic, MicOff, Volume2, Square, Settings2, Star } from 'lucide-react';
+import { MessageCircle, X, Send, Trash2, Loader2, User, AlertCircle, ThumbsUp, ThumbsDown, History, Plus, ChevronLeft, Mic, MicOff, Volume2, Square, Settings2, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';

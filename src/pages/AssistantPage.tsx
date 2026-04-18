@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { 
-  Send, Trash2, Loader2, Bot, User, AlertCircle, ThumbsUp, ThumbsDown, 
+  Send, Trash2, Loader2, User, AlertCircle, ThumbsUp, ThumbsDown, 
   Plus, Mic, MicOff, Volume2, Square, Star, MessageCircle, PanelLeftClose, 
   PanelLeft, Settings2, ArrowLeft
 } from 'lucide-react';

@@ -191,6 +191,16 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
   - Maturity levels from Beginner to Compliance Ready
   - Category breakdown with prioritized gap analysis and recommendations
 
+### 🤖 Andrea — EHDS AI Assistant
+- **Andrea persona** - Friendly, knowledgeable AI guide specialized exclusively in the EHDS Regulation
+- **Adaptive avatar** - Andrea's appearance adapts to the selected perspective (Citizen, Healthcare Professional, Legal/Compliance, Researcher, Health Tech Developer, Policy Maker, or General)
+- **Role-based responses** - Tailored prompts and tone per stakeholder type, integrated with the platform-wide stakeholder filter
+- **Adjustable complexity** - Choose explanation depth from Complete Beginner through Expert
+- **Voice in/out** - Voice input transcription and text-to-speech playback via ElevenLabs
+- **Conversation history** - Saved chats with favorites, sharing, and tagging
+- **AI use disclaimers** - Clear notices that responses may be inaccurate and should be verified against the official regulation
+- **Daily usage limits** with transparent remaining-uses indicator
+
 ### 🎯 Stakeholder Guidance
 - **Scenario Finder** - AI-powered situation analysis at `/scenario-finder`
   - 18 predefined scenario templates by stakeholder type

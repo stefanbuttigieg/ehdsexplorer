@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { 
-  Send, Trash2, Loader2, Bot, User, AlertCircle, ThumbsUp, ThumbsDown, 
+  Send, Trash2, Loader2, User, AlertCircle, ThumbsUp, ThumbsDown, 
   Plus, Mic, MicOff, Volume2, Square, Star, MessageCircle, PanelLeftClose, 
   PanelLeft, Settings2, ArrowLeft
 } from 'lucide-react';
@@ -22,6 +22,8 @@ import { Link } from 'react-router-dom';
 import AIRoleSelector from '@/components/AIRoleSelector';
 import AIContextSuggestions from '@/components/AIContextSuggestions';
 import AIConversationActions from '@/components/AIConversationActions';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import andreaAvatar from '@/assets/andrea-avatar.png';
 
 const AssistantPage: React.FC = () => {
   const [input, setInput] = useState('');
@@ -371,10 +373,13 @@ const AssistantPage: React.FC = () => {
                 </SheetContent>
               </Sheet>
             )}
-            <Bot className="h-5 w-5 text-primary" />
+            <Avatar className="h-8 w-8 border-2 border-primary/20">
+              <AvatarImage src={andreaAvatar} alt="Andrea, your EHDS assistant" />
+              <AvatarFallback>A</AvatarFallback>
+            </Avatar>
             <div>
-              <h1 className="text-sm font-semibold">EHDS Assistant</h1>
-              <p className="text-[10px] text-muted-foreground">AI-powered regulation guidance</p>
+              <h1 className="text-sm font-semibold">Andrea</h1>
+              <p className="text-[10px] text-muted-foreground">Your EHDS regulation guide</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
@@ -392,10 +397,12 @@ const AssistantPage: React.FC = () => {
         <div className="flex-1 overflow-y-auto" ref={scrollRef}>
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full px-4 text-center max-w-lg mx-auto">
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-                <Bot className="h-8 w-8 text-primary" />
-              </div>
-              <h2 className="text-xl font-semibold mb-2">EHDS Assistant</h2>
+              <Avatar className="h-20 w-20 mb-4 border-2 border-primary/20 shadow-md">
+                <AvatarImage src={andreaAvatar} alt="Andrea, your EHDS assistant" />
+                <AvatarFallback>A</AvatarFallback>
+              </Avatar>
+              <h2 className="text-xl font-semibold mb-1">Hi, I'm Andrea 👋</h2>
+              <p className="text-xs text-muted-foreground mb-3">Your EHDS regulation guide</p>
               <p className="text-sm text-muted-foreground mb-6">
                 Ask me anything about the European Health Data Space regulation. I can explain articles, 
                 compare provisions, clarify obligations, and help you navigate the legislation.
@@ -407,9 +414,10 @@ const AssistantPage: React.FC = () => {
               {messages.map((msg, idx) => (
                 <div key={idx} className={cn("flex gap-3", msg.role === 'user' ? "justify-end" : "justify-start")}>
                   {msg.role === 'assistant' && (
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
-                      <Bot className="h-4 w-4 text-primary" />
-                    </div>
+                    <Avatar className="h-8 w-8 flex-shrink-0 mt-1 border border-border">
+                      <AvatarImage src={andreaAvatar} alt="Andrea" />
+                      <AvatarFallback>A</AvatarFallback>
+                    </Avatar>
                   )}
                   <div className={cn(
                     "max-w-[80%] rounded-2xl px-4 py-3",
@@ -477,12 +485,13 @@ const AssistantPage: React.FC = () => {
 
               {isLoading && (
                 <div className="flex gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Loader2 className="h-4 w-4 text-primary animate-spin" />
-                  </div>
+                  <Avatar className="h-8 w-8 flex-shrink-0 border border-border">
+                    <AvatarImage src={andreaAvatar} alt="Andrea" />
+                    <AvatarFallback>A</AvatarFallback>
+                  </Avatar>
                   <div className="bg-muted rounded-2xl px-4 py-3">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>Thinking</span>
+                      <span>Andrea is thinking</span>
                       <span className="animate-pulse">...</span>
                     </div>
                   </div>
@@ -509,7 +518,7 @@ const AssistantPage: React.FC = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Ask about the EHDS regulation..."
+                  placeholder="Ask Andrea about the EHDS regulation..."
                   className="min-h-[44px] max-h-[200px] resize-none pr-12 rounded-xl"
                   rows={1}
                   disabled={isLoading}

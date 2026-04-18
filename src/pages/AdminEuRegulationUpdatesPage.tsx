@@ -32,6 +32,7 @@ export default function AdminEuRegulationUpdatesPage() {
   const [reviewNotes, setReviewNotes] = useState('');
   const [showConfig, setShowConfig] = useState(false);
   const [configCheckTimes, setConfigCheckTimes] = useState('');
+  const [configTargetUrl, setConfigTargetUrl] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   if (authLoading || !shouldRender) return null;

@@ -16,6 +16,8 @@ import { Link } from 'react-router-dom';
 import AIRoleSelector from './AIRoleSelector';
 import AIContextSuggestions from './AIContextSuggestions';
 import AIConversationActions from './AIConversationActions';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import andreaAvatar from '@/assets/andrea-avatar.png';
 
 interface AIAssistantProps {
   className?: string;
@@ -348,14 +350,17 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
               ) : (
-                <Bot className="h-5 w-5 text-primary" />
+                <Avatar className="h-7 w-7 border border-primary/20">
+                  <AvatarImage src={andreaAvatar} alt="Andrea" />
+                  <AvatarFallback>A</AvatarFallback>
+                </Avatar>
               )}
               <div>
                 <h3 className="font-semibold text-sm">
-                  {showHistory ? 'Chat History' : showSettings ? 'Settings' : 'EHDS Assistant'}
+                  {showHistory ? 'Chat History' : showSettings ? 'Settings' : 'Andrea'}
                 </h3>
                 <p className="text-xs text-muted-foreground">
-                  {showHistory ? 'Select a conversation' : showSettings ? 'Customize responses' : 'Ask about the regulation'}
+                  {showHistory ? 'Select a conversation' : showSettings ? 'Customize responses' : 'Your EHDS guide'}
                 </p>
               </div>
             </div>
@@ -522,8 +527,11 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
               <ScrollArea className="flex-1 p-4" ref={scrollRef}>
                 {messages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
-                    <Bot className="h-12 w-12 mb-4 opacity-50" />
-                    <p className="text-sm font-medium mb-2">Welcome to EHDS Assistant</p>
+                    <Avatar className="h-16 w-16 mb-3 border-2 border-primary/20 shadow-sm">
+                      <AvatarImage src={andreaAvatar} alt="Andrea, your EHDS assistant" />
+                      <AvatarFallback>A</AvatarFallback>
+                    </Avatar>
+                    <p className="text-sm font-medium mb-1 text-foreground">Hi, I'm Andrea 👋</p>
                     <p className="text-xs max-w-[280px]">
                       Ask me anything about the European Health Data Space Regulation. I can help you find articles, explain concepts, and navigate the regulation.
                     </p>
@@ -565,9 +573,10 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
                         )}
                       >
                         {message.role === 'assistant' && (
-                          <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
-                            <Bot className="h-4 w-4 text-primary" />
-                          </div>
+                          <Avatar className="flex-shrink-0 h-7 w-7 border border-border">
+                            <AvatarImage src={andreaAvatar} alt="Andrea" />
+                            <AvatarFallback>A</AvatarFallback>
+                          </Avatar>
                         )}
                         <div className="flex flex-col gap-1 max-w-[85%]">
                           <div
@@ -662,9 +671,10 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
                     ))}
                     {isLoading && messages[messages.length - 1]?.role === 'user' && (
                       <div className="flex gap-3">
-                        <div className="flex-shrink-0 w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
-                          <Bot className="h-4 w-4 text-primary" />
-                        </div>
+                        <Avatar className="flex-shrink-0 h-7 w-7 border border-border">
+                          <AvatarImage src={andreaAvatar} alt="Andrea" />
+                          <AvatarFallback>A</AvatarFallback>
+                        </Avatar>
                         <div className="bg-muted rounded-lg px-3 py-2">
                           <Loader2 className="h-4 w-4 animate-spin" />
                         </div>
@@ -719,7 +729,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder={isRecording ? "Recording..." : "Ask about EHDS..."}
+                    placeholder={isRecording ? "Recording..." : "Ask Andrea..."}
                     className="min-h-[44px] max-h-[120px] resize-none text-sm"
                     rows={1}
                     disabled={isLoading || isRecording}

@@ -23,7 +23,7 @@ import AIRoleSelector from '@/components/AIRoleSelector';
 import AIContextSuggestions from '@/components/AIContextSuggestions';
 import AIConversationActions from '@/components/AIConversationActions';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import andreaAvatar from '@/assets/andrea-avatar.png';
+import { getAndreaAvatar } from '@/lib/andreaAvatars';
 
 const AssistantPage: React.FC = () => {
   const [input, setInput] = useState('');

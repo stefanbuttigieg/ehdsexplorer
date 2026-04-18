@@ -17,7 +17,7 @@ import AIRoleSelector from './AIRoleSelector';
 import AIContextSuggestions from './AIContextSuggestions';
 import AIConversationActions from './AIConversationActions';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import andreaAvatar from '@/assets/andrea-avatar.png';
+import { getAndreaAvatar } from '@/lib/andreaAvatars';
 
 interface AIAssistantProps {
   className?: string;

@@ -374,7 +374,7 @@ const AssistantPage: React.FC = () => {
               </Sheet>
             )}
             <Avatar className="h-8 w-8 border-2 border-primary/20">
-              <AvatarImage src={andreaAvatar} alt="Andrea, your EHDS assistant" />
+              <AvatarImage src={getAndreaAvatar(effectiveRole)} alt="Andrea, your EHDS assistant" />
               <AvatarFallback>A</AvatarFallback>
             </Avatar>
             <div>
@@ -398,7 +398,7 @@ const AssistantPage: React.FC = () => {
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full px-4 text-center max-w-lg mx-auto">
               <Avatar className="h-20 w-20 mb-4 border-2 border-primary/20 shadow-md">
-                <AvatarImage src={andreaAvatar} alt="Andrea, your EHDS assistant" />
+                <AvatarImage src={getAndreaAvatar(effectiveRole)} alt="Andrea, your EHDS assistant" />
                 <AvatarFallback>A</AvatarFallback>
               </Avatar>
               <h2 className="text-xl font-semibold mb-1">Hi, I'm Andrea 👋</h2>
@@ -415,7 +415,7 @@ const AssistantPage: React.FC = () => {
                 <div key={idx} className={cn("flex gap-3", msg.role === 'user' ? "justify-end" : "justify-start")}>
                   {msg.role === 'assistant' && (
                     <Avatar className="h-8 w-8 flex-shrink-0 mt-1 border border-border">
-                      <AvatarImage src={andreaAvatar} alt="Andrea" />
+                      <AvatarImage src={getAndreaAvatar(effectiveRole)} alt="Andrea" />
                       <AvatarFallback>A</AvatarFallback>
                     </Avatar>
                   )}
@@ -486,7 +486,7 @@ const AssistantPage: React.FC = () => {
               {isLoading && (
                 <div className="flex gap-3">
                   <Avatar className="h-8 w-8 flex-shrink-0 border border-border">
-                    <AvatarImage src={andreaAvatar} alt="Andrea" />
+                    <AvatarImage src={getAndreaAvatar(effectiveRole)} alt="Andrea" />
                     <AvatarFallback>A</AvatarFallback>
                   </Avatar>
                   <div className="bg-muted rounded-2xl px-4 py-3">

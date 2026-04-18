@@ -351,7 +351,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
                 </Button>
               ) : (
                 <Avatar className="h-7 w-7 border border-primary/20">
-                  <AvatarImage src={andreaAvatar} alt="Andrea" />
+                  <AvatarImage src={getAndreaAvatar(effectiveRole)} alt="Andrea" />
                   <AvatarFallback>A</AvatarFallback>
                 </Avatar>
               )}
@@ -528,7 +528,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
                 {messages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
                     <Avatar className="h-16 w-16 mb-3 border-2 border-primary/20 shadow-sm">
-                      <AvatarImage src={andreaAvatar} alt="Andrea, your EHDS assistant" />
+                      <AvatarImage src={getAndreaAvatar(effectiveRole)} alt="Andrea, your EHDS assistant" />
                       <AvatarFallback>A</AvatarFallback>
                     </Avatar>
                     <p className="text-sm font-medium mb-1 text-foreground">Hi, I'm Andrea 👋</p>
@@ -574,7 +574,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
                       >
                         {message.role === 'assistant' && (
                           <Avatar className="flex-shrink-0 h-7 w-7 border border-border">
-                            <AvatarImage src={andreaAvatar} alt="Andrea" />
+                            <AvatarImage src={getAndreaAvatar(effectiveRole)} alt="Andrea" />
                             <AvatarFallback>A</AvatarFallback>
                           </Avatar>
                         )}
@@ -672,7 +672,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ className }) => {
                     {isLoading && messages[messages.length - 1]?.role === 'user' && (
                       <div className="flex gap-3">
                         <Avatar className="flex-shrink-0 h-7 w-7 border border-border">
-                          <AvatarImage src={andreaAvatar} alt="Andrea" />
+                          <AvatarImage src={getAndreaAvatar(effectiveRole)} alt="Andrea" />
                           <AvatarFallback>A</AvatarFallback>
                         </Avatar>
                         <div className="bg-muted rounded-lg px-3 py-2">

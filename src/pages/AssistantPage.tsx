@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { 
   Send, Trash2, Loader2, User, AlertCircle, ThumbsUp, ThumbsDown, 
   Plus, Mic, MicOff, Volume2, Square, Star, MessageCircle, PanelLeftClose, 
-  PanelLeft, Settings2, ArrowLeft
+  PanelLeft, Settings2, ArrowLeft, Info
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';

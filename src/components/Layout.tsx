@@ -33,6 +33,7 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import { MFAReminderBanner } from "@/components/mfa/MFAReminderBanner";
 import { DisclaimerBanner } from "@/components/DisclaimerBanner";
 import { KidsModeToggle } from "@/components/KidsModeToggle";
+import { HeaderItemsRenderer } from "@/components/HeaderItemsRenderer";
 import { useKidsMode } from "@/contexts/KidsModeContext";
 import { LeaderboardTracker } from "@/components/LeaderboardTracker";
 
@@ -237,13 +238,7 @@ const Layout = ({
           </div>
           <span className="font-serif font-bold text-base">EHDS Explorer</span>
         </Link>
-        <div className="flex items-center gap-1" data-tour="accessibility">
-          <StakeholderFilter compact />
-          <KidsModeToggle compact />
-          <LanguageSelector variant="compact" />
-          <AccessibilityControls />
-          <UserMenu />
-        </div>
+        <HeaderItemsRenderer forceDevice="mobile" className="flex items-center gap-1" />
       </header>
 
       {/* Sidebar Overlay */}
@@ -269,13 +264,9 @@ const Layout = ({
 
         {/* Toolbar Row - Only when expanded */}
         {!sidebarCollapsed && <div className="hidden gap-1 px-3 py-2 border-b border-sidebar-border md:flex items-center justify-center flex-wrap" data-tour="accessibility">
-            <StakeholderFilter compact />
-            <KidsModeToggle compact />
-            <UserMenu />
-            <LanguageSelector variant="compact" />
+            <HeaderItemsRenderer forceDevice="desktop" className="flex items-center gap-1 flex-wrap justify-center" />
             <TourButton onClick={startTour} />
             <ReportIssueButton />
-            <AccessibilityControls />
           </div>}
         
         <ScrollArea className={cn(sidebarCollapsed ? "h-[calc(100vh-3.5rem)]" : "h-[calc(100vh-7rem)]")}>

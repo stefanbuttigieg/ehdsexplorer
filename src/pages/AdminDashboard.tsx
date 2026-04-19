@@ -387,6 +387,13 @@ const AdminDashboard = () => {
       badge: 'Super Admin',
     },
     {
+      title: 'Header Manager',
+      description: 'Control top header items (Sign In, Kids Mode, Language) — visibility, order, per-device & auth state',
+      icon: Settings2,
+      href: '/admin/header',
+      badge: 'Super Admin',
+    },
+    {
       title: 'API Keys & Logs',
       description: 'View API keys and request logs from country managers',
       icon: Key,

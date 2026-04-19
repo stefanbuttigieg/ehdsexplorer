@@ -6,6 +6,118 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Try to obtain markdown text of the PDF via Firecrawl (preferred when key is available)
+async function tryFirecrawlScrape(pdfUrl: string): Promise<string | null> {
+  const apiKey = Deno.env.get("FIRECRAWL_API_KEY");
+  if (!apiKey) {
+    console.log("[firecrawl] No FIRECRAWL_API_KEY — skipping Firecrawl path");
+    return null;
+  }
+  try {
+    console.log("[firecrawl] Scraping PDF as markdown:", pdfUrl);
+    const res = await fetch("https://api.firecrawl.dev/v2/scrape", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        url: pdfUrl,
+        formats: ["markdown"],
+        onlyMainContent: true,
+      }),
+    });
+    if (!res.ok) {
+      console.warn("[firecrawl] Non-OK status:", res.status, await res.text());
+      return null;
+    }
+    const data = await res.json();
+    const md =
+      data?.data?.markdown ??
+      data?.markdown ??
+      data?.data?.content ??
+      null;
+    if (!md || typeof md !== "string" || md.length < 200) {
+      console.warn("[firecrawl] Empty/short markdown returned");
+      return null;
+    }
+    console.log("[firecrawl] Success — markdown length:", md.length);
+    return md;
+  } catch (e) {
+    console.warn("[firecrawl] Error:", e instanceof Error ? e.message : e);
+    return null;
+  }
+}
+
+const EXTRACTION_PROMPT = `You are extracting structured FAQ data from the European Commission's EHDS FAQ document.
+
+Extract ALL FAQs (numbered 1-67). For each FAQ, extract:
+1. faq_number (integer)
+2. question (the full question text)
+3. answer (plain text summary, max 500 chars)
+4. rich_content (full answer in markdown, preserving tables, lists, links, bold text)
+5. chapter (the H2-level chapter heading)
+6. sub_category (if present, e.g. "For patients", "For health professionals", etc.)
+7. source_articles (array of article numbers referenced in the "Sources:" line)
+8. source_references (the full "Sources:" line text)
+
+Also extract footnotes. Each footnote: marker (string), content (string), faq_numbers (array of FAQ numbers it appears in).
+
+Return a single JSON object: { "faqs": [...], "footnotes": [...] }.
+IMPORTANT: Extract ALL 67 FAQs. Preserve markdown tables exactly.`;
+
+async function extractFromMarkdown(markdown: string, lovableKey: string) {
+  const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${lovableKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-pro",
+      messages: [
+        { role: "system", content: EXTRACTION_PROMPT },
+        { role: "user", content: `Extract all 67 FAQs from this EHDS FAQ markdown. Return complete JSON.\n\n${markdown}` },
+      ],
+      temperature: 0.1,
+      max_tokens: 60000,
+    }),
+  });
+  if (!aiResponse.ok) {
+    throw new Error(`AI (markdown) extraction failed: ${aiResponse.status} ${await aiResponse.text()}`);
+  }
+  return aiResponse.json();
+}
+
+async function extractFromPdfBase64(pdfBase64: string, lovableKey: string) {
+  const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${lovableKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-pro",
+      messages: [
+        { role: "system", content: EXTRACTION_PROMPT },
+        {
+          role: "user",
+          content: [
+            { type: "text", text: "Extract all FAQs from this EHDS FAQ PDF document. Return the complete JSON with all 67 FAQs." },
+            { type: "image_url", image_url: { url: `data:application/pdf;base64,${pdfBase64}` } },
+          ],
+        },
+      ],
+      temperature: 0.1,
+      max_tokens: 60000,
+    }),
+  });
+  if (!aiResponse.ok) {
+    throw new Error(`AI (pdf) extraction failed: ${aiResponse.status} ${await aiResponse.text()}`);
+  }
+  return aiResponse.json();
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -20,28 +132,18 @@ serve(async (req) => {
     const body = await req.json();
     const pdfUrl = body.pdf_url || "https://health.ec.europa.eu/document/download/4dd47ec2-71dd-49fc-b036-ad7c14f6ed68_en?filename=ehealth_ehds_qa_en.pdf";
     const dryRun = body.dry_run === true;
+    // Allow caller to force a particular path: 'firecrawl' | 'pdf'. Default = auto (firecrawl first, fallback to pdf)
+    const preferredMethod: "firecrawl" | "pdf" | "auto" = body.method ?? "auto";
 
-    console.log("Downloading PDF from:", pdfUrl);
+    console.log("Downloading PDF from:", pdfUrl, "method:", preferredMethod);
 
-    // Download PDF
+    // Always download the PDF — needed for hash-based change detection AND as fallback
     const pdfResponse = await fetch(pdfUrl);
     if (!pdfResponse.ok) throw new Error(`Failed to download PDF: ${pdfResponse.status}`);
     const pdfBuffer = await pdfResponse.arrayBuffer();
-    
-    // Encode to base64 in chunks to avoid stack overflow on large PDFs
-    const bytes = new Uint8Array(pdfBuffer);
-    const chunkSize = 32768;
-    let pdfBase64 = "";
-    for (let i = 0; i < bytes.length; i += chunkSize) {
-      const chunk = bytes.subarray(i, i + chunkSize);
-      pdfBase64 += String.fromCharCode(...chunk);
-    }
-    pdfBase64 = btoa(pdfBase64);
 
-    // Compute a simple hash for change detection
     const hashBuffer = await crypto.subtle.digest("SHA-256", pdfBuffer);
     const pdfHash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
-
     console.log("PDF hash:", pdfHash, "Size:", pdfBuffer.byteLength);
 
     // Check if already parsed this version
@@ -66,61 +168,38 @@ serve(async (req) => {
       });
     }
 
-    // Use AI to extract FAQs - process in chunks
-    const extractionPrompt = `You are extracting structured FAQ data from the European Commission's EHDS FAQ document. The PDF is provided as base64.
+    // === Extraction with Firecrawl-first strategy ===
+    let aiResult: any;
+    let methodUsed: "firecrawl" | "pdf" = "pdf";
 
-Extract ALL FAQs (numbered 1-67) from this document. For each FAQ, extract:
-1. faq_number (integer)
-2. question (the full question text)
-3. answer (plain text summary, max 500 chars)
-4. rich_content (full answer in markdown, preserving tables, lists, links, bold text)
-5. chapter (the H2-level chapter heading, e.g. "General", "Primary Use (Chapter II)", "Requirements for EHR systems and wellness apps (Chapter III)", "Secondary Use (Chapter IV)", "Governance (Chapter VI)", "International aspects (Chapter V)", "Relationship with other EU law")
-6. sub_category (if present, e.g. "For patients", "For health professionals", "For Member States' authorities", "For manufacturers/importers/distributors of EHR systems", "For buyers of EHR systems", "For users of wellness applications", "For data holders", "For data users", "For patients / data subjects", "For health data access bodies (HDABs)")
-7. source_articles (array of article numbers referenced in the "Sources:" line, e.g. ["1", "14", "105"])
-8. source_references (the full "Sources:" line text)
-
-Also extract footnotes from the document. Each footnote has a number marker and content text.
-
-Return a JSON object with two arrays: "faqs" and "footnotes".
-Each footnote should have: marker (string), content (string), and faq_numbers (array of FAQ numbers where this footnote appears).
-
-IMPORTANT: Extract ALL 67 FAQs. Do not skip any. Preserve markdown tables exactly. Include the version history table from the Introduction.`;
-
-    console.log("Calling AI for FAQ extraction...");
-
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
-        messages: [
-          { role: "system", content: extractionPrompt },
-          {
-            role: "user",
-            content: [
-              { type: "text", text: "Extract all FAQs from this EHDS FAQ PDF document. Return the complete JSON with all 67 FAQs." },
-              { type: "image_url", image_url: { url: `data:application/pdf;base64,${pdfBase64}` } },
-            ],
-          },
-        ],
-        temperature: 0.1,
-        max_tokens: 60000,
-      }),
-    });
-
-    if (!aiResponse.ok) {
-      const errorText = await aiResponse.text();
-      console.error("AI extraction failed:", aiResponse.status, errorText);
-      throw new Error(`AI extraction failed: ${aiResponse.status}`);
+    if (preferredMethod !== "pdf") {
+      const markdown = await tryFirecrawlScrape(pdfUrl);
+      if (markdown) {
+        try {
+          aiResult = await extractFromMarkdown(markdown, LOVABLE_API_KEY);
+          methodUsed = "firecrawl";
+        } catch (e) {
+          console.warn("Firecrawl-markdown extraction failed, falling back to PDF:", e instanceof Error ? e.message : e);
+        }
+      }
     }
 
-    const aiResult = await aiResponse.json();
-    let content = aiResult.choices?.[0]?.message?.content || "";
+    if (!aiResult) {
+      // Fallback: encode PDF to base64 and pass directly to AI
+      const bytes = new Uint8Array(pdfBuffer);
+      const chunkSize = 32768;
+      let pdfBase64 = "";
+      for (let i = 0; i < bytes.length; i += chunkSize) {
+        const chunk = bytes.subarray(i, i + chunkSize);
+        pdfBase64 += String.fromCharCode(...chunk);
+      }
+      pdfBase64 = btoa(pdfBase64);
+      console.log("Calling AI with PDF (fallback path)...");
+      aiResult = await extractFromPdfBase64(pdfBase64, LOVABLE_API_KEY);
+      methodUsed = "pdf";
+    }
 
-    // Extract JSON from response (may be wrapped in markdown code block)
+    let content = aiResult.choices?.[0]?.message?.content || "";
     const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/) || content.match(/(\{[\s\S]*\})/);
     if (!jsonMatch) {
       throw new Error("Could not parse JSON from AI response");
@@ -130,10 +209,10 @@ IMPORTANT: Extract ALL 67 FAQs. Do not skip any. Preserve markdown tables exactl
     const faqs = extracted.faqs || [];
     const footnotes = extracted.footnotes || [];
 
-    console.log(`Extracted ${faqs.length} FAQs and ${footnotes.length} footnotes`);
+    console.log(`Extracted ${faqs.length} FAQs and ${footnotes.length} footnotes via ${methodUsed}`);
 
     if (dryRun) {
-      return new Response(JSON.stringify({ success: true, status: "dry_run", faqs, footnotes }), {
+      return new Response(JSON.stringify({ success: true, status: "dry_run", method: methodUsed, faqs, footnotes }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -166,14 +245,13 @@ IMPORTANT: Extract ALL 67 FAQs. Do not skip any. Preserve markdown tables exactl
       }
     }
 
-    // Get FAQ IDs for footnote linking
+    // Footnotes
     const { data: faqRows } = await supabase
       .from("ehds_faqs")
       .select("id, faq_number");
 
     const faqIdMap = new Map((faqRows || []).map(r => [r.faq_number, r.id]));
 
-    // Delete old footnotes and insert new ones
     if (faqRows && faqRows.length > 0) {
       await supabase.from("ehds_faq_footnotes").delete().in("faq_id", faqRows.map(r => r.id));
     }
@@ -194,20 +272,21 @@ IMPORTANT: Extract ALL 67 FAQs. Do not skip any. Preserve markdown tables exactl
       }
     }
 
-    // Log sync
     await supabase.from("ehds_faq_sync_log").insert({
       pdf_url: pdfUrl,
       pdf_hash: pdfHash,
       faqs_parsed: faqsUpserted,
       footnotes_parsed: footnotesInserted,
       status: "success",
+      error_message: `method:${methodUsed}`,
     });
 
-    console.log(`Success: ${faqsUpserted} FAQs, ${footnotesInserted} footnotes`);
+    console.log(`Success via ${methodUsed}: ${faqsUpserted} FAQs, ${footnotesInserted} footnotes`);
 
     return new Response(JSON.stringify({
       success: true,
       status: "success",
+      method: methodUsed,
       faqs_parsed: faqsUpserted,
       footnotes_parsed: footnotesInserted,
     }), {

@@ -1934,6 +1934,48 @@ export type Database = {
           },
         ]
       }
+      header_items: {
+        Row: {
+          component_key: string
+          created_at: string
+          id: string
+          is_visible: boolean
+          label: string
+          show_on_desktop: boolean
+          show_on_mobile: boolean
+          show_when_logged_in: boolean
+          show_when_logged_out: boolean
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          component_key: string
+          created_at?: string
+          id: string
+          is_visible?: boolean
+          label: string
+          show_on_desktop?: boolean
+          show_on_mobile?: boolean
+          show_when_logged_in?: boolean
+          show_when_logged_out?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          component_key?: string
+          created_at?: string
+          id?: string
+          is_visible?: boolean
+          label?: string
+          show_on_desktop?: boolean
+          show_on_mobile?: boolean
+          show_when_logged_in?: boolean
+          show_when_logged_out?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       health_authorities: {
         Row: {
           address: string | null

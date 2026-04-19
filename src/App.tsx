@@ -136,6 +136,7 @@ const AdminEhdsFaqsPage = lazy(() => import("./pages/AdminEhdsFaqsPage"));
 const AdminImplementingActDataTablesPage = lazy(() => import("./pages/AdminImplementingActDataTablesPage"));
 const AdminFaqDataTablesPage = lazy(() => import("./pages/AdminFaqDataTablesPage"));
 const AdminSidebarPage = lazy(() => import("./pages/AdminSidebarPage"));
+const AdminHeaderPage = lazy(() => import("./pages/AdminHeaderPage"));
 const AdminUITranslationsPage = lazy(() => import("./pages/AdminUITranslationsPage"));
 const AdminEuRegulationUpdatesPage = lazy(() => import("./pages/AdminEuRegulationUpdatesPage"));
 const AssistantPage = lazy(() => import("./pages/AssistantPage"));
@@ -298,6 +299,7 @@ const App = () => (
             <Route path="/admin/ia-data-tables" element={<AdminImplementingActDataTablesPage />} />
             <Route path="/admin/faq-data-tables" element={<AdminFaqDataTablesPage />} />
             <Route path="/admin/sidebar" element={<AdminSidebarPage />} />
+            <Route path="/admin/header" element={<AdminHeaderPage />} />
             <Route path="/admin/ui-translations" element={<AdminUITranslationsPage />} />
             <Route path="/admin/eu-regulation-updates" element={<AdminEuRegulationUpdatesPage />} />
             <Route path="*" element={<NotFound />} />

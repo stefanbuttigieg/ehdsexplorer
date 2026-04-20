@@ -240,7 +240,48 @@ const AdminImplementingActContentPage = () => {
         setImportText(fullText);
         toast.success(`Extracted text from Word document`);
       } else {
-        // PDF path
+        // PDF path: try Firecrawl first (via temp storage), fall back to pdfjs
+        let firecrawlText: string | null = null;
+        let uploadedPath: string | null = null;
+        try {
+          const arrayBufferFc = await file.arrayBuffer();
+          const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+          const { error: upErr } = await supabase.storage
+            .from("temp-pdf-imports")
+            .upload(fileName, new Blob([arrayBufferFc], { type: "application/pdf" }), {
+              contentType: "application/pdf",
+              upsert: false,
+            });
+          if (upErr) throw upErr;
+          uploadedPath = fileName;
+          const { data: pub } = supabase.storage.from("temp-pdf-imports").getPublicUrl(fileName);
+          const publicUrl = pub.publicUrl;
+
+          const { data: fcData, error: fcErr } = await supabase.functions.invoke("parse-implementing-act-pdf", {
+            body: { pdfUrl: publicUrl },
+          });
+          if (fcErr) throw fcErr;
+          if (fcData?.success && typeof fcData.content === "string" && fcData.content.length > 500) {
+            firecrawlText = fcData.content;
+          } else {
+            throw new Error(fcData?.error || "Firecrawl returned no content");
+          }
+        } catch (fcEx) {
+          console.warn("Firecrawl PDF parse failed, falling back to pdfjs:", fcEx);
+        } finally {
+          if (uploadedPath) {
+            // Cleanup temp file (don't await failures)
+            supabase.storage.from("temp-pdf-imports").remove([uploadedPath]).catch(() => {});
+          }
+        }
+
+        if (firecrawlText) {
+          setImportText(firecrawlText);
+          toast.success("Extracted text via Firecrawl");
+          return;
+        }
+
+        // Fallback: client-side pdfjs
         const pdfjsLib = await import("pdfjs-dist");
         pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 

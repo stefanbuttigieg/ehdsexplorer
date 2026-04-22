@@ -4747,6 +4747,63 @@ export type Database = {
         }
         Relationships: []
       }
+      translation_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          external_reference: string | null
+          id: string
+          metadata: Json | null
+          requested_by: string | null
+          source_language: string
+          source_text: string
+          status: string
+          target_field: string | null
+          target_id: string | null
+          target_language: string
+          target_type: string
+          translated_text: string | null
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          external_reference?: string | null
+          id?: string
+          metadata?: Json | null
+          requested_by?: string | null
+          source_language: string
+          source_text: string
+          status?: string
+          target_field?: string | null
+          target_id?: string | null
+          target_language: string
+          target_type?: string
+          translated_text?: string | null
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          external_reference?: string | null
+          id?: string
+          metadata?: Json | null
+          requested_by?: string | null
+          source_language?: string
+          source_text?: string
+          status?: string
+          target_field?: string | null
+          target_id?: string | null
+          target_language?: string
+          target_type?: string
+          translated_text?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ui_translations: {
         Row: {
           context: string | null

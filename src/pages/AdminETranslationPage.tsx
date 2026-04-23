@@ -1,11 +1,8 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { AdminPageLayout } from "@/components/admin/AdminPageLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -56,7 +53,7 @@ const EU_LANGUAGES = [
 function StatusBadge({ status }: { status: string }) {
   if (status === "completed") {
     return (
-      <Badge variant="outline" className="border-green-500/40 text-green-700 dark:text-green-400 gap-1">
+      <Badge variant="outline" className="border-success/40 text-success gap-1">
         <CheckCircle2 className="h-3 w-3" /> Completed
       </Badge>
     );
@@ -174,7 +171,7 @@ export default function AdminETranslationPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Completed</CardDescription>
-            <CardTitle className="text-2xl text-green-600 dark:text-green-400">
+            <CardTitle className="text-2xl text-success">
               {stats.completed}
             </CardTitle>
           </CardHeader>

@@ -9,7 +9,7 @@ const corsHeaders = {
 // eTranslation REST v2 endpoint
 // Docs: https://language-tools.ec.europa.eu/dev-corner/etranslation/rest-v2/text
 const ETRANSLATION_ENDPOINT =
-  "https://www.cefat4eu.eu/etranslation/v2/translateText";
+  "https://language-tools.ec.europa.eu/etranslation/api/askTranslate";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -45,19 +45,34 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const userClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: claimsData, error: claimsErr } = await userClient.auth.getClaims(
-      authHeader.replace("Bearer ", "")
-    );
-    if (claimsErr || !claimsData?.claims) {
+    const token = authHeader.replace("Bearer ", "");
+    let userId: string | undefined;
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      userId = payload?.sub;
+    } catch {
+      userId = undefined;
+    }
+    if (!userId) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const userId = claimsData.claims.sub as string;
+
+    const userClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: canSubmit, error: roleErr } = await userClient.rpc(
+      "is_admin_or_editor",
+      { _user_id: userId }
+    );
+    if (roleErr || !canSubmit) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const body = await req.json();
     const {
@@ -120,12 +135,17 @@ Deno.serve(async (req) => {
       sourceLanguage: sourceLanguage.toUpperCase(),
       targetLanguages: [targetLanguage.toUpperCase()],
       callerInformation: {
-        application: appName,
+        externalReference,
+        username: appName,
       },
       textToTranslate: text,
-      requesterCallback: callbackWithRef,
-      errorCallback: callbackWithRef,
-      externalReference,
+      notifications: {
+        success: { http: callbackWithRef },
+        failure: { http: callbackWithRef },
+      },
+      deliveries: {
+        http: callbackWithRef,
+      },
     };
     if (domain) payload.domain = domain;
 
@@ -169,7 +189,9 @@ Deno.serve(async (req) => {
 
     // Store the EC request id (positive number = accepted, negative = error code)
     const ecRequestId =
-      typeof respJson === "object" && respJson !== null && "request-id" in (respJson as any)
+      typeof respJson === "object" && respJson !== null && "requestId" in (respJson as any)
+        ? (respJson as any).requestId
+        : typeof respJson === "object" && respJson !== null && "request-id" in (respJson as any)
         ? (respJson as any)["request-id"]
         : respText.trim();
 

@@ -214,6 +214,12 @@ const AdminDashboard = () => {
       href: '/admin/ui-translations',
     },
     {
+      title: 'eTranslation (EC)',
+      description: 'Monitor European Commission eTranslation API jobs and run live test translations',
+      icon: Languages,
+      href: '/admin/etranslation',
+    },
+    {
       title: 'National EHDS Entities',
       description: 'Manage Digital Health Authorities (DHAs) and Health Data Access Bodies (HDABs)',
       icon: MapPin,

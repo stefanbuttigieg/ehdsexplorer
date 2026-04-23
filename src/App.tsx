@@ -139,6 +139,7 @@ const AdminSidebarPage = lazy(() => import("./pages/AdminSidebarPage"));
 const AdminHeaderPage = lazy(() => import("./pages/AdminHeaderPage"));
 const AdminUITranslationsPage = lazy(() => import("./pages/AdminUITranslationsPage"));
 const AdminEuRegulationUpdatesPage = lazy(() => import("./pages/AdminEuRegulationUpdatesPage"));
+const AdminETranslationPage = lazy(() => import("./pages/AdminETranslationPage"));
 const AssistantPage = lazy(() => import("./pages/AssistantPage"));
 
 const queryClient = new QueryClient({
@@ -302,6 +303,7 @@ const App = () => (
             <Route path="/admin/header" element={<AdminHeaderPage />} />
             <Route path="/admin/ui-translations" element={<AdminUITranslationsPage />} />
             <Route path="/admin/eu-regulation-updates" element={<AdminEuRegulationUpdatesPage />} />
+            <Route path="/admin/etranslation" element={<AdminETranslationPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>

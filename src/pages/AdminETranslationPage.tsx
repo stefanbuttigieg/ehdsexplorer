@@ -53,7 +53,7 @@ const EU_LANGUAGES = [
 function StatusBadge({ status }: { status: string }) {
   if (status === "completed") {
     return (
-      <Badge variant="outline" className="border-success/40 text-success gap-1">
+      <Badge variant="outline" className="border-primary/40 text-primary gap-1">
         <CheckCircle2 className="h-3 w-3" /> Completed
       </Badge>
     );
@@ -171,7 +171,7 @@ export default function AdminETranslationPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Completed</CardDescription>
-            <CardTitle className="text-2xl text-success">
+            <CardTitle className="text-2xl text-primary">
               {stats.completed}
             </CardTitle>
           </CardHeader>

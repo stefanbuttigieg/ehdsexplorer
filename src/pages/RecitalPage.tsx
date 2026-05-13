@@ -11,6 +11,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import PrintButton from "@/components/PrintButton";
 import { useRecital, useRecitals } from "@/hooks/useRecitals";
+import { useRelatedFaqsByRecital } from "@/hooks/useEhdsFaqs";
 import { useFootnotesByRecital } from "@/hooks/useFootnotes";
 import FootnotesSection from "@/components/FootnotesSection";
 import { JsonLdMetadata } from "@/components/JsonLdMetadata";
@@ -26,6 +27,7 @@ const RecitalPage = () => {
   const { data: recital, isLoading } = useRecital(recitalNumber);
   const { data: recitals = [] } = useRecitals();
   const { data: footnotes = [] } = useFootnotesByRecital(recital?.id ?? null);
+  const { data: relatedFaqs = [] } = useRelatedFaqsByRecital(recitalNumber);
   const { isBookmarked, toggleBookmark } = useBookmarks();
 
   useKeyboardShortcuts({
@@ -163,6 +165,27 @@ const RecitalPage = () => {
                   </Link>
                 ) : null;
               })}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Related Official FAQs */}
+        {relatedFaqs.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-lg">Related Official FAQs</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {relatedFaqs.map((faq) => (
+                <Link key={faq.id} to={`/faq/${faq.faq_number}`} className="block">
+                  <div className="p-3 rounded-lg bg-muted hover:bg-accent transition-colors">
+                    <div className="flex items-start gap-2">
+                      <Badge variant="outline" className="font-mono shrink-0">#{faq.faq_number}</Badge>
+                      <span className="text-sm font-medium line-clamp-2">{faq.question}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
             </CardContent>
           </Card>
         )}

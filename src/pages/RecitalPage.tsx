@@ -18,6 +18,7 @@ import { EliReference } from "@/components/EliReference";
 import PlainLanguageView from "@/components/PlainLanguageView";
 import { AnnotatedContent } from "@/components/AnnotatedContent";
 import { CompareButton } from "@/components/CompareButton";
+import { SEOHead, ArticleSchema, BreadcrumbSchema } from "@/components/seo";
 
 const RecitalPage = () => {
   const { id } = useParams();
@@ -62,9 +63,32 @@ const RecitalPage = () => {
     { label: `Recital ${recital.recital_number}` }
   ];
 
+  const pageUrl = `/recital/${recital.recital_number}`;
+  const metaDescription = `Recital ${recital.recital_number} of the EHDS Regulation — ${recital.content.replace(/\s+/g, " ").substring(0, 150)}...`;
+
   return (
     <Layout>
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
+        <SEOHead
+          title={`Recital ${recital.recital_number} | EHDS Explorer`}
+          description={metaDescription}
+          url={pageUrl}
+          keywords={["EHDS", `Recital ${recital.recital_number}`, "EU regulation", "health data", "recital"]}
+        />
+        <ArticleSchema
+          title={`Recital ${recital.recital_number}`}
+          description={metaDescription}
+          url={pageUrl}
+          articleNumber={recital.recital_number}
+          dateModified={recital.updated_at}
+        />
+        <BreadcrumbSchema
+          items={[
+            { name: "Home", url: "/" },
+            { name: "Recitals", url: "/recitals" },
+            { name: `Recital ${recital.recital_number}`, url: pageUrl },
+          ]}
+        />
         <JsonLdMetadata
           type="recital"
           recitalNumber={recital.recital_number}

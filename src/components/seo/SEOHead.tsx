@@ -27,7 +27,7 @@ export function SEOHead({
   nofollow = false,
   keywords,
 }: SEOHeadProps) {
-  const baseUrl = 'https://ehdsexplorer.lovable.app';
+  const baseUrl = 'https://ehdsexplorer.eu';
   const fullUrl = url ? `${baseUrl}${url}` : baseUrl;
   const defaultOgImage = `${baseUrl}/og-image.png`;
 

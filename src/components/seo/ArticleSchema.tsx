@@ -19,7 +19,7 @@ export function ArticleSchema({
   articleNumber,
   isLegislation = true,
 }: ArticleSchemaProps) {
-  const baseUrl = 'https://ehdsexplorer.lovable.app';
+  const baseUrl = 'https://ehdsexplorer.eu';
   
   const schema = isLegislation
     ? {

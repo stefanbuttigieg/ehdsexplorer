@@ -5,7 +5,7 @@ interface WebsiteSchemaProps {
 }
 
 export function WebsiteSchema({ searchUrl }: WebsiteSchemaProps) {
-  const baseUrl = 'https://ehdsexplorer.lovable.app';
+  const baseUrl = 'https://ehdsexplorer.eu';
 
   const schema = {
     '@context': 'https://schema.org',

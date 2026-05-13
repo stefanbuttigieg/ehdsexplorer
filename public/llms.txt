@@ -45,13 +45,13 @@ EHDS Explorer helps citizens, healthcare professionals, health-tech companies, r
 
 ## Links
 
-- Website: https://ehdsexplorer.lovable.app
-- Regulation full text: https://ehdsexplorer.lovable.app/articles
-- Definitions: https://ehdsexplorer.lovable.app/definitions
-- Country tracker: https://ehdsexplorer.lovable.app/overview
+- Website: https://ehdsexplorer.eu
+- Regulation full text: https://ehdsexplorer.eu/articles
+- Definitions: https://ehdsexplorer.eu/definitions
+- Country tracker: https://ehdsexplorer.eu/overview
 - AI Assistant: available to registered users
-- Games: https://ehdsexplorer.lovable.app/games
+- Games: https://ehdsexplorer.eu/games
 
 ## Contact
 
-For questions or feedback, use the in-app feedback tools or visit the Help Center at https://ehdsexplorer.lovable.app/help
+For questions or feedback, use the in-app feedback tools or visit the Help Center at https://ehdsexplorer.eu/help

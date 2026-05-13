@@ -11,7 +11,7 @@ interface FAQSchemaProps {
 }
 
 export function FAQSchema({ items, pageUrl }: FAQSchemaProps) {
-  const baseUrl = 'https://ehdsexplorer.lovable.app';
+  const baseUrl = 'https://ehdsexplorer.eu';
 
   const schema = {
     '@context': 'https://schema.org',

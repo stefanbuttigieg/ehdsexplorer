@@ -10,7 +10,7 @@ interface BreadcrumbSchemaProps {
 }
 
 export function BreadcrumbSchema({ items }: BreadcrumbSchemaProps) {
-  const baseUrl = 'https://ehdsexplorer.lovable.app';
+  const baseUrl = 'https://ehdsexplorer.eu';
 
   const schema = {
     '@context': 'https://schema.org',

@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Search, Plus, Pencil, Trash2, Globe, FileText, Tag, Image } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SEOKeywordRankings } from '@/components/admin/SEOKeywordRankings';
 
 const COMMON_PAGES = [
   { path: '/', name: 'Home' },
@@ -124,7 +125,7 @@ export default function AdminSEOPage() {
       description="Manage meta tags, structured data, and search engine optimization"
     >
       <Tabs defaultValue="configured" className="space-y-4">
-        <TabsList>
+        <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="configured">Configured Pages</TabsTrigger>
           <TabsTrigger value="unconfigured">
             Quick Setup
@@ -132,6 +133,7 @@ export default function AdminSEOPage() {
               <Badge variant="secondary" className="ml-2">{unconfiguredPages.length}</Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="rankings">Keyword Rankings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="configured" className="space-y-4">
@@ -268,6 +270,10 @@ export default function AdminSEOPage() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="rankings">
+          <SEOKeywordRankings />
         </TabsContent>
       </Tabs>
 

@@ -4035,6 +4035,89 @@ export type Database = {
           },
         ]
       }
+      seo_keyword_rankings: {
+        Row: {
+          competition: number | null
+          cpc: number | null
+          created_at: string
+          database: string
+          difficulty: number | null
+          id: string
+          keyword: string
+          last_refreshed_at: string | null
+          notes: string | null
+          our_position: number | null
+          our_url: string | null
+          search_volume: number | null
+          updated_at: string
+        }
+        Insert: {
+          competition?: number | null
+          cpc?: number | null
+          created_at?: string
+          database?: string
+          difficulty?: number | null
+          id?: string
+          keyword: string
+          last_refreshed_at?: string | null
+          notes?: string | null
+          our_position?: number | null
+          our_url?: string | null
+          search_volume?: number | null
+          updated_at?: string
+        }
+        Update: {
+          competition?: number | null
+          cpc?: number | null
+          created_at?: string
+          database?: string
+          difficulty?: number | null
+          id?: string
+          keyword?: string
+          last_refreshed_at?: string | null
+          notes?: string | null
+          our_position?: number | null
+          our_url?: string | null
+          search_volume?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      seo_serp_snapshots: {
+        Row: {
+          captured_at: string
+          domain: string
+          id: string
+          keyword_id: string
+          position: number
+          url: string
+        }
+        Insert: {
+          captured_at?: string
+          domain: string
+          id?: string
+          keyword_id: string
+          position: number
+          url: string
+        }
+        Update: {
+          captured_at?: string
+          domain?: string
+          id?: string
+          keyword_id?: string
+          position?: number
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_serp_snapshots_keyword_id_fkey"
+            columns: ["keyword_id"]
+            isOneToOne: false
+            referencedRelation: "seo_keyword_rankings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seo_settings: {
         Row: {
           canonical_url: string | null

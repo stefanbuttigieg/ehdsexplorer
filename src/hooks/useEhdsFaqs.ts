@@ -114,6 +114,24 @@ export function useRelatedFaqs(articleNumber: number) {
   });
 }
 
+export function useRelatedFaqsByRecital(recitalNumber: number) {
+  return useQuery({
+    queryKey: ["related-faqs-recital", recitalNumber],
+    queryFn: async () => {
+      const recStr = String(recitalNumber);
+      const { data, error } = await supabase
+        .from("ehds_faqs")
+        .select("id, faq_number, question, chapter")
+        .eq("is_published", true)
+        .contains("source_recitals", [recStr])
+        .order("faq_number");
+      if (error) throw error;
+      return data as Pick<EhdsFaq, "id" | "faq_number" | "question" | "chapter">[];
+    },
+    enabled: !!recitalNumber,
+  });
+}
+
 export function useEhdsFaqSyncLogs() {
   return useQuery({
     queryKey: ["ehds-faq-sync-logs"],

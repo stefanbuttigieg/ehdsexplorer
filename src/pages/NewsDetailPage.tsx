@@ -1,5 +1,4 @@
 import { useParams, Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import { format } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
@@ -10,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNewsSummary } from '@/hooks/useNewsSummaries';
+import { SEOHead, ArticleSchema, BreadcrumbSchema } from '@/components/seo';
 
 const NewsDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -42,12 +42,32 @@ const NewsDetailPage = () => {
     );
   }
 
+  const pageUrl = `/news/${summary.id}`;
+  const description = summary.summary.replace(/\s+/g, ' ').substring(0, 160);
+
   return (
     <Layout>
-      <Helmet>
-        <title>{summary.title} | EHDS News</title>
-        <meta name="description" content={summary.summary.substring(0, 160)} />
-      </Helmet>
+      <SEOHead
+        title={`${summary.title} | EHDS News`}
+        description={description}
+        url={pageUrl}
+        keywords={["EHDS", "news", "European Health Data Space", "weekly summary"]}
+      />
+      <ArticleSchema
+        title={summary.title}
+        description={description}
+        url={pageUrl}
+        datePublished={summary.created_at}
+        dateModified={summary.updated_at}
+        isLegislation={false}
+      />
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'News', url: '/news' },
+          { name: summary.title, url: pageUrl },
+        ]}
+      />
 
       <div className="max-w-4xl mx-auto">
         <Button variant="ghost" asChild className="mb-6">

@@ -10,8 +10,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "predev": "tsx scripts/generate-sitemap.ts",
-    "prebuild": "tsx scripts/generate-sitemap.ts"
+    "predev": "bunx tsx scripts/generate-sitemap.ts",
+    "prebuild": "bunx tsx scripts/generate-sitemap.ts"
   },
   "dependencies": {
     "@capacitor/android": "^8.0.1",

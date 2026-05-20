@@ -427,6 +427,104 @@ const AdminImplementingActsPage = () => {
     }
   };
 
+  const handleOpenBulkEdit = () => {
+    setBulkStatus('__keep__');
+    setBulkType('__keep__');
+    setBulkThemesMode('keep');
+    setBulkThemes([]);
+    setBulkEditOpen(true);
+  };
+
+  const handleBulkSave = async () => {
+    if (selectedCount === 0) return;
+    setIsBulkSaving(true);
+    try {
+      const acts = implementingActs?.filter(a => selected.has(a.id)) ?? [];
+      const updates = acts.map(act => {
+        const patch: Record<string, unknown> = {};
+        if (bulkStatus !== '__keep__') {
+          if (act.status !== bulkStatus) patch.previous_status = act.status;
+          patch.status = bulkStatus;
+        }
+        if (bulkType !== '__keep__') patch.type = bulkType;
+        if (bulkThemesMode !== 'keep') {
+          const current = act.themes && act.themes.length > 0 ? act.themes : [act.theme];
+          let next: string[] = current;
+          if (bulkThemesMode === 'replace') next = [...bulkThemes];
+          else if (bulkThemesMode === 'add') next = Array.from(new Set([...current, ...bulkThemes]));
+          else if (bulkThemesMode === 'remove') next = current.filter(t => !bulkThemes.includes(t));
+          if (next.length === 0) next = [act.theme];
+          patch.themes = next;
+          patch.theme = next[0];
+        }
+        return { id: act.id, patch };
+      }).filter(u => Object.keys(u.patch).length > 0);
+
+      if (updates.length === 0) {
+        toast({ title: 'Nothing to update', description: 'Select at least one field to change.' });
+        setIsBulkSaving(false);
+        return;
+      }
+
+      let succeeded = 0;
+      const failures: string[] = [];
+      for (const { id, patch } of updates) {
+        const { error } = await supabase
+          .from('implementing_acts')
+          .update(patch)
+          .eq('id', id);
+        if (error) failures.push(id);
+        else succeeded++;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['admin-implementing-acts'] });
+      queryClient.invalidateQueries({ queryKey: ['implementing-acts'] });
+
+      if (failures.length === 0) {
+        toast({
+          title: 'Bulk update complete',
+          description: `${succeeded} implementing act${succeeded === 1 ? '' : 's'} updated.`,
+        });
+      } else {
+        toast({
+          title: 'Bulk update partially failed',
+          description: `${succeeded} updated, ${failures.length} failed.`,
+          variant: 'destructive',
+        });
+      }
+      setBulkEditOpen(false);
+      clearSelection();
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message || 'Bulk update failed', variant: 'destructive' });
+    } finally {
+      setIsBulkSaving(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedCount === 0) return;
+    setIsBulkDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('implementing_acts')
+        .delete()
+        .in('id', selectedArray);
+      if (error) throw error;
+      toast({
+        title: 'Implementing acts deleted',
+        description: `${selectedCount} item${selectedCount === 1 ? '' : 's'} deleted.`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['admin-implementing-acts'] });
+      queryClient.invalidateQueries({ queryKey: ['implementing-acts'] });
+      setBulkDeleteOpen(false);
+      clearSelection();
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message || 'Bulk delete failed', variant: 'destructive' });
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
   if (loading || !user || !isEditor) {
     return (
       <Layout>

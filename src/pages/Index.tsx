@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { SearchCommand } from "@/components/SearchCommand";
-import { Search, Book, FileText, Scale, ListChecks, Bookmark, Files, Clock, MessageSquare, ExternalLink, Gamepad2, Newspaper, StickyNote, Heart, Laptop, Stethoscope, Sparkles, Wrench } from "lucide-react";
+import { Search, Book, FileText, Scale, ListChecks, Bookmark, Files, Clock, MessageSquare, ExternalLink, Gamepad2, StickyNote, Heart, Laptop, Stethoscope, Sparkles, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useChapters } from "@/hooks/useChapters";
 import { useImplementingActs, getActStats } from "@/hooks/useImplementingActs";
 import { useDefinitions } from "@/hooks/useDefinitions";
-import { useNewsSummaries } from "@/hooks/useNewsSummaries";
 import { useIsFeatureEnabled } from "@/hooks/useFeatureFlags";
 import Layout from "@/components/Layout";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
@@ -50,7 +49,7 @@ const Index = () => {
   const { data: chapters, isLoading: chaptersLoading } = useChapters();
   const { data: implementingActs = [] } = useImplementingActs();
   const { data: definitions = [] } = useDefinitions();
-  const { data: newsSummaries = [] } = useNewsSummaries(true);
+  // Latest News section temporarily removed while content is being refreshed.
   const actStats = getActStats(implementingActs);
   const { isKidsMode } = useKidsMode();
 

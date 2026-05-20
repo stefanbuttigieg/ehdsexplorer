@@ -86,6 +86,16 @@ const AdminImplementingActsPage = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [deletingAct, setDeletingAct] = useState<DbImplementingAct | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Bulk edit state
+  const [bulkEditOpen, setBulkEditOpen] = useState(false);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkStatus, setBulkStatus] = useState<string>('__keep__');
+  const [bulkType, setBulkType] = useState<string>('__keep__');
+  const [bulkThemesMode, setBulkThemesMode] = useState<'keep' | 'replace' | 'add' | 'remove'>('keep');
+  const [bulkThemes, setBulkThemes] = useState<string[]>([]);
+  const [isBulkSaving, setIsBulkSaving] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   
   const themeOptions = [
     { value: 'primary-use', label: 'Primary Use' },

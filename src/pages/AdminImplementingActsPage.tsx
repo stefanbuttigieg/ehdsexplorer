@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Search, Edit, Save, X, ArrowLeft, Plus, Trash2, FileText, GitCompareArrows } from 'lucide-react';
+import { Search, Edit, Save, X, ArrowLeft, Plus, Trash2, FileText, GitCompareArrows, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,6 +8,7 @@ import MarkdownEditor from '@/components/MarkdownEditor';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -36,6 +37,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useBulkSelection } from '@/hooks/useBulkSelection';
 
 interface DbImplementingAct {
   id: string;

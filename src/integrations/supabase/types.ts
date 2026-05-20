@@ -5201,6 +5201,7 @@ export type Database = {
       }
     }
     Functions: {
+      close_expired_feedback_periods: { Args: never; Returns: number }
       has_permission: {
         Args: { _action: string; _content_type: string; _user_id: string }
         Returns: boolean

@@ -871,6 +871,105 @@ const AdminImplementingActsPage = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        <Dialog open={bulkEditOpen} onOpenChange={setBulkEditOpen}>
+          <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Bulk edit {selectedCount} implementing act{selectedCount === 1 ? '' : 's'}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-2">
+              <p className="text-sm text-muted-foreground">
+                Choose only the fields you want to change. Fields left as "Keep current" will not be modified.
+              </p>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={bulkStatus} onValueChange={setBulkStatus}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__keep__">Keep current</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="preparation">In Preparation</SelectItem>
+                    <SelectItem value="feedback">Open for Feedback</SelectItem>
+                    <SelectItem value="feedback-closed">Feedback Closed</SelectItem>
+                    <SelectItem value="progress">In Progress</SelectItem>
+                    <SelectItem value="adopted">Adopted</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Type</Label>
+                <Select value={bulkType} onValueChange={setBulkType}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__keep__">Keep current</SelectItem>
+                    <SelectItem value="implementing">Implementing Act</SelectItem>
+                    <SelectItem value="delegated">Delegated Act</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Themes</Label>
+                <Select value={bulkThemesMode} onValueChange={(v) => setBulkThemesMode(v as typeof bulkThemesMode)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="keep">Keep current</SelectItem>
+                    <SelectItem value="replace">Replace with selection</SelectItem>
+                    <SelectItem value="add">Add selection to existing</SelectItem>
+                    <SelectItem value="remove">Remove selection from existing</SelectItem>
+                  </SelectContent>
+                </Select>
+                {bulkThemesMode !== 'keep' && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3 border rounded-md">
+                    {themeOptions.map(option => (
+                      <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={bulkThemes.includes(option.value)}
+                          onChange={(e) => {
+                            if (e.target.checked) setBulkThemes([...bulkThemes, option.value]);
+                            else setBulkThemes(bulkThemes.filter(t => t !== option.value));
+                          }}
+                          className="rounded border-gray-300"
+                        />
+                        <span className="text-sm">{option.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="outline" onClick={() => setBulkEditOpen(false)} disabled={isBulkSaving}>
+                  Cancel
+                </Button>
+                <Button onClick={handleBulkSave} disabled={isBulkSaving}>
+                  <Save className="h-4 w-4 mr-1" />
+                  {isBulkSaving ? 'Applying...' : `Apply to ${selectedCount}`}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete {selectedCount} implementing act{selectedCount === 1 ? '' : 's'}?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This permanently deletes the selected implementing acts. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isBulkDeleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleBulkDelete}
+                disabled={isBulkDeleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isBulkDeleting ? 'Deleting...' : `Delete ${selectedCount}`}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Layout>
   );

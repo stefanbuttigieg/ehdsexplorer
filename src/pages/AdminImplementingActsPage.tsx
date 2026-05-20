@@ -135,6 +135,18 @@ const AdminImplementingActsPage = () => {
     act.theme.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
+  const filteredIds = useMemo(() => filteredActs.map(a => a.id), [filteredActs]);
+  const {
+    selected,
+    selectedCount,
+    selectedArray,
+    isSelected,
+    isAllSelected,
+    toggle,
+    toggleAll,
+    clearSelection,
+  } = useBulkSelection<string>(filteredIds);
+
   const handleOpenCreate = () => {
     setIsCreating(true);
     setEditedId('');

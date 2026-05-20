@@ -568,6 +568,35 @@ const AdminImplementingActsPage = () => {
           </div>
         </div>
 
+        {filteredActs.length > 0 && (
+          <div className="flex flex-wrap items-center gap-3 mb-4 p-3 border rounded-md bg-muted/30">
+            <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+              <Checkbox checked={isAllSelected} onCheckedChange={toggleAll} />
+              {selectedCount > 0
+                ? `${selectedCount} selected`
+                : `Select all (${filteredActs.length})`}
+            </label>
+            <div className="flex-1" />
+            <Button size="sm" variant="outline" disabled={selectedCount === 0} onClick={handleOpenBulkEdit}>
+              <Pencil className="h-4 w-4 mr-1" />
+              Bulk edit
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={selectedCount === 0}
+              onClick={() => setBulkDeleteOpen(true)}
+              className="text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              Bulk delete
+            </Button>
+            {selectedCount > 0 && (
+              <Button size="sm" variant="ghost" onClick={clearSelection}>Clear</Button>
+            )}
+          </div>
+        )}
+
         {isLoading ? (
           <div className="space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (

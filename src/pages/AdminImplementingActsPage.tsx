@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Search, Edit, Save, X, ArrowLeft, Plus, Trash2, FileText, GitCompareArrows } from 'lucide-react';
+import { Search, Edit, Save, X, ArrowLeft, Plus, Trash2, FileText, GitCompareArrows, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,6 +8,7 @@ import MarkdownEditor from '@/components/MarkdownEditor';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -36,6 +37,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useBulkSelection } from '@/hooks/useBulkSelection';
 
 interface DbImplementingAct {
   id: string;
@@ -84,6 +86,16 @@ const AdminImplementingActsPage = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [deletingAct, setDeletingAct] = useState<DbImplementingAct | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Bulk edit state
+  const [bulkEditOpen, setBulkEditOpen] = useState(false);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkStatus, setBulkStatus] = useState<string>('__keep__');
+  const [bulkType, setBulkType] = useState<string>('__keep__');
+  const [bulkThemesMode, setBulkThemesMode] = useState<'keep' | 'replace' | 'add' | 'remove'>('keep');
+  const [bulkThemes, setBulkThemes] = useState<string[]>([]);
+  const [isBulkSaving, setIsBulkSaving] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   
   const themeOptions = [
     { value: 'primary-use', label: 'Primary Use' },
@@ -122,6 +134,18 @@ const AdminImplementingActsPage = () => {
     act.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
     act.theme.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
+
+  const filteredIds = useMemo(() => filteredActs.map(a => a.id), [filteredActs]);
+  const {
+    selected,
+    selectedCount,
+    selectedArray,
+    isSelected,
+    isAllSelected,
+    toggle,
+    toggleAll,
+    clearSelection,
+  } = useBulkSelection<string>(filteredIds);
 
   const handleOpenCreate = () => {
     setIsCreating(true);
@@ -403,6 +427,104 @@ const AdminImplementingActsPage = () => {
     }
   };
 
+  const handleOpenBulkEdit = () => {
+    setBulkStatus('__keep__');
+    setBulkType('__keep__');
+    setBulkThemesMode('keep');
+    setBulkThemes([]);
+    setBulkEditOpen(true);
+  };
+
+  const handleBulkSave = async () => {
+    if (selectedCount === 0) return;
+    setIsBulkSaving(true);
+    try {
+      const acts = implementingActs?.filter(a => selected.has(a.id)) ?? [];
+      const updates = acts.map(act => {
+        const patch: Record<string, unknown> = {};
+        if (bulkStatus !== '__keep__') {
+          if (act.status !== bulkStatus) patch.previous_status = act.status;
+          patch.status = bulkStatus;
+        }
+        if (bulkType !== '__keep__') patch.type = bulkType;
+        if (bulkThemesMode !== 'keep') {
+          const current = act.themes && act.themes.length > 0 ? act.themes : [act.theme];
+          let next: string[] = current;
+          if (bulkThemesMode === 'replace') next = [...bulkThemes];
+          else if (bulkThemesMode === 'add') next = Array.from(new Set([...current, ...bulkThemes]));
+          else if (bulkThemesMode === 'remove') next = current.filter(t => !bulkThemes.includes(t));
+          if (next.length === 0) next = [act.theme];
+          patch.themes = next;
+          patch.theme = next[0];
+        }
+        return { id: act.id, patch };
+      }).filter(u => Object.keys(u.patch).length > 0);
+
+      if (updates.length === 0) {
+        toast({ title: 'Nothing to update', description: 'Select at least one field to change.' });
+        setIsBulkSaving(false);
+        return;
+      }
+
+      let succeeded = 0;
+      const failures: string[] = [];
+      for (const { id, patch } of updates) {
+        const { error } = await supabase
+          .from('implementing_acts')
+          .update(patch)
+          .eq('id', id);
+        if (error) failures.push(id);
+        else succeeded++;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['admin-implementing-acts'] });
+      queryClient.invalidateQueries({ queryKey: ['implementing-acts'] });
+
+      if (failures.length === 0) {
+        toast({
+          title: 'Bulk update complete',
+          description: `${succeeded} implementing act${succeeded === 1 ? '' : 's'} updated.`,
+        });
+      } else {
+        toast({
+          title: 'Bulk update partially failed',
+          description: `${succeeded} updated, ${failures.length} failed.`,
+          variant: 'destructive',
+        });
+      }
+      setBulkEditOpen(false);
+      clearSelection();
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message || 'Bulk update failed', variant: 'destructive' });
+    } finally {
+      setIsBulkSaving(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedCount === 0) return;
+    setIsBulkDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('implementing_acts')
+        .delete()
+        .in('id', selectedArray);
+      if (error) throw error;
+      toast({
+        title: 'Implementing acts deleted',
+        description: `${selectedCount} item${selectedCount === 1 ? '' : 's'} deleted.`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['admin-implementing-acts'] });
+      queryClient.invalidateQueries({ queryKey: ['implementing-acts'] });
+      setBulkDeleteOpen(false);
+      clearSelection();
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message || 'Bulk delete failed', variant: 'destructive' });
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
   if (loading || !user || !isEditor) {
     return (
       <Layout>
@@ -446,6 +568,35 @@ const AdminImplementingActsPage = () => {
           </div>
         </div>
 
+        {filteredActs.length > 0 && (
+          <div className="flex flex-wrap items-center gap-3 mb-4 p-3 border rounded-md bg-muted/30">
+            <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+              <Checkbox checked={isAllSelected} onCheckedChange={toggleAll} />
+              {selectedCount > 0
+                ? `${selectedCount} selected`
+                : `Select all (${filteredActs.length})`}
+            </label>
+            <div className="flex-1" />
+            <Button size="sm" variant="outline" disabled={selectedCount === 0} onClick={handleOpenBulkEdit}>
+              <Pencil className="h-4 w-4 mr-1" />
+              Bulk edit
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={selectedCount === 0}
+              onClick={() => setBulkDeleteOpen(true)}
+              className="text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              Bulk delete
+            </Button>
+            {selectedCount > 0 && (
+              <Button size="sm" variant="ghost" onClick={clearSelection}>Clear</Button>
+            )}
+          </div>
+        )}
+
         {isLoading ? (
           <div className="space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -475,7 +626,14 @@ const AdminImplementingActsPage = () => {
               <Card key={act.id} className="hover:border-primary/50 transition-colors">
                 <CardContent className="p-3 sm:p-4">
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
-                    <div className="flex-1 min-w-0">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      <Checkbox
+                        className="mt-1"
+                        checked={isSelected(act.id)}
+                        onCheckedChange={() => toggle(act.id)}
+                        aria-label={`Select ${act.id}`}
+                      />
+                      <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 sm:gap-2 mb-1 flex-wrap">
                         <Badge variant="outline" className="text-xs font-mono">{act.article_reference}</Badge>
                         <Badge variant="outline" className="text-xs hidden sm:inline-flex">{act.id}</Badge>
@@ -486,6 +644,7 @@ const AdminImplementingActsPage = () => {
                       <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1 sm:line-clamp-2 hidden sm:block">
                         {act.description.substring(0, 200)}...
                       </p>
+                      </div>
                     </div>
                     <div className="flex gap-2 shrink-0">
                       <Link to={`/admin/implementing-acts/${act.id}/content`}>
@@ -708,6 +867,105 @@ const AdminImplementingActsPage = () => {
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
                 {isDeleting ? 'Deleting...' : 'Delete'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <Dialog open={bulkEditOpen} onOpenChange={setBulkEditOpen}>
+          <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Bulk edit {selectedCount} implementing act{selectedCount === 1 ? '' : 's'}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-2">
+              <p className="text-sm text-muted-foreground">
+                Choose only the fields you want to change. Fields left as "Keep current" will not be modified.
+              </p>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={bulkStatus} onValueChange={setBulkStatus}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__keep__">Keep current</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="preparation">In Preparation</SelectItem>
+                    <SelectItem value="feedback">Open for Feedback</SelectItem>
+                    <SelectItem value="feedback-closed">Feedback Closed</SelectItem>
+                    <SelectItem value="progress">In Progress</SelectItem>
+                    <SelectItem value="adopted">Adopted</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Type</Label>
+                <Select value={bulkType} onValueChange={setBulkType}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__keep__">Keep current</SelectItem>
+                    <SelectItem value="implementing">Implementing Act</SelectItem>
+                    <SelectItem value="delegated">Delegated Act</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Themes</Label>
+                <Select value={bulkThemesMode} onValueChange={(v) => setBulkThemesMode(v as typeof bulkThemesMode)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="keep">Keep current</SelectItem>
+                    <SelectItem value="replace">Replace with selection</SelectItem>
+                    <SelectItem value="add">Add selection to existing</SelectItem>
+                    <SelectItem value="remove">Remove selection from existing</SelectItem>
+                  </SelectContent>
+                </Select>
+                {bulkThemesMode !== 'keep' && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3 border rounded-md">
+                    {themeOptions.map(option => (
+                      <label key={option.value} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={bulkThemes.includes(option.value)}
+                          onChange={(e) => {
+                            if (e.target.checked) setBulkThemes([...bulkThemes, option.value]);
+                            else setBulkThemes(bulkThemes.filter(t => t !== option.value));
+                          }}
+                          className="rounded border-gray-300"
+                        />
+                        <span className="text-sm">{option.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="outline" onClick={() => setBulkEditOpen(false)} disabled={isBulkSaving}>
+                  Cancel
+                </Button>
+                <Button onClick={handleBulkSave} disabled={isBulkSaving}>
+                  <Save className="h-4 w-4 mr-1" />
+                  {isBulkSaving ? 'Applying...' : `Apply to ${selectedCount}`}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete {selectedCount} implementing act{selectedCount === 1 ? '' : 's'}?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This permanently deletes the selected implementing acts. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isBulkDeleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleBulkDelete}
+                disabled={isBulkDeleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isBulkDeleting ? 'Deleting...' : `Delete ${selectedCount}`}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

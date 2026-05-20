@@ -626,7 +626,14 @@ const AdminImplementingActsPage = () => {
               <Card key={act.id} className="hover:border-primary/50 transition-colors">
                 <CardContent className="p-3 sm:p-4">
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
-                    <div className="flex-1 min-w-0">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      <Checkbox
+                        className="mt-1"
+                        checked={isSelected(act.id)}
+                        onCheckedChange={() => toggle(act.id)}
+                        aria-label={`Select ${act.id}`}
+                      />
+                      <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 sm:gap-2 mb-1 flex-wrap">
                         <Badge variant="outline" className="text-xs font-mono">{act.article_reference}</Badge>
                         <Badge variant="outline" className="text-xs hidden sm:inline-flex">{act.id}</Badge>
@@ -637,6 +644,7 @@ const AdminImplementingActsPage = () => {
                       <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1 sm:line-clamp-2 hidden sm:block">
                         {act.description.substring(0, 200)}...
                       </p>
+                      </div>
                     </div>
                     <div className="flex gap-2 shrink-0">
                       <Link to={`/admin/implementing-acts/${act.id}/content`}>

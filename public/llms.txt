@@ -1,56 +1,79 @@
 # EHDS Explorer
 
-> A comprehensive, open-access platform for exploring the European Health Data Space (EHDS) Regulation (EU) 2025/327.
+> A comprehensive, open-access platform for exploring the European Health Data Space (EHDS) Regulation (EU) 2025/327, with structured navigation, plain-language explanations, cross-regulation mapping, country implementation tracking, and interactive learning tools.
 
 ## About
 
-EHDS Explorer helps citizens, healthcare professionals, health-tech companies, researchers, and policymakers understand and navigate the EHDS regulation. It provides the full text of the regulation with structured navigation, plain-language explanations, definitions, cross-regulation references, and interactive learning tools.
-
-## Key Features
-
-- Full regulation text: all 98 articles, 85 recitals, and annexes with structured chapter/section navigation
-- Definitions glossary with source references
-- Plain-language translations of complex legal text
-- Cross-regulation reference mapping (GDPR, MDR, AI Act, Data Governance Act, etc.)
-- Country-level implementation tracking across EU/EEA Member States
-- Health authority directory
-- AI-powered assistant for regulation questions
-- Interactive learning games (quiz, flashcards, word search, true/false, who am I?)
-- Stakeholder-specific views (citizens, healthcare professionals, health-tech companies)
-- Implementing acts tracker
-- Multilingual support
-- Bookmarks, annotations, and note-taking
-- Accessibility controls and dark mode
+EHDS Explorer helps citizens, healthcare professionals, health-tech companies, researchers, and policymakers understand and navigate the EHDS Regulation. It provides the full text of the regulation with structured chapter/section navigation, plain-language explanations, a multi-source definitions glossary, official EU FAQs, cross-regulation references, country-level implementation tracking, an implementing acts tracker, and a suite of learning and collaboration tools. All public content is free and open-access.
 
 ## Core Content
 
-- **Articles**: 98 articles organised across 11 chapters covering primary use, secondary use, governance, infrastructure, enforcement, and more
-- **Recitals**: 85 recitals providing interpretive context
-- **Definitions**: 40+ defined terms from Article 2
-- **Annexes**: Technical annexes on EHR categories, data categories, and more
-- **Implementing Acts**: Tracker for delegated and implementing acts required by the regulation
+- **Articles**: full regulation text organised across chapters and sections, covering primary use, secondary use, governance, the EHDS infrastructure (MyHealth@EU, HealthData@EU), enforcement, and more
+- **Recitals**: interpretive context for the regulation
+- **Definitions**: multi-source glossary of defined terms, drawn from the EHDS Regulation, the European EHR Exchange Format, Xt-EHR, and implementing acts, with source references
+- **Annexes**: technical annexes on EHR categories, data categories, and related requirements
+- **Implementing & Delegated Acts**: tracker covering lifecycle status, feedback/consultation periods (with automatic status transitions when deadlines pass), themes, and full text where available
+- **Official EHDS FAQs**: European Commission FAQs with version tracking
+- **Topics & Glossary Index**: rights and obligations mapped to specific articles and recitals
+- **Cross-Regulation References**: mapping to GDPR, MDR/IVDR, AI Act, Data Governance Act, Data Act, NIS2, and other related EU law
+
+## Key Features
+
+- Full-text and fuzzy search across all content
+- AI-powered assistant for regulation questions (FAQ-first, role-aware)
+- Plain-language translations of complex legal text
+- Country-level implementation tracking and legislation status across EU/EEA Member States, with an interactive country map
+- Member State implementation tracker covering key obligations with supporting evidence
+- Health authority directory
+- Cross-regulation map and content/knowledge-graph visualisations
+- Stakeholder-tailored experiences (citizens, healthcare professionals, health-tech companies) and scenario finder
+- Compliance tools hub (readiness assessment, starter-kit wizard)
+- Study mode (sequential reading, flashcards, quizzes) and learning games (quiz, flashcards, match, word search, true/false, who am I?)
+- Kids Corner with AI-generated comics and a simplified mode
+- Country leaderboard and achievements/gamification
+- Collaboration tools: workspaces/teams, bookmarks, annotations, notes, inline highlighting, and shareable deep links
+- News & updates with weekly AI-generated summaries
+- Email subscriptions and act alerts
+- Multilingual support across many EU languages
+- Public, FAIR-compliant data API (JSON-LD, ELI/EUR-Lex references)
+- Accessibility controls (WCAG 2.1) and light/dark mode
+- Installable progressive web app (PWA) with offline support; native iOS/Android apps
 
 ## Primary Audiences
 
 - EU/EEA citizens and patients wanting to understand their health data rights
 - Healthcare professionals adapting workflows to EHDS requirements
-- Health-tech companies assessing compliance obligations
-- Researchers and policymakers working on health data governance
+- Health-tech companies and manufacturers assessing compliance obligations
+- Researchers, data holders, and health data access bodies working on secondary use
+- Policymakers and Member State authorities transposing and implementing the regulation
 
 ## Important Disclaimers
 
 - This platform is an educational and informational tool, not a source of legal advice
 - Always refer to the Official Journal of the European Union for the authoritative regulation text
-- Content may be updated as implementing acts and national transposition measures are adopted
+- Content is updated as implementing acts, official FAQs, and national transposition measures are adopted
 
 ## Links
 
 - Website: https://ehdsexplorer.eu
-- Regulation full text: https://ehdsexplorer.eu/articles
+- Regulation articles: https://ehdsexplorer.eu/articles
+- Recitals: https://ehdsexplorer.eu/recitals
 - Definitions: https://ehdsexplorer.eu/definitions
-- Country tracker: https://ehdsexplorer.eu/overview
-- AI Assistant: available to registered users
+- Annexes: https://ehdsexplorer.eu/annexes
+- Implementing acts: https://ehdsexplorer.eu/implementing-acts
+- Official FAQs: https://ehdsexplorer.eu/faqs
+- Topic index: https://ehdsexplorer.eu/topic-index
+- Cross-regulation map: https://ehdsexplorer.eu/cross-regulation-map
+- Country overview & tracker: https://ehdsexplorer.eu/overview
+- Health authorities: https://ehdsexplorer.eu/health-authorities
+- Compliance tools: https://ehdsexplorer.eu/tools
+- AI assistant: https://ehdsexplorer.eu/assistant
+- Study mode: https://ehdsexplorer.eu/study
 - Games: https://ehdsexplorer.eu/games
+- Kids Corner: https://ehdsexplorer.eu/kids
+- News & updates: https://ehdsexplorer.eu/news
+- Public API docs: https://ehdsexplorer.eu/api
+- Help Center: https://ehdsexplorer.eu/help
 
 ## Contact
 

@@ -218,8 +218,17 @@ const Layout = ({
     // Filter to kid-friendly routes when Kids Mode is active
     if (isKidsMode) {
       items = items.filter(item => isKidsFriendlyRoute(item.path));
-      if (!items.find(item => item.path === '/kids')) {
-        items = [items[0], { path: "/kids", icon: Heart, label: "Comics" }, ...items.slice(1)];
+      if (items.length === 0) {
+        items = fallbackNavItems.filter(item => isKidsFriendlyRoute(item.path));
+      }
+      if (!items.some(item => item.path === '/kids')) {
+        const homeItem = items.find(item => item.path === '/');
+        const remainingItems = items.filter(item => item.path !== '/');
+        items = [
+          ...(homeItem ? [homeItem] : []),
+          { path: "/kids", icon: Heart, label: "Comics" },
+          ...remainingItems,
+        ];
       }
     }
     

@@ -26,8 +26,12 @@ export const KidsModeProvider = ({ children }: { children: ReactNode }) => {
 
   const { data: sidebarItems } = useSidebarItems();
 
-  const kidsFriendlyPaths = sidebarItems && sidebarItems.length > 0
+  const dbKidsFriendlyPaths = sidebarItems && sidebarItems.length > 0
     ? new Set(sidebarItems.filter(i => i.show_in_kids_mode).map(i => i.path))
+    : null;
+
+  const kidsFriendlyPaths = dbKidsFriendlyPaths && dbKidsFriendlyPaths.size > 0
+    ? new Set([...FALLBACK_KIDS_PATHS, ...dbKidsFriendlyPaths])
     : FALLBACK_KIDS_PATHS;
 
   const checkKidsFriendly = (path: string) => kidsFriendlyPaths.has(path);

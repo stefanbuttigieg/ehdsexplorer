@@ -3012,6 +3012,7 @@ export type Database = {
       leaderboard_contributions: {
         Row: {
           category: string
+          contributor_hash: string | null
           country_code: string
           country_name: string
           created_at: string
@@ -3023,6 +3024,7 @@ export type Database = {
         }
         Insert: {
           category: string
+          contributor_hash?: string | null
           country_code: string
           country_name: string
           created_at?: string
@@ -3034,6 +3036,7 @@ export type Database = {
         }
         Update: {
           category?: string
+          contributor_hash?: string | null
           country_code?: string
           country_name?: string
           created_at?: string
@@ -5152,7 +5155,7 @@ export type Database = {
         }
         Insert: {
           category?: string | null
-          contributor_hash?: never
+          contributor_hash?: string | null
           country_code?: string | null
           country_name?: string | null
           created_at?: string | null
@@ -5162,7 +5165,7 @@ export type Database = {
         }
         Update: {
           category?: string | null
-          contributor_hash?: never
+          contributor_hash?: string | null
           country_code?: string | null
           country_name?: string | null
           created_at?: string | null

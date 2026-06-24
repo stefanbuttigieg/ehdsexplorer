@@ -109,7 +109,7 @@ Deno.serve(async (req) => {
         scraped_at: new Date().toISOString(),
       }));
 
-      const upsertRes = await fetch(`${supabaseUrl}/rest/v1/comitology_updates`, {
+      const upsertRes = await fetch(`${supabaseUrl}/rest/v1/comitology_updates?on_conflict=title`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${supabaseKey}`,

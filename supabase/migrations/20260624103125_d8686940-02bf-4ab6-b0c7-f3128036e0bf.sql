@@ -1,0 +1,1 @@
+DELETE FROM public.comitology_updates WHERE source_url = 'https://ec.europa.eu/transparency/comitology-register/screen/committees/C131500';

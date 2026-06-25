@@ -1,0 +1,2 @@
+INSERT INTO public.sidebar_items (label, path, icon_name, section, sort_order, is_visible, requires_auth, open_external, show_in_kids_mode, show_in_mobile_nav, mobile_sort_order)
+VALUES ('My Journey', '/journey', 'Sparkles', 'main', 26, true, false, false, true, false, 0);

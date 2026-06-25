@@ -12,7 +12,7 @@ const KidsModeContext = createContext<KidsModeContextType | undefined>(undefined
 
 // Static fallback used before DB loads
 const FALLBACK_KIDS_PATHS = new Set([
-  "/", "/kids", "/games", "/match-game", "/flashcards", "/quiz",
+  "/", "/kids", "/games", "/journey", "/match-game", "/flashcards", "/quiz",
   "/word-search", "/true-false", "/who-am-i", "/for/citizens",
   "/help", "/privacy-policy", "/cookies-policy", "/terms-of-service", "/accessibility",
 ]);

@@ -141,6 +141,7 @@ const AdminUITranslationsPage = lazy(() => import("./pages/AdminUITranslationsPa
 const AdminEuRegulationUpdatesPage = lazy(() => import("./pages/AdminEuRegulationUpdatesPage"));
 const AdminETranslationPage = lazy(() => import("./pages/AdminETranslationPage"));
 const AssistantPage = lazy(() => import("./pages/AssistantPage"));
+const JourneyPage = lazy(() => import("./pages/JourneyPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -241,6 +242,7 @@ const App = () => (
             <Route path="/study/flashcards" element={<StudyFlashcardsPage />} />
             <Route path="/study/quiz" element={<StudyQuizPage />} />
             <Route path="/assistant" element={<AssistantPage />} />
+            <Route path="/journey" element={<JourneyPage />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin/set-password" element={<AdminSetPasswordPage />} />
             <Route path="/profile" element={<ProfilePage />} />

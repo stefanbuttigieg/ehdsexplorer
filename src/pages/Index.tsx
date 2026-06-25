@@ -234,6 +234,17 @@ const Index = () => {
         <section className="py-8 px-4 border-b border-border bg-muted/30">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
+              <Link to="/journey">
+                <Card className="hover:border-primary transition-colors cursor-pointer h-full border-primary/30 bg-gradient-to-br from-primary/10 to-transparent">
+                  <CardContent className="p-4 flex flex-col items-center text-center gap-2">
+                    <Sparkles className="h-7 w-7 text-primary shrink-0" />
+                    <div>
+                      <p className="font-semibold text-sm">My Journey</p>
+                      <p className="text-xs text-muted-foreground">Your progress</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
               <Link to="/overview">
                 <Card className="hover:border-primary transition-colors cursor-pointer h-full">
                   <CardContent className="p-4 flex flex-col items-center text-center gap-2">

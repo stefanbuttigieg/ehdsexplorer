@@ -180,7 +180,7 @@ const ImplementingActContent = ({ implementingActId }: ImplementingActContentPro
                 </Button>
               </div>
             )}
-            <ScrollArea className="h-[500px] pr-4">
+            <ScrollArea className="h-[400px] sm:h-[500px] pr-2 sm:pr-4">
               {filteredArticles.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">
                   {searchQuery ? "No articles match your search" : "No articles added yet"}
@@ -206,15 +206,15 @@ const ImplementingActContent = ({ implementingActId }: ImplementingActContentPro
                               value={article.id}
                               className="border rounded-lg"
                             >
-                              <AccordionTrigger className="px-4 hover:no-underline">
-                                <div className="flex items-center gap-3 text-left">
-                                  <Badge variant="secondary" className="shrink-0">
+                              <AccordionTrigger className="px-3 sm:px-4 hover:no-underline">
+                                <div className="flex items-start sm:items-center gap-2 sm:gap-3 text-left min-w-0">
+                                  <Badge variant="secondary" className="shrink-0 text-xs">
                                     Art. {article.article_number}
                                   </Badge>
-                                  <span className="font-medium">{article.title}</span>
+                                  <span className="font-medium text-sm sm:text-base break-words">{article.title}</span>
                                 </div>
                               </AccordionTrigger>
-                              <AccordionContent className="px-4 pb-4">
+                              <AccordionContent className="px-3 sm:px-4 pb-4 overflow-x-auto">
                                 <IAArticleFootnotes articleId={article.id} content={article.content} />
                               </AccordionContent>
                             </AccordionItem>
@@ -238,15 +238,15 @@ const ImplementingActContent = ({ implementingActId }: ImplementingActContentPro
                           value={article.id}
                           className="border rounded-lg"
                         >
-                          <AccordionTrigger className="px-4 hover:no-underline">
-                            <div className="flex items-center gap-3 text-left">
-                              <Badge variant="secondary" className="shrink-0">
+                          <AccordionTrigger className="px-3 sm:px-4 hover:no-underline">
+                            <div className="flex items-start sm:items-center gap-2 sm:gap-3 text-left min-w-0">
+                              <Badge variant="secondary" className="shrink-0 text-xs">
                                 Art. {article.article_number}
                               </Badge>
-                              <span className="font-medium">{article.title}</span>
+                              <span className="font-medium text-sm sm:text-base break-words">{article.title}</span>
                             </div>
                           </AccordionTrigger>
-                          <AccordionContent className="px-4 pb-4">
+                          <AccordionContent className="px-3 sm:px-4 pb-4 overflow-x-auto">
                             <IAArticleFootnotes articleId={article.id} content={article.content} />
                           </AccordionContent>
                         </AccordionItem>
@@ -259,7 +259,7 @@ const ImplementingActContent = ({ implementingActId }: ImplementingActContentPro
           </TabsContent>
 
           <TabsContent value="recitals" className="mt-4">
-            <ScrollArea className="h-[500px] pr-4">
+            <ScrollArea className="h-[400px] sm:h-[500px] pr-2 sm:pr-4">
               {filteredRecitals.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">
                   {searchQuery ? "No recitals match your search" : "No recitals added yet"}
@@ -271,8 +271,8 @@ const ImplementingActContent = ({ implementingActId }: ImplementingActContentPro
                       key={recital.id}
                       className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                     >
-                      <div className="flex items-start gap-3">
-                        <Badge variant="outline" className="shrink-0">
+                      <div className="flex items-start gap-2 sm:gap-3 min-w-0">
+                        <Badge variant="outline" className="shrink-0 text-xs">
                           ({recital.recital_number})
                         </Badge>
                         <IARecitalFootnotes recitalId={recital.id} content={recital.content} />

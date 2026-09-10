@@ -135,7 +135,7 @@ const ImplementingActDetail = () => {
         <DisclaimerBanner placement={`implementing_act:${act.id}`} className="mb-6" />
 
         <Card className="mb-6">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             {/* Display all themes */}
             <div className="flex gap-2 mb-4 flex-wrap">
               {act.themes.map(t => (
@@ -162,11 +162,11 @@ const ImplementingActDetail = () => {
             {(act.status === 'feedback' || act.status === 'feedback-closed') && act.feedbackDeadline && (() => {
               const feedbackStatus = getFeedbackStatus(act.feedbackDeadline);
               return (
-                <div className="mt-6 p-4 rounded-lg bg-accent border border-accent-foreground/20">
-                  <div className="flex items-center justify-between gap-4 flex-wrap">
-                    <div className="flex items-center gap-2 text-accent-foreground">
-                      <Calendar className="h-5 w-5" />
-                      <span className="font-medium">Feedback period: {act.feedbackDeadline}</span>
+                <div className="mt-6 p-3 sm:p-4 rounded-lg bg-accent border border-accent-foreground/20">
+                  <div className="flex items-center justify-between gap-2 sm:gap-4 flex-wrap">
+                    <div className="flex items-start gap-2 text-accent-foreground min-w-0">
+                      <Calendar className="h-5 w-5 shrink-0 mt-0.5" />
+                      <span className="font-medium text-sm sm:text-base break-words">Feedback period: {act.feedbackDeadline}</span>
                     </div>
                     {feedbackStatus && (
                       <Badge 
@@ -322,12 +322,12 @@ const ImplementingActDetail = () => {
                   className="block"
                 >
                   <div className="p-3 rounded-lg bg-muted hover:bg-accent transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="font-medium">{deliverable.deliverable_name}</span>
-                        <p className="text-sm text-muted-foreground">{deliverable.joint_action_name}</p>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <span className="font-medium break-words">{deliverable.deliverable_name}</span>
+                        <p className="text-sm text-muted-foreground break-words">{deliverable.joint_action_name}</p>
                       </div>
-                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                      <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
                     </div>
                   </div>
                 </a>
@@ -352,12 +352,12 @@ const ImplementingActDetail = () => {
                   className="block"
                 >
                   <div className="p-3 rounded-lg bg-muted hover:bg-accent transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="font-medium">{work.name}</span>
-                        <p className="text-sm text-muted-foreground">{work.affiliated_organization}</p>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <span className="font-medium break-words">{work.name}</span>
+                        <p className="text-sm text-muted-foreground break-words">{work.affiliated_organization}</p>
                       </div>
-                      <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                      <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
                     </div>
                   </div>
                 </a>

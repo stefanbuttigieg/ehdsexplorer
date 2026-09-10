@@ -86,31 +86,31 @@ const ImplementingActDetail = () => {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto p-6 animate-fade-in">
+      <div className="max-w-4xl mx-auto px-4 py-4 sm:p-6 animate-fade-in pb-20 md:pb-6">
         <Breadcrumbs items={[{ label: "Implementing Acts", href: "/implementing-acts" }, { label: act.articleReference }]} />
 
-        <div className="flex items-start justify-between gap-4 mb-6">
-          <div>
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 mb-6">
+          <div className="min-w-0">
             <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <Badge variant="outline">{act.articleReference}</Badge>
-              <Badge variant={act.type === 'delegated' ? 'secondary' : 'outline'}>{act.type} act</Badge>
-              <span className={`status-badge status-${act.status}`}>{statusLabels[act.status]}</span>
+              <Badge variant="outline" className="text-xs">{act.articleReference}</Badge>
+              <Badge variant={act.type === 'delegated' ? 'secondary' : 'outline'} className="text-xs">{act.type} act</Badge>
+              <span className={`status-badge status-${act.status} text-xs`}>{statusLabels[act.status]}</span>
               {/* With/Without Deadline Tag */}
               {act.feedbackDeadline ? (
-                <Badge variant="outline" className="text-primary border-primary/50">
+                <Badge variant="outline" className="text-xs text-primary border-primary/50">
                   <CalendarClock className="h-3 w-3 mr-1" />
                   With Deadline
                 </Badge>
               ) : (
-                <Badge variant="outline" className="text-muted-foreground">
+                <Badge variant="outline" className="text-xs text-muted-foreground">
                   <CalendarX className="h-3 w-3 mr-1" />
                   No Deadline
                 </Badge>
               )}
             </div>
-            <h1 className="text-3xl font-bold font-serif">{act.title}</h1>
+            <h1 className="text-xl sm:text-3xl font-bold font-serif break-words">{act.title}</h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap sm:shrink-0">
             <CompareButton
               item={{
                 id: act.id,

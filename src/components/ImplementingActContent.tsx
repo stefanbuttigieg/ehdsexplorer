@@ -127,10 +127,10 @@ const ImplementingActContent = ({ implementingActId }: ImplementingActContentPro
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between gap-4">
+      <CardHeader className="p-4 sm:p-6">
+        <div className="flex items-center justify-between gap-2 sm:gap-4 flex-wrap">
           <CardTitle className="text-lg">Act Content</CardTitle>
-          <Badge variant="outline">
+          <Badge variant="outline" className="text-xs">
             {articles.length} Articles · {recitals.length} Recitals
           </Badge>
         </div>
@@ -144,15 +144,15 @@ const ImplementingActContent = ({ implementingActId }: ImplementingActContentPro
           />
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
         <Tabs defaultValue="articles">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="articles" className="gap-2">
-              <FileText className="h-4 w-4" />
+            <TabsTrigger value="articles" className="gap-1.5 sm:gap-2 text-xs sm:text-sm px-1.5">
+              <FileText className="h-4 w-4 shrink-0" />
               Articles ({filteredArticles.length})
             </TabsTrigger>
-            <TabsTrigger value="recitals" className="gap-2">
-              <BookOpen className="h-4 w-4" />
+            <TabsTrigger value="recitals" className="gap-1.5 sm:gap-2 text-xs sm:text-sm px-1.5">
+              <BookOpen className="h-4 w-4 shrink-0" />
               Recitals ({filteredRecitals.length})
             </TabsTrigger>
           </TabsList>

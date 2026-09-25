@@ -133,6 +133,9 @@ async function processAct(sb: any, apiKey: string, act: any) {
       country: c.country,
       organization: c.organization || null,
       company_size: c.companySize || null,
+      attachments: (c.attachments ?? []).filter((x: any) => x?.documentId).map((x: any) => ({
+        id: x.documentId, name: x.fileName || x.ersFileName || "Attachment", pages: x.pages ?? null, size: x.size ?? null,
+      })),
     }));
     for (let i = 0; i < rows.length; i += 200) {
       const { error } = await sb.from("implementing_act_feedback").upsert(rows.slice(i, i + 200), { onConflict: "id", ignoreDuplicates: false });

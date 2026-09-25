@@ -471,7 +471,7 @@ const AdminImplementingActsPage = () => {
       for (const { id, patch } of updates) {
         const { error } = await supabase
           .from('implementing_acts')
-          .update(patch)
+          .update(patch as never)
           .eq('id', id);
         if (error) failures.push(id);
         else succeeded++;

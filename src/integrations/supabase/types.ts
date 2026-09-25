@@ -1815,6 +1815,27 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback_sync_lock: {
+        Row: {
+          id: string
+          last_run_at: string | null
+          locked_until: string
+          paused_reason: string | null
+        }
+        Insert: {
+          id: string
+          last_run_at?: string | null
+          locked_until?: string
+          paused_reason?: string | null
+        }
+        Update: {
+          id?: string
+          last_run_at?: string | null
+          locked_until?: string
+          paused_reason?: string | null
+        }
+        Relationships: []
+      }
       footnote_translations: {
         Row: {
           content: string
@@ -2610,6 +2631,111 @@ export type Database = {
           name?: string
           sort_order?: number | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      implementing_act_feedback: {
+        Row: {
+          analyzed_at: string | null
+          company_size: string | null
+          country: string | null
+          created_at: string
+          date_feedback: string | null
+          feedback: string
+          id: number
+          implementing_act_id: string
+          language: string | null
+          organization: string | null
+          publication_id: number | null
+          sentiment: string | null
+          sentiment_score: number | null
+          user_type: string | null
+        }
+        Insert: {
+          analyzed_at?: string | null
+          company_size?: string | null
+          country?: string | null
+          created_at?: string
+          date_feedback?: string | null
+          feedback?: string
+          id: number
+          implementing_act_id: string
+          language?: string | null
+          organization?: string | null
+          publication_id?: number | null
+          sentiment?: string | null
+          sentiment_score?: number | null
+          user_type?: string | null
+        }
+        Update: {
+          analyzed_at?: string | null
+          company_size?: string | null
+          country?: string | null
+          created_at?: string
+          date_feedback?: string | null
+          feedback?: string
+          id?: number
+          implementing_act_id?: string
+          language?: string | null
+          organization?: string | null
+          publication_id?: number | null
+          sentiment?: string | null
+          sentiment_score?: number | null
+          user_type?: string | null
+        }
+        Relationships: []
+      }
+      implementing_act_feedback_analysis: {
+        Row: {
+          analyzed_count: number
+          by_country: Json
+          by_user_type: Json
+          implementing_act_id: string
+          initiative_id: string | null
+          key_themes: Json
+          last_error: string | null
+          last_synced_at: string | null
+          sentiment_counts: Json
+          status: string
+          summary_comment_count: number
+          themes_summary: string | null
+          total_count: number
+          updated_at: string
+          word_cloud: Json
+        }
+        Insert: {
+          analyzed_count?: number
+          by_country?: Json
+          by_user_type?: Json
+          implementing_act_id: string
+          initiative_id?: string | null
+          key_themes?: Json
+          last_error?: string | null
+          last_synced_at?: string | null
+          sentiment_counts?: Json
+          status?: string
+          summary_comment_count?: number
+          themes_summary?: string | null
+          total_count?: number
+          updated_at?: string
+          word_cloud?: Json
+        }
+        Update: {
+          analyzed_count?: number
+          by_country?: Json
+          by_user_type?: Json
+          implementing_act_id?: string
+          initiative_id?: string | null
+          key_themes?: Json
+          last_error?: string | null
+          last_synced_at?: string | null
+          sentiment_counts?: Json
+          status?: string
+          summary_comment_count?: number
+          themes_summary?: string | null
+          total_count?: number
+          updated_at?: string
+          word_cloud?: Json
         }
         Relationships: []
       }

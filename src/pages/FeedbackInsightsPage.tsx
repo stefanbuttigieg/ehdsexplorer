@@ -114,8 +114,22 @@ export default function FeedbackInsightsPage() {
           <p className="text-muted-foreground mt-1">What people told the European Commission about each EHDS implementing act on its "Have your say" page.</p>
         </div>
 
+        {!isLoading && allRows.length > 0 && (
+          <div className="flex gap-1 flex-wrap" role="group" aria-label="Feedback session">
+            {([
+              ["all", `All sessions (${allRows.length})`],
+              ["open", `Open for feedback (${openCount})`],
+              ["past", `Past sessions (${allRows.length - openCount})`],
+            ] as const).map(([k, l]) => (
+              <Button key={k} size="sm" variant={session === k ? "default" : "outline"} onClick={() => setSession(k)} aria-pressed={session === k}>{l}</Button>
+            ))}
+          </div>
+        )}
+
         {isLoading ? <Skeleton className="h-64 w-full" /> : rows.length === 0 ? (
-          <Card><CardContent className="p-6 text-muted-foreground">No feedback has been collected yet.</CardContent></Card>
+          <Card><CardContent className="p-6 text-muted-foreground">
+            {allRows.length === 0 ? "No feedback has been collected yet." : session === "open" ? "No act is currently open for feedback." : "No past feedback sessions yet."}
+          </CardContent></Card>
         ) : (
           <>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -200,6 +214,9 @@ export default function FeedbackInsightsPage() {
                           <p className="font-medium break-words">{act?.title ?? r.implementing_act_id}</p>
                           <div className="flex gap-2 flex-wrap mt-1 text-xs text-muted-foreground">
                             {act?.article_reference && <Badge variant="outline" className="text-xs">{act.article_reference}</Badge>}
+                            <Badge variant={isOpen(r) ? "default" : "secondary"} className="text-xs">
+                              {isOpen(r) ? `Open${act?.feedback_deadline ? ` until ${act.feedback_deadline}` : ""}` : "Feedback closed"}
+                            </Badge>
                             <span>{r.total_count} comments</span>
                             {r.last_synced_at && <span>· updated {format(new Date(r.last_synced_at), "dd MMM yyyy")}</span>}
                           </div>

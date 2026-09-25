@@ -8,13 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { ETranslateButton } from "@/components/ETranslateButton";
 import { format } from "date-fns";
 
 type Group = { key: string; total: number; positive: number; neutral: number; negative: number };
 type Theme = { theme: string; description: string; sentiment: string };
 type Attachment = { id: number | string; name: string; pages?: number | null; size?: number | null };
 type Comment = {
-  id: number; feedback: string; user_type: string | null; country: string | null; organization: string | null;
+  id: number; feedback: string; language: string | null; user_type: string | null; country: string | null; organization: string | null;
   date_feedback: string | null; sentiment: string | null; sentiment_score: number | null; attachments: Attachment[] | null;
 };
 type Sent = "positive" | "neutral" | "negative";
@@ -89,7 +90,7 @@ export default function ActFeedbackInsights({ implementingActId }: { implementin
     enabled: !!a && (a.total_count ?? 0) > 0,
     queryFn: async () => {
       const { data } = await supabase.from("implementing_act_feedback")
-        .select("id, feedback, user_type, country, organization, date_feedback, sentiment, sentiment_score, attachments")
+        .select("id, feedback, language, user_type, country, organization, date_feedback, sentiment, sentiment_score, attachments")
         .eq("implementing_act_id", implementingActId).order("date_feedback", { ascending: false }).limit(2000);
       return (data ?? []) as unknown as Comment[];
     },
@@ -373,6 +374,15 @@ export default function ActFeedbackInsights({ implementingActId }: { implementin
                       ))}
                     </div>
                     <p className="whitespace-pre-line break-words line-clamp-[12]">{c.feedback}</p>
+                    {c.language && c.language.toUpperCase() !== "EN" && (
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge variant="outline" className="text-[10px]">{c.language.toUpperCase()}</Badge>
+                        {canManage && c.feedback && (
+                          <ETranslateButton text={c.feedback} sourceLanguage={c.language.toUpperCase()} defaultTarget="EN"
+                            targetId={String(c.id)} label="Translate" variant="ghost" />
+                        )}
+                      </div>
+                    )}
                     {!!c.attachments?.length && (
                       <div className="flex gap-2 flex-wrap mt-2">
                         {c.attachments.map((f) => (

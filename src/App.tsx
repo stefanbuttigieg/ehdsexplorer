@@ -31,6 +31,7 @@ const RecitalPage = lazy(() => import("./pages/RecitalPage"));
 const DefinitionsPage = lazy(() => import("./pages/DefinitionsPage"));
 const SearchPage = lazy(() => import("./pages/SearchPage"));
 const ImplementingActsPage = lazy(() => import("./pages/ImplementingActsPage"));
+const FeedbackInsightsPage = lazy(() => import("./pages/FeedbackInsightsPage"));
 const ImplementingActDetail = lazy(() => import("./pages/ImplementingActDetail"));
 const OverviewPage = lazy(() => import("./pages/OverviewPage"));
 const BookmarksPage = lazy(() => import("./pages/BookmarksPage"));
@@ -197,6 +198,7 @@ const App = () => (
             <Route path="/definitions" element={<DefinitionsPage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/implementing-acts" element={<ImplementingActsPage />} />
+            <Route path="/feedback-insights" element={<FeedbackInsightsPage />} />
             <Route path="/implementing-acts/:id" element={<ImplementingActDetail />} />
             <Route path="/annexes" element={<AnnexesPage />} />
             <Route path="/annex/:id" element={<AnnexDetailPage />} />

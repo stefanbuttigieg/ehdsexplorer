@@ -368,7 +368,7 @@ function BulkEditDialog({ open, onClose, selectedIds, versions, chapters, onDone
 
     const { error } = await supabase
       .from("ehds_faqs")
-      .update(updatePayload)
+      .update(updatePayload as never)
       .in("id", selectedIds);
 
     setSaving(false);

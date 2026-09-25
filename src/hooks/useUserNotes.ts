@@ -148,7 +148,7 @@ export const useUserNotes = () => {
 
         const { data, error } = await supabase
           .from('user_notes')
-          .update(updateData)
+          .update(updateData as never)
           .eq('id', input.id)
           .select()
           .single();

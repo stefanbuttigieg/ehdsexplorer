@@ -2637,6 +2637,7 @@ export type Database = {
       implementing_act_feedback: {
         Row: {
           analyzed_at: string | null
+          attachments: Json
           company_size: string | null
           country: string | null
           created_at: string
@@ -2653,6 +2654,7 @@ export type Database = {
         }
         Insert: {
           analyzed_at?: string | null
+          attachments?: Json
           company_size?: string | null
           country?: string | null
           created_at?: string
@@ -2669,6 +2671,7 @@ export type Database = {
         }
         Update: {
           analyzed_at?: string | null
+          attachments?: Json
           company_size?: string | null
           country?: string | null
           created_at?: string

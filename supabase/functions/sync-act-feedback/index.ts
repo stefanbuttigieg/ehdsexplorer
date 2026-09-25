@@ -13,6 +13,7 @@ const MODEL = "openai/gpt-6-astra";
 const SENTIMENT_BATCH = 25;
 const MAX_SENTIMENT_PER_ACT = 150; // bound per run
 const MAX_PAGES = 20;
+const EC_HEADERS = { "Accept-Encoding": "identity", Accept: "application/json", "User-Agent": "Mozilla/5.0 EHDSExplorer" };
 
 class AiStop extends Error {
   constructor(public status: number, msg: string) { super(msg); }
@@ -96,13 +97,13 @@ function group(rows: any[], key: string) {
 
 // ---------- EC portal ----------
 async function fetchComments(initiativeId: string) {
-  const gi = await fetch(`${BRP}/brpapi/groupInitiatives/${initiativeId}`);
+  const gi = await fetch(`${BRP}/brpapi/groupInitiatives/${initiativeId}`, { headers: EC_HEADERS });
   if (!gi.ok) throw new Error(`EC portal ${gi.status}`);
   const pubs = ((await gi.json()).publications ?? []).filter((p: any) => (p.totalFeedback ?? 0) > 0);
   const all: any[] = [];
   for (const p of pubs) {
     for (let page = 0; page < MAX_PAGES; page++) {
-      const r = await fetch(`${BRP}/api/allFeedback?publicationId=${p.id}&page=${page}&size=100`);
+      const r = await fetch(`${BRP}/api/allFeedback?publicationId=${p.id}&page=${page}&size=100`, { headers: EC_HEADERS });
       if (!r.ok) break;
       const d = await r.json();
       all.push(...(d.content ?? []));

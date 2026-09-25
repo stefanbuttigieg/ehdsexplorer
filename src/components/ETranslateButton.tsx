@@ -58,6 +58,7 @@ interface ETranslateButtonProps {
   variant?: "default" | "outline" | "ghost" | "secondary";
   size?: "default" | "sm" | "lg" | "icon";
   label?: string;
+  defaultTarget?: string;
 }
 
 export function ETranslateButton({
@@ -69,8 +70,9 @@ export function ETranslateButton({
   variant = "outline",
   size = "sm",
   label = "Translate (EC)",
+  defaultTarget = "FR",
 }: ETranslateButtonProps) {
-  const [target, setTarget] = useState<string>("FR");
+  const [target, setTarget] = useState<string>(defaultTarget);
   const [jobId, setJobId] = useState<string | null>(null);
   const submit = useSubmitETranslation();
   const { data: job } = useTranslationJob(jobId);

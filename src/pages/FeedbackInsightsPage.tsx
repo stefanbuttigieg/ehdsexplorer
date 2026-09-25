@@ -20,7 +20,7 @@ type Row = {
   by_user_type: Group[] | null; by_country: Group[] | null; themes_summary: string | null;
   key_themes: { theme: string; description: string; sentiment: string }[] | null; last_synced_at: string | null;
 };
-type Act = { id: string; title: string; article_reference: string; status: string };
+type Act = { id: string; title: string; article_reference: string; status: string; feedback_deadline?: string | null };
 
 const label = (s: string) => s.replace(/_/g, " ").toLowerCase().replace(/^\w/, (c) => c.toUpperCase());
 const SENT = [
@@ -52,20 +52,24 @@ function merge(rows: Row[], field: "by_user_type" | "by_country") {
 export default function FeedbackInsightsPage() {
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<"comments" | "negative" | "positive">("comments");
+  const [session, setSession] = useState<"all" | "open" | "past">("all");
 
   const { data, isLoading } = useQuery({
     queryKey: ["feedback-insights-all"],
     queryFn: async () => {
       const [{ data: rows }, { data: acts }] = await Promise.all([
         supabase.from("implementing_act_feedback_analysis").select("*").gt("total_count", 0),
-        supabase.from("implementing_acts").select("id, title, article_reference, status"),
+        supabase.from("implementing_acts").select("id, title, article_reference, status, feedback_deadline"),
       ]);
       return { rows: (rows ?? []) as unknown as Row[], acts: new Map(((acts ?? []) as Act[]).map((a) => [a.id, a])) };
     },
   });
 
-  const rows = data?.rows ?? [];
+  const allRows = data?.rows ?? [];
   const acts = data?.acts ?? new Map<string, Act>();
+  const isOpen = (r: Row) => acts.get(r.implementing_act_id)?.status === "feedback";
+  const openCount = allRows.filter(isOpen).length;
+  const rows = allRows.filter((r) => session === "all" || (session === "open" ? isOpen(r) : !isOpen(r)));
 
   const totals = useMemo(() => {
     const s = { positive: 0, neutral: 0, negative: 0 };

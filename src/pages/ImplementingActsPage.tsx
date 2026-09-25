@@ -186,6 +186,9 @@ const ImplementingActsPage = () => {
           <SubscribeAlertButton implementingActId="" implementingActTitle="All Implementing Acts" />
         </div>
         <p className="text-sm sm:text-base text-muted-foreground mb-4">Track the progress of delegated and implementing acts required by the EHDS Regulation</p>
+        <Link to="/feedback-insights" className="inline-flex items-center gap-1 text-sm text-primary hover:underline mb-4">
+          See public feedback insights across all acts <ChevronRight className="h-4 w-4" />
+        </Link>
 
         {/* Comitology Register Updates */}
         <ComitologyUpdatesCard />

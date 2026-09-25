@@ -408,7 +408,7 @@ const Layout = ({
       <PublicTour run={isTourOpen} onComplete={completeTour} onClose={closeTour} />
 
       {/* Main Content - add bottom padding for mobile nav */}
-      <main className="flex-1 min-w-0 w-full max-w-full overflow-x-hidden md:pt-0 flex flex-col pb-14 md:pb-0" style={{
+      <main className="flex-1 min-w-0 w-full max-w-full overflow-x-clip md:pt-0 flex flex-col pb-14 md:pb-0" style={{
       paddingTop: 'calc(3.5rem + env(safe-area-inset-top))'
     }}>
         <div className="flex-1">

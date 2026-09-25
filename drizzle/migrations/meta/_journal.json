@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1790320746459,
+      "tag": "0000_implementing_act_feedback_analysis",
+      "breakpoints": true
+    }
+  ]
+}

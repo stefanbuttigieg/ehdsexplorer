@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { ETranslateButton } from "@/components/ETranslateButton";
 import { format } from "date-fns";
-import { FeedbackTimeline } from "@/components/FeedbackTimeline";
+import { FeedbackTimeline, deadlineMarkers } from "@/components/FeedbackTimeline";
 
 type Group = { key: string; total: number; positive: number; neutral: number; negative: number };
 type Theme = { theme: string; description: string; sentiment: string };
@@ -85,6 +85,15 @@ export default function ActFeedbackInsights({ implementingActId }: { implementin
       return data;
     },
   });
+
+  const { data: deadline } = useQuery({
+    queryKey: ["act-feedback-deadline", implementingActId],
+    queryFn: async () => {
+      const { data } = await supabase.from("implementing_acts").select("feedback_deadline").eq("id", implementingActId).maybeSingle();
+      return data?.feedback_deadline ?? null;
+    },
+  });
+  const markers = useMemo(() => deadlineMarkers(deadline), [deadline]);
 
   const { data: comments = [] } = useQuery({
     queryKey: ["act-feedback-comments", implementingActId],
@@ -203,7 +212,7 @@ export default function ActFeedbackInsights({ implementingActId }: { implementin
         <CardContent className="space-y-6">
           <div>
             <h3 className="text-sm font-semibold mb-2">Comments by submission date</h3>
-            <FeedbackTimeline items={filtered} />
+            <FeedbackTimeline items={filtered} markers={markers} />
           </div>
           <div>
             <h3 className="text-sm font-semibold mb-2">Sentiment</h3>

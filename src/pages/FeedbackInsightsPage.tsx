@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
+import { FeedbackTimeline } from "@/components/FeedbackTimeline";
 
 type Group = { key: string; total: number; positive: number; neutral: number; negative: number };
 type Row = {
@@ -57,11 +58,16 @@ export default function FeedbackInsightsPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["feedback-insights-all"],
     queryFn: async () => {
-      const [{ data: rows }, { data: acts }] = await Promise.all([
+      const [{ data: rows }, { data: acts }, { data: dates }] = await Promise.all([
         supabase.from("implementing_act_feedback_analysis").select("*").gt("total_count", 0),
         supabase.from("implementing_acts").select("id, title, article_reference, status, feedback_deadline"),
+        supabase.from("implementing_act_feedback").select("implementing_act_id, date_feedback, sentiment").limit(10000),
       ]);
-      return { rows: (rows ?? []) as unknown as Row[], acts: new Map(((acts ?? []) as Act[]).map((a) => [a.id, a])) };
+      return {
+        rows: (rows ?? []) as unknown as Row[],
+        acts: new Map(((acts ?? []) as Act[]).map((a) => [a.id, a])),
+        dates: (dates ?? []) as { implementing_act_id: string; date_feedback: string | null; sentiment: string | null }[],
+      };
     },
   });
 
@@ -70,6 +76,8 @@ export default function FeedbackInsightsPage() {
   const isOpen = (r: Row) => acts.get(r.implementing_act_id)?.status === "feedback";
   const openCount = allRows.filter(isOpen).length;
   const rows = allRows.filter((r) => session === "all" || (session === "open" ? isOpen(r) : !isOpen(r)));
+  const rowIds = new Set(rows.map((r) => r.implementing_act_id));
+  const timelineItems = (data?.dates ?? []).filter((d) => rowIds.has(d.implementing_act_id));
 
   const totals = useMemo(() => {
     const s = { positive: 0, neutral: 0, negative: 0 };
@@ -151,6 +159,11 @@ export default function FeedbackInsightsPage() {
                   {SENT.map((s) => <span key={s.k} className="flex items-center gap-1"><span className={`h-2 w-2 rounded-full ${s.cls}`} />{label(s.k)}: {totals.s[s.k]}</span>)}
                 </div>
               </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-base">Comments by submission date</CardTitle></CardHeader>
+              <CardContent><FeedbackTimeline items={timelineItems} /></CardContent>
             </Card>
 
             <div className="grid lg:grid-cols-2 gap-4">

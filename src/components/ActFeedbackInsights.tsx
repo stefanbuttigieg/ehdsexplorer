@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { ETranslateButton } from "@/components/ETranslateButton";
 import { format } from "date-fns";
+import { FeedbackTimeline } from "@/components/FeedbackTimeline";
 
 type Group = { key: string; total: number; positive: number; neutral: number; negative: number };
 type Theme = { theme: string; description: string; sentiment: string };
@@ -200,6 +201,10 @@ export default function ActFeedbackInsights({ implementingActId }: { implementin
 
       {a && a.total_count > 0 && (
         <CardContent className="space-y-6">
+          <div>
+            <h3 className="text-sm font-semibold mb-2">Comments by submission date</h3>
+            <FeedbackTimeline items={filtered} />
+          </div>
           <div>
             <h3 className="text-sm font-semibold mb-2">Sentiment</h3>
             <SentimentBar g={{ positive: counts.positive ?? 0, neutral: counts.neutral ?? 0, negative: counts.negative ?? 0 }} />

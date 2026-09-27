@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import { FeedbackTimeline } from "@/components/FeedbackTimeline";
+import { FeedbackTimeline, deadlineMarkers } from "@/components/FeedbackTimeline";
 
 type Group = { key: string; total: number; positive: number; neutral: number; negative: number };
 type Row = {
@@ -78,6 +78,10 @@ export default function FeedbackInsightsPage() {
   const rows = allRows.filter((r) => session === "all" || (session === "open" ? isOpen(r) : !isOpen(r)));
   const rowIds = new Set(rows.map((r) => r.implementing_act_id));
   const timelineItems = (data?.dates ?? []).filter((d) => rowIds.has(d.implementing_act_id));
+  const timelineMarkers = rows.flatMap((r) => {
+    const act = acts.get(r.implementing_act_id);
+    return deadlineMarkers(act?.feedback_deadline, act?.title ?? r.implementing_act_id).filter((m) => m.kind === "close");
+  });
 
   const totals = useMemo(() => {
     const s = { positive: 0, neutral: 0, negative: 0 };
@@ -163,7 +167,7 @@ export default function FeedbackInsightsPage() {
 
             <Card>
               <CardHeader className="pb-2"><CardTitle className="text-base">Comments by submission date</CardTitle></CardHeader>
-              <CardContent><FeedbackTimeline items={timelineItems} /></CardContent>
+              <CardContent><FeedbackTimeline items={timelineItems} markers={timelineMarkers} /></CardContent>
             </Card>
 
             <div className="grid lg:grid-cols-2 gap-4">

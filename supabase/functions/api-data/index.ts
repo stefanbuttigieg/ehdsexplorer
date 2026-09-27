@@ -13,7 +13,8 @@ const corsHeaders = {
 // Allowed resources - expanded whitelist
 const ALLOWED_RESOURCES = [
   "articles", "recitals", "definitions", "chapters", "sections",
-  "implementing-acts", "annexes", "health-authorities", "country-legislation", "faqs", "metadata"
+  "implementing-acts", "annexes", "health-authorities", "country-legislation", "faqs",
+  "feedback-comments", "feedback-insights", "metadata"
 ];
 const ALLOWED_FORMATS = ["json", "csv"];
 const ALLOWED_LANGUAGES = ["en", "mt", "de", "fr", "it", "es", "pt", "nl", "pl", "cs", "sk", "hu", "ro", "bg", "el", "sv", "da", "fi", "et", "lv", "lt", "sl", "hr", "ga"];
@@ -182,6 +183,8 @@ const RESOURCE_FIELDS: Record<string, string[]> = {
   "health-authorities": ["id", "name", "country_code", "country_name", "authority_type", "status", "email", "phone", "website", "address", "description", "ehds_role", "latitude", "longitude"],
   "country-legislation": ["id", "country_code", "country_name", "title", "official_title", "legislation_type", "status", "status_notes", "summary", "url", "effective_date", "adoption_date", "publication_date", "enforcement_measures"],
   "faqs": ["faq_number", "question", "answer", "rich_content", "chapter", "sub_category", "source_articles", "source_recitals", "source_references", "data_tables"],
+  "feedback-comments": ["id", "implementing_act_id", "feedback", "language", "user_type", "country", "organization", "date_feedback", "sentiment", "sentiment_score", "attachments"],
+  "feedback-insights": ["implementing_act_id", "total_count", "analyzed_count", "sentiment_counts", "word_cloud", "by_user_type", "by_country", "themes_summary", "key_themes", "last_synced_at"],
 };
 
 Deno.serve(async (req) => {
@@ -598,6 +601,47 @@ Deno.serve(async (req) => {
         break;
       }
 
+      case "feedback-comments": {
+        const act = validateStringId(url.searchParams.get("act"));
+        const limit = Math.min(Math.max(parseInt(url.searchParams.get("limit") || "100", 10) || 100, 1), 1000);
+        const offset = Math.max(parseInt(url.searchParams.get("offset") || "0", 10) || 0, 0);
+        const sentiment = url.searchParams.get("sentiment");
+        const country = url.searchParams.get("country");
+        const userType = url.searchParams.get("user_type");
+        const from = url.searchParams.get("from");
+        const to = url.searchParams.get("to");
+        const iso = /^\d{4}-\d{2}-\d{2}/;
+        let q = supabase.from("implementing_act_feedback")
+          .select("id, implementing_act_id, feedback, language, user_type, country, organization, date_feedback, sentiment, sentiment_score, attachments")
+          .order("date_feedback", { ascending: false })
+          .range(offset, offset + limit - 1);
+        if (act) q = q.eq("implementing_act_id", act);
+        if (sentiment && ["positive", "neutral", "negative"].includes(sentiment)) q = q.eq("sentiment", sentiment);
+        if (country && /^[A-Za-z]{2,3}$/.test(country)) q = q.eq("country", country.toUpperCase());
+        if (userType && /^[A-Z_]{1,60}$/i.test(userType)) q = q.eq("user_type", userType.toUpperCase());
+        if (from && iso.test(from)) q = q.gte("date_feedback", from);
+        if (to && iso.test(to)) q = q.lte("date_feedback", to);
+        const { data: rows, error } = await q;
+        if (error) throw error;
+        data = (rows ?? []).map((r: any) => ({
+          ...r,
+          attachments: (r.attachments ?? []).map((a: any) => ({ ...a, url: `https://ec.europa.eu/info/law/better-regulation/api/download/${a.id}` })),
+        }));
+        break;
+      }
+
+      case "feedback-insights": {
+        const act = validateStringId(url.searchParams.get("act"));
+        let q = supabase.from("implementing_act_feedback_analysis")
+          .select("implementing_act_id, total_count, analyzed_count, sentiment_counts, word_cloud, by_user_type, by_country, themes_summary, key_themes, last_synced_at")
+          .gt("total_count", 0);
+        if (act) q = q.eq("implementing_act_id", act);
+        const { data: rows, error } = await q;
+        if (error) throw error;
+        data = rows ?? [];
+        break;
+      }
+
       case "annexes": {
         const validatedId = validateStringId(id);
         const baseColumns = "id, title, content";
@@ -888,6 +932,8 @@ function getResourceDescription(resource: string): string {
     "health-authorities": "National Digital Health Authorities and Health Data Access Bodies",
     "country-legislation": "National implementing legislation tracker",
     "faqs": "Official EHDS FAQs from the European Commission (DG SANTE)",
+    "feedback-comments": "Public 'Have your say' comments on implementing acts, with AI sentiment and attachment links. Params: act, sentiment, country, user_type, from, to, limit (max 1000), offset",
+    "feedback-insights": "Aggregated feedback analysis per implementing act: sentiment split, word cloud, key themes, stakeholder and country breakdowns. Param: act",
   };
   return descriptions[resource] || resource;
 }

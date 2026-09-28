@@ -4078,6 +4078,24 @@ export type Database = {
         }
         Relationships: []
       }
+      search_query_counts: {
+        Row: {
+          last_searched_at: string
+          query: string
+          search_count: number
+        }
+        Insert: {
+          last_searched_at?: string
+          query: string
+          search_count?: number
+        }
+        Update: {
+          last_searched_at?: string
+          query?: string
+          search_count?: number
+        }
+        Relationships: []
+      }
       section_translations: {
         Row: {
           created_at: string | null
@@ -5367,6 +5385,7 @@ export type Database = {
         Args: { _team_id: string; _user_id: string }
         Returns: boolean
       }
+      record_search_query: { Args: { _query: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "editor" | "super_admin"

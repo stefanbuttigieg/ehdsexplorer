@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useSearchParams, Link } from "react-router-dom";
 import { Search, FileText, Scale, Book, Layers, ScrollText, FileStack, HelpCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,16 @@ const SearchPage = () => {
   const [filter, setFilter] = useState<FilterType>('all');
   
   const { search, isLoading } = useSearch();
+
+  // Record settled searches (debounced) to rank popular topics
+  useEffect(() => {
+    const q = query.trim();
+    if (q.length < 3) return;
+    const t = setTimeout(() => {
+      supabase.rpc("record_search_query", { _query: q }).then(() => {});
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [query]);
 
   const results = useMemo(() => {
     if (!query.trim()) {

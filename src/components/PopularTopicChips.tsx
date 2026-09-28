@@ -39,6 +39,19 @@ export const PopularTopicChips = () => {
     },
     staleTime: 1000 * 60 * 30,
   });
+  const { data: counts = [] } = useQuery({
+    queryKey: ["search-query-counts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("search_query_counts")
+        .select("query, search_count")
+        .order("search_count", { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return data ?? [];
+    },
+    staleTime: 1000 * 60 * 10,
+  });
 
   const chips = useMemo<Chip[]>(() => {
     const live: Chip[] = acts
@@ -50,14 +63,26 @@ export const PopularTopicChips = () => {
         to: `/implementing-acts/${a.id}`,
         live: true,
       }));
-    const pool = topics.length ? dailyShuffle(topics) : FALLBACK;
+    // Score each topic by searches that match it (exact or containing the topic)
+    const score = (t: string) => {
+      const tl = t.toLowerCase();
+      return counts.reduce(
+        (s, c) => (c.query === tl || c.query.includes(tl) || tl.includes(c.query) ? s + c.search_count : s),
+        0,
+      );
+    };
+    const base = topics.length ? dailyShuffle(topics) : FALLBACK;
+    const pool = base
+      .map((t, i) => ({ t, s: score(t), i }))
+      .sort((a, b) => b.s - a.s || a.i - b.i)
+      .map((x) => x.t);
     const topicChips: Chip[] = pool.slice(0, MAX_CHIPS - live.length).map((t) => ({
       key: `t-${t}`,
       label: t,
       to: `/search?q=${encodeURIComponent(t)}`,
     }));
     return [...live, ...topicChips];
-  }, [acts, topics]);
+  }, [acts, topics, counts]);
 
   if (!chips.length) return null;
 

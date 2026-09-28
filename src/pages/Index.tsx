@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { SearchCommand } from "@/components/SearchCommand";
+import { PopularTopicChips } from "@/components/PopularTopicChips";
 import { Search, Book, FileText, Scale, ListChecks, Bookmark, Files, Clock, MessageSquare, ExternalLink, Gamepad2, StickyNote, Heart, Laptop, Stethoscope, Sparkles, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -102,6 +103,7 @@ const Index = () => {
                 </div>
                 <kbd className="absolute right-4 top-1/2 -translate-y-1/2 text-xs px-2 py-1 bg-muted rounded">/</kbd>
               </div>
+              <PopularTopicChips />
             </div>
 
             {/* Search Command */}

@@ -33,7 +33,21 @@
             "description": "The resource type to retrieve",
             "schema": {
               "type": "string",
-              "enum": ["articles", "recitals", "definitions", "chapters", "sections", "implementing-acts", "annexes", "health-authorities", "country-legislation", "faqs", "feedback-comments", "feedback-insights", "metadata"]
+              "enum": [
+                "articles",
+                "recitals",
+                "definitions",
+                "chapters",
+                "sections",
+                "implementing-acts",
+                "annexes",
+                "health-authorities",
+                "country-legislation",
+                "faqs",
+                "feedback-comments",
+                "feedback-insights",
+                "metadata"
+              ]
             }
           },
           {
@@ -52,7 +66,10 @@
             "description": "Response format",
             "schema": {
               "type": "string",
-              "enum": ["json", "csv"],
+              "enum": [
+                "json",
+                "csv"
+              ],
               "default": "json"
             }
           },
@@ -64,7 +81,32 @@
             "schema": {
               "type": "string",
               "default": "en",
-              "enum": ["en", "mt", "de", "fr", "it", "es", "pt", "nl", "pl", "cs", "sk", "hu", "ro", "bg", "el", "sv", "da", "fi", "et", "lv", "lt", "sl", "hr", "ga"]
+              "enum": [
+                "en",
+                "mt",
+                "de",
+                "fr",
+                "it",
+                "es",
+                "pt",
+                "nl",
+                "pl",
+                "cs",
+                "sk",
+                "hu",
+                "ro",
+                "bg",
+                "el",
+                "sv",
+                "da",
+                "fi",
+                "et",
+                "lv",
+                "lt",
+                "sl",
+                "hr",
+                "ga"
+              ]
             }
           },
           {
@@ -81,7 +123,7 @@
             "name": "country",
             "in": "query",
             "required": false,
-            "description": "Filter by country code (for health-authorities and country-legislation)",
+            "description": "Filter by country code (health-authorities, country-legislation, feedback-comments)",
             "schema": {
               "type": "string"
             },
@@ -104,6 +146,76 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "act",
+            "in": "query",
+            "required": false,
+            "description": "Implementing act ID (for feedback-comments and feedback-insights)",
+            "schema": {
+              "type": "string"
+            },
+            "example": "art-75"
+          },
+          {
+            "name": "sentiment",
+            "in": "query",
+            "required": false,
+            "description": "positive, neutral or negative (feedback-comments)",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "positive",
+                "neutral",
+                "negative"
+              ]
+            }
+          },
+          {
+            "name": "user_type",
+            "in": "query",
+            "required": false,
+            "description": "Respondent type (feedback-comments)",
+            "schema": {
+              "type": "string"
+            },
+            "example": "NGO"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "description": "Submitted on/after YYYY-MM-DD (feedback-comments)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "description": "Submitted on/before YYYY-MM-DD (feedback-comments)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Max results, up to 1000 (feedback-comments)",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "Pagination offset (feedback-comments)",
+            "schema": {
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -112,15 +224,22 @@
             "headers": {
               "X-RateLimit-Limit": {
                 "description": "Maximum requests per hour",
-                "schema": { "type": "integer" }
+                "schema": {
+                  "type": "integer"
+                }
               },
               "X-RateLimit-Remaining": {
                 "description": "Remaining requests in current window",
-                "schema": { "type": "integer" }
+                "schema": {
+                  "type": "integer"
+                }
               },
               "X-RateLimit-Reset": {
                 "description": "ISO 8601 timestamp when the rate limit resets",
-                "schema": { "type": "string", "format": "date-time" }
+                "schema": {
+                  "type": "string",
+                  "format": "date-time"
+                }
               }
             },
             "content": {
@@ -151,7 +270,9 @@
             "headers": {
               "Retry-After": {
                 "description": "Seconds until rate limit resets",
-                "schema": { "type": "integer" }
+                "schema": {
+                  "type": "integer"
+                }
               }
             },
             "content": {
@@ -215,8 +336,15 @@
           },
           "data": {
             "oneOf": [
-              { "type": "array", "items": { "type": "object" } },
-              { "type": "object" }
+              {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              {
+                "type": "object"
+              }
             ]
           },
           "recordCount": {
@@ -227,159 +355,380 @@
       "Organization": {
         "type": "object",
         "properties": {
-          "@type": { "type": "string", "example": "Organization" },
-          "name": { "type": "string" },
-          "url": { "type": "string", "format": "uri" }
+          "@type": {
+            "type": "string",
+            "example": "Organization"
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
         }
       },
       "Legislation": {
         "type": "object",
         "properties": {
-          "@type": { "type": "string", "example": "Legislation" },
-          "name": { "type": "string" },
-          "identifier": { "type": "string" }
+          "@type": {
+            "type": "string",
+            "example": "Legislation"
+          },
+          "name": {
+            "type": "string"
+          },
+          "identifier": {
+            "type": "string"
+          }
         }
       },
       "Article": {
         "type": "object",
         "properties": {
-          "article_number": { "type": "integer" },
-          "title": { "type": "string" },
-          "content": { "type": "string" },
-          "chapter_id": { "type": "integer" },
-          "section_id": { "type": "integer", "nullable": true },
-          "is_key_provision": { "type": "boolean" },
-          "stakeholder_tags": { "type": "array", "items": { "type": "string" } },
-          "language": { "type": "string" }
+          "article_number": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "chapter_id": {
+            "type": "integer"
+          },
+          "section_id": {
+            "type": "integer",
+            "nullable": true
+          },
+          "is_key_provision": {
+            "type": "boolean"
+          },
+          "stakeholder_tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "language": {
+            "type": "string"
+          }
         }
       },
       "Recital": {
         "type": "object",
         "properties": {
-          "recital_number": { "type": "integer" },
-          "content": { "type": "string" },
-          "related_articles": { "type": "array", "items": { "type": "integer" } },
-          "language": { "type": "string" }
+          "recital_number": {
+            "type": "integer"
+          },
+          "content": {
+            "type": "string"
+          },
+          "related_articles": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "language": {
+            "type": "string"
+          }
         }
       },
       "Definition": {
         "type": "object",
         "properties": {
-          "term": { "type": "string" },
-          "definition": { "type": "string" },
-          "source_article": { "type": "integer", "nullable": true },
-          "source": { "type": "string" },
-          "language": { "type": "string" }
+          "term": {
+            "type": "string"
+          },
+          "definition": {
+            "type": "string"
+          },
+          "source_article": {
+            "type": "integer",
+            "nullable": true
+          },
+          "source": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          }
         }
       },
       "Chapter": {
         "type": "object",
         "properties": {
-          "chapter_number": { "type": "integer" },
-          "title": { "type": "string" },
-          "description": { "type": "string" },
-          "language": { "type": "string" }
+          "chapter_number": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          }
         }
       },
       "Section": {
         "type": "object",
         "properties": {
-          "section_number": { "type": "integer" },
-          "title": { "type": "string" },
-          "chapter_id": { "type": "integer" },
-          "language": { "type": "string" }
+          "section_number": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "chapter_id": {
+            "type": "integer"
+          },
+          "language": {
+            "type": "string"
+          }
         }
       },
       "ImplementingAct": {
         "type": "object",
         "properties": {
-          "id": { "type": "string" },
-          "title": { "type": "string" },
-          "description": { "type": "string" },
-          "type": { "type": "string" },
-          "theme": { "type": "string" },
-          "themes": { "type": "array", "items": { "type": "string" } },
-          "status": { "type": "string" },
-          "article_reference": { "type": "string" },
-          "related_articles": { "type": "array", "items": { "type": "integer" } },
-          "feedback_deadline": { "type": "string" },
-          "official_link": { "type": "string" },
-          "language": { "type": "string" }
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "theme": {
+            "type": "string"
+          },
+          "themes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string"
+          },
+          "article_reference": {
+            "type": "string"
+          },
+          "related_articles": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "feedback_deadline": {
+            "type": "string"
+          },
+          "official_link": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          }
         }
       },
       "Annex": {
         "type": "object",
         "properties": {
-          "id": { "type": "string" },
-          "title": { "type": "string" },
-          "content": { "type": "string" },
-          "language": { "type": "string" }
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          }
         }
       },
       "HealthAuthority": {
         "type": "object",
         "properties": {
-          "id": { "type": "string", "format": "uuid" },
-          "name": { "type": "string" },
-          "country_code": { "type": "string" },
-          "country_name": { "type": "string" },
-          "authority_type": { "type": "string", "enum": ["dha", "hdab"] },
-          "status": { "type": "string" },
-          "email": { "type": "string", "format": "email" },
-          "phone": { "type": "string" },
-          "website": { "type": "string", "format": "uri" },
-          "address": { "type": "string" },
-          "description": { "type": "string" },
-          "ehds_role": { "type": "string" },
-          "latitude": { "type": "number" },
-          "longitude": { "type": "number" }
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "country_code": {
+            "type": "string"
+          },
+          "country_name": {
+            "type": "string"
+          },
+          "authority_type": {
+            "type": "string",
+            "enum": [
+              "dha",
+              "hdab"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "website": {
+            "type": "string",
+            "format": "uri"
+          },
+          "address": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "ehds_role": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          }
         }
       },
       "CountryLegislation": {
         "type": "object",
         "properties": {
-          "id": { "type": "string", "format": "uuid" },
-          "country_code": { "type": "string" },
-          "country_name": { "type": "string" },
-          "title": { "type": "string" },
-          "official_title": { "type": "string" },
-          "legislation_type": { "type": "string" },
-          "status": { "type": "string" },
-          "status_notes": { "type": "string" },
-          "summary": { "type": "string" },
-          "url": { "type": "string", "format": "uri" },
-          "effective_date": { "type": "string", "format": "date" },
-          "adoption_date": { "type": "string", "format": "date" },
-          "publication_date": { "type": "string", "format": "date" },
-          "enforcement_measures": { "type": "array", "items": { "type": "string" } }
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "country_code": {
+            "type": "string"
+          },
+          "country_name": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "official_title": {
+            "type": "string"
+          },
+          "legislation_type": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "status_notes": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "effective_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "adoption_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "publication_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "enforcement_measures": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
         }
       },
       "FAQ": {
         "type": "object",
         "properties": {
-          "faq_number": { "type": "integer" },
-          "question": { "type": "string" },
-          "answer": { "type": "string" },
-          "chapter": { "type": "string" },
-          "sub_category": { "type": "string", "nullable": true },
-          "source_articles": { "type": "array", "items": { "type": "string" }, "nullable": true },
-          "source_recitals": { "type": "array", "items": { "type": "string" }, "nullable": true },
-          "source_references": { "type": "string", "nullable": true }
+          "faq_number": {
+            "type": "integer"
+          },
+          "question": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          },
+          "chapter": {
+            "type": "string"
+          },
+          "sub_category": {
+            "type": "string",
+            "nullable": true
+          },
+          "source_articles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "source_recitals": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "source_references": {
+            "type": "string",
+            "nullable": true
+          }
         }
       },
       "Error": {
         "type": "object",
         "properties": {
-          "error": { "type": "string" },
-          "allowedResources": { "type": "array", "items": { "type": "string" } }
+          "error": {
+            "type": "string"
+          },
+          "allowedResources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
         }
       },
       "RateLimitError": {
         "type": "object",
         "properties": {
-          "error": { "type": "string" },
-          "message": { "type": "string" },
-          "retryAfter": { "type": "integer" }
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "retryAfter": {
+            "type": "integer"
+          }
         }
       }
     }

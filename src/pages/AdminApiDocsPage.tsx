@@ -170,6 +170,41 @@ const getEndpoints = [
 }`,
   },
   {
+    resource: "feedback-comments",
+    description: "Public 'Have your say' comments on implementing acts, with AI sentiment and attachment links",
+    parameters: [
+      { name: "act", type: "string", required: false, description: "Implementing act ID (e.g., art-75)" },
+      { name: "sentiment", type: "string", required: false, description: "positive, neutral or negative" },
+      { name: "country", type: "string", required: false, description: "Respondent country code (e.g., BEL)" },
+      { name: "user_type", type: "string", required: false, description: "Respondent type (e.g., NGO, COMPANY)" },
+      { name: "from", type: "string", required: false, description: "Submitted on/after (YYYY-MM-DD)" },
+      { name: "to", type: "string", required: false, description: "Submitted on/before (YYYY-MM-DD)" },
+      { name: "limit", type: "number", required: false, description: "Max results (max 1000)" },
+      { name: "offset", type: "number", required: false, description: "Pagination offset" },
+      { name: "format", type: "string", required: false, description: "Response format: json (default) or csv" },
+      { name: "fields", type: "string", required: false, description: "Comma-separated fields to return" },
+    ],
+    availableFields: ["id", "implementing_act_id", "feedback", "language", "user_type", "country", "organization", "date_feedback", "sentiment", "sentiment_score", "attachments"],
+    exampleRequest: `curl "${API_BASE}?resource=feedback-comments&act=art-75&sentiment=negative"`,
+    exampleResponse: `{
+  "data": [{ "implementing_act_id": "art-75", "user_type": "NGO", "country": "BEL", "sentiment": "negative", "sentiment_score": -0.6 }]
+}`,
+  },
+  {
+    resource: "feedback-insights",
+    description: "Aggregated feedback analysis per implementing act",
+    parameters: [
+      { name: "act", type: "string", required: false, description: "Implementing act ID (omit for all)" },
+      { name: "format", type: "string", required: false, description: "Response format: json (default) or csv" },
+      { name: "fields", type: "string", required: false, description: "Comma-separated fields to return" },
+    ],
+    availableFields: ["implementing_act_id", "total_count", "analyzed_count", "sentiment_counts", "word_cloud", "by_user_type", "by_country", "themes_summary", "key_themes", "last_synced_at"],
+    exampleRequest: `curl "${API_BASE}?resource=feedback-insights&act=art-77"`,
+    exampleResponse: `{
+  "data": [{ "implementing_act_id": "art-77", "total_count": 64, "sentiment_counts": { "positive": 10, "neutral": 48, "negative": 6 } }]
+}`,
+  },
+  {
     resource: "metadata",
     description: "API metadata and regulation information",
     parameters: [],

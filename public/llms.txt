@@ -35,7 +35,7 @@ EHDS Explorer helps citizens, healthcare professionals, health-tech companies, r
 - News & updates with weekly AI-generated summaries
 - Email subscriptions and act alerts
 - Multilingual support across many EU languages
-- Public, FAIR-compliant data API (JSON-LD, ELI/EUR-Lex references)
+- Public, FAIR-compliant data API (JSON-LD, ELI/EUR-Lex references), including public feedback comments (`resource=feedback-comments`) and per-act feedback insights (`resource=feedback-insights`)
 - Accessibility controls (WCAG 2.1) and light/dark mode
 - Installable progressive web app (PWA) with offline support; native iOS/Android apps
 

@@ -71,11 +71,21 @@ export const PopularTopicChips = () => {
         0,
       );
     };
+    // Top real searches first (counts are already sorted desc)
+    const topSearches = counts
+      .filter((c) => c.search_count > 0 && c.query.trim().length > 2)
+      .slice(0, 4)
+      .map((c) => c.query.charAt(0).toUpperCase() + c.query.slice(1));
+    const seen = new Set(topSearches.map((q) => q.toLowerCase()));
     const base = topics.length ? dailyShuffle(topics) : FALLBACK;
-    const pool = base
-      .map((t, i) => ({ t, s: score(t), i }))
-      .sort((a, b) => b.s - a.s || a.i - b.i)
-      .map((x) => x.t);
+    const pool = [
+      ...topSearches,
+      ...base
+        .filter((t) => !seen.has(t.toLowerCase()))
+        .map((t, i) => ({ t, s: score(t), i }))
+        .sort((a, b) => b.s - a.s || a.i - b.i)
+        .map((x) => x.t),
+    ];
     const topicChips: Chip[] = pool.slice(0, MAX_CHIPS - live.length).map((t) => ({
       key: `t-${t}`,
       label: t,

@@ -1,4 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+
+const getPageProps = (pathname: string): Record<string, unknown> => {
+  const m = pathname.match(/^\/(article|recital)s?\/(\d+)/);
+  if (m) return { page_type: m[1], content_number: Number(m[2]), content_key: `${m[1]}-${m[2]}` };
+  return { page_type: pathname === '/' ? 'home' : pathname.split('/')[1] || 'other', content_number: null, content_key: null };
+};
 import { useLocation } from 'react-router-dom';
 import posthog from 'posthog-js';
 
@@ -78,13 +84,18 @@ const PostHogProvider = () => {
     };
   }, []);
 
-  // Track page views on route change
+  // Track page views (and SPA page leaves) on route change, tagged by content type
+  // so bounce rate can be broken down per article / recital in PostHog.
+  const prevRef = useRef<{ url: string; props: Record<string, unknown> } | null>(null);
   useEffect(() => {
-    if (posthogInitialized && getAnalyticsConsent()) {
-      posthog.capture('$pageview', {
-        $current_url: window.location.href,
-      });
+    if (!posthogInitialized || !getAnalyticsConsent()) return;
+    const props = getPageProps(location.pathname);
+    if (prevRef.current) {
+      posthog.capture('$pageleave', { $current_url: prevRef.current.url, ...prevRef.current.props });
     }
+    posthog.register(props);
+    posthog.capture('$pageview', { $current_url: window.location.href, ...props });
+    prevRef.current = { url: window.location.href, props };
   }, [location.pathname, location.search]);
 
   return null;

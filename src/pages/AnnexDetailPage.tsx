@@ -9,6 +9,32 @@ import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
+import remarkGfm from "remark-gfm";
+
+// Ensure markdown tables parse: blank line before a table, and a divider row after the header if missing.
+const fixTables = (text: string): string => {
+  const lines = text.replace(/\r\n/g, "\n").split("\n");
+  const out: string[] = [];
+  const isRow = (l: string) => /^\s*\|.*\|\s*$/.test(l);
+  const isDivider = (l: string) => /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/.test(l);
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i];
+    const prev = out[out.length - 1];
+    if (isRow(l) && (prev === undefined || !isRow(prev))) {
+      if (prev !== undefined && prev.trim() !== "") out.push("");
+      out.push(l);
+      const next = lines[i + 1];
+      if (next === undefined || !isDivider(next)) {
+        const cols = l.trim().replace(/^\||\|$/g, "").split("|").length;
+        out.push("|" + Array(cols).fill(" --- ").join("|") + "|");
+      }
+      continue;
+    }
+    if (prev !== undefined && isRow(prev) && !isRow(l) && !isDivider(l) && l.trim() !== "") out.push("");
+    out.push(l);
+  }
+  return out.join("\n");
+};
 
 const AnnexDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -50,11 +76,11 @@ const AnnexDetailPage = () => {
 
   return (
     <Layout>
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-6">
         <Breadcrumbs items={[{ label: "Annexes", href: "/annexes" }, { label: `Annex ${annex.id}` }]} />
 
         {/* Header */}
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-4">
             <div className="p-3 rounded-lg bg-primary/10">
               <FileText className="h-6 w-6 text-primary" />
@@ -88,7 +114,25 @@ const AnnexDetailPage = () => {
           </CardHeader>
           <CardContent>
             <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:font-serif prose-h2:text-lg prose-h2:mt-6 prose-h2:mb-3">
-              <ReactMarkdown remarkPlugins={[remarkBreaks]}>{annex.content}</ReactMarkdown>
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm, remarkBreaks]}
+                components={{
+                  table: ({ children }) => (
+                    <div className="not-prose my-4 w-full overflow-x-auto rounded-md border border-border">
+                      <table className="w-full border-collapse text-sm">{children}</table>
+                    </div>
+                  ),
+                  thead: ({ children }) => <thead className="bg-muted">{children}</thead>,
+                  th: ({ children }) => (
+                    <th className="border border-border px-3 py-2 text-left align-top font-semibold text-foreground">{children}</th>
+                  ),
+                  td: ({ children }) => (
+                    <td className="border border-border px-3 py-2 align-top text-foreground">{children}</td>
+                  ),
+                }}
+              >
+                {fixTables(annex.content)}
+              </ReactMarkdown>
             </div>
           </CardContent>
         </Card>

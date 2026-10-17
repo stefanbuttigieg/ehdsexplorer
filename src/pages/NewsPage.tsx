@@ -1,3 +1,4 @@
+import { SEOHead, BreadcrumbSchema } from "@/components/seo";
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -13,6 +14,8 @@ const NewsPage = () => {
 
   return (
     <Layout>
+      <SEOHead title={"EHDS News & Updates – EHDS Explorer"} description={"Weekly summaries of news and developments on the European Health Data Space."} url={"/news"} />
+      <BreadcrumbSchema items={[{name:"Home",url:"/"},{name:"News",url:"/news"}]} />
       <Helmet>
         <title>EHDS News | Weekly Summaries</title>
         <meta name="description" content="Weekly AI-generated summaries of developments in the European Health Data Space Regulation." />

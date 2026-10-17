@@ -1,3 +1,4 @@
+import { SEOHead, BreadcrumbSchema } from "@/components/seo";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,8 @@ const AnnexesPage = () => {
 
   return (
     <Layout>
+      <SEOHead title={"Annexes – EHDS Regulation (EU) 2025/327"} description={"The annexes of the European Health Data Space Regulation, including priority categories of electronic health data."} url={"/annexes"} />
+      <BreadcrumbSchema items={[{name:"Home",url:"/"},{name:"Annexes",url:"/annexes"}]} />
       <div className="p-6 space-y-6">
         <div>
           <Breadcrumbs items={[{ label: "Annexes" }]} />

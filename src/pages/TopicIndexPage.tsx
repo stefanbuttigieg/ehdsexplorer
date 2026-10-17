@@ -1,3 +1,4 @@
+import { SEOHead, BreadcrumbSchema } from "@/components/seo";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, ExternalLink, BookOpen, Users, Building2, Stethoscope, FileText, Book } from "lucide-react";
@@ -50,6 +51,8 @@ const TopicIndexPage = () => {
 
   return (
     <Layout>
+      <SEOHead title={"Topic Index – EHDS Explorer"} description={"Find EHDS articles and recitals by topic, from patient rights to secondary use of health data."} url={"/topic-index"} />
+      <BreadcrumbSchema items={[{name:"Home",url:"/"},{name:"Topic Index",url:"/topic-index"}]} />
       <div className="max-w-6xl mx-auto p-6 animate-fade-in">
         <Breadcrumbs items={[{ label: "Topics & Glossary" }]} />
         

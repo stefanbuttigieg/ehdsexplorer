@@ -1,3 +1,4 @@
+import { SEOHead, BreadcrumbSchema } from "@/components/seo";
 import { useParams, Link } from "react-router-dom";
 import { ChevronRight, CheckCircle2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -63,6 +64,8 @@ const ChapterPage = () => {
 
   return (
     <Layout>
+      <SEOHead title={`Chapter ${chapter?.chapter_number ?? id}: ${chapter?.title ?? ""} – EHDS Regulation`} description={`Read Chapter ${chapter?.chapter_number ?? id} of the EHDS Regulation${chapter?.title ? ": " + chapter.title : ""}.`} url={`/chapter/${id}`} />
+      <BreadcrumbSchema items={[{name:"Home",url:"/"},{name:"Articles",url:"/articles"},{name:`Chapter ${id}`,url:`/chapter/${id}`}]} />
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
         <Breadcrumbs items={[{ label: `Chapter ${chapter!.chapter_number}` }]} />
 

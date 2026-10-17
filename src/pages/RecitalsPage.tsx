@@ -1,3 +1,4 @@
+import { SEOHead, BreadcrumbSchema } from "@/components/seo";
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -141,6 +142,8 @@ const RecitalsPage = () => {
 
   return (
     <Layout>
+      <SEOHead title={"Recitals – EHDS Regulation (EU) 2025/327"} description={"Read every recital of the European Health Data Space Regulation, explaining the intent behind its articles."} url={"/recitals"} />
+      <BreadcrumbSchema items={[{name:"Home",url:"/"},{name:"Recitals",url:"/recitals"}]} />
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
         <Breadcrumbs items={breadcrumbItems} />
         <div className="flex items-start justify-between mb-2">

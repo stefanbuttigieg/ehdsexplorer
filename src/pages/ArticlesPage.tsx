@@ -1,3 +1,4 @@
+import { SEOHead, BreadcrumbSchema } from "@/components/seo";
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -117,6 +118,8 @@ const ArticlesPage = () => {
 
   return (
     <Layout>
+      <SEOHead title={"All Articles – EHDS Regulation (EU) 2025/327"} description={"Browse all 105 articles of the European Health Data Space Regulation, organised by chapter and section."} url={"/articles"} />
+      <BreadcrumbSchema items={[{name:"Home",url:"/"},{name:"Articles",url:"/articles"}]} />
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
         <Breadcrumbs items={[{ label: "Articles" }]} />
         <div className="flex items-start justify-between mb-2">

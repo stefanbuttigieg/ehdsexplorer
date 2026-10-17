@@ -1,3 +1,4 @@
+import { SEOHead, BreadcrumbSchema } from "@/components/seo";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, FileText, ChevronDown, ChevronUp } from "lucide-react";
@@ -63,6 +64,8 @@ const DefinitionsPage = () => {
 
   return (
     <Layout>
+      <SEOHead title={"Definitions & Glossary – EHDS Explorer"} description={"Key legal definitions from the EHDS Regulation and related sources, searchable in one glossary."} url={"/definitions"} />
+      <BreadcrumbSchema items={[{name:"Home",url:"/"},{name:"Definitions",url:"/definitions"}]} />
       <div className="max-w-4xl mx-auto p-6 animate-fade-in">
         <Breadcrumbs items={[{ label: "Definitions" }]} />
         <div className="flex items-start justify-between mb-4">

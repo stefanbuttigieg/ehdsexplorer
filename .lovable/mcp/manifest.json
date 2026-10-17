@@ -1,0 +1,221 @@
+{
+  "version": 1,
+  "sdk_version": "3.1.1",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://giwrfhupfphvxlfwpsdh.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "ehds-explorer",
+      "version": "0.1.0",
+      "title": "EHDS Explorer"
+    },
+    "tools": [
+      {
+        "name": "search_articles",
+        "title": "Search EHDS articles",
+        "description": "Search the articles of the EHDS Regulation (EU) 2025/327 by keyword in title or text.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 100,
+              "description": "Keyword or phrase, e.g. 'secondary use'."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "description": "Maximum results (default 10)."
+            }
+          },
+          "required": [
+            "query"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_article",
+        "title": "Get an EHDS article",
+        "description": "Get the full text of one EHDS Regulation article by its number.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "article_number": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "description": "Article number, e.g. 33."
+            }
+          },
+          "required": [
+            "article_number"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_recital",
+        "title": "Get an EHDS recital",
+        "description": "Get the text of one EHDS Regulation recital by number, with its related articles.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "recital_number": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 300,
+              "description": "Recital number, e.g. 12."
+            }
+          },
+          "required": [
+            "recital_number"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "search_definitions",
+        "title": "Search definitions",
+        "description": "Look up legal definitions (EHDS and related sources) by term.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "term": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 100,
+              "description": "Term to look up, e.g. 'electronic health record'."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "description": "Maximum results (default 10)."
+            }
+          },
+          "required": [
+            "term"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "search_faqs",
+        "title": "Search official EHDS FAQs",
+        "description": "Search the European Commission's official EHDS FAQs by keyword in the question or answer.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 100,
+              "description": "Keyword or phrase."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30,
+              "description": "Maximum results (default 10)."
+            }
+          },
+          "required": [
+            "query"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_implementing_acts",
+        "title": "List implementing acts",
+        "description": "List EHDS implementing and delegated acts, optionally filtered by status (e.g. 'feedback' for open consultations).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "maxLength": 40,
+              "description": "Status filter, e.g. 'feedback', 'feedback-closed', 'adopted', 'pending'."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_feedback_insights",
+        "title": "Get public feedback insights",
+        "description": "Get the sentiment split, key themes and stakeholder breakdowns of public comments on an implementing act.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "act_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60,
+              "description": "Implementing act ID, e.g. 'art-75'. Omit for all acts."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

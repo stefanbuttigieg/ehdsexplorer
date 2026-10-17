@@ -55,7 +55,9 @@ const PostHogProvider = () => {
     
     if (hasConsent) {
       initPostHog();
-      posthog.opt_in_capturing();
+      if (!posthog.has_opted_in_capturing()) {
+        posthog.opt_in_capturing();
+      }
     } else if (posthogInitialized) {
       posthog.opt_out_capturing();
     }
@@ -65,7 +67,9 @@ const PostHogProvider = () => {
       const consent = getAnalyticsConsent();
       if (consent) {
         initPostHog();
-        posthog.opt_in_capturing();
+        if (!posthog.has_opted_in_capturing()) {
+          posthog.opt_in_capturing();
+        }
       } else if (posthogInitialized) {
         posthog.opt_out_capturing();
       }

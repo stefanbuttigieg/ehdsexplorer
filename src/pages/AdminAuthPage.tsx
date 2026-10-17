@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { oauthReturnPath } from '@/lib/oauth-return-path';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -52,6 +53,9 @@ const AdminAuthPage = () => {
   }, []);
   const { user, loading, signIn, isEditor } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const nextPath = oauthReturnPath(searchParams.get('next'));
+  const hasNext = nextPath !== '/';
   const { toast } = useToast();
 
   useEffect(() => {
@@ -72,6 +76,7 @@ const AdminAuthPage = () => {
     }
 
     if (!loading && user) {
+      if (hasNext) { navigate(nextPath); return; }
       // If user is an editor/admin, go to admin dashboard
       if (isEditor) {
         navigate('/admin');
@@ -80,7 +85,7 @@ const AdminAuthPage = () => {
         navigate('/');
       }
     }
-  }, [user, loading, isEditor, navigate, toast, awaitingMFA, showMFAVerify]);
+  }, [user, loading, isEditor, navigate, toast, awaitingMFA, showMFAVerify, hasNext, nextPath]);
 
   // Also listen for auth state changes to detect invite/recovery
   useEffect(() => {
@@ -179,7 +184,9 @@ const AdminAuthPage = () => {
     setMfaUserEmail('');
     sessionStorage.removeItem('mfa_pending');
     toast({ title: 'Signed in successfully' });
-    if (isEditor) {
+    if (hasNext) {
+      navigate(nextPath);
+    } else if (isEditor) {
       navigate('/admin');
     } else {
       navigate('/');
@@ -223,7 +230,7 @@ const AdminAuthPage = () => {
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: hasNext ? new URL(nextPath, window.location.origin).href : window.location.origin,
       },
     });
     setIsLoading(false);

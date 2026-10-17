@@ -14,6 +14,8 @@ interface Chip {
 
 const FALLBACK = ["Secondary use", "Electronic health records", "Opt-out rights", "Health data access bodies", "Patient summary"];
 const MAX_CHIPS = 7;
+const MIN_SEARCHES = 3; // a search must recur before it can be "popular"
+const MIN_SEARCHES_UNMATCHED = 15; // searches unrelated to a known topic need far more
 
 // Stable per-day shuffle so chips rotate daily without jumping on every render
 const dailyShuffle = <T,>(arr: T[]) => {
@@ -71,10 +73,21 @@ export const PopularTopicChips = () => {
         0,
       );
     };
-    // Top real searches first (counts are already sorted desc)
+    // Top real searches first (counts are already sorted desc).
+    // Only promote searches that are genuinely repeated, look like real words,
+    // and relate to a known topic (or are very frequent), so one-off typos never show.
+    const topicLower = topics.map((t) => t.toLowerCase());
+    const relatesToTopic = (q: string) =>
+      topicLower.some((t) => t === q || t.includes(q) || q.includes(t));
     const topSearches = counts
-      .filter((c) => c.search_count > 0 && c.query.trim().length > 2)
-      .slice(0, 4)
+      .filter((c) => {
+        const q = c.query.trim().toLowerCase();
+        if (q.length < 3 || q.length > 40) return false;
+        if (!/^[\p{L}\p{N}][\p{L}\p{N} .()'\-]*$/u.test(q)) return false;
+        if (c.search_count < MIN_SEARCHES) return false;
+        return relatesToTopic(q) || c.search_count >= MIN_SEARCHES_UNMATCHED;
+      })
+      .slice(0, 3)
       .map((c) => c.query.charAt(0).toUpperCase() + c.query.slice(1));
     const seen = new Set(topSearches.map((q) => q.toLowerCase()));
     const base = topics.length ? dailyShuffle(topics) : FALLBACK;

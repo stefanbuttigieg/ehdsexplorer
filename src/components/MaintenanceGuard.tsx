@@ -9,7 +9,7 @@ interface MaintenanceGuardProps {
 }
 
 // Routes that should always be accessible during maintenance
-const MAINTENANCE_EXEMPT_ROUTES = ["/admin/auth"];
+const MAINTENANCE_EXEMPT_ROUTES = ["/admin/auth", "/.lovable/oauth/consent"];
 
 const MaintenanceGuard = ({ children }: MaintenanceGuardProps) => {
   const location = useLocation();

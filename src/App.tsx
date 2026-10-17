@@ -1,3 +1,4 @@
+import OAuthConsent from "./pages/OAuthConsent";
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -245,6 +246,7 @@ const App = () => (
             <Route path="/study/quiz" element={<StudyQuizPage />} />
             <Route path="/assistant" element={<AssistantPage />} />
             <Route path="/journey" element={<JourneyPage />} />
+            <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
             <Route path="/admin/auth" element={<AdminAuthPage />} />
             <Route path="/admin/set-password" element={<AdminSetPasswordPage />} />
             <Route path="/profile" element={<ProfilePage />} />

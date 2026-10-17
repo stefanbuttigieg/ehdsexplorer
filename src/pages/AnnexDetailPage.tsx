@@ -1,3 +1,4 @@
+import { SEOHead, BreadcrumbSchema } from "@/components/seo";
 import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -76,6 +77,8 @@ const AnnexDetailPage = () => {
 
   return (
     <Layout>
+      <SEOHead title={`Annex ${annex.id}: ${annex.title} – EHDS Regulation`} description={`Full text of Annex ${annex.id} of the EHDS Regulation: ${annex.title}.`} url={`/annex/${annex.id}`} />
+      <BreadcrumbSchema items={[{name:"Home",url:"/"},{name:"Annexes",url:"/annexes"},{name:`Annex ${annex.id}`,url:`/annex/${annex.id}`}]} />
       <div className="p-4 sm:p-6 space-y-6">
         <Breadcrumbs items={[{ label: "Annexes", href: "/annexes" }, { label: `Annex ${annex.id}` }]} />
 

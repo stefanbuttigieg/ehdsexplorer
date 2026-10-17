@@ -1,3 +1,4 @@
+import { SEOHead, BreadcrumbSchema } from "@/components/seo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -30,6 +31,8 @@ const OverviewPage = () => {
 
   return (
     <Layout>
+      <SEOHead title={"EHDS Overview – What the European Health Data Space Means"} description={"A plain overview of the European Health Data Space Regulation: goals, key rights, obligations and timeline."} url={"/overview"} />
+      <BreadcrumbSchema items={[{name:"Home",url:"/"},{name:"Overview",url:"/overview"}]} />
       <div className="max-w-5xl mx-auto p-4 md:p-6 animate-fade-in">
         <Breadcrumbs items={[{ label: "Overview" }]} />
         <Badge variant="outline" className="mb-2 text-xs md:text-sm">{content?.regulation_reference || 'Regulation (EU) 2025/327'}</Badge>

@@ -1,3 +1,4 @@
+import { SEOHead, BreadcrumbSchema } from "@/components/seo";
 import { useParams, Link } from "react-router-dom";
 import { ExternalLink, Calendar, Bookmark, Globe, Clock, CalendarClock, CalendarX, CalendarCheck, Gavel, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -87,6 +88,8 @@ const ImplementingActDetail = () => {
 
   return (
     <Layout>
+      <SEOHead title={`${act.articleReference}: ${act.title} – EHDS Implementing Act`} description={(act.description || act.title).slice(0,155)} url={`/implementing-acts/${act.id}`} />
+      <BreadcrumbSchema items={[{name:"Home",url:"/"},{name:"Implementing Acts",url:"/implementing-acts"},{name:act.articleReference,url:`/implementing-acts/${act.id}`}]} />
       <div className="max-w-4xl mx-auto px-4 py-4 sm:p-6 animate-fade-in pb-20 md:pb-6">
         <Breadcrumbs items={[{ label: "Implementing Acts", href: "/implementing-acts" }, { label: act.articleReference }]} />
 

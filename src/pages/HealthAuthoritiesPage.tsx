@@ -1,3 +1,4 @@
+import { SEOHead, BreadcrumbSchema } from "@/components/seo";
 import { useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import Layout from '@/components/Layout';
@@ -339,6 +340,8 @@ export default function HealthAuthoritiesPage() {
 
   return (
     <Layout>
+      <SEOHead title={"Health Data Authorities by Country – EHDS Explorer"} description={"Digital health authorities and health data access bodies across EU Member States under the EHDS."} url={"/health-authorities"} />
+      <BreadcrumbSchema items={[{name:"Home",url:"/"},{name:"Health Authorities",url:"/health-authorities"}]} />
       <Helmet>
         <title>EHDS Country Map | EHDS Explorer</title>
         <meta name="description" content="Explore EHDS implementation progress, Digital Health Authorities, Health Data Access Bodies, and national legislation across EU member states." />

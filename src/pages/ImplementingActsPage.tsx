@@ -1,3 +1,4 @@
+import { SEOHead, BreadcrumbSchema } from "@/components/seo";
 import { Link } from "react-router-dom";
 import { useState, useMemo } from "react";
 import { ChevronRight, Globe, Clock, ExternalLink, CalendarClock, CalendarX, Search, ArrowUpDown } from "lucide-react";
@@ -179,6 +180,8 @@ const ImplementingActsPage = () => {
 
   return (
     <Layout>
+      <SEOHead title={"Implementing Acts Tracker – EHDS Explorer"} description={"Track every EHDS implementing and delegated act: status, feedback periods, deadlines and public comments."} url={"/implementing-acts"} />
+      <BreadcrumbSchema items={[{name:"Home",url:"/"},{name:"Implementing Acts",url:"/implementing-acts"}]} />
       <div className="max-w-5xl mx-auto px-4 py-4 sm:p-6 animate-fade-in pb-20 md:pb-6">
         <Breadcrumbs items={[{ label: "Implementing Acts" }]} />
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4 mb-2">

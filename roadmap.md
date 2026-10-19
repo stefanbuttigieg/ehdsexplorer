@@ -1,2 +1,2 @@
-- [ ] Show dashboard numbers before five newest committee meetings and the acts list.
-- [ ] Fix and verify retrieval of the latest official committee meetings.
+- [x] Show dashboard numbers before five newest committee meetings and the acts list.
+- [x] Fix and verify retrieval of the latest official committee meetings.

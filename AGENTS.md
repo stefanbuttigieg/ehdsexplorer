@@ -1,5 +1,7 @@
 # Agent rules
 
+- Country maps keep the shared Leaflet renderer and key-free OpenStreetMap standard tiles with visible attribution — avoids provider API-key prompts across classic, beta, and Kids Mode.
+
 - Committee meeting previews sort distinct meeting records by meeting date before limiting display; never sort by cache creation time or infer totals from ordinal titles — keeps the newest meetings visible and counts accurate.
 - Committee refreshes use the official register JSON feed and follow all returned pages, rejecting incomplete retrieval or failed storage — avoids silently reporting a partial scrape as current.
 

@@ -79,7 +79,7 @@ export function BetaSearch() {
     setParams(next, { replace: true });
   };
   return <BetaLayout>
-    <section className={`mx-auto max-w-5xl px-4 sm:px-8 ${query ? 'pt-10' : 'pt-14 sm:pt-20'}`}>
+    <section className={`mx-auto max-w-5xl px-4 sm:px-8 ${query ? 'pt-7 sm:pt-10' : 'pt-8 sm:pt-20'}`}>
       <div className="mb-8">
         <p className="mb-4 text-sm font-semibold uppercase text-secondary">European Health Data Space</p>
         <h1 className="font-serif text-3xl font-semibold leading-tight sm:text-4xl">{query ? 'Search EHDS' : 'EHDS Regulation Explorer'}</h1>
@@ -88,7 +88,7 @@ export function BetaSearch() {
       <form role="search" onSubmit={e => e.preventDefault()} className="flex min-h-16 items-center gap-2 rounded-lg border border-input bg-card px-3 focus-within:ring-2 focus-within:ring-ring sm:px-5">
         <Search className="h-6 w-6 shrink-0 text-primary" aria-hidden="true" />
         <label htmlFor="beta-search" className="sr-only">Search EHDS</label>
-        <Input id="beta-search" type="search" placeholder="Search a topic, question or article…" value={query} onChange={e => updateQuery(e.target.value)} className="min-h-16 min-w-0 border-0 bg-transparent px-2 text-base shadow-none focus-visible:ring-0 sm:text-lg" />
+        <Input id="beta-search" type="search" placeholder="Search EHDS…" value={query} onChange={e => updateQuery(e.target.value)} className="min-h-16 min-w-0 border-0 bg-transparent px-2 text-base shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 sm:text-lg" />
         {query && <Button variant="ghost" size="icon" className="min-h-11 min-w-11" aria-label="Clear search" onClick={() => updateQuery('')}><X className="h-4 w-4" /></Button>}
         <Button type="submit" size="icon" className="min-h-11 min-w-11" aria-label="Search"><ArrowRight className="h-5 w-5" /></Button>
       </form>
@@ -99,15 +99,15 @@ export function BetaSearch() {
         <div className="mt-10 flex flex-wrap items-center gap-3 text-sm text-muted-foreground"><BookOpen className="h-4 w-4" /><span>Regulation (EU) 2025/327</span><Button asChild variant="link" className="h-auto p-0"><Link to="/overview">Overview <ArrowRight className="ml-2 h-3 w-3" /></Link></Button></div>
       </>}
       {query && <>
-        <nav aria-label="Result type" className="mt-7 flex flex-wrap gap-2">
+        <nav aria-label="Result type" className="mt-7 flex gap-2 overflow-x-auto pb-2 sm:flex-wrap sm:overflow-visible [&>button]:shrink-0">
           <Button variant={filter === 'all' ? 'default' : 'ghost'} className="min-h-11" aria-pressed={filter === 'all'} onClick={() => updateFilter('all')}>All {all.length}</Button>
           {TYPES.map(t => <Button key={t.key} variant={filter === t.key ? 'default' : 'ghost'} className="min-h-11" aria-pressed={filter === t.key} onClick={() => updateFilter(t.key)}>{t.label} {results[t.key].length}</Button>)}
         </nav>
-        <p role="status" aria-live="polite" className="my-6 text-sm text-muted-foreground">{isLoading ? 'Searching…' : `${visible.length} results${filter === 'all' ? ' · Best matches first' : ''}`}</p>
+        <p role="status" aria-live="polite" className="my-6 text-sm text-muted-foreground">{isLoading ? 'Searching…' : `${visible.length} ${visible.length === 1 ? 'result' : 'results'}${filter === 'all' ? ' · Best matches first' : ''}`}</p>
         {isLoading ? <div className="space-y-4">{[1, 2, 3].map(n => <Skeleton key={n} className="h-28" />)}</div> : <div>
           {visible.slice(0, limit).map(result => <Link key={result.id} to={result.to} onClick={() => rememberSearch(`${location.pathname}${location.search}`)} className="group block border-t border-border py-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label={`${result.label}: ${result.title}`}>
             <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase text-secondary"><FileText className="h-3.5 w-3.5" />{result.label}</div>
-            <div className="flex items-start justify-between gap-4"><h2 className="font-serif text-lg font-semibold leading-relaxed group-hover:text-primary"><HighlightedText text={result.title} query={query} /></h2><ArrowRight className="mt-2 h-4 w-4 shrink-0 text-primary" /></div>
+            <div className="flex items-start justify-between gap-4"><h2 className="line-clamp-3 break-words font-serif text-lg font-semibold leading-relaxed group-hover:text-primary"><HighlightedText text={result.title} query={query} /></h2><ArrowRight className="mt-2 h-4 w-4 shrink-0 text-primary" /></div>
             <p className="mt-2 line-clamp-3 break-words text-sm leading-relaxed text-muted-foreground"><ResultSnippet result={result} query={query} /></p>
           </Link>)}
           {visible.length === 0 && <div className="border-t border-border py-12"><h2 className="font-serif text-xl font-semibold">No matches{filter !== 'all' ? ' in this content type' : ''}</h2>{filter !== 'all' && all.length > 0 ? <Button variant="link" onClick={() => updateFilter('all')}>View all {all.length} results</Button> : <p className="mt-3 text-muted-foreground">No results for “{query}”.</p>}</div>}

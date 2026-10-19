@@ -38,6 +38,7 @@ import { useKidsMode } from "@/contexts/KidsModeContext";
 import { LeaderboardTracker } from "@/components/LeaderboardTracker";
 import { useBetaExperience } from "@/contexts/BetaExperienceContext";
 import { BetaLayout } from "@/components/beta/BetaLayout";
+import { isBetaEligible } from "@/lib/beta-experience";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Home, Book, FileText, Scale, Files, ListChecks, Globe, Network, GitCompare,
@@ -421,7 +422,7 @@ const ClassicLayout = ({
             <NotificationsBanner />
           </div>
           <LayoutDisclaimers pathname={location.pathname} />
-          {!isKidsMode && !location.pathname.startsWith('/admin') && <div className="flex justify-end px-4 pt-2"><Button variant="outline" size="sm" className="min-h-11 gap-2" onClick={tryBeta}><Sparkles className="h-4 w-4" />Try the beta</Button></div>}
+          {isBetaEligible(location.pathname, isKidsMode) && <div className="flex justify-end px-4 pt-2"><Button variant="outline" size="sm" className="min-h-11 gap-2" onClick={tryBeta}><Sparkles className="h-4 w-4" />Try the beta</Button></div>}
           {children}
         </div>
       </main>

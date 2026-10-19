@@ -297,15 +297,15 @@
 
 /* Optional beta: tokens are scoped to this experience, including portal controls. */
 html.beta-experience {
-  --background: 210 40% 98%;
-  --foreground: 210 30% 13%;
+  --background: 210 40% 98.0392%;
+  --foreground: 210 30.303% 12.9412%;
   --card: 0 0% 100%;
   --card-foreground: 210 30% 13%;
   --popover: 0 0% 100%;
   --popover-foreground: 210 30% 13%;
-  --primary: 207 76% 38%;
+  --primary: 206.5306 76.1658% 37.8431%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 186 89% 29%;
+  --secondary: 185.9091 89.1892% 29.0196%;
   --secondary-foreground: 0 0% 100%;
   --accent: 186 35% 92%;
   --accent-foreground: 186 89% 24%;
@@ -340,6 +340,7 @@ html.dark.beta-experience {
 .beta-shell h1, .beta-shell h2, .beta-shell h3 { letter-spacing: 0; }
 .beta-shell a:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 3px; }
 .beta-shell button { min-height: 2.75rem; }
+.beta-shell input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
 @media (prefers-reduced-motion: reduce) {
   .beta-shell *, .beta-shell *::before, .beta-shell *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }

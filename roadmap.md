@@ -1,2 +1,5 @@
 - [x] Show dashboard numbers before five newest committee meetings and the acts list.
 - [x] Fix and verify retrieval of the latest official committee meetings.
+- [ ] Add browser-local beta trial, explicit adoption/reversal and routing safeguards without changing live.
+- [ ] Build search-first beta and accessible browse navigation using existing search and popular topics.
+- [ ] Run behavioural tests and verify real search, adoption/reload/reversal and desktop/mobile layouts.

@@ -193,9 +193,6 @@ const ImplementingActsPage = () => {
           See public feedback insights across all acts <ChevronRight className="h-4 w-4" />
         </Link>
 
-        {/* Comitology Register Updates */}
-        <ComitologyUpdatesCard />
-
         {/* Stats - scrollable on mobile */}
         <div className="flex gap-3 mb-8 overflow-x-auto pb-2 -mx-2 px-2 snap-x snap-mandatory md:grid md:grid-cols-6 md:overflow-visible md:pb-0 md:mx-0 md:px-0">
           {(['pending', 'preparation', 'feedback', 'feedback-closed', 'progress', 'adopted'] as ActStatus[]).map(status => (
@@ -207,6 +204,9 @@ const ImplementingActsPage = () => {
             </Card>
           ))}
         </div>
+
+        {/* Comitology Register Updates */}
+        <ComitologyUpdatesCard />
 
         {/* Search & Sort */}
         <div className="flex flex-col sm:flex-row gap-2 mb-4">

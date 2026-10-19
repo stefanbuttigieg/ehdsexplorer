@@ -6,14 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
-interface ComitologyMeeting {
-  meeting_code: string;
-  title: string;
-  date: string;
-  committee: string;
-  url: string;
-}
+import { newestMeetings, MEETING_PREVIEW_LIMIT } from '@/lib/comitology-meetings';
 
 export function ComitologyUpdatesCard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -25,15 +18,14 @@ export function ComitologyUpdatesCard() {
       const { data, error } = await supabase
         .from('comitology_updates')
         .select('*')
-        .order('created_at', { ascending: false })
-        .limit(10);
+        .order('scraped_at', { ascending: false });
       if (error) throw error;
       return data || [];
     },
   });
 
-  const isStale = updates.length === 0 || 
-    (updates.length > 0 && new Date(updates[0].scraped_at).getTime() < Date.now() - 24 * 60 * 60 * 1000);
+  const isStale = updates.length === 0 || updates.some(u =>
+    new Date(u.scraped_at).getTime() < Date.now() - 24 * 60 * 60 * 1000);
 
   const handleRefreshSilent = useCallback(async () => {
     setIsRefreshing(true);
@@ -75,27 +67,19 @@ export function ComitologyUpdatesCard() {
     }
   };
 
-  // Parse scraped_content to get structured meeting data
-  const meetings: ComitologyMeeting[] = updates
-    .map(u => {
-      try {
-        return JSON.parse(u.scraped_content || '{}') as ComitologyMeeting;
-      } catch {
-        return null;
-      }
-    })
-    .filter((m): m is ComitologyMeeting => m !== null && !!m.meeting_code);
+  const allMeetings = newestMeetings(updates);
+  const meetings = allMeetings.slice(0, MEETING_PREVIEW_LIMIT);
 
   return (
     <Card className="mb-6 border-primary/20">
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Calendar className="h-5 w-5 text-primary" />
             EHDS Committee Meetings
           </CardTitle>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
+            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing} aria-label="Refresh committee meetings" title="Refresh committee meetings">
               {isRefreshing ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
@@ -115,21 +99,22 @@ export function ComitologyUpdatesCard() {
         </div>
       </CardHeader>
       <CardContent>
+        {allMeetings.length > 0 && <p className="text-xs text-muted-foreground mb-2">Latest {meetings.length} of {allMeetings.length} meetings</p>}
         {meetings.length > 0 ? (
           <div className="space-y-2">
-            {meetings.map((m, i) => (
+            {meetings.map(m => (
               <a
-                key={i}
+                key={m.meeting_code}
                 href={m.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50 transition-colors group"
               >
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">
+                  <p className="text-sm font-medium break-words group-hover:text-primary transition-colors">
                     {m.title}
                   </p>
-                  <div className="flex items-center gap-2 mt-0.5">
+                  <div className="flex flex-wrap items-center gap-2 mt-0.5">
                     <Badge variant="outline" className="text-xs">{m.meeting_code}</Badge>
                     <span className="text-xs text-muted-foreground">{m.date}</span>
                   </div>

@@ -36,6 +36,8 @@ import { KidsModeToggle } from "@/components/KidsModeToggle";
 import { HeaderItemsRenderer } from "@/components/HeaderItemsRenderer";
 import { useKidsMode } from "@/contexts/KidsModeContext";
 import { LeaderboardTracker } from "@/components/LeaderboardTracker";
+import { useBetaExperience } from "@/contexts/BetaExperienceContext";
+import { BetaLayout } from "@/components/beta/BetaLayout";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Home, Book, FileText, Scale, Files, ListChecks, Globe, Network, GitCompare,
@@ -95,7 +97,7 @@ function LayoutDisclaimers({ pathname }: { pathname: string }) {
 interface LayoutProps {
   children: ReactNode;
 }
-const Layout = ({
+const ClassicLayout = ({
   children
 }: LayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -124,6 +126,7 @@ const Layout = ({
   } = useAuth();
   const { isFeatureEnabled } = useFeatureFlags();
   const { isKidsMode, isKidsFriendlyRoute } = useKidsMode();
+  const { tryBeta } = useBetaExperience();
   const { t } = useLanguage();
   const { data: dbSidebarItems } = useSidebarItems();
 
@@ -418,6 +421,7 @@ const Layout = ({
             <NotificationsBanner />
           </div>
           <LayoutDisclaimers pathname={location.pathname} />
+          {!isKidsMode && !location.pathname.startsWith('/admin') && <div className="flex justify-end px-4 pt-2"><Button variant="outline" size="sm" className="min-h-11 gap-2" onClick={tryBeta}><Sparkles className="h-4 w-4" />Try the beta</Button></div>}
           {children}
         </div>
       </main>
@@ -444,5 +448,9 @@ const Layout = ({
         </div>
       )}
     </div>;
+};
+const Layout = ({ children }: LayoutProps) => {
+  const { active } = useBetaExperience();
+  return active ? <BetaLayout>{children}</BetaLayout> : <ClassicLayout>{children}</ClassicLayout>;
 };
 export default Layout;

@@ -19,6 +19,8 @@ import { AchievementUnlockedToast } from "@/components/achievements/AchievementU
 import { LevelUpModal } from "@/components/achievements/LevelUpModal";
 import CookieConsentBanner from "./components/CookieConsentBanner";
 import PostHogProvider from "./components/PostHogProvider";
+import { BetaExperienceProvider, useBetaExperience } from "@/contexts/BetaExperienceContext";
+import { BetaSearch } from "@/components/beta/BetaSearch";
 
 // Eagerly load Index for fastest FCP/LCP on homepage
 import Index from "./pages/Index";
@@ -166,6 +168,10 @@ const PageLoader = () => (
 // Wrappers to use achievements hooks within providers
 const AchievementToastWrapper = () => <AchievementUnlockedToast />;
 const LevelUpModalWrapper = () => <LevelUpModal />;
+const PublicHome = () => {
+  const { active } = useBetaExperience();
+  return active ? <BetaSearch /> : <Index />;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -179,6 +185,7 @@ const App = () => (
               <Toaster />
               <Sonner />
               <BrowserRouter>
+                <BetaExperienceProvider>
                 <UmamiAnalytics />
                 <PostHogProvider />
                 <CookieConsentBanner />
@@ -189,7 +196,8 @@ const App = () => (
                 <KidsModeGuard />
           <Suspense fallback={<PageLoader />}>
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<PublicHome />} />
+            <Route path="/beta" element={<PublicHome />} />
             <Route path="/overview" element={<OverviewPage />} />
             <Route path="/chapter/:id" element={<ChapterPage />} />
             <Route path="/articles" element={<ArticlesPage />} />
@@ -314,6 +322,7 @@ const App = () => (
           </Routes>
           </Suspense>
           </MaintenanceGuard>
+          </BetaExperienceProvider>
           </BrowserRouter>
             </TooltipProvider>
             </KidsModeProvider>

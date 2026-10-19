@@ -26,7 +26,7 @@ const dailyShuffle = <T,>(arr: T[]) => {
     .map((x) => x.v);
 };
 
-export const PopularTopicChips = () => {
+export const PopularTopicChips = ({ searchOnly = false, maxChips = MAX_CHIPS }: { searchOnly?: boolean; maxChips?: number } = {}) => {
   const { data: acts = [] } = useImplementingActs();
   const { data: topics = [] } = useQuery({
     queryKey: ["popular-topic-chips"],
@@ -56,7 +56,7 @@ export const PopularTopicChips = () => {
   });
 
   const chips = useMemo<Chip[]>(() => {
-    const live: Chip[] = acts
+    const live: Chip[] = (searchOnly ? [] : acts)
       .filter((a) => a.status === "feedback")
       .slice(0, 2)
       .map((a) => ({
@@ -99,13 +99,13 @@ export const PopularTopicChips = () => {
         .sort((a, b) => b.s - a.s || a.i - b.i)
         .map((x) => x.t),
     ];
-    const topicChips: Chip[] = pool.slice(0, MAX_CHIPS - live.length).map((t) => ({
+    const topicChips: Chip[] = pool.slice(0, maxChips - live.length).map((t) => ({
       key: `t-${t}`,
       label: t,
       to: `/search?q=${encodeURIComponent(t)}`,
     }));
     return [...live, ...topicChips];
-  }, [acts, topics, counts]);
+  }, [acts, topics, counts, searchOnly, maxChips]);
 
   if (!chips.length) return null;
 
@@ -121,7 +121,7 @@ export const PopularTopicChips = () => {
           className={
             c.live
               ? "inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
-              : "inline-flex items-center rounded-full border border-border bg-background px-3 py-1 text-xs text-foreground hover:border-primary hover:text-primary transition-colors"
+              : "inline-flex min-h-11 max-w-full items-center rounded-full border border-border bg-background px-3 py-1 text-xs text-foreground hover:border-primary hover:text-primary transition-colors break-words"
           }
         >
           {c.live && <MessageSquare className="h-3 w-3" />}

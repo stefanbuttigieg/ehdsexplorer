@@ -3,6 +3,10 @@ import { act, cleanup, render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import PostHogProvider from '@/components/PostHogProvider';
 
+vi.mock('@/contexts/BetaExperienceContext', () => ({
+  useBetaExperience: () => ({ active: false, adopted: false }),
+}));
+
 const analytics = vi.hoisted(() => ({
   optedIn: false,
   init: vi.fn(),

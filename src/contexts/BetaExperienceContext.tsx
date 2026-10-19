@@ -49,7 +49,7 @@ export function BetaExperienceProvider({ children }: { children: ReactNode }) {
   // A shared entry starts only a tab-local trial; it never changes the default.
   useEffect(() => {
     if (location.pathname === '/beta' && !isKidsMode) {
-      if (!trial && !adopted) announceBetaChoice('trial');
+      if (!trial && !adopted && !readBetaChoice(sessionStorage, BETA_TRIAL_KEY)) announceBetaChoice('trial');
       setTrial(true);
       writeBetaChoice(sessionStorage, BETA_TRIAL_KEY, true);
     }

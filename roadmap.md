@@ -3,3 +3,4 @@
 - [x] Add browser-local beta trial, explicit adoption/reversal and routing safeguards without changing live.
 - [x] Build search-first beta and accessible browse navigation using existing search and popular topics.
 - [x] Run behavioural tests and verify real search, adoption/reload/reversal and desktop/mobile layouts.
+- [x] Add consent-based production-only beta choice events and experience labels; test no trial/draft inflation (16 Bun tests and real browser flow passed; standard consent runner remains incompatible).

@@ -7,6 +7,8 @@ const getPageProps = (pathname: string): Record<string, unknown> => {
 };
 import { useLocation } from 'react-router-dom';
 import posthog from 'posthog-js';
+import { useBetaExperience } from '@/contexts/BetaExperienceContext';
+import { BETA_CHOICE_EVENT, betaEventName, canTrackBeta } from '@/lib/beta-analytics';
 
 const POSTHOG_KEY = 'phc_9BcUMy3kevDdo2gGu61hTnQD05dzn5FGtBxilJ6yXt3';
 const POSTHOG_HOST = 'https://eu.i.posthog.com';
@@ -48,6 +50,17 @@ const initPostHog = () => {
 
 const PostHogProvider = () => {
   const location = useLocation();
+  const { active, adopted } = useBetaExperience();
+
+  useEffect(() => {
+    const handleBetaChoice = (event: Event) => {
+      const name = betaEventName((event as CustomEvent).detail?.choice);
+      if (!name || !canTrackBeta(getAnalyticsConsent(), posthogInitialized, window.location.hostname, window.self !== window.top)) return;
+      posthog.capture(name, { beta_version: 'search-first-v1' });
+    };
+    window.addEventListener(BETA_CHOICE_EVENT, handleBetaChoice);
+    return () => window.removeEventListener(BETA_CHOICE_EVENT, handleBetaChoice);
+  }, []);
 
   // Initialize or opt out based on cookie consent
   useEffect(() => {
@@ -93,7 +106,8 @@ const PostHogProvider = () => {
   const prevRef = useRef<{ url: string; props: Record<string, unknown> } | null>(null);
   useEffect(() => {
     if (!posthogInitialized || !getAnalyticsConsent()) return;
-    const props = getPageProps(location.pathname);
+    const props = { ...getPageProps(location.pathname), experience: active ? 'beta' : 'classic', beta_default: adopted,
+      analytics_environment: canTrackBeta(true, true, window.location.hostname, window.self !== window.top) ? 'production' : 'review' };
     if (prevRef.current) {
       posthog.capture('$pageleave', { $current_url: prevRef.current.url, ...prevRef.current.props });
     }

@@ -11,10 +11,12 @@ import Layout from "@/components/Layout";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { HighlightedText } from "@/components/HighlightedText";
 import { useSearch, getMatchContext } from "@/hooks/useSearch";
+import { useBetaExperience } from "@/contexts/BetaExperienceContext";
+import { BetaSearch } from "@/components/beta/BetaSearch";
 
 type FilterType = 'all' | 'articles' | 'recitals' | 'definitions' | 'chapters' | 'acts' | 'annexes' | 'faqs';
 
-const SearchPage = () => {
+const ClassicSearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialQuery = searchParams.get("q") || "";
   const [query, setQuery] = useState(initialQuery);
@@ -329,4 +331,8 @@ const SearchPage = () => {
   );
 };
 
+const SearchPage = () => {
+  const { active } = useBetaExperience();
+  return active ? <BetaSearch /> : <ClassicSearchPage />;
+};
 export default SearchPage;

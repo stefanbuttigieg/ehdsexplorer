@@ -295,6 +295,56 @@
   }
 }
 
+/* Optional beta: tokens are scoped to this experience, including portal controls. */
+html.beta-experience {
+  --background: 210 40% 98.0392%;
+  --foreground: 210 30.303% 12.9412%;
+  --card: 0 0% 100%;
+  --card-foreground: 210 30% 13%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 210 30% 13%;
+  --primary: 206.5306 76.1658% 37.8431%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 185.9091 89.1892% 29.0196%;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 186 35% 92%;
+  --accent-foreground: 186 89% 24%;
+  --muted: 210 25% 94%;
+  --muted-foreground: 210 16% 39%;
+  --border: 210 23% 86%;
+  --input: 210 23% 78%;
+  --ring: 207 76% 38%;
+  --font-serif: 'Sora', system-ui, sans-serif;
+  --font-sans: 'Manrope', system-ui, sans-serif;
+}
+html.dark.beta-experience {
+  --background: 210 22% 10%;
+  --foreground: 210 25% 95%;
+  --card: 210 20% 13%;
+  --card-foreground: 210 25% 95%;
+  --popover: 210 20% 13%;
+  --popover-foreground: 210 25% 95%;
+  --primary: 207 85% 73%;
+  --primary-foreground: 210 30% 13%;
+  --secondary: 186 60% 65%;
+  --secondary-foreground: 210 30% 13%;
+  --accent: 186 30% 19%;
+  --accent-foreground: 186 60% 80%;
+  --muted: 210 20% 18%;
+  --muted-foreground: 210 15% 73%;
+  --border: 210 18% 28%;
+  --input: 210 18% 40%;
+  --ring: 207 85% 73%;
+}
+.beta-shell { font-family: var(--font-sans); letter-spacing: 0; }
+.beta-shell h1, .beta-shell h2, .beta-shell h3 { letter-spacing: 0; }
+.beta-shell a:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 3px; }
+.beta-shell button { min-height: 2.75rem; }
+.beta-shell input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
+@media (prefers-reduced-motion: reduce) {
+  .beta-shell *, .beta-shell *::before, .beta-shell *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
 /* Print Styles */
 @media print {
   /* Hide navigation and interactive elements */

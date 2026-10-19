@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useKidsMode } from '@/contexts/KidsModeContext';
-import { BETA_DEFAULT_KEY, BETA_TRIAL_KEY, classicDestination, readBetaChoice, shouldUseBeta, writeBetaChoice } from '@/lib/beta-experience';
+import { BETA_DEFAULT_KEY, BETA_TRIAL_KEY, classicDestination, isBetaEligible, readBetaChoice, shouldUseBeta, writeBetaChoice } from '@/lib/beta-experience';
 
 interface BetaExperience {
   active: boolean;
@@ -22,7 +22,9 @@ export function BetaExperienceProvider({ children }: { children: ReactNode }) {
   const [adopted, setAdopted] = useState(() => readBetaChoice(localStorage, BETA_DEFAULT_KEY));
   const [trial, setTrial] = useState(() => readBetaChoice(sessionStorage, BETA_TRIAL_KEY));
   const [storageError, setStorageError] = useState<string | null>(null);
-  const [searchReturn, setSearchReturn] = useState<string | null>(null);
+  const [searchReturn, setSearchReturn] = useState<string | null>(() => {
+    try { return sessionStorage.getItem('ehds-beta-search-return'); } catch { return null; }
+  });
   const active = shouldUseBeta(location.pathname, isKidsMode, trial, adopted);
 
   useEffect(() => {
@@ -52,7 +54,7 @@ export function BetaExperienceProvider({ children }: { children: ReactNode }) {
   }, [location.pathname, isKidsMode]);
 
   const tryBeta = () => {
-    if (isKidsMode) return;
+    if (!isBetaEligible(location.pathname, isKidsMode)) return;
     setTrial(true);
     writeBetaChoice(sessionStorage, BETA_TRIAL_KEY, true);
     setStorageError(null);
@@ -69,12 +71,18 @@ export function BetaExperienceProvider({ children }: { children: ReactNode }) {
     setTrial(false);
     setAdopted(false);
     setSearchReturn(null);
+    try { sessionStorage.removeItem('ehds-beta-search-return'); } catch { /* Session memory still clears. */ }
     setStorageError(saved ? null : 'Your browser could not clear this preference.');
     const destination = classicDestination(location.pathname, location.search, location.hash);
     if (destination !== `${location.pathname}${location.search}${location.hash}`) navigate(destination, { replace: true });
   };
 
-  return <BetaContext.Provider value={{ active, adopted, storageError, tryBeta, adopt, backToClassic, searchReturn, rememberSearch: setSearchReturn }}>{children}</BetaContext.Provider>;
+  const rememberSearch = (url: string) => {
+    if (!/^\/(?:beta|search)(?:\?|$)/.test(url)) return;
+    setSearchReturn(url);
+    try { sessionStorage.setItem('ehds-beta-search-return', url); } catch { /* In-memory return still works. */ }
+  };
+  return <BetaContext.Provider value={{ active, adopted, storageError, tryBeta, adopt, backToClassic, searchReturn, rememberSearch }}>{children}</BetaContext.Provider>;
 }
 
 export function useBetaExperience() {

@@ -27,6 +27,13 @@ export function BetaExperienceProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.classList.toggle('beta-experience', active);
+    if (active && !document.getElementById('beta-fonts')) {
+      const fonts = document.createElement('link');
+      fonts.id = 'beta-fonts';
+      fonts.rel = 'stylesheet';
+      fonts.href = 'https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap';
+      document.head.appendChild(fonts);
+    }
     return () => document.documentElement.classList.remove('beta-experience');
   }, [active]);
 

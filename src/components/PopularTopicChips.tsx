@@ -121,7 +121,7 @@ export const PopularTopicChips = ({ searchOnly = false, maxChips = MAX_CHIPS }: 
           className={
             c.live
               ? "inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
-              : "inline-flex min-h-11 max-w-full items-center rounded-full border border-border bg-background px-3 py-1 text-xs text-foreground hover:border-primary hover:text-primary transition-colors break-words"
+              : `inline-flex ${searchOnly ? 'min-h-11 max-w-full break-words' : ''} items-center rounded-full border border-border bg-background px-3 py-1 text-xs text-foreground hover:border-primary hover:text-primary transition-colors`
           }
         >
           {c.live && <MessageSquare className="h-3 w-3" />}

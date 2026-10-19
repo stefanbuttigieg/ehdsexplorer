@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useKidsMode } from '@/contexts/KidsModeContext';
 import { BETA_DEFAULT_KEY, BETA_TRIAL_KEY, classicDestination, isBetaEligible, readBetaChoice, shouldUseBeta, writeBetaChoice } from '@/lib/beta-experience';
+import { announceBetaChoice } from '@/lib/beta-analytics';
 
 interface BetaExperience {
   active: boolean;
@@ -48,25 +49,30 @@ export function BetaExperienceProvider({ children }: { children: ReactNode }) {
   // A shared entry starts only a tab-local trial; it never changes the default.
   useEffect(() => {
     if (location.pathname === '/beta' && !isKidsMode) {
+      if (!trial && !adopted) announceBetaChoice('trial');
       setTrial(true);
       writeBetaChoice(sessionStorage, BETA_TRIAL_KEY, true);
     }
-  }, [location.pathname, isKidsMode]);
+  }, [location.pathname, isKidsMode, trial, adopted]);
 
   const tryBeta = () => {
     if (!isBetaEligible(location.pathname, isKidsMode)) return;
+    if (!trial && !adopted) announceBetaChoice('trial');
     setTrial(true);
     writeBetaChoice(sessionStorage, BETA_TRIAL_KEY, true);
     setStorageError(null);
     if (location.pathname === '/') navigate(`/beta${location.search}${location.hash}`);
   };
   const adopt = () => {
+    if (adopted || !active) return;
     const saved = writeBetaChoice(localStorage, BETA_DEFAULT_KEY, true);
+    if (saved) announceBetaChoice('adopted');
     setAdopted(saved);
     setStorageError(saved ? null : 'Your browser could not save this preference.');
   };
   const backToClassic = () => {
     const saved = writeBetaChoice(localStorage, BETA_DEFAULT_KEY, false);
+    if (saved && adopted) announceBetaChoice('returned_to_classic');
     writeBetaChoice(sessionStorage, BETA_TRIAL_KEY, false);
     setTrial(false);
     setAdopted(false);

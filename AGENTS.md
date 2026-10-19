@@ -7,3 +7,4 @@
 - Optional beta presentation is selected by BetaExperienceProvider at public home/search and Layout boundaries; canonical content routes and their loaders remain shared — preserves deep links and one search engine.
 - Beta trials use session storage, adoption uses local storage, and switching back clears both; eligibility excludes Kids Mode and administrative/account/auth surfaces — avoids silent adoption and redirect loops.
 - Beta search consumes useSearch and PopularTopicChips directly, with its own results presentation and scoped theme tokens — keeps search semantics and popularity safeguards consistent with classic.
+- Beta choice events are sent only through the initialized consent-based PostHog provider on nonembedded production hosts; existing pageviews carry experience/default/environment labels — measures uptake without draft inflation or a second tracker.

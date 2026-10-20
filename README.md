@@ -29,7 +29,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Article Dependency Graph** — interactive visualization showing how articles reference each other, with spiral layout, pan/zoom, filtering, and detail panel
 - **115 Recitals** with individual detail pages and related article links
 - **4 Annexes** with detailed technical requirements and specifications
-- **170+ Definitions** from Article 2, EU EHR Glossary, Xt-EHR, and Implementing Acts with multi-source support
+- **172 Definitions** from Article 2, EU EHR Glossary, Xt-EHR, and Implementing Acts with multi-source support
 - **Multi-source definitions** - See how the same term is defined across EHDS Regulation, EU EHR Glossary, Xt-EHR, and Implementing Acts
 - **Smart legal reference linking** - Internal article/recital references are auto-linked; external regulation references (e.g., "Article 6 of Regulation (EU) 2016/679") are correctly left as plain text
 
@@ -45,7 +45,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Search-first beta** — opt-in redesigned experience at `/beta`; visitors can try, adopt, or switch back to classic
 
 ### 📋 Implementing Acts Tracker
-- **33 implementing/delegated acts** identified in the regulation
+- **16 implementing/delegated acts** currently tracked
 - **6 thematic categories**: Primary Use, EHR Systems, Secondary Use, Health Data Access Bodies, Cross-Border Infrastructure, EHDS Board & Governance
 - **Status tracking**: Pending, Open for Feedback, In Progress, Adopted
 - **Adoption lifecycle dates** — adopted_date, entry_into_force_date, and date_of_effect per implementing act
@@ -156,7 +156,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Dismissible notifications** for better UX
 
 ### ❓ Official EHDS FAQs
-- **67 official EU Commission Q&As** parsed from the EHDS FAQ PDF document
+- **66 official EU Commission Q&As** parsed from the EHDS FAQ PDF document
 - **Chapter-grouped accordion** display with search across questions and answers
 - **Rich content** rendering including markdown tables, links, and formatted lists
 - **Footnote tooltips** per FAQ with inline markers
@@ -165,7 +165,7 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **FAQ cross-references** (e.g. "see question 33") as clickable anchors
 - **Official source linkback** to EU Commission page
 - **Auto-update pipeline** — weekly monitoring of EU source page for new PDF versions
-- **PDF parser** — AI-powered extraction of all 67 FAQs preserving tables, footnotes, and references
+- **PDF parser** — AI-powered extraction of all official FAQs preserving tables, footnotes, and references
 - **API endpoint** — `?resource=faqs` with chapter filtering and CSV export
 - **JSON-LD structured data** for SEO
 
@@ -408,9 +408,9 @@ https://api.ehdsexplorer.eu/functions/v1/api-data
 | `?resource=articles` | All 105 articles |
 | `?resource=recitals` | All 115 recitals |
 | `?resource=definitions` | All definitions |
-| `?resource=chapters` | All 10 chapters |
-| `?resource=implementing-acts` | All 33 implementing acts |
-| `?resource=faqs` | All 67 official EHDS FAQs |
+| `?resource=chapters` | All 9 chapters |
+| `?resource=implementing-acts` | All 16 tracked implementing acts |
+| `?resource=faqs` | All 66 official EHDS FAQs |
 | `?resource=feedback-comments` | Public feedback comments on implementing acts (filters: act, sentiment, country, user_type, from, to, limit, offset) |
 | `?resource=feedback-insights` | Per-act feedback summaries (sentiment, themes, word cloud); add `act` for one |
 | `?resource=metadata` | Dataset metadata |

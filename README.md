@@ -41,6 +41,8 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Real-time results** as you type
 - **Search-result highlighting**
 - **Recent searches history**
+- **Popular topic chips** — one-click topics weighted by real search popularity, with safeguards against one-off searches
+- **Search-first beta** — opt-in redesigned experience at `/beta`; visitors can try, adopt, or switch back to classic
 
 ### 📋 Implementing Acts Tracker
 - **33 implementing/delegated acts** identified in the regulation
@@ -60,12 +62,16 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Section-based article organization** for complex acts
 - **Data Tables** — Structured data element tables per implementing act with search, CSV/JSON export, FHIR mapping fields
 - **Search & sort** — Filter implementing acts by title/description and sort by linked article number
+- **Committee meetings** — Latest meetings of the EHDS Committee, pulled from the official Comitology Register feed
+- **Automatic feedback closing** — Feedback status closes automatically once the deadline passes
+- **Bulk editing** for admins across multiple acts
+- **Feedback Insights** (`/feedback-insights`) — Public comments from the EC Have Your Say portal with AI sentiment, word cloud, respondent/country breakdowns, points of contention, consensus vs friction matrix, and submission timelines marked with deadlines
 
 ### 🗺️ National EHDS Entities
 - **Directory of DHAs and HDABs** across all 27 EU member states
 - **Digital Health Authorities (DHAs)** - Primary use of health data (citizen access to EHRs)
 - **Health Data Access Bodies (HDABs)** - Secondary use of health data (research, policy)
-- **Interactive EU map** showing countries with designated entities
+- **Interactive EU map** showing countries with designated entities (OpenStreetMap, no API key needed)
 - **Color-coded entity types** - Blue for DHAs, purple for HDABs
 - **Status tracking** - Active, pending, planned, or inactive
 - **Contact information** - Email, phone, website, and address for each entity
@@ -129,6 +135,8 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - **Dynamic meta tags** with keyword-rich titles and descriptions under 60/160 characters
 - **Open Graph and Twitter cards** for social sharing optimization
 - **Admin SEO Management** at `/admin/seo` for page-level configuration
+- **Automatic sitemap** generated from the database at build time, plus `llms.txt` for AI tools
+- **Google Search Console** verified with sitemap submitted
 - **Newsletter signup** for email capture and user retention
 - **Weekly newsletter management** — AI-assisted newsletter composer with subscriber management and bulk distribution
 - **Downloadable resources** with email gating for lead generation
@@ -348,6 +356,9 @@ The EHDS Regulation Explorer provides an intuitive interface for healthcare prof
 - [X] Multi-language support (all 24 EU languages)
 - [X] API for third-party integrations
 - [X] National EHDS Entities directory (DHAs and HDABs)
+- [X] Public feedback insights for implementing acts (sentiment, word cloud, timelines)
+- [X] Search-first beta experience (opt-in at `/beta`)
+- [X] EC eTranslation integration for admins
 
 ## 🚀 Planned Features and Actions
 
@@ -400,11 +411,13 @@ https://api.ehdsexplorer.eu/functions/v1/api-data
 | `?resource=chapters` | All 10 chapters |
 | `?resource=implementing-acts` | All 33 implementing acts |
 | `?resource=faqs` | All 67 official EHDS FAQs |
+| `?resource=feedback-comments` | Public feedback comments on implementing acts (filters: act, sentiment, country, user_type, from, to, limit, offset) |
+| `?resource=feedback-insights` | Per-act feedback summaries (sentiment, themes, word cloud); add `act` for one |
 | `?resource=metadata` | Dataset metadata |
 
 ### Example
 ```bash
-curl "https://lmjjghvrjgffmbidajih.supabase.co/functions/v1/api-data?resource=articles&format=json"
+curl "https://api.ehdsexplorer.eu/functions/v1/api-data?resource=articles&format=json"
 ```
 
 See the [API Documentation](/api) for full details.

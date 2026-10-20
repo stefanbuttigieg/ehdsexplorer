@@ -5,6 +5,39 @@ All notable changes to the EHDS Regulation Explorer will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0] - 2026-10-20
+
+### Added
+- **Search-first beta** at `/beta` — opt-in redesign focused on search; try, adopt, or switch back to classic (Kids Mode and admin unaffected)
+- **Feedback Insights dashboard** (`/feedback-insights`) — EC public feedback comments per implementing act with AI sentiment, word cloud, clickable filters, points of contention, consensus vs friction matrix, open/past session filter, and submission timelines with deadline markers
+- **Public API** — new `feedback-comments` and `feedback-insights` resources, documented on the API pages
+- **Popular topic chips** below the homepage search, weighted by search popularity (minimum thresholds and text checks)
+- **My EHDS Journey** link in the main navigation for all audiences, including Kids Mode
+- **EC eTranslation** integration and admin dashboard (`/admin/etranslation`)
+- **Bulk edit/delete** for implementing acts in admin
+- **Automatic sitemap** generation from the database; `llms.txt` refreshed; Google Search Console verified with sitemap submitted
+- **PostHog page-type tracking** for article/recital bounce analysis
+
+### Changed
+- Implementing Acts page order: numbers first, then the 5 latest committee meetings, then the acts list
+- Feedback status closes automatically when the deadline passes (daily job)
+- Implementing act detail pages improved for mobile
+- Annex markdown tables now render correctly
+- Per-page SEO titles, descriptions, canonical addresses and breadcrumbs across main pages
+
+### Fixed
+- Committee meetings now come from the official Comitology Register feed with all pages retrieved (previously incomplete)
+- Country maps use OpenStreetMap tiles and no longer ask for an API key
+- PostHog consent opt-in now runs once instead of on every render (reduces analytics costs)
+- Kids Mode navigation in incognito/production
+- EU regulation update checker deployment made more reliable
+
+### Security
+- Anonymized public leaderboard view with `security_invoker`
+- Dependency updates (jsdom); remaining advisories documented
+
+---
+
 ## [2.5.0] - 2026-04-18
 
 ### Added

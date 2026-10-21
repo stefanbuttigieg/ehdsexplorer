@@ -1,3 +1,4 @@
+- [ ] Match Help Center definitions to the glossary and present historical news as an archive; verify both pages.
 - [x] Show dashboard numbers before five newest committee meetings and the acts list.
 - [x] Fix and verify retrieval of the latest official committee meetings.
 - [x] Add browser-local beta trial, explicit adoption/reversal and routing safeguards without changing live.

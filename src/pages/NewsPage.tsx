@@ -1,5 +1,4 @@
 import { SEOHead, BreadcrumbSchema } from "@/components/seo";
-import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Newspaper, Calendar, ChevronRight } from 'lucide-react';
@@ -14,21 +13,21 @@ const NewsPage = () => {
 
   return (
     <Layout>
-      <SEOHead title={"EHDS News & Updates – EHDS Explorer"} description={"Weekly summaries of news and developments on the European Health Data Space."} url={"/news"} />
-      <BreadcrumbSchema items={[{name:"Home",url:"/"},{name:"News",url:"/news"}]} />
-      <Helmet>
-        <title>EHDS News | Weekly Summaries</title>
-        <meta name="description" content="Weekly AI-generated summaries of developments in the European Health Data Space Regulation." />
-      </Helmet>
+      <SEOHead title="EHDS News Archive – EHDS Explorer" description="Archived summaries of European Health Data Space developments, with their original reporting periods." url="/news" />
+      <BreadcrumbSchema items={[{name:"Home",url:"/"},{name:"News Archive",url:"/news"}]} />
 
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
             <Newspaper className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold">EHDS News</h1>
+            <h1 className="text-3xl font-bold">EHDS News Archive</h1>
           </div>
           <p className="text-muted-foreground">
-            Weekly AI-generated summaries of developments related to the European Health Data Space Regulation.
+            Historical summaries, not a current weekly news feed. Dates reflect the original reporting periods.
+          </p>
+          <p className="text-muted-foreground mt-3">
+            For current implementation status and committee meetings, visit the{' '}
+            <Link to="/implementing-acts" className="text-primary hover:underline">Implementing Acts tracker</Link>.
           </p>
         </div>
 
@@ -49,7 +48,7 @@ const NewsPage = () => {
         ) : summaries && summaries.length > 0 ? (
           <div className="space-y-4">
             {summaries.map((summary) => (
-              <Link key={summary.id} to={`/news/${summary.id}`}>
+              <Link key={summary.id} to={`/news/${summary.id}`} className="block">
                 <Card className="hover:border-primary/50 transition-colors cursor-pointer">
                   <CardHeader>
                     <div className="flex items-start justify-between gap-4">
@@ -85,9 +84,9 @@ const NewsPage = () => {
           <Card>
             <CardContent className="py-12 text-center">
               <Newspaper className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">No News Yet</h3>
+              <h3 className="text-lg font-medium mb-2">No Archived Summaries</h3>
               <p className="text-muted-foreground">
-                Weekly EHDS news summaries will appear here once published.
+                There are no published summaries in the archive.
               </p>
             </CardContent>
           </Card>

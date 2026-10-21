@@ -18,9 +18,11 @@ import Layout from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
 import { useHelpCenterFaqs, useFaqCategories } from '@/hooks/useHelpCenterFaq';
 import { SEOHead, FAQSchema, BreadcrumbSchema } from '@/components/seo';
+import { useDefinitions } from '@/hooks/useDefinitions';
 
 const HelpCenterPage = () => {
   const { user } = useAuth();
+  const { data: definitions } = useDefinitions();
   const { data: dynamicFaqs, isLoading: faqsLoading } = useHelpCenterFaqs(true);
   const categories = useFaqCategories();
   
@@ -154,7 +156,7 @@ const HelpCenterPage = () => {
                 </li>
                 <li className="flex items-center gap-2">
                   <ChevronRight className="h-4 w-4 text-primary" />
-                  <strong>62+ Definitions</strong> from Article 2
+                  <strong>{definitions ? `${definitions.length} Definitions` : 'Definitions'}</strong> from the EHDS Regulation, EU EHR glossary, Xt-EHR, and implementing acts
                 </li>
                 <li className="flex items-center gap-2">
                   <ChevronRight className="h-4 w-4 text-primary" />
@@ -281,7 +283,7 @@ const HelpCenterPage = () => {
                   <li><strong>Recitals:</strong> Browse all 115 recitals</li>
                   <li><strong>Annexes:</strong> Technical specifications and requirements</li>
                   <li><strong>Implementing Acts:</strong> Track implementation progress</li>
-                  <li><strong>News:</strong> Weekly updates and summaries</li>
+                  <li><strong>News:</strong> Archived EHDS news summaries</li>
                   <li><strong>Bookmarks:</strong> Your saved articles and recitals</li>
                   <li><strong>Notes:</strong> Your personal notes (logged-in users)</li>
                 </ul>
@@ -476,16 +478,16 @@ const HelpCenterPage = () => {
               <AccordionTrigger className="hover:no-underline">
                 <div className="flex items-center gap-3">
                   <Newspaper className="h-5 w-5 text-primary" />
-                  <span className="font-semibold">Weekly News Summaries</span>
+                  <span className="font-semibold">News Archive</span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="pt-4 space-y-4">
                 <p className="text-muted-foreground">
-                  Stay updated with EHDS-related developments:
+                  Browse past EHDS news summaries. For current implementation status, visit the <Link to="/implementing-acts" className="text-primary hover:underline">Implementing Acts tracker</Link>.
                 </p>
                 <ul className="space-y-2 text-muted-foreground ml-4">
-                  <li>Weekly curated summaries of EHDS news</li>
-                  <li>Updates on implementing acts and regulatory changes</li>
+                  <li>Historical summaries of EHDS developments</li>
+                  <li>Original reporting periods and publication dates are retained</li>
                   <li>Access from the News section in the sidebar</li>
                 </ul>
               </AccordionContent>

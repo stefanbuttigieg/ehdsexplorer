@@ -64,7 +64,7 @@ const NewsDetailPage = () => {
       <BreadcrumbSchema
         items={[
           { name: 'Home', url: '/' },
-          { name: 'News', url: '/news' },
+          { name: 'News Archive', url: '/news' },
           { name: summary.title, url: pageUrl },
         ]}
       />
@@ -73,11 +73,15 @@ const NewsDetailPage = () => {
         <Button variant="ghost" asChild className="mb-6">
           <Link to="/news">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to News
+            Back to News Archive
           </Link>
         </Button>
 
         <article>
+          <p className="text-sm text-muted-foreground mb-6">
+            Archived summary: this covers the reporting period below, not current developments. See the{' '}
+            <Link to="/implementing-acts" className="text-primary hover:underline">Implementing Acts tracker</Link> for current implementation status.
+          </p>
           <header className="mb-8">
             <h1 className="text-3xl font-bold mb-4">{summary.title}</h1>
             <div className="flex items-center gap-4 text-muted-foreground">

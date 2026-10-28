@@ -144,6 +144,13 @@ var search_definitions_default = defineTool4({
 // src/lib/mcp/tools/search-faqs.ts
 import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@3.1.1";
 import { z as z5 } from "npm:zod@^3.25.76";
+
+// src/lib/mcp/faq-content.ts
+function faqAnswer(faq) {
+  return faq.rich_content?.trim() || faq.answer?.trim() || "";
+}
+
+// src/lib/mcp/tools/search-faqs.ts
 var search_faqs_default = defineTool5({
   name: "search_faqs",
   title: "Search official EHDS FAQs",
@@ -155,11 +162,16 @@ var search_faqs_default = defineTool5({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: ({ query, limit }, ctx) => {
     const q = query.replace(/[%,()]/g, " ");
-    return runQuery(
-      ctx,
-      "faqs",
-      (db) => db.from("ehds_faqs").select("faq_number, question, answer, chapter, source_articles, source_recitals").eq("is_published", true).or(`question.ilike.%${q}%,answer.ilike.%${q}%`).order("faq_number").limit(limit ?? 10)
-    );
+    return runQuery(ctx, "faqs", async (db) => {
+      const { data, error } = await db.from("ehds_faqs").select("faq_number, question, answer, rich_content, chapter, source_articles, source_recitals").eq("is_published", true).or(`question.ilike.%${q}%,answer.ilike.%${q}%,rich_content.ilike.%${q}%`).order("faq_number").limit(limit ?? 10);
+      return {
+        data: data?.map(({ rich_content, ...faq }) => ({
+          ...faq,
+          answer: faqAnswer({ answer: faq.answer, rich_content })
+        })),
+        error
+      };
+    });
   }
 });
 

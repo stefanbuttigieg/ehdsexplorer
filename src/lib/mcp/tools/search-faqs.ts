@@ -1,6 +1,7 @@
 import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
 import { runQuery } from "../supabase";
+import { faqAnswer } from "../faq-content";
 
 export default defineTool({
   name: "search_faqs",
@@ -13,13 +14,20 @@ export default defineTool({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: ({ query, limit }, ctx) => {
     const q = query.replace(/[%,()]/g, " ");
-    return runQuery(ctx, "faqs", (db) =>
-      db.from("ehds_faqs")
-        .select("faq_number, question, answer, chapter, source_articles, source_recitals")
+    return runQuery(ctx, "faqs", async (db) => {
+      const { data, error } = await db.from("ehds_faqs")
+        .select("faq_number, question, answer, rich_content, chapter, source_articles, source_recitals")
         .eq("is_published", true)
-        .or(`question.ilike.%${q}%,answer.ilike.%${q}%`)
+        .or(`question.ilike.%${q}%,answer.ilike.%${q}%,rich_content.ilike.%${q}%`)
         .order("faq_number")
-        .limit(limit ?? 10),
-    );
+        .limit(limit ?? 10);
+      return {
+        data: data?.map(({ rich_content, ...faq }) => ({
+          ...faq,
+          answer: faqAnswer({ answer: faq.answer, rich_content }),
+        })),
+        error,
+      };
+    });
   },
 });

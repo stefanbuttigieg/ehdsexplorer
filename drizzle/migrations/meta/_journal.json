@@ -43,6 +43,13 @@
       "when": 1793209945521,
       "tag": "0005_harden_two_step_sessions",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793210185343,
+      "tag": "0006_enforce_mfa_settings_and_storage",
+      "breakpoints": true
     }
   ]
 }

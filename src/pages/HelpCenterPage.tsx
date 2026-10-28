@@ -78,6 +78,23 @@ const HelpCenterPage = () => {
           </div>
         </div>
 
+        <section aria-labelledby="ai-assistants-guide-heading" className="mb-8 border-y border-primary/20 bg-primary/5 py-5 px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex items-start gap-3 flex-1 min-w-0">
+              <Bot aria-hidden="true" className="h-6 w-6 text-primary shrink-0 mt-1" />
+              <h2 id="ai-assistants-guide-heading" className="text-xl font-semibold">
+                AI Assistants Guide: Claude &amp; ChatGPT
+              </h2>
+            </div>
+            <Button asChild className="gap-2 shrink-0 self-start sm:self-auto">
+              <Link to="/ai-assistants">
+                Open setup guide
+                <ChevronRight aria-hidden="true" className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </section>
+
         {/* Quick Navigation */}
         <Card className="mb-8">
           <CardHeader>

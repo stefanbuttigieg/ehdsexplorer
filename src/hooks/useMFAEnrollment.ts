@@ -55,10 +55,11 @@ export function useMFAEnrollment() {
   const { data: preferences, isLoading: preferencesLoading } = useQuery({
     queryKey: ['mfa-preferences', user?.id],
     queryFn: async () => {
+      if (!user) return null;
       const { data, error } = await supabase
         .from('user_mfa_preferences')
-        .select('*')
-        .eq('user_id', user!.id)
+        .select('id,user_id,reminder_dismissed_at,reminder_snooze_until,preferred_method,email_otp_enabled,created_at,updated_at')
+        .eq('user_id', user.id)
         .maybeSingle();
       
       if (error) throw error;
@@ -111,6 +112,7 @@ export function useMFAEnrollment() {
     onSuccess: () => {
       setEnrollmentData(null);
       refetchFactors();
+      window.dispatchEvent(new Event('mfa-verification-changed'));
       toast({
         title: 'MFA enabled',
         description: 'Two-factor authentication is now active on your account.',
@@ -156,7 +158,9 @@ export function useMFAEnrollment() {
         .from('user_mfa_preferences')
         .upsert({
           user_id: user.id,
-          ...updates,
+          reminder_dismissed_at: updates.reminder_dismissed_at,
+          reminder_snooze_until: updates.reminder_snooze_until,
+          preferred_method: updates.preferred_method,
           updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id' })
         .select()

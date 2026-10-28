@@ -38,16 +38,13 @@ export function TOTPSetupDialog({ open, onOpenChange }: TOTPSetupDialogProps) {
         setCopied(false);
         
         try {
-          console.log('Starting TOTP enrollment...');
           const data = await startTOTPEnrollment();
-          console.log('TOTP enrollment response:', JSON.stringify(data, null, 2));
           
           if (data?.totp?.qr_code) {
-            console.log('QR code received, length:', data.totp.qr_code.length);
             setLocalEnrollment(data);
             setStep('scan');
           } else {
-            console.error('No QR code in enrollment response:', data);
+            console.error('Authenticator setup returned no QR code');
             toast({
               title: 'Setup failed',
               description: 'Could not generate QR code. Please try again.',
@@ -175,6 +172,7 @@ export function TOTPSetupDialog({ open, onOpenChange }: TOTPSetupDialogProps) {
                 id="totp-code"
                 type="text"
                 inputMode="numeric"
+                autoComplete="one-time-code"
                 pattern="[0-9]*"
                 maxLength={6}
                 placeholder="000000"

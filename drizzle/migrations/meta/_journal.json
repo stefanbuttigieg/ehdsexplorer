@@ -57,6 +57,13 @@
       "when": 1793210271022,
       "tag": "0007_gate_privileged_permission_helpers",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793220873052,
+      "tag": "0008_add_health_edge_source_with_credit",
+      "breakpoints": true
     }
   ]
 }

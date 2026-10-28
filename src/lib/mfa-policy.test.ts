@@ -1,3 +1,4 @@
+// @ts-ignore Bun runs this focused test; browser dependencies omit Bun types.
 import { describe, test, expect } from 'bun:test';
 import { CODE_PATTERN, RESEND_SECONDS, MAX_ATTEMPTS, sessionIdFromClaims, requiresVerification, codeDigest, generateCode } from '../../supabase/functions/_shared/mfa-policy';
 

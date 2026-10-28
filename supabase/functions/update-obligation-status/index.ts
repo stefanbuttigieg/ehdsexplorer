@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { requireVerifiedSession } from '../_shared/mfa-access.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -130,6 +131,8 @@ async function authenticate(
 
   // Try JWT auth
   if (authHeader?.startsWith('Bearer ')) {
+    const mfaDenied = await requireVerifiedSession(req)
+    if (mfaDenied) return { error: { message: 'Complete two-step verification before continuing', status: 403 } }
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_ANON_KEY')!,

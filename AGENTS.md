@@ -1,5 +1,8 @@
 # Agent rules
 
+- Implementation updates use configured research and official country sources; only exact, recent, obligation-specific official evidence can auto-publish, with atomic evidence/status writes and optimistic conflict detection — prevents AI inference or stale checks from overwriting reviewed progress.
+- Scheduled implementation checks rotate one source daily and persist provider pauses; cron authentication uses a private service-only settings token — bounds recurring costs and prevents anonymous writes.
+
 - Country maps keep the shared Leaflet renderer and key-free OpenStreetMap standard tiles with visible attribution — avoids provider API-key prompts across classic, beta, and Kids Mode.
 
 - Committee meeting previews sort distinct meeting records by meeting date before limiting display; never sort by cache creation time or infer totals from ordinal titles — keeps the newest meetings visible and counts accurate.

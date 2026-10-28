@@ -1,4 +1,5 @@
-- [ ] Refine sign-in codes and two-step authentication; confirm the intended email/authenticator policy before changing access enforcement, then harden code handling, verification, and session transitions with tests.
+- [x] Keep email verification and profiles; harden server-only codes, atomic consumption, guessing/resend limits, database writes, permission helpers, protected account actions, restored sign-in and cancellation. Nine focused tests and real-account bypass checks passed.
+- [ ] Verify successful email-code and authenticator sign-in end-to-end; blocked by managed testing session lacking session_id and no access to the user's mailbox/authenticator. Requires a normal sign-in through the preview. Frontend changes remain unpublished.
 - [x] Add source-backed automated EHDS member state tracker updates with publishing safeguards and run history; 7 tests passed, real Finland check published one update and retained one uncertain claim, tracker read-back verified; daily rotation scheduled. Initial national coverage: FI/SE/DE/FR, with source controls for expansion.
 - [x] Match Help Center definitions to the glossary and present historical news as an archive; verified 172 definitions, archive listing, and dated detail notice.
 - [x] Show dashboard numbers before five newest committee meetings and the acts list.

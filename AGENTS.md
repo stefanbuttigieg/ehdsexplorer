@@ -1,5 +1,7 @@
 # Agent rules
 
+- Two-step verification uses native TOTP or server-only, keyed, session/purpose-bound email challenges consumed atomically; restrictive RLS and authenticated edge actions check the server-owned verified session, never browser flags — prevents password-only bypass and code replay without changing public reads.
+
 - Implementation updates use configured research and official country sources; only exact, recent, obligation-specific official evidence can auto-publish, with atomic evidence/status writes and optimistic conflict detection — prevents AI inference or stale checks from overwriting reviewed progress.
 - Scheduled implementation checks rotate one source daily and persist provider pauses; cron authentication uses a private service-only settings token — bounds recurring costs and prevents anonymous writes.
 

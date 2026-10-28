@@ -16,11 +16,11 @@ interface UseAdminGuardOptions {
  */
 export function useAdminGuard(options: UseAdminGuardOptions = {}) {
   const { requireAdmin = false, requireSuperAdmin = false } = options;
-  const { user, loading, isEditor, isAdmin, isSuperAdmin } = useAuth();
+  const { user, loading, isEditor, isAdmin, isSuperAdmin, mfaRequired, mfaError } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!loading && (!user || mfaRequired || mfaError)) {
       navigate('/admin/auth');
     } else if (!loading && user && !isEditor) {
       navigate('/');
@@ -29,9 +29,9 @@ export function useAdminGuard(options: UseAdminGuardOptions = {}) {
     } else if (!loading && user && requireAdmin && !isAdmin) {
       navigate('/admin');
     }
-  }, [user, loading, isEditor, isAdmin, isSuperAdmin, requireAdmin, requireSuperAdmin, navigate]);
+  }, [user, loading, isEditor, isAdmin, isSuperAdmin, mfaRequired, mfaError, requireAdmin, requireSuperAdmin, navigate]);
 
-  const shouldRender = !loading && !!user && isEditor && 
+  const shouldRender = !loading && !!user && !mfaRequired && !mfaError && isEditor && 
     (!requireAdmin || isAdmin) && 
     (!requireSuperAdmin || isSuperAdmin);
 

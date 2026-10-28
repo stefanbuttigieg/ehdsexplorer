@@ -37,21 +37,7 @@ const AdminAuthPage = () => {
   const [mfaUserEmail, setMfaUserEmail] = useState('');
   const [awaitingMFA, setAwaitingMFA] = useState(false);
 
-  // Restore MFA state from sessionStorage on mount (survives tab switches / navigation)
-  useEffect(() => {
-    const saved = sessionStorage.getItem('mfa_pending');
-    if (saved) {
-      try {
-        const s = JSON.parse(saved);
-        setMfaTotpFactorId(s.totpFactorId ?? null);
-        setMfaEmailEnabled(s.emailEnabled ?? false);
-        setMfaUserEmail(s.userEmail ?? '');
-        setAwaitingMFA(true);
-        setShowMFAVerify(true);
-      } catch { /* ignore corrupt data */ }
-    }
-  }, []);
-  const { user, loading, signIn, isEditor } = useAuth();
+  const { user, loading, isEditor, mfaRequired, mfaError } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const nextPath = oauthReturnPath(searchParams.get('next'));
@@ -71,7 +57,7 @@ const AdminAuthPage = () => {
     }
 
     // CRITICAL: Do NOT redirect if MFA verification is in progress
-    if (awaitingMFA || showMFAVerify) {
+    if (isLoading || awaitingMFA || showMFAVerify || mfaRequired || mfaError) {
       return;
     }
 
@@ -85,7 +71,7 @@ const AdminAuthPage = () => {
         navigate('/');
       }
     }
-  }, [user, loading, isEditor, navigate, toast, awaitingMFA, showMFAVerify, hasNext, nextPath]);
+  }, [user, loading, isEditor, navigate, toast, awaitingMFA, showMFAVerify, hasNext, nextPath, isLoading, mfaRequired, mfaError]);
 
   // Also listen for auth state changes to detect invite/recovery
   useEffect(() => {
@@ -103,6 +89,27 @@ const AdminAuthPage = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+
+  useEffect(() => {
+    if (!user || loading || !mfaRequired || isLoading) return;
+    let cancelled = false;
+    const restore = async () => {
+      const { data: factors, error: factorError } = await supabase.auth.mfa.listFactors();
+      const { data: prefs, error: prefError } = await supabase.from('user_mfa_preferences').select('email_otp_enabled').eq('user_id', user.id).maybeSingle();
+      if (cancelled) return;
+      if (factorError || prefError) return;
+      const factor = factors?.totp?.find(f => f.status === 'verified');
+      if (!factor && !prefs?.email_otp_enabled) { navigate('/profile'); return; }
+      setMfaTotpFactorId(factor?.id ?? null);
+      setMfaEmailEnabled(prefs?.email_otp_enabled === true);
+      setMfaUserEmail(user.email ?? '');
+      setAwaitingMFA(true);
+      setShowMFAVerify(true);
+    };
+    void restore();
+    return () => { cancelled = true; };
+  }, [user?.id, loading, mfaRequired, isLoading, navigate]);
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -117,10 +124,12 @@ const AdminAuthPage = () => {
     }
 
     setIsLoading(true);
+    setAwaitingMFA(true);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       
       if (error) {
+        setAwaitingMFA(false);
         toast({
           title: 'Sign In Failed',
           description: error.message === 'Invalid login credentials' 
@@ -134,16 +143,18 @@ const AdminAuthPage = () => {
       // Check if MFA is required
       if (data.session) {
          // Check for TOTP factors
-         const { data: factorsData } = await supabase.auth.mfa.listFactors();
+         const { data: factorsData, error: factorsError } = await supabase.auth.mfa.listFactors();
+         if (factorsError) throw factorsError;
          const verifiedTotpFactors = factorsData?.totp?.filter(f => f.status === 'verified') ?? [];
          
          // Check for Email OTP in user preferences
-         const { data: mfaPrefs } = await supabase
+         const { data: mfaPrefs, error: prefsError } = await supabase
            .from('user_mfa_preferences')
            .select('email_otp_enabled')
            .eq('user_id', data.user.id)
            .maybeSingle();
          
+         if (prefsError) throw prefsError;
          const hasTotp = verifiedTotpFactors.length > 0;
          const hasEmailOtp = mfaPrefs?.email_otp_enabled === true;
          
@@ -164,8 +175,11 @@ const AdminAuthPage = () => {
         }
       }
 
+      setAwaitingMFA(false);
       toast({ title: 'Signed in successfully' });
     } catch (err: any) {
+      await supabase.auth.signOut();
+      setAwaitingMFA(false);
       toast({
         title: 'Sign In Failed',
         description: err.message || 'An error occurred',
@@ -173,6 +187,7 @@ const AdminAuthPage = () => {
       });
     } finally {
       setIsLoading(false);
+      window.dispatchEvent(new Event('mfa-verification-changed'));
     }
   };
 
@@ -183,6 +198,7 @@ const AdminAuthPage = () => {
     setMfaEmailEnabled(false);
     setMfaUserEmail('');
     sessionStorage.removeItem('mfa_pending');
+    window.dispatchEvent(new Event('mfa-verification-changed'));
     toast({ title: 'Signed in successfully' });
     if (hasNext) {
       navigate(nextPath);
@@ -324,6 +340,7 @@ const AdminAuthPage = () => {
             )}
           </CardHeader>
           <CardContent>
+            {mfaError && <p role="alert" className="mb-4 text-sm text-destructive">Unable to check two-step verification. Please sign out and try again.</p>}
             {showForgotPassword ? (
               resetEmailSent ? (
                 <div className="text-center space-y-4">
@@ -473,7 +490,7 @@ const AdminAuthPage = () => {
         {/* MFA Verification Dialog */}
          <LoginMFAVerifyDialog
            open={showMFAVerify}
-           onOpenChange={setShowMFAVerify}
+           onOpenChange={(open) => { if (open) setShowMFAVerify(true); }}
            totpFactorId={mfaTotpFactorId}
            emailOTPEnabled={mfaEmailEnabled}
            userEmail={mfaUserEmail}

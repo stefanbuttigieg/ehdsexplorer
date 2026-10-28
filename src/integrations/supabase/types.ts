@@ -3392,6 +3392,36 @@ export type Database = {
           },
         ]
       }
+      mfa_email_challenges: {
+        Row: {
+          attempts: number
+          code_hash: string
+          expires_at: string
+          purpose: string
+          sent_at: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          expires_at: string
+          purpose: string
+          sent_at?: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          expires_at?: string
+          purpose?: string
+          sent_at?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       mfa_settings: {
         Row: {
           allowed_methods: string[]
@@ -3422,6 +3452,24 @@ export type Database = {
           id?: string
           reminder_enabled?: boolean
           updated_at?: string
+        }
+        Relationships: []
+      }
+      mfa_verified_sessions: {
+        Row: {
+          session_id: string
+          user_id: string
+          verified_at: string
+        }
+        Insert: {
+          session_id: string
+          user_id: string
+          verified_at?: string
+        }
+        Update: {
+          session_id?: string
+          user_id?: string
+          verified_at?: string
         }
         Relationships: []
       }
@@ -5525,6 +5573,15 @@ export type Database = {
     }
     Functions: {
       close_expired_feedback_periods: { Args: never; Returns: number }
+      consume_mfa_email_challenge: {
+        Args: {
+          _code_hash: string
+          _purpose: string
+          _session_id: string
+          _user_id: string
+        }
+        Returns: string
+      }
       has_permission: {
         Args: { _action: string; _content_type: string; _user_id: string }
         Returns: boolean
@@ -5549,6 +5606,7 @@ export type Database = {
         Args: { _country_code: string; _user_id: string }
         Returns: boolean
       }
+      is_mfa_session_verified: { Args: never; Returns: boolean }
       is_note_owner: {
         Args: { _note_id: string; _user_id: string }
         Returns: boolean
@@ -5557,6 +5615,15 @@ export type Database = {
       is_team_member: {
         Args: { _team_id: string; _user_id: string }
         Returns: boolean
+      }
+      issue_mfa_email_challenge: {
+        Args: {
+          _code_hash: string
+          _purpose: string
+          _session_id: string
+          _user_id: string
+        }
+        Returns: number
       }
       publish_implementation_candidate: {
         Args: { automatic?: boolean; candidate_id: string }

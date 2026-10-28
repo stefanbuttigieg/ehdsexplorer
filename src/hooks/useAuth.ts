@@ -10,10 +10,24 @@ export function useAuth() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [mfaRequired, setMfaRequired] = useState(false);
+  const [mfaError, setMfaError] = useState(false);
 
   const checkRoles = useCallback(async (userId: string) => {
     setRolesLoading(true);
     try {
+      const { data: verifiedUser, error: userError } = await supabase.auth.getUser();
+      if (userError || verifiedUser.user?.id !== userId) throw new Error('Session validation failed');
+      const { data: verified, error: verificationError } = await supabase.rpc('is_mfa_session_verified');
+      if (verificationError) throw verificationError;
+      setMfaRequired(verified !== true);
+      setMfaError(false);
+      if (verified !== true) {
+        setIsAdmin(false);
+        setIsEditor(false);
+        setIsSuperAdmin(false);
+        return;
+      }
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
@@ -28,11 +42,12 @@ export function useAuth() {
       }
 
       const roles = data?.map(r => r.role) || [];
-      console.log('User roles from DB:', roles);
       setIsSuperAdmin(roles.includes('super_admin'));
       setIsAdmin(roles.includes('admin') || roles.includes('super_admin'));
       setIsEditor(roles.includes('editor') || roles.includes('admin') || roles.includes('super_admin'));
     } catch (err) {
+      setMfaError(true);
+      setMfaRequired(true);
       console.error('Error checking roles:', err);
       setIsAdmin(false);
       setIsEditor(false);
@@ -51,6 +66,7 @@ export function useAuth() {
 
         // Defer role check with setTimeout to avoid deadlock
         if (session?.user) {
+          setRolesLoading(true);
           setTimeout(() => {
             checkRoles(session.user.id);
           }, 0);
@@ -58,6 +74,8 @@ export function useAuth() {
           setIsAdmin(false);
           setIsEditor(false);
           setIsSuperAdmin(false);
+          setMfaRequired(false);
+          setMfaError(false);
           setRolesLoading(false);
           setLoading(false);
         }
@@ -77,7 +95,16 @@ export function useAuth() {
       }
     });
 
-    return () => subscription.unsubscribe();
+    const refreshVerification = () => {
+      void supabase.auth.getSession().then(({ data }) => {
+        if (data.session?.user) void checkRoles(data.session.user.id);
+      });
+    };
+    window.addEventListener('mfa-verification-changed', refreshVerification);
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('mfa-verification-changed', refreshVerification);
+    };
   }, [checkRoles]);
 
   const signIn = async (email: string, password: string) => {
@@ -107,6 +134,8 @@ export function useAuth() {
     isAdmin,
     isEditor,
     isSuperAdmin,
+    mfaRequired,
+    mfaError,
     signIn,
     signUp,
     signOut,

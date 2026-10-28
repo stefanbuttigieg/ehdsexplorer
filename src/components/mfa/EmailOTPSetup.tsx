@@ -8,11 +8,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { useMFAEnrollment } from '@/hooks/useMFAEnrollment';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 export function EmailOTPSetup() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { preferences, updatePreferences } = useMFAEnrollment();
+  const { preferences } = useMFAEnrollment();
+  const queryClient = useQueryClient();
+  const [purpose, setPurpose] = useState<'enroll' | 'disable'>('enroll');
   const [step, setStep] = useState<'idle' | 'sending' | 'verifying' | 'verified'>('idle');
   const [code, setCode] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
@@ -26,7 +29,7 @@ export function EmailOTPSetup() {
     try {
       // Call our custom edge function to send a real OTP code
       const { data, error } = await supabase.functions.invoke('send-email-otp', {
-        body: { action: 'send' },
+        body: { action: 'send', purpose },
       });
 
       if (error) throw error;
@@ -55,7 +58,7 @@ export function EmailOTPSetup() {
     try {
       // Call our custom edge function to verify the OTP code
       const { data, error } = await supabase.functions.invoke('send-email-otp', {
-        body: { action: 'verify', code },
+        body: { action: 'verify', purpose, code },
       });
 
       if (error) throw error;
@@ -64,14 +67,13 @@ export function EmailOTPSetup() {
       // Success - update UI immediately without reload
       setStep('verified');
       toast({
-        title: 'Email OTP enabled',
-        description: 'You can now use email verification for two-factor authentication.',
+        title: purpose === 'disable' ? 'Email verification disabled' : 'Email verification enabled',
+        description: 'Your verification settings have been updated.',
       });
       
-      // Wait a moment then reload to refresh preferences
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+      await queryClient.invalidateQueries({ queryKey: ['mfa-preferences', user.id] });
+      window.dispatchEvent(new Event('mfa-verification-changed'));
+      setStep('idle');
     } catch (error: any) {
       console.error('Error verifying OTP:', error);
       // Don't show error if already enabled
@@ -91,19 +93,14 @@ export function EmailOTPSetup() {
   };
 
   const handleDisable = async () => {
-    try {
-      await updatePreferences.mutateAsync({ email_otp_enabled: false });
+    setPurpose('disable');
+    setStep('verifying');
+    const { data, error } = await supabase.functions.invoke('send-email-otp', { body: { action: 'send', purpose: 'disable' } });
+    if (error || data?.error) {
       setStep('idle');
-      toast({
-        title: 'Email OTP disabled',
-        description: 'Email verification has been disabled.',
-      });
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      });
+      toast({ title: 'Unable to send code', description: data?.error || 'Please wait 30 seconds and try again.', variant: 'destructive' });
+    } else {
+      toast({ title: 'Confirm removal', description: 'Enter the code from your email to disable email verification.' });
     }
   };
 
@@ -125,7 +122,7 @@ export function EmailOTPSetup() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {isEnabled ? (
+        {isEnabled && step === 'idle' ? (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
               Email verification is currently enabled for your account. 
@@ -138,7 +135,7 @@ export function EmailOTPSetup() {
         ) : (
           <>
             {step === 'idle' && (
-              <Button onClick={handleSendCode}>
+              <Button onClick={() => { setPurpose('enroll'); void handleSendCode(); }}>
                 <Mail className="h-4 w-4 mr-2" />
                 Enable Email Verification
               </Button>
@@ -162,6 +159,7 @@ export function EmailOTPSetup() {
                     id="email-otp-code"
                     type="text"
                     inputMode="numeric"
+                    autoComplete="one-time-code"
                     pattern="[0-9]*"
                     maxLength={6}
                     placeholder="000000"
@@ -182,7 +180,7 @@ export function EmailOTPSetup() {
                         Verifying...
                       </>
                     ) : (
-                      'Verify & Enable'
+                      purpose === 'disable' ? 'Verify & Disable' : 'Verify & Enable'
                     )}
                   </Button>
                 </div>

@@ -1,3 +1,4 @@
+import { requireVerifiedSession } from '../_shared/mfa-access.ts';
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
@@ -13,6 +14,9 @@ serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const mfaDenied = await requireVerifiedSession(req);
+  if (mfaDenied) return mfaDenied;
 
   try {
     const authHeader = req.headers.get("Authorization");

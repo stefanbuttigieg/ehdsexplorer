@@ -22,7 +22,7 @@ import { MFASecuritySection } from "@/components/mfa/MFASecuritySection";
 import { LeaderboardCountrySelector } from "@/components/LeaderboardCountrySelector";
 
 const ProfilePage = () => {
-  const { user, session, loading, isAdmin, isEditor } = useAuth();
+  const { user, session, loading, isAdmin, isEditor, mfaRequired, mfaError } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
@@ -43,8 +43,16 @@ const ProfilePage = () => {
   useEffect(() => {
     if (!loading && !user) {
       navigate("/admin/auth");
+    } else if (!loading && user && (mfaRequired || mfaError)) {
+      const checkEnrollment = async () => {
+        const { data: factors, error } = await supabase.auth.mfa.listFactors();
+        const { data: prefs, error: prefsError } = await supabase.from('user_mfa_preferences').select('email_otp_enabled').eq('user_id', user.id).maybeSingle();
+        if (error || prefsError || factors?.totp.some(f => f.status === 'verified') || prefs?.email_otp_enabled) navigate('/admin/auth');
+        else setSearchParams({ tab: 'security' });
+      };
+      void checkEnrollment();
     }
-  }, [user, loading, navigate]);
+  }, [user?.id, loading, navigate, mfaRequired, mfaError]);
 
   useEffect(() => {
     const fetchProfile = async () => {

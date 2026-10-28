@@ -48,6 +48,7 @@ const staticEntries: SitemapEntry[] = [
   { path: "/scenario-finder", changefreq: "monthly", priority: "0.6" },
   { path: "/tools", changefreq: "monthly", priority: "0.6" },
   { path: "/api", changefreq: "monthly", priority: "0.5" },
+  { path: "/ai-assistants", changefreq: "monthly", priority: "0.6" },
   { path: "/games", changefreq: "monthly", priority: "0.5" },
 ];
 

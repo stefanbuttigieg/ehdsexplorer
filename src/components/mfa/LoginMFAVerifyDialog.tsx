@@ -1,4 +1,4 @@
- import { useState, useEffect } from 'react';
+ import { useState, useEffect, useRef } from 'react';
  import { Shield, Loader2, Mail, Smartphone } from 'lucide-react';
  import {
    Dialog,
@@ -40,6 +40,15 @@
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [emailCodeSent, setEmailCodeSent] = useState(false);
   const [lastSentAt, setLastSentAt] = useState<number>(0);
+  const sending = useRef(false);
+  const [now, setNow] = useState(Date.now());
+  const storageKey = `mfa_email_sent:${userEmail}`;
+  const remaining = Math.max(0, Math.ceil((lastSentAt + 30000 - now) / 1000));
+  useEffect(() => {
+    if (!open) return;
+    const interval = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(interval);
+  }, [open]);
    const [activeMethod, setActiveMethod] = useState<'totp' | 'email'>(
      totpFactorId ? 'totp' : 'email'
    );
@@ -49,15 +58,18 @@
       if (open) {
         setCode('');
         // Restore emailCodeSent from sessionStorage (survives tab switch)
-        const wasSent = sessionStorage.getItem('mfa_email_code_sent') === 'true';
+        const sentAt = Number(sessionStorage.getItem(storageKey) ?? 0);
+        const wasSent = Date.now() - sentAt < 10 * 60 * 1000;
+        setLastSentAt(sentAt);
         setEmailCodeSent(wasSent);
         setActiveMethod(totpFactorId ? 'totp' : 'email');
       }
-    }, [open, totpFactorId]);
+    }, [open, totpFactorId, storageKey]);
  
     const handleSendEmailCode = async () => {
       // Prevent double-sends within 30 seconds
       const now = Date.now();
+      if (sending.current) return;
       if (now - lastSentAt < 30000) {
         toast({
           title: 'Please wait',
@@ -66,10 +78,11 @@
         return;
       }
 
+      sending.current = true;
       setIsSendingEmail(true);
       try {
         const { data, error } = await supabase.functions.invoke('send-email-otp', {
-          body: { action: 'send' },
+          body: { action: 'send', purpose: 'login' },
         });
 
         if (error) {
@@ -79,7 +92,7 @@
         if (data?.error) throw new Error(data.error);
 
         setEmailCodeSent(true);
-        sessionStorage.setItem('mfa_email_code_sent', 'true');
+        sessionStorage.setItem(storageKey, String(Date.now()));
         setLastSentAt(Date.now());
         setCode('');
         toast({
@@ -94,12 +107,13 @@
           variant: 'destructive',
         });
       } finally {
+        sending.current = false;
         setIsSendingEmail(false);
       }
     };
  
    const handleVerifyTOTP = async () => {
-     if (!totpFactorId || code.length !== 6) return;
+     if (!totpFactorId || code.length !== 6 || isVerifying) return;
  
      setIsVerifying(true);
      try {
@@ -117,7 +131,8 @@
  
        if (error) throw error;
  
-        sessionStorage.removeItem('mfa_email_code_sent');
+        sessionStorage.removeItem(storageKey);
+        window.dispatchEvent(new Event('mfa-verification-changed'));
         onSuccess();
         onOpenChange(false);
      } catch (error: any) {
@@ -133,7 +148,7 @@
    };
  
    const handleVerifyEmail = async () => {
-     if (code.length !== 6) return;
+     if (code.length !== 6 || isVerifying) return;
  
       setIsVerifying(true);
       try {
@@ -148,7 +163,8 @@
         }
         if (data?.error) throw new Error(data.error);
 
-        sessionStorage.removeItem('mfa_email_code_sent');
+        sessionStorage.removeItem(storageKey);
+        window.dispatchEvent(new Event('mfa-verification-changed'));
         onSuccess();
         onOpenChange(false);
       } catch (error: any) {
@@ -178,8 +194,7 @@
    };
  
     const handleCancel = () => {
-      sessionStorage.removeItem('mfa_email_code_sent');
-      onOpenChange(false);
+      sessionStorage.removeItem(storageKey);
       onCancel?.();
     };
  
@@ -192,7 +207,7 @@
    const hasBothMethods = totpFactorId && emailOTPEnabled;
  
    return (
-     <Dialog open={open} onOpenChange={onOpenChange}>
+     <Dialog open={open} onOpenChange={(nextOpen) => { if (!nextOpen && !isVerifying) handleCancel(); }}>
        <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
          <DialogHeader>
            <DialogTitle className="flex items-center gap-2">

@@ -240,6 +240,7 @@
                      id="totp-code"
                      type="text"
                      inputMode="numeric"
+                     autoComplete="one-time-code"
                      pattern="[0-9]*"
                      maxLength={6}
                      placeholder="000000"
@@ -264,7 +265,7 @@
                      </p>
                      <Button 
                        onClick={handleSendEmailCode} 
-                       disabled={isSendingEmail}
+                       disabled={isSendingEmail || remaining > 0}
                        className="w-full"
                      >
                        {isSendingEmail ? (
@@ -288,7 +289,8 @@
                          id="email-code"
                          type="text"
                          inputMode="numeric"
-                         pattern="[0-9]*"
+                         autoComplete="one-time-code"
+                     pattern="[0-9]*"
                          maxLength={6}
                          placeholder="000000"
                          value={code}
@@ -305,10 +307,10 @@
                      <Button 
                        variant="link" 
                        onClick={handleSendEmailCode}
-                       disabled={isSendingEmail}
+                       disabled={isSendingEmail || remaining > 0}
                        className="w-full"
                      >
-                       {isSendingEmail ? 'Sending...' : 'Resend code'}
+                       {isSendingEmail ? 'Sending...' : remaining > 0 ? `Resend in ${remaining}s` : 'Resend code'}
                      </Button>
                    </>
                  )}
@@ -323,7 +325,8 @@
                    id="mfa-code"
                    type="text"
                    inputMode="numeric"
-                   pattern="[0-9]*"
+                   autoComplete="one-time-code"
+                     pattern="[0-9]*"
                    maxLength={6}
                    placeholder="000000"
                    value={code}
@@ -348,7 +351,7 @@
                    </p>
                    <Button 
                      onClick={handleSendEmailCode} 
-                     disabled={isSendingEmail}
+                     disabled={isSendingEmail || remaining > 0}
                      className="w-full"
                    >
                      {isSendingEmail ? (
@@ -372,7 +375,8 @@
                        id="email-code-only"
                        type="text"
                        inputMode="numeric"
-                       pattern="[0-9]*"
+                       autoComplete="one-time-code"
+                     pattern="[0-9]*"
                        maxLength={6}
                        placeholder="000000"
                        value={code}
@@ -389,10 +393,10 @@
                    <Button 
                      variant="link" 
                      onClick={handleSendEmailCode}
-                     disabled={isSendingEmail}
+                     disabled={isSendingEmail || remaining > 0}
                      className="w-full"
                    >
-                     {isSendingEmail ? 'Sending...' : 'Resend code'}
+                     {isSendingEmail ? 'Sending...' : remaining > 0 ? `Resend in ${remaining}s` : 'Resend code'}
                    </Button>
                  </>
                )}

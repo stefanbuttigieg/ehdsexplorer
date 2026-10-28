@@ -159,6 +159,7 @@ export function EmailOTPSetup() {
                     id="email-otp-code"
                     type="text"
                     inputMode="numeric"
+                    autoComplete="one-time-code"
                     pattern="[0-9]*"
                     maxLength={6}
                     placeholder="000000"

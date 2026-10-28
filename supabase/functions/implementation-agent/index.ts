@@ -1,3 +1,4 @@
+import { requireVerifiedSession } from '../_shared/mfa-access.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { z } from 'npm:zod@3';
@@ -20,6 +21,8 @@ Deno.serve(async req => {
     const settings = must(await db.from('implementation_agent_settings').select('*').eq('id',true).single()).data;
     const cron = req.headers.get('x-implementation-token') === settings.cron_token;
     if (!cron) {
+      const mfaDenied = await requireVerifiedSession(req);
+      if (mfaDenied) return mfaDenied;
       const token = req.headers.get('Authorization')?.replace(/^Bearer /i,'');
       if (!token) return reply({ error: 'Sign in required' },401);
       const { data: auth, error } = await db.auth.getUser(token);

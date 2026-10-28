@@ -56,7 +56,7 @@ export function ImplementationAgentPanel() {
     <section className="space-y-3"><h3 className="font-semibold">Evidence and decisions</h3>
       {!data?.candidates.length && <p className="text-sm text-muted-foreground">No country-specific findings yet.</p>}
       {data?.candidates.map(c=><article key={c.id} className="border rounded-md p-4 space-y-2">
-        <div className="flex flex-wrap justify-between gap-2"><h4 className="font-medium">{c.country_code} · {c.obligation_id.replaceAll('_',' ')} · {c.proposed_status.replaceAll('_',' ')}</h4><Badge variant="outline">{c.state}</Badge></div>
+        <div className="flex flex-wrap justify-between gap-2"><h4 className="font-medium">{c.country_code} · {c.obligation_id.replace(/_/g,' ')} · {c.proposed_status.replace(/_/g,' ')}</h4><Badge variant="outline">{c.state}</Badge></div>
         <p className="text-sm">{c.summary}</p><blockquote className="border-l-2 pl-3 text-sm text-muted-foreground">{c.evidence_quote}</blockquote>
         <p className="text-xs text-muted-foreground">{c.reason} · Evidence: {c.evidence_date || 'Undated'} · Confidence: {Math.round(Number(c.confidence)*100)}%</p>
         <a className="text-sm text-primary" href={data.sources.find(s=>s.id===c.source_id)?.url} target="_blank" rel="noopener noreferrer">Source evidence</a>

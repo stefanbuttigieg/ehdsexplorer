@@ -1,3 +1,4 @@
+// @ts-ignore Bun runs this focused test; browser dependencies omit Bun types.
 import { describe, expect, test } from 'bun:test';
 import { assessEvidence } from '../../supabase/functions/implementation-agent/policy';
 const quote = 'Finland is implementing EHDS through a dedicated national programme.';

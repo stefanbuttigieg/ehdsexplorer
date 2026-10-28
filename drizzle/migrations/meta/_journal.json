@@ -50,6 +50,13 @@
       "when": 1793210185343,
       "tag": "0006_enforce_mfa_settings_and_storage",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793210271022,
+      "tag": "0007_gate_privileged_permission_helpers",
+      "breakpoints": true
     }
   ]
 }

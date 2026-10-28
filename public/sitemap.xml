@@ -388,12 +388,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://ehdsexplorer.eu/article/66</loc>
-    <lastmod>2026-02-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://ehdsexplorer.eu/article/46</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
@@ -514,12 +508,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://ehdsexplorer.eu/article/91</loc>
-    <lastmod>2026-02-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://ehdsexplorer.eu/article/39</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
@@ -545,6 +533,12 @@
   </url>
   <url>
     <loc>https://ehdsexplorer.eu/article/62</loc>
+    <lastmod>2026-02-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ehdsexplorer.eu/article/66</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -653,6 +647,12 @@
   </url>
   <url>
     <loc>https://ehdsexplorer.eu/article/95</loc>
+    <lastmod>2026-02-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://ehdsexplorer.eu/article/91</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -832,12 +832,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ehdsexplorer.eu/recital/22</loc>
-    <lastmod>2026-02-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://ehdsexplorer.eu/recital/65</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
@@ -1007,6 +1001,12 @@
   </url>
   <url>
     <loc>https://ehdsexplorer.eu/recital/20</loc>
+    <lastmod>2026-02-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ehdsexplorer.eu/recital/22</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -1432,56 +1432,14 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ehdsexplorer.eu/news/3075e363-27d9-4e08-8001-129abbbd2c62</loc>
-    <lastmod>2026-01-02</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://ehdsexplorer.eu/news/9fc90184-0be3-4bc7-a9a7-4a7821d0e12c</loc>
     <lastmod>2026-01-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ehdsexplorer.eu/faq/67</loc>
-    <lastmod>2026-03-31</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://ehdsexplorer.eu/faq/53</loc>
-    <lastmod>2026-04-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://ehdsexplorer.eu/faq/23</loc>
-    <lastmod>2026-03-31</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://ehdsexplorer.eu/faq/38</loc>
-    <lastmod>2026-03-31</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://ehdsexplorer.eu/faq/15</loc>
-    <lastmod>2026-03-31</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://ehdsexplorer.eu/faq/19</loc>
-    <lastmod>2026-03-31</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://ehdsexplorer.eu/faq/22</loc>
-    <lastmod>2026-03-31</lastmod>
+    <loc>https://ehdsexplorer.eu/news/3075e363-27d9-4e08-8001-129abbbd2c62</loc>
+    <lastmod>2026-01-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1499,12 +1457,6 @@
   </url>
   <url>
     <loc>https://ehdsexplorer.eu/faq/10</loc>
-    <lastmod>2026-03-31</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://ehdsexplorer.eu/faq/27</loc>
     <lastmod>2026-03-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -1547,6 +1499,48 @@
   </url>
   <url>
     <loc>https://ehdsexplorer.eu/faq/37</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ehdsexplorer.eu/faq/53</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ehdsexplorer.eu/faq/23</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ehdsexplorer.eu/faq/38</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ehdsexplorer.eu/faq/15</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ehdsexplorer.eu/faq/19</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ehdsexplorer.eu/faq/22</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ehdsexplorer.eu/faq/27</loc>
     <lastmod>2026-03-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -1642,12 +1636,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ehdsexplorer.eu/faq/41</loc>
-    <lastmod>2026-04-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://ehdsexplorer.eu/faq/18</loc>
     <lastmod>2026-03-31</lastmod>
     <changefreq>monthly</changefreq>
@@ -1715,6 +1703,12 @@
   </url>
   <url>
     <loc>https://ehdsexplorer.eu/faq/40</loc>
+    <lastmod>2026-04-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ehdsexplorer.eu/faq/41</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -1858,12 +1852,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ehdsexplorer.eu/implementing-acts/art-75</loc>
-    <lastmod>2026-09-30</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://ehdsexplorer.eu/implementing-acts/art-15-1</loc>
     <lastmod>2026-04-16</lastmod>
     <changefreq>monthly</changefreq>
@@ -1894,12 +1882,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ehdsexplorer.eu/implementing-acts/art-70</loc>
-    <lastmod>2026-04-16</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://ehdsexplorer.eu/implementing-acts/art-74</loc>
     <lastmod>2026-03-29</lastmod>
     <changefreq>monthly</changefreq>
@@ -1924,6 +1906,12 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://ehdsexplorer.eu/implementing-acts/art-75</loc>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://ehdsexplorer.eu/implementing-acts/art-40</loc>
     <lastmod>2026-04-16</lastmod>
     <changefreq>monthly</changefreq>
@@ -1936,32 +1924,38 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://ehdsexplorer.eu/implementing-acts/art-70</loc>
+    <lastmod>2026-10-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://ehdsexplorer.eu/implementing-acts/art-78</loc>
     <lastmod>2026-07-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ehdsexplorer.eu/annex/I</loc>
-    <lastmod>2025-12-12</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://ehdsexplorer.eu/annex/II</loc>
-    <lastmod>2025-12-12</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://ehdsexplorer.eu/annex/III</loc>
-    <lastmod>2025-12-12</lastmod>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://ehdsexplorer.eu/annex/IV</loc>
-    <lastmod>2025-12-12</lastmod>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://ehdsexplorer.eu/annex/I</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://ehdsexplorer.eu/annex/III</loc>
+    <lastmod>2026-10-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>

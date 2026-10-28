@@ -95,7 +95,7 @@ const AiAssistantsPage = () => {
             <p className="mt-3 flex items-start gap-2 text-sm text-muted-foreground">
               <Lock className="mt-0.5 h-4 w-4 shrink-0" />
               You'll need a free EHDS Explorer account. When you connect, you'll be asked to sign in and approve access.
-              {' '}<Link to="/auth" className="text-primary underline">Create an account</Link>
+              {' '}<Link to="/admin/auth" className="text-primary underline">Create an account</Link>
             </p>
           </CardContent>
         </Card>

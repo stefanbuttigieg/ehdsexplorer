@@ -101,6 +101,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://ehdsexplorer.eu/ai-assistants</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://ehdsexplorer.eu/games</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>

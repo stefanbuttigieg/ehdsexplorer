@@ -200,7 +200,7 @@ var get_feedback_insights_default = defineTool7({
 });
 
 // src/lib/mcp/index.ts
-var projectRef = "giwrfhupfphvxlfwpsdh";
+var projectRef = "lmjjghvrjgffmbidajih";
 var mcp_default = defineMcp({
   name: "ehds-explorer",
   title: "EHDS Explorer",

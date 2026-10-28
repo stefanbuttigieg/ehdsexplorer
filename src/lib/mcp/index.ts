@@ -18,6 +18,7 @@ export default defineMcp({
     "Tools for exploring the European Health Data Space Regulation (EU) 2025/327: search and read articles and recitals, look up definitions and official Commission FAQs, list implementing acts and their consultation status, and read public feedback insights.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
+    resource: "https://mcp.ehdsexplorer.eu",
     acceptedAudiences: "authenticated",
   }),
   tools: [searchArticles, getArticle, getRecital, searchDefinitions, searchFaqs, listImplementingActs, getFeedbackInsights],

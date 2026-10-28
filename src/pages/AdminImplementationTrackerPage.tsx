@@ -74,6 +74,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { toast } from 'sonner';
+import { ImplementationAgentPanel } from '@/components/admin/ImplementationAgentPanel';
 
 const EU_COUNTRIES = [
   { code: "AT", name: "Austria" }, { code: "BE", name: "Belgium" },
@@ -125,7 +126,7 @@ export default function AdminImplementationTrackerPage() {
   const updateObligationStatus = useUpdateObligationStatus();
   
   const [selectedCountry, setSelectedCountry] = useState<string>("AT");
-  const [activeTab, setActiveTab] = useState<"config" | "status">("config");
+  const [activeTab, setActiveTab] = useState<"config" | "status" | "agent">("config");
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -256,11 +257,13 @@ export default function AdminImplementationTrackerPage() {
       }
     >
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
-        <TabsList className="grid w-full grid-cols-2 mb-6">
+        <TabsList className="grid w-full grid-cols-3 mb-6">
           <TabsTrigger value="config">Weight Configuration</TabsTrigger>
           <TabsTrigger value="status">Country Status</TabsTrigger>
+          <TabsTrigger value="agent">Update Agent</TabsTrigger>
         </TabsList>
 
+        <TabsContent value="agent"><ImplementationAgentPanel /></TabsContent>
         {/* Weight Configuration Tab */}
         <TabsContent value="config">
           <Form {...form}>

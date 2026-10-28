@@ -2298,6 +2298,179 @@ export type Database = {
         }
         Relationships: []
       }
+      implementation_agent_candidates: {
+        Row: {
+          confidence: number
+          country_code: string
+          created_at: string
+          decided_at: string | null
+          evidence_date: string | null
+          evidence_quote: string
+          expected_updated_at: string | null
+          fingerprint: string
+          id: string
+          obligation_id: string
+          proposed_status: Database["public"]["Enums"]["obligation_status"]
+          qualifies: boolean
+          reason: string
+          source_id: string
+          state: string
+          summary: string
+        }
+        Insert: {
+          confidence: number
+          country_code: string
+          created_at?: string
+          decided_at?: string | null
+          evidence_date?: string | null
+          evidence_quote: string
+          expected_updated_at?: string | null
+          fingerprint: string
+          id?: string
+          obligation_id: string
+          proposed_status: Database["public"]["Enums"]["obligation_status"]
+          qualifies?: boolean
+          reason: string
+          source_id: string
+          state?: string
+          summary: string
+        }
+        Update: {
+          confidence?: number
+          country_code?: string
+          created_at?: string
+          decided_at?: string | null
+          evidence_date?: string | null
+          evidence_quote?: string
+          expected_updated_at?: string | null
+          fingerprint?: string
+          id?: string
+          obligation_id?: string
+          proposed_status?: Database["public"]["Enums"]["obligation_status"]
+          qualifies?: boolean
+          reason?: string
+          source_id?: string
+          state?: string
+          summary?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "implementation_agent_candidates_obligation_id_fkey"
+            columns: ["obligation_id"]
+            isOneToOne: false
+            referencedRelation: "ehds_obligations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "implementation_agent_candidates_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "implementation_agent_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      implementation_agent_runs: {
+        Row: {
+          candidates: number
+          error: string | null
+          finished_at: string | null
+          id: string
+          published: number
+          source_id: string | null
+          started_at: string
+          status: string
+        }
+        Insert: {
+          candidates?: number
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          published?: number
+          source_id?: string | null
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          candidates?: number
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          published?: number
+          source_id?: string | null
+          started_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "implementation_agent_runs_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "implementation_agent_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      implementation_agent_settings: {
+        Row: {
+          auto_publish: boolean
+          cron_token: string
+          enabled: boolean
+          id: boolean
+          paused_reason: string | null
+        }
+        Insert: {
+          auto_publish?: boolean
+          cron_token?: string
+          enabled?: boolean
+          id?: boolean
+          paused_reason?: string | null
+        }
+        Update: {
+          auto_publish?: boolean
+          cron_token?: string
+          enabled?: boolean
+          id?: boolean
+          paused_reason?: string | null
+        }
+        Relationships: []
+      }
+      implementation_agent_sources: {
+        Row: {
+          content_hash: string | null
+          country_code: string | null
+          enabled: boolean
+          id: string
+          last_checked_at: string | null
+          last_error: string | null
+          official: boolean
+          publisher: string
+          url: string
+        }
+        Insert: {
+          content_hash?: string | null
+          country_code?: string | null
+          enabled?: boolean
+          id?: string
+          last_checked_at?: string | null
+          last_error?: string | null
+          official?: boolean
+          publisher: string
+          url: string
+        }
+        Update: {
+          content_hash?: string | null
+          country_code?: string | null
+          enabled?: boolean
+          id?: string
+          last_checked_at?: string | null
+          last_error?: string | null
+          official?: boolean
+          publisher?: string
+          url?: string
+        }
+        Relationships: []
+      }
       implementation_tracker_config: {
         Row: {
           created_at: string
@@ -5384,6 +5557,10 @@ export type Database = {
       is_team_member: {
         Args: { _team_id: string; _user_id: string }
         Returns: boolean
+      }
+      publish_implementation_candidate: {
+        Args: { automatic?: boolean; candidate_id: string }
+        Returns: string
       }
       record_search_query: { Args: { _query: string }; Returns: undefined }
     }

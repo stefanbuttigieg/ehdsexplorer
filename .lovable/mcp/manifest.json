@@ -5,6 +5,7 @@
   "auth": {
     "type": "oauth",
     "issuer": "https://lmjjghvrjgffmbidajih.supabase.co/auth/v1",
+    "resource": "https://mcp.ehdsexplorer.eu",
     "accepted_audiences": [
       "authenticated"
     ]

@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { SEOHead, BreadcrumbSchema } from '@/components/seo';
 
-const MCP_URL = 'https://lmjjghvrjgffmbidajih.supabase.co/functions/v1/mcp';
+const MCP_URL = 'https://mcp.ehdsexplorer.eu';
 
 const TOOLS = [
   { name: 'search_articles', desc: 'Find EHDS articles by keyword.' },

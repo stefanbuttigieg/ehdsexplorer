@@ -1,3 +1,4 @@
+- [ ] Add source-backed automated EHDS member state tracker updates with publishing safeguards and run history.
 - [x] Match Help Center definitions to the glossary and present historical news as an archive; verified 172 definitions, archive listing, and dated detail notice.
 - [x] Show dashboard numbers before five newest committee meetings and the acts list.
 - [x] Fix and verify retrieval of the latest official committee meetings.

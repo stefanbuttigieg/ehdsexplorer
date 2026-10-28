@@ -78,6 +78,7 @@ const WordSearchGamePage = lazy(() => import("./pages/WordSearchGamePage"));
 const TrueFalseGamePage = lazy(() => import("./pages/TrueFalseGamePage"));
 const GamesPage = lazy(() => import("./pages/GamesPage"));
 const ApiDocsPage = lazy(() => import("./pages/ApiDocsPage"));
+const AiAssistantsPage = lazy(() => import("./pages/AiAssistantsPage"));
 const NewsPage = lazy(() => import("./pages/NewsPage"));
 const NewsDetailPage = lazy(() => import("./pages/NewsDetailPage"));
 const AdminNewsPage = lazy(() => import("./pages/AdminNewsPage"));
@@ -226,6 +227,7 @@ const App = () => (
             <Route path="/games" element={<GamesPage />} />
             <Route path="/kids" element={<KidsCornerPage />} />
             <Route path="/api" element={<ApiDocsPage />} />
+            <Route path="/ai-assistants" element={<AiAssistantsPage />} />
             <Route path="/news" element={<NewsPage />} />
             <Route path="/news/:id" element={<NewsDetailPage />} />
             <Route path="/help" element={<HelpCenterPage />} />

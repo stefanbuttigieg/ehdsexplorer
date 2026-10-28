@@ -21,7 +21,7 @@ const TOOLS = [
 ];
 
 const EXAMPLES = [
-  'What does Article 35 of the EHDS say about secondary use?',
+  'What does Article 71 of the EHDS say about the right to opt out from secondary use?',
   'Define "electronic health record system" under the EHDS.',
   'Which implementing acts are open for feedback right now?',
   'Summarise the main points of contention in the feedback on Article 77.',

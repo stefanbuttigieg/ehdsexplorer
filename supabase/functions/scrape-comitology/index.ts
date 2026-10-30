@@ -7,8 +7,8 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     if (!supabaseUrl || !supabaseKey) throw new Error('Meeting storage is not configured');
-    const meetings = await fetchCommitteeMeetings();
     const scrapedAt = new Date().toISOString();
+    const meetings = await fetchCommitteeMeetings();
     const updates = meetings.map(m => ({
       title: m.title,
       source_url: m.url,
@@ -16,15 +16,15 @@ Deno.serve(async (req) => {
       summary: `${m.meeting_code} - ${m.date}`,
       scraped_at: scrapedAt,
     }));
-    const saved = await fetch(`${supabaseUrl}/rest/v1/comitology_updates?on_conflict=title`, {
+    // Save and retire outdated register rows together, only after complete retrieval.
+    const saved = await fetch(`${supabaseUrl}/rest/v1/rpc/sync_committee_meetings`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${supabaseKey}`,
         apikey: supabaseKey,
         'Content-Type': 'application/json',
-        Prefer: 'resolution=merge-duplicates,return=minimal',
       },
-      body: JSON.stringify(updates),
+      body: JSON.stringify({ _updates: updates, _scraped_at: scrapedAt }),
     });
     if (!saved.ok) throw new Error(`Failed to save committee meetings (${saved.status})`);
     return new Response(JSON.stringify({ success: true, data: { meetings, total: meetings.length, scraped_at: scrapedAt } }), {

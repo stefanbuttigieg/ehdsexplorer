@@ -37,7 +37,7 @@ const AdminAuthPage = () => {
   const [mfaUserEmail, setMfaUserEmail] = useState('');
   const [awaitingMFA, setAwaitingMFA] = useState(false);
 
-  const { user, loading, isEditor, mfaRequired, mfaError } = useAuth();
+  const { user, loading, isEditor, mfaRequired, mfaError, refreshRoles } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const nextPath = oauthReturnPath(searchParams.get('next'));
@@ -191,7 +191,9 @@ const AdminAuthPage = () => {
     }
   };
 
-  const handleMFASuccess = () => {
+  const handleMFASuccess = async () => {
+    // Keep redirects blocked until this hook has refreshed server-verified roles.
+    await refreshRoles();
     setShowMFAVerify(false);
     setAwaitingMFA(false);
     setMfaTotpFactorId(null);
@@ -200,13 +202,7 @@ const AdminAuthPage = () => {
     sessionStorage.removeItem('mfa_pending');
     window.dispatchEvent(new Event('mfa-verification-changed'));
     toast({ title: 'Signed in successfully' });
-    if (hasNext) {
-      navigate(nextPath);
-    } else if (isEditor) {
-      navigate('/admin');
-    } else {
-      navigate('/');
-    }
+    // The redirect effect uses the refreshed roles, not this callback's stale closure.
   };
 
   const handleMFACancel = async () => {

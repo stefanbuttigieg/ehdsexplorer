@@ -154,16 +154,26 @@ export function useMFAEnrollment() {
     mutationFn: async (updates: Partial<UserMFAPreferences>) => {
       if (!user) throw new Error('Not authenticated');
 
+      const values = {
+        ...(updates.reminder_dismissed_at !== undefined ? { reminder_dismissed_at: updates.reminder_dismissed_at } : {}),
+        ...(updates.reminder_snooze_until !== undefined ? { reminder_snooze_until: updates.reminder_snooze_until } : {}),
+        ...(updates.preferred_method !== undefined ? { preferred_method: updates.preferred_method } : {}),
+        updated_at: new Date().toISOString(),
+      };
+      const columns = 'id,user_id,reminder_dismissed_at,reminder_snooze_until,preferred_method,email_otp_enabled,created_at,updated_at';
+      // Upsert also requires UPDATE(user_id), which is intentionally not granted.
+      const existing = await supabase
+        .from('user_mfa_preferences')
+        .update(values)
+        .eq('user_id', user.id)
+        .select(columns)
+        .maybeSingle();
+      if (existing.error) throw existing.error;
+      if (existing.data) return existing.data;
       const { data, error } = await supabase
         .from('user_mfa_preferences')
-        .upsert({
-          user_id: user.id,
-          reminder_dismissed_at: updates.reminder_dismissed_at,
-          reminder_snooze_until: updates.reminder_snooze_until,
-          preferred_method: updates.preferred_method,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: 'user_id' })
-        .select('id,user_id,reminder_dismissed_at,reminder_snooze_until,preferred_method,email_otp_enabled,created_at,updated_at')
+        .insert({ user_id: user.id, ...values })
+        .select(columns)
         .single();
       
       if (error) throw error;

@@ -1,9 +1,11 @@
+// @ts-ignore Bun runs these focused tests independently of the Vite test runner.
 import { beforeEach, expect, it, mock } from 'bun:test';
 import { JSDOM } from 'jsdom';
 import React from 'react';
 
 const dom = new JSDOM('<!doctype html><html><body></body></html>', { url: 'http://localhost:8080/admin/auth' });
 Object.assign(globalThis, { window: dom.window, document: dom.window.document, navigator: dom.window.navigator, sessionStorage: dom.window.sessionStorage, Event: dom.window.Event, HTMLElement: dom.window.HTMLElement });
+Object.assign(globalThis, { getComputedStyle: dom.window.getComputedStyle.bind(dom.window), requestAnimationFrame: (fn: FrameRequestCallback) => setTimeout(fn, 0), cancelAnimationFrame: clearTimeout });
 let verified = false;
 let role = 'admin';
 let selected = '';
@@ -28,6 +30,8 @@ const client = {
       maybeSingle: async () => ({ data: { email_otp_enabled: true } }),
       single: async () => selected === '*' || !selected ? ({ error: new Error('permission denied') }) : ({ data: { user_id: user.id } }),
       upsert: () => prefs,
+      update: () => prefs,
+      insert: () => prefs,
     };
     return prefs;
   },
@@ -47,6 +51,7 @@ beforeEach(() => { cleanup(); verified = false; selected = ''; role = 'admin'; }
 it('dismiss and snooze return only preference columns the caller may read', async () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const { result } = renderHook(() => useMFAEnrollment(), { wrapper: ({ children }) => <QueryClientProvider client={queryClient}>{children}</QueryClientProvider> });
+  await act(async () => { await new Promise(resolve => setTimeout(resolve, 20)); });
   await waitFor(() => expect(result.current.isLoading).toBe(false));
   await act(async () => { await result.current.dismissReminder(); });
   expect(selected).toBe('id,user_id,reminder_dismissed_at,reminder_snooze_until,preferred_method,email_otp_enabled,created_at,updated_at');

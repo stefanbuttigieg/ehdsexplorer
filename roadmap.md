@@ -1,3 +1,4 @@
+- [ ] Verify and fix reminder preference writes, post-verification admin routing, and committee cache freshness from Project monitoring.
 - [x] Correct the MCP guide example to Article 71 and return/search rich FAQ answers, covering all 37 affected FAQs; FAQ 43's existing content and guide verified in preview, three regression tests passed, manifest extracted. Hosted MCP confirmation awaits republishing and external sign-in.
 - [x] Deploy mcp.ehdsexplorer.eu fixed-origin Cloudflare Worker with streaming and OAuth discovery; HTTPS metadata and 401 sign-in challenge verified, six proxy tests passed; guide and canonical MCP resource updated for next app publish.
 - [ ] Verify a full Claude/ChatGPT OAuth connection and authenticated streamed tool call through mcp.ehdsexplorer.eu; requires approval/sign-in in the external assistant. Republish app after final MCP manifest extraction to serve the updated guide and canonical server resource.

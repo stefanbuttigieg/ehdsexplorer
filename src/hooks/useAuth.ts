@@ -127,6 +127,11 @@ export function useAuth() {
     return { error };
   };
 
+  const refreshRoles = useCallback(async () => {
+    const { data } = await supabase.auth.getSession();
+    if (data.session?.user) await checkRoles(data.session.user.id);
+  }, [checkRoles]);
+
   return {
     user,
     session,
@@ -136,6 +141,7 @@ export function useAuth() {
     isSuperAdmin,
     mfaRequired,
     mfaError,
+    refreshRoles,
     signIn,
     signUp,
     signOut,

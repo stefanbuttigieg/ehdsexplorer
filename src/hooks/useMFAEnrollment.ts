@@ -163,7 +163,7 @@ export function useMFAEnrollment() {
           preferred_method: updates.preferred_method,
           updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id' })
-        .select()
+        .select('id,user_id,reminder_dismissed_at,reminder_snooze_until,preferred_method,email_otp_enabled,created_at,updated_at')
         .single();
       
       if (error) throw error;

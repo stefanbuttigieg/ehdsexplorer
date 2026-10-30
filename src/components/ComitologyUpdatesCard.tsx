@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { newestMeetings, MEETING_PREVIEW_LIMIT } from '@/lib/comitology-meetings';
+import { newestMeetings, isMeetingCacheStale, MEETING_PREVIEW_LIMIT } from '@/lib/comitology-meetings';
 
 export function ComitologyUpdatesCard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -18,14 +18,14 @@ export function ComitologyUpdatesCard() {
       const { data, error } = await supabase
         .from('comitology_updates')
         .select('*')
+        .like('source_url', 'https://ec.europa.eu/transparency/comitology-register/screen/meetings/%')
         .order('scraped_at', { ascending: false });
       if (error) throw error;
       return data || [];
     },
   });
 
-  const isStale = updates.length === 0 || updates.some(u =>
-    new Date(u.scraped_at).getTime() < Date.now() - 24 * 60 * 60 * 1000);
+  const isStale = isMeetingCacheStale(updates);
 
   const handleRefreshSilent = useCallback(async () => {
     setIsRefreshing(true);

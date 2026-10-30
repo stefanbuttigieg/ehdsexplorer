@@ -8,13 +8,25 @@ export interface ComitologyMeeting {
 
 export const MEETING_PREVIEW_LIMIT = 5;
 
-export function newestMeetings(updates: { scraped_content: string | null }[]): ComitologyMeeting[] {
+export interface MeetingCacheRow {
+  scraped_content: string | null;
+  scraped_at?: string;
+}
+
+export function isMeetingCacheStale(updates: MeetingCacheRow[], now = Date.now()): boolean {
+  const latest = Math.max(...updates.map(u => Date.parse(u.scraped_at ?? '')).filter(Number.isFinite));
+  return !Number.isFinite(latest) || latest < now - 24 * 60 * 60 * 1000;
+}
+
+export function newestMeetings(updates: MeetingCacheRow[]): ComitologyMeeting[] {
   const meetings = new Map<string, ComitologyMeeting>();
-  for (const update of updates) {
+  // Compare cache times explicitly so caller order cannot choose an older duplicate.
+  const ordered = [...updates].sort((a, b) => (Date.parse(b.scraped_at ?? '') || 0) - (Date.parse(a.scraped_at ?? '') || 0));
+  for (const update of ordered) {
     try {
       const meeting = JSON.parse(update.scraped_content || '{}');
       if (typeof meeting.meeting_code !== 'string' || typeof meeting.title !== 'string' || typeof meeting.date !== 'string' || typeof meeting.url !== 'string') continue;
-      meetings.set(meeting.meeting_code, meeting);
+      if (!meetings.has(meeting.meeting_code)) meetings.set(meeting.meeting_code, meeting);
     } catch {
       // Ignore malformed cached rows.
     }

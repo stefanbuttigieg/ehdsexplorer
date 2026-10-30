@@ -5630,6 +5630,10 @@ export type Database = {
         Returns: string
       }
       record_search_query: { Args: { _query: string }; Returns: undefined }
+      sync_committee_meetings: {
+        Args: { _scraped_at: string; _updates: Json }
+        Returns: number
+      }
     }
     Enums: {
       app_role: "admin" | "editor" | "super_admin"

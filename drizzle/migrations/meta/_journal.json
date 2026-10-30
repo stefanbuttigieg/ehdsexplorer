@@ -64,6 +64,13 @@
       "when": 1793220873052,
       "tag": "0008_add_health_edge_source_with_credit",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793373060257,
+      "tag": "0009_sync_complete_committee_meeting_cache",
+      "breakpoints": true
     }
   ]
 }

@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { ClipboardPaste } from "lucide-react";
-import { Plus, Pencil, Trash2, Eye, EyeOff, ArrowLeft, Table2, Columns, Rows3, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, ArrowLeft, Table2, Columns, Rows3, ArrowUp, ArrowDown, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -227,6 +227,18 @@ function RowManager({ tableId }: { tableId: string }) {
   const { data: columns = [] } = useDataColumns(tableId);
   const { data: rows = [], isLoading } = useDataRows(tableId);
   const { createRow, updateRow, deleteRow, reorderRows } = useDataRowMutations(tableId);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [overIndex, setOverIndex] = useState<number | null>(null);
+  const dropRow = (to: number) => {
+    const from = dragIndex;
+    setDragIndex(null);
+    setOverIndex(null);
+    if (from === null || from === to) return;
+    const ids = rows.map(r => r.id);
+    const [moved] = ids.splice(from, 1);
+    ids.splice(to, 0, moved);
+    reorderRows.mutate(ids);
+  };
   const moveRow = (index: number, delta: number) => {
     const target = index + delta;
     if (target < 0 || target >= rows.length) return;
@@ -339,13 +351,25 @@ function RowManager({ tableId }: { tableId: string }) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-8" aria-label="Drag to reorder" />
                 {columns.map(c => <TableHead key={c.id} className="text-xs whitespace-nowrap">{c.name}</TableHead>)}
                 <TableHead className="w-36">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {rows.map((row, index) => (
-                <TableRow key={row.id}>
+                <TableRow
+                  key={row.id}
+                  draggable={!reorderRows.isPending}
+                  onDragStart={e => { setDragIndex(index); e.dataTransfer.effectAllowed = "move"; }}
+                  onDragOver={e => { e.preventDefault(); if (overIndex !== index) setOverIndex(index); }}
+                  onDrop={e => { e.preventDefault(); dropRow(index); }}
+                  onDragEnd={() => { setDragIndex(null); setOverIndex(null); }}
+                  className={`${dragIndex === index ? "opacity-50" : ""} ${overIndex === index && dragIndex !== null && dragIndex !== index ? "border-t-2 border-t-primary" : ""}`}
+                >
+                  <TableCell className="w-8 cursor-grab text-muted-foreground" title="Drag to reorder">
+                    <GripVertical className="h-4 w-4" />
+                  </TableCell>
                   {columns.map(c => (
                     <TableCell key={c.id} className="text-sm max-w-xs">
                       <span className="line-clamp-2">{row.values[c.column_key] || ""}</span>

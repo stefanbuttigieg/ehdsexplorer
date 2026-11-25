@@ -14,7 +14,7 @@ const corsHeaders = {
 const ALLOWED_RESOURCES = [
   "articles", "recitals", "definitions", "chapters", "sections",
   "implementing-acts", "annexes", "health-authorities", "country-legislation", "faqs",
-  "feedback-comments", "feedback-insights", "metadata"
+  "feedback-comments", "feedback-insights", "data-tables", "metadata"
 ];
 const ALLOWED_FORMATS = ["json", "csv"];
 const ALLOWED_LANGUAGES = ["en", "mt", "de", "fr", "it", "es", "pt", "nl", "pl", "cs", "sk", "hu", "ro", "bg", "el", "sv", "da", "fi", "et", "lv", "lt", "sl", "hr", "ga"];
@@ -184,6 +184,7 @@ const RESOURCE_FIELDS: Record<string, string[]> = {
   "country-legislation": ["id", "country_code", "country_name", "title", "official_title", "legislation_type", "status", "status_notes", "summary", "url", "effective_date", "adoption_date", "publication_date", "enforcement_measures"],
   "faqs": ["faq_number", "question", "answer", "rich_content", "chapter", "sub_category", "source_articles", "source_recitals", "source_references", "data_tables"],
   "feedback-comments": ["id", "implementing_act_id", "feedback", "language", "user_type", "country", "organization", "date_feedback", "sentiment", "sentiment_score", "attachments"],
+  "data-tables": ["id", "implementing_act_id", "name", "description", "sort_order", "columns", "rows", "updated_at"],
   "feedback-insights": ["implementing_act_id", "total_count", "analyzed_count", "sentiment_counts", "word_cloud", "by_user_type", "by_country", "themes_summary", "key_themes", "last_synced_at"],
 };
 
@@ -642,6 +643,38 @@ Deno.serve(async (req) => {
         break;
       }
 
+      case "data-tables": {
+        // Only published tables are exposed; this client bypasses row security.
+        const act = validateStringId(url.searchParams.get("act"));
+        const tableId = id && /^[0-9a-f-]{36}$/i.test(id) ? id : null;
+        let q = supabase.from("implementing_act_data_tables")
+          .select("id, implementing_act_id, name, description, sort_order, updated_at, implementing_act_data_columns(name, column_key, sort_order), implementing_act_data_rows(values, sort_order)")
+          .eq("is_published", true)
+          .order("implementing_act_id", { ascending: true })
+          .order("sort_order", { ascending: true });
+        if (act) q = q.eq("implementing_act_id", act);
+        if (tableId) q = q.eq("id", tableId);
+        const { data: rows, error } = await q;
+        if (error) throw error;
+        const bySort = (a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0);
+        data = (rows ?? []).map((t: any) => {
+          const columns = [...(t.implementing_act_data_columns ?? [])].sort(bySort).map((c: any) => ({ name: c.name, key: c.column_key }));
+          return {
+            id: t.id,
+            implementing_act_id: t.implementing_act_id,
+            name: t.name,
+            description: t.description,
+            sort_order: t.sort_order,
+            updated_at: t.updated_at,
+            columns,
+            rows: [...(t.implementing_act_data_rows ?? [])].sort(bySort).map((r: any) =>
+              Object.fromEntries(columns.map(c => [c.key, r.values?.[c.key] ?? ""]))),
+          };
+        });
+        if (tableId) data = data[0] ?? null;
+        break;
+      }
+
       case "annexes": {
         const validatedId = validateStringId(id);
         const baseColumns = "id, title, content";
@@ -933,6 +966,7 @@ function getResourceDescription(resource: string): string {
     "country-legislation": "National implementing legislation tracker",
     "faqs": "Official EHDS FAQs from the European Commission (DG SANTE)",
     "feedback-comments": "Public 'Have your say' comments on implementing acts, with AI sentiment and attachment links. Params: act, sentiment, country, user_type, from, to, limit (max 1000), offset",
+    "data-tables": "Published data tables from implementing acts and annexes, with ordered columns and rows. Params: act, id",
     "feedback-insights": "Aggregated feedback analysis per implementing act: sentiment split, word cloud, key themes, stakeholder and country breakdowns. Param: act",
   };
   return descriptions[resource] || resource;

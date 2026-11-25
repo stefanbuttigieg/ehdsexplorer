@@ -231,6 +231,24 @@ const endpoints = [
     },
   },
   {
+    resource: "data-tables",
+    description: "Published data tables from implementing acts and annexes, with columns and rows in their set order",
+    parameters: [
+      { name: "act", type: "string", description: "Implementing act ID (omit for all acts)" },
+      { name: "id", type: "string", description: "Single table ID" },
+      { name: "format", type: "string", description: "Response format: json (default) or csv" },
+      { name: "fields", type: "string", description: "Comma-separated fields to return" },
+    ],
+    availableFields: ["id", "implementing_act_id", "name", "description", "sort_order", "columns", "rows", "updated_at"],
+    exampleResponse: {
+      "@context": "https://schema.org",
+      "@type": "Dataset",
+      name: "EHDS Regulation - data-tables",
+      data: [{ id: "3f2c…", implementing_act_id: "art-15", name: "Annex I – Data categories", columns: [{ name: "Category", key: "category" }], rows: [{ category: "Patient summary" }] }],
+      recordCount: 1,
+    },
+  },
+  {
     resource: "metadata",
     description: "API metadata and regulation information",
     parameters: [],

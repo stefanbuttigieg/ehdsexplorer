@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { ClipboardPaste } from "lucide-react";
-import { Plus, Pencil, Trash2, Eye, EyeOff, ArrowLeft, Table2, Columns, Rows3 } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, ArrowLeft, Table2, Columns, Rows3, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -226,7 +226,14 @@ function ColumnManager({ tableId }: { tableId: string }) {
 function RowManager({ tableId }: { tableId: string }) {
   const { data: columns = [] } = useDataColumns(tableId);
   const { data: rows = [], isLoading } = useDataRows(tableId);
-  const { createRow, updateRow, deleteRow } = useDataRowMutations(tableId);
+  const { createRow, updateRow, deleteRow, reorderRows } = useDataRowMutations(tableId);
+  const moveRow = (index: number, delta: number) => {
+    const target = index + delta;
+    if (target < 0 || target >= rows.length) return;
+    const ids = rows.map(r => r.id);
+    [ids[index], ids[target]] = [ids[target], ids[index]];
+    reorderRows.mutate(ids);
+  };
   const [editingRow, setEditingRow] = useState<{ id: string; values: Record<string, string> } | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [newValues, setNewValues] = useState<Record<string, string>>({});
@@ -333,11 +340,11 @@ function RowManager({ tableId }: { tableId: string }) {
             <TableHeader>
               <TableRow>
                 {columns.map(c => <TableHead key={c.id} className="text-xs whitespace-nowrap">{c.name}</TableHead>)}
-                <TableHead className="w-20">Actions</TableHead>
+                <TableHead className="w-36">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rows.map(row => (
+              {rows.map((row, index) => (
                 <TableRow key={row.id}>
                   {columns.map(c => (
                     <TableCell key={c.id} className="text-sm max-w-xs">
@@ -346,6 +353,12 @@ function RowManager({ tableId }: { tableId: string }) {
                   ))}
                   <TableCell>
                     <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Move row up" disabled={index === 0 || reorderRows.isPending} onClick={() => moveRow(index, -1)}>
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Move row down" disabled={index === rows.length - 1 || reorderRows.isPending} onClick={() => moveRow(index, 1)}>
+                        <ArrowDown className="h-3.5 w-3.5" />
+                      </Button>
                       <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditingRow({ id: row.id, values: { ...row.values } })}>
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>

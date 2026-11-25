@@ -196,5 +196,16 @@ export function useDataRowMutations(tableId: string) {
     onSuccess: invalidate,
   });
 
-  return { createRow, updateRow, deleteRow };
+  const reorderRows = useMutation({
+    mutationFn: async (orderedIds: string[]) => {
+      const results = await Promise.all(
+        orderedIds.map((id, i) => supabase.from("implementing_act_data_rows").update({ sort_order: i }).eq("id", id)),
+      );
+      const failed = results.find(r => r.error);
+      if (failed?.error) throw failed.error;
+    },
+    onSettled: invalidate,
+  });
+
+  return { createRow, updateRow, deleteRow, reorderRows };
 }

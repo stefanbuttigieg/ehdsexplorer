@@ -21,11 +21,14 @@ import {
   type DataTable, type DataColumn,
 } from "@/hooks/useImplementingActDataTables";
 import { useToast } from "@/hooks/use-toast";
+import { PdfTableImportDialog } from "@/components/admin/PdfTableImportDialog";
+import { FileUp } from "lucide-react";
 
 function TableManager({ actId, actTitle }: { actId: string; actTitle: string }) {
   const { data: tables = [], isLoading } = useDataTables(actId);
   const { createTable, updateTable, deleteTable } = useDataTableMutations(actId);
   const [showCreate, setShowCreate] = useState(false);
+  const [showPdf, setShowPdf] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const [editingTable, setEditingTable] = useState<DataTable | null>(null);
@@ -53,10 +56,16 @@ function TableManager({ actId, actTitle }: { actId: string; actTitle: string }) 
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <h3 className="font-medium text-sm text-muted-foreground">{actTitle}</h3>
-        <Button size="sm" onClick={() => setShowCreate(true)}>
-          <Plus className="h-4 w-4 mr-1" /> Add Table
-        </Button>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={() => setShowPdf(true)}>
+            <FileUp className="h-4 w-4 mr-1" /> Import from PDF
+          </Button>
+          <Button size="sm" onClick={() => setShowCreate(true)}>
+            <Plus className="h-4 w-4 mr-1" /> Add Table
+          </Button>
+        </div>
       </div>
+      <PdfTableImportDialog actId={actId} open={showPdf} onOpenChange={setShowPdf} startOrder={tables.length} />
 
       {tables.length === 0 ? (
         <Card><CardContent className="p-6 text-center text-muted-foreground text-sm">No data tables yet.</CardContent></Card>

@@ -6,23 +6,40 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Simple IP-to-country using ip-api.com (free, no key needed)
-async function detectCountry(ip: string): Promise<{ code: string; name: string } | null> {
-  // Skip local/private IPs
-  if (!ip || ip === "127.0.0.1" || ip === "::1" || ip.startsWith("192.168.") || ip.startsWith("10.")) {
-    return null;
-  }
+const IPV4 = /^(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}$/;
+const IPV6 = /^[0-9a-fA-F:]{2,39}$/;
+const isPublicIp = (ip: string) =>
+  (IPV4.test(ip) && !/^(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|0\.)/.test(ip)) ||
+  (IPV6.test(ip) && ip.includes(':') && !/^(::1$|fc|fd|fe80)/i.test(ip));
 
+// IP-to-country lookup for the caller's own, validated public address only.
+async function detectCountry(ip: string): Promise<{ code: string; name: string } | null> {
+  if (!isPublicIp(ip)) return null;
   try {
-    const res = await fetch(`http://ip-api.com/json/${ip}?fields=status,countryCode,country`);
+    const res = await fetch(`http://ip-api.com/json/${encodeURIComponent(ip)}?fields=status,countryCode,country`);
     const data = await res.json();
-    if (data.status === "success") {
-      return { code: data.countryCode, name: data.country };
+    if (data.status === "success" && /^[A-Z]{2}$/.test(data.countryCode)) {
+      return { code: data.countryCode, name: String(data.country).slice(0, 80) };
     }
   } catch {
     // fallback
   }
   return null;
+}
+
+const HOURLY_LIMIT = 60;
+async function withinRateLimit(supabase: any, ip: string): Promise<boolean> {
+  const id = `leaderboard:${ip || "unknown"}`;
+  const since = new Date(Date.now() - 3600_000).toISOString();
+  const { data } = await supabase.from("api_rate_limits").select("id, request_count")
+    .eq("ip_address", id).gte("window_start", since).order("window_start", { ascending: false }).limit(1).maybeSingle();
+  if (data) {
+    if (data.request_count >= HOURLY_LIMIT) return false;
+    await supabase.from("api_rate_limits").update({ request_count: data.request_count + 1 }).eq("id", data.id);
+    return true;
+  }
+  await supabase.from("api_rate_limits").insert({ ip_address: id, request_count: 1, window_start: new Date().toISOString() });
+  return true;
 }
 
 Deno.serve(async (req) => {
@@ -48,6 +65,7 @@ Deno.serve(async (req) => {
       });
     }
 
+    const ip = (req.headers.get("cf-connecting-ip") || req.headers.get("x-forwarded-for")?.split(",")[0] || req.headers.get("x-real-ip") || "").trim();
     // Get user info from auth header if available
     let userId: string | null = null;
     const authHeader = req.headers.get("authorization");
@@ -55,6 +73,11 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
+    if (!(await withinRateLimit(supabase, ip))) {
+      return new Response(JSON.stringify({ error: "Too many requests" }), {
+        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     if (authHeader) {
       const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
@@ -66,16 +89,10 @@ Deno.serve(async (req) => {
     }
 
     // Determine country - prefer client-provided, fallback to IP detection
-    let finalCountryCode = country_code;
-    let finalCountryName = country_name;
+    let finalCountryCode = typeof country_code === "string" && /^[A-Z]{2}$/.test(country_code) ? country_code : undefined;
+    let finalCountryName = finalCountryCode ? String(country_name ?? finalCountryCode).slice(0, 80) : undefined;
 
     if (!finalCountryCode) {
-      const ip =
-        req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-        req.headers.get("cf-connecting-ip") ||
-        req.headers.get("x-real-ip") ||
-        "";
-
       const geo = await detectCountry(ip);
       if (geo) {
         finalCountryCode = geo.code;
@@ -95,8 +112,8 @@ Deno.serve(async (req) => {
       country_code: finalCountryCode,
       country_name: finalCountryName,
       category,
-      points: Math.min(Math.max(1, points), 100), // clamp 1-100
-      source_detail: source_detail?.substring(0, 200) ?? null,
+      points: Math.min(Math.max(1, Math.floor(Number(points) || 1)), 100), // clamp 1-100
+      source_detail: typeof source_detail === "string" ? source_detail.substring(0, 200) : null,
     });
 
     if (error) throw error;

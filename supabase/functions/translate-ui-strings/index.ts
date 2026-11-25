@@ -1,3 +1,4 @@
+import { requireStaff } from '../_shared/auth-guard.ts';
 import { requireVerifiedSession } from '../_shared/mfa-access.ts';
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
@@ -11,6 +12,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+  const denied = await requireStaff(req);
+  if (denied) return denied;
 
   const mfaDenied = await requireVerifiedSession(req);
   if (mfaDenied) return mfaDenied;

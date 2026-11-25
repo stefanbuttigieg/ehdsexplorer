@@ -88,7 +88,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log(`Sending test email to ${recipientEmail}`);
+    console.log("Sending test email");
 
     // Fetch email template from database
     let template = defaultTemplate;
@@ -122,7 +122,7 @@ const handler = async (req: Request): Promise<Response> => {
       html: emailHtml,
     });
 
-    console.log("Email API response:", emailResponse);
+    console.log("Email API response id:", emailResponse?.data?.id);
 
     if (emailResponse.error) {
       console.error("Email error:", emailResponse.error);

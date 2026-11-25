@@ -1,3 +1,4 @@
+import { requireStaff } from '../_shared/auth-guard.ts';
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
@@ -18,6 +19,8 @@ const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+  const denied = await requireStaff(req);
+  if (denied) return denied;
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -91,7 +94,7 @@ const handler = async (req: Request): Promise<Response> => {
         );
       }
 
-      console.log(`Newsletter verification email sent to ${sub.email}`);
+      console.log("Newsletter verification email sent");
       return new Response(
         JSON.stringify({ success: true, message: "Verification email sent" }),
         { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
@@ -170,7 +173,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log(`Verification email sent to ${subscription.email}`);
+    console.log("Verification email sent");
     return new Response(
       JSON.stringify({ success: true, message: "Verification email sent" }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }

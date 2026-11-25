@@ -98,7 +98,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Check if user is already confirmed
     if (targetUser.email_confirmed_at) {
-      console.log("User email already confirmed:", targetUser.email);
+      console.log("User email already confirmed");
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -176,7 +176,7 @@ const handler = async (req: Request): Promise<Response> => {
           </html>
         `,
       });
-      console.log(`Confirmation email sent to ${targetUser.email}`);
+      console.log("Confirmation email sent");
     } catch (emailError) {
       console.error(`Failed to send confirmation email:`, emailError);
       return new Response(

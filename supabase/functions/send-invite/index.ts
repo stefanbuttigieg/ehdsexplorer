@@ -119,7 +119,7 @@ const handler = async (req: Request): Promise<Response> => {
     const siteUrl = Deno.env.get("SITE_URL") || "https://ehdsexplorer.eu";
     const normalizedEmail = email.toLowerCase().trim();
 
-    console.log(`Creating invitation for ${normalizedEmail} with role ${role}`);
+    console.log(`Creating invitation with role ${role}`);
 
     // Create the invitation record first
     const { data: invitation, error: inviteInsertError } = await supabaseAdmin
@@ -189,7 +189,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log("User invited successfully:", inviteData);
+    console.log("User invited successfully:", inviteData?.user?.id);
 
     // Pre-create the user role so it's ready when they accept
     if (inviteData.user) {

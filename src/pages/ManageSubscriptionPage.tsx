@@ -94,24 +94,17 @@ const ManageSubscriptionPage = () => {
       const subscription = subscriptions.find(s => s.id === subscriptionId);
       if (!subscription) return;
 
+      // Send confirmation email first, while the subscription still proves ownership
+      await supabase.functions.invoke("send-unsubscribe-confirmation", {
+        body: { token: subscription.unsubscribe_token },
+      }).catch(() => {});
+
       const { error } = await supabase
         .from("implementing_act_subscriptions")
         .delete()
         .eq("unsubscribe_token", subscription.unsubscribe_token);
 
       if (error) throw error;
-
-      // Send confirmation email
-      const unsubscribedFrom = subscription.subscribe_all 
-        ? "all" 
-        : subscription.implementing_acts?.title || "an implementing act";
-
-      await supabase.functions.invoke("send-unsubscribe-confirmation", {
-        body: { 
-          email: subscription.email,
-          unsubscribed_from: unsubscribedFrom
-        },
-      });
 
       setSubscriptions(prev => prev.filter(s => s.id !== subscriptionId));
       toast({
@@ -132,8 +125,13 @@ const ManageSubscriptionPage = () => {
   const handleUnsubscribeAll = async () => {
     setDeletingId("all");
     try {
-      const userEmail = email;
-      
+      // Send confirmation email first, while a subscription still proves ownership
+      if (subscriptions[0]) {
+        await supabase.functions.invoke("send-unsubscribe-confirmation", {
+          body: { token: subscriptions[0].unsubscribe_token, unsubscribed_from: "all" },
+        }).catch(() => {});
+      }
+
       // Delete all subscriptions for this email
       for (const subscription of subscriptions) {
         await supabase
@@ -142,15 +140,6 @@ const ManageSubscriptionPage = () => {
           .eq("unsubscribe_token", subscription.unsubscribe_token);
       }
 
-      // Send confirmation email for unsubscribing from all
-      if (userEmail) {
-        await supabase.functions.invoke("send-unsubscribe-confirmation", {
-          body: { 
-            email: userEmail,
-            unsubscribed_from: "all"
-          },
-        });
-      }
 
       setSubscriptions([]);
       toast({

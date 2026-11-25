@@ -1,3 +1,4 @@
+import { requireStaff } from '../_shared/auth-guard.ts';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -7,11 +8,14 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+  const denied = await requireStaff(req);
+  if (denied) return denied;
 
   try {
     const { pdfUrl } = await req.json();
 
-    if (!pdfUrl || typeof pdfUrl !== 'string') {
+    const allowedPrefix = `${Deno.env.get('SUPABASE_URL')}/storage/v1/object/public/temp-pdf-imports/`;
+    if (!pdfUrl || typeof pdfUrl !== 'string' || !pdfUrl.startsWith(allowedPrefix) || pdfUrl.includes('..')) {
       return new Response(
         JSON.stringify({ success: false, error: 'pdfUrl is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

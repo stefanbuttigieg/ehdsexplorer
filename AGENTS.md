@@ -18,3 +18,4 @@
 - Beta trials use session storage, adoption uses local storage, and switching back clears both; eligibility excludes Kids Mode and administrative/account/auth surfaces — avoids silent adoption and redirect loops.
 - Beta search consumes useSearch and PopularTopicChips directly, with its own results presentation and scoped theme tokens — keeps search semantics and popularity safeguards consistent with classic.
 - Beta choice events are sent only through the initialized consent-based PostHog provider on nonembedded production hosts; existing pageviews carry experience/default/environment labels — measures uptake without draft inflation or a second tracker.
+- Staff-only and scheduled edge functions gate through _shared/auth-guard.ts (requireStaff with the user's own token, or x-cron-token matching the service-only scheduler token); public email/callback endpoints require a stored per-record token — prevents anonymous paid calls, spoofed emails and forged callbacks.

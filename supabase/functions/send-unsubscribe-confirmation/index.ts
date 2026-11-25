@@ -1,3 +1,5 @@
+import { createClient } from "npm:@supabase/supabase-js@2";
+import { escapeHtml } from "../_shared/auth-guard.ts";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 
@@ -19,24 +21,46 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { email, unsubscribed_from }: UnsubscribeConfirmRequest = await req.json();
+    const body = await req.json();
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const isInternal = req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "") === serviceKey;
+    let email: string | null = null;
+    let unsubscribed_from: string = "an implementing act";
+
+    if (isInternal && typeof body.email === "string") {
+      email = body.email;
+      unsubscribed_from = typeof body.unsubscribed_from === "string" ? body.unsubscribed_from : unsubscribed_from;
+    } else {
+      // Public callers must prove they hold the subscription's private token; the address comes from our records.
+      const token = typeof body.token === "string" ? body.token : "";
+      if (!/^[A-Za-z0-9-]{16,100}$/.test(token)) {
+        return new Response(JSON.stringify({ error: "Valid subscription token required" }), { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders } });
+      }
+      const admin = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey);
+      const { data: sub } = await admin.from("implementing_act_subscriptions")
+        .select("email, subscribe_all, implementing_acts(title)").eq("unsubscribe_token", token).maybeSingle();
+      if (!sub) {
+        return new Response(JSON.stringify({ error: "Subscription not found" }), { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders } });
+      }
+      email = sub.email;
+      unsubscribed_from = body.unsubscribed_from === "all" || sub.subscribe_all ? "all" : ((sub.implementing_acts as any)?.title || unsubscribed_from);
+    }
 
     if (!email) {
-      console.error("Missing email");
       return new Response(
         JSON.stringify({ error: "email is required" }),
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
 
-    console.log(`Sending unsubscribe confirmation to ${email}`);
+    console.log("Sending unsubscribe confirmation");
 
     const baseUrl = Deno.env.get("SITE_URL") || "https://ehdsexplorer.eu";
     const subscribeUrl = `${baseUrl}/implementing-acts`;
 
     const unsubscribedText = unsubscribed_from === "all" 
       ? "all implementing act updates"
-      : `updates for "${unsubscribed_from}"`;
+      : `updates for "${escapeHtml(unsubscribed_from)}"`;
 
     try {
       await resend.emails.send({
@@ -78,7 +102,7 @@ const handler = async (req: Request): Promise<Response> => {
           </html>
         `,
       });
-      console.log(`Unsubscribe confirmation sent to ${email}`);
+      console.log("Unsubscribe confirmation sent");
     } catch (emailError) {
       console.error(`Failed to send unsubscribe confirmation:`, emailError);
       return new Response(

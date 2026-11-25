@@ -1857,12 +1857,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ehdsexplorer.eu/implementing-acts/art-15-1</loc>
-    <lastmod>2026-04-16</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://ehdsexplorer.eu/implementing-acts/art-36-1</loc>
     <lastmod>2026-06-30</lastmod>
     <changefreq>monthly</changefreq>
@@ -1875,6 +1869,12 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://ehdsexplorer.eu/implementing-acts/art-15-1</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://ehdsexplorer.eu/implementing-acts/art-16</loc>
     <lastmod>2026-09-22</lastmod>
     <changefreq>monthly</changefreq>
@@ -1883,6 +1883,12 @@
   <url>
     <loc>https://ehdsexplorer.eu/implementing-acts/art-47</loc>
     <lastmod>2026-03-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ehdsexplorer.eu/implementing-acts/art-70</loc>
+    <lastmod>2026-11-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -1918,25 +1924,19 @@
   </url>
   <url>
     <loc>https://ehdsexplorer.eu/implementing-acts/art-40</loc>
-    <lastmod>2026-04-16</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://ehdsexplorer.eu/implementing-acts/art-73</loc>
-    <lastmod>2026-06-30</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://ehdsexplorer.eu/implementing-acts/art-70</loc>
-    <lastmod>2026-10-17</lastmod>
+    <lastmod>2026-11-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://ehdsexplorer.eu/implementing-acts/art-78</loc>
     <lastmod>2026-07-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ehdsexplorer.eu/implementing-acts/art-73</loc>
+    <lastmod>2026-11-24</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>

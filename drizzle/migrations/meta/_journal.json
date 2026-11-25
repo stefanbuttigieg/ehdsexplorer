@@ -71,6 +71,13 @@
       "when": 1793373060257,
       "tag": "0009_sync_complete_committee_meeting_cache",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795610922885,
+      "tag": "0010_tighten_internal_table_access",
+      "breakpoints": true
     }
   ]
 }

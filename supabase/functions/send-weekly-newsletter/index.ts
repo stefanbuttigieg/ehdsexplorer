@@ -146,7 +146,7 @@ serve(async (req: Request) => {
         });
 
         if (emailResponse.error) {
-          console.error(`Failed to send to ${subscriber.email}:`, emailResponse.error);
+          console.error("Failed to send newsletter to a subscriber:", emailResponse.error);
           errors.push(subscriber.email);
           await serviceClient.from("email_send_log").insert({
             message_id: messageId,
@@ -167,7 +167,7 @@ serve(async (req: Request) => {
           });
         }
       } catch (emailError: any) {
-        console.error(`Error sending to ${subscriber.email}:`, emailError);
+        console.error("Error sending newsletter to a subscriber:", emailError);
         errors.push(subscriber.email);
         await serviceClient.from("email_send_log").insert({
           message_id: messageId,

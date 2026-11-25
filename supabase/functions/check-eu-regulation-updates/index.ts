@@ -180,9 +180,9 @@ Deno.serve(async (req) => {
                     html: emailHtml,
                   }),
                 });
-                console.log(`Notification sent to ${email}`);
+                console.log("Notification sent");
               } catch (emailError) {
-                console.error(`Failed to send email to ${email}:`, emailError);
+                console.error("Failed to send notification email:", emailError);
               }
             }
           }

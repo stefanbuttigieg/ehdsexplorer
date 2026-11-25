@@ -105,6 +105,8 @@ Deno.serve(async (req) => {
 
     const adminClient = createClient(supabaseUrl, serviceKey);
 
+    // Private per-job value: only the callback URL we hand to eTranslation contains it.
+    const callbackToken = crypto.randomUUID() + crypto.randomUUID();
     // Create job row first so the callback can correlate via external-reference
     const { data: job, error: jobErr } = await adminClient
       .from("translation_jobs")
@@ -117,7 +119,7 @@ Deno.serve(async (req) => {
         target_field: targetField ?? null,
         status: "pending",
         requested_by: userId,
-        metadata: metadata ?? {},
+        metadata: { ...(metadata ?? {}), callback_token: callbackToken },
       })
       .select()
       .single();
@@ -133,7 +135,7 @@ Deno.serve(async (req) => {
     // Build eTranslation REST v2 request
     // The "externalReference" we send is echoed back in the callback so we can find this job.
     const externalReference = job.id;
-    const callbackWithRef = `${callbackUrl}?ref=${encodeURIComponent(externalReference)}`;
+    const callbackWithRef = `${callbackUrl}?ref=${encodeURIComponent(externalReference)}&cbt=${encodeURIComponent(callbackToken)}`;
 
     const payload: Record<string, unknown> = {
       sourceLanguage: sourceLanguage.toUpperCase(),

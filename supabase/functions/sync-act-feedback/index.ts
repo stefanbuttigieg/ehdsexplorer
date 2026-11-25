@@ -1,3 +1,4 @@
+import { isScheduledCall } from '../_shared/auth-guard.ts';
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -207,7 +208,7 @@ Deno.serve(async (req) => {
   let body: any = {};
   try { body = await req.json(); } catch { /* empty */ }
   const actId = typeof body.implementingActId === "string" ? body.implementingActId.slice(0, 100) : null;
-  const scheduled = body.scheduled === true;
+  const scheduled = body.scheduled === true && await isScheduledCall(req);
 
   // Manual runs require an admin/editor
   let isAdmin = false;

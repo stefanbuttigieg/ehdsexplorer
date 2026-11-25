@@ -166,8 +166,8 @@ serve(async (req) => {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (!msg.role || !['user', 'assistant', 'system'].includes(msg.role)) {
-        return new Response(JSON.stringify({ error: "Invalid request: message role must be 'user', 'assistant', or 'system'" }), {
+      if (!msg.role || !['user', 'assistant'].includes(msg.role)) {
+        return new Response(JSON.stringify({ error: "Invalid request: message role must be 'user' or 'assistant'" }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }

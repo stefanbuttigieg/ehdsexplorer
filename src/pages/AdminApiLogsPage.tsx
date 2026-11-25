@@ -97,6 +97,13 @@ function getKeyStatusBadge(key: ApiKeyWithProfile) {
   return <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">Active</Badge>;
 }
 
+// Quote cells and neutralise spreadsheet formulas (=, +, -, @, tab, CR).
+function csvCell(value: unknown): string {
+  let c = String(value ?? "");
+  if (/^[=+\-@\t\r]/.test(c)) c = `'${c}`;
+  return `"${c.replace(/"/g, '""')}"`;
+}
+
 function exportLogsCSV(logs: ApiLogWithDetails[]) {
   const headers = ["Time", "User", "Key", "Endpoint", "Method", "Country", "Status", "Message", "IP"];
   const rows = logs.map(log => [
@@ -111,7 +118,7 @@ function exportLogsCSV(logs: ApiLogWithDetails[]) {
     log.ip_address || "",
   ]);
 
-  const csv = [headers, ...rows].map(r => r.map(c => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
+  const csv = [headers, ...rows].map(r => r.map(csvCell).join(",")).join("\n");
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -133,7 +140,7 @@ function exportKeysCSV(keys: ApiKeyWithProfile[]) {
     format(new Date(key.created_at), "yyyy-MM-dd"),
   ]);
 
-  const csv = [headers, ...rows].map(r => r.map(c => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
+  const csv = [headers, ...rows].map(r => r.map(csvCell).join(",")).join("\n");
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");

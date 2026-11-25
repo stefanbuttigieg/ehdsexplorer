@@ -1,3 +1,4 @@
+import { requireStaff, escapeHtml } from '../_shared/auth-guard.ts';
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "https://esm.sh/resend@2.0.0";
@@ -21,13 +22,26 @@ const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+  const denied = await requireStaff(req);
+  if (denied) return denied;
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { implementing_act_id, old_status, new_status, title }: StatusChangeRequest = await req.json();
+    const body: StatusChangeRequest = await req.json();
+    const implementing_act_id = String(body.implementing_act_id ?? '');
+    if (!/^[A-Za-z0-9_-]{1,100}$/.test(implementing_act_id)) {
+      return new Response(JSON.stringify({ error: "Invalid implementing act" }), { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } });
+    }
+    const { data: act } = await supabase.from("implementing_acts").select("title").eq("id", implementing_act_id).maybeSingle();
+    if (!act) {
+      return new Response(JSON.stringify({ error: "Implementing act not found" }), { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders } });
+    }
+    const title = escapeHtml(act.title);
+    const old_status = escapeHtml(String(body.old_status ?? '').slice(0, 50));
+    const new_status = escapeHtml(String(body.new_status ?? '').slice(0, 50));
 
     console.log(`Status change alert: ${title} changed from ${old_status} to ${new_status}`);
 
@@ -58,13 +72,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send emails to all subscribers
     const emailPromises = subscribers.map(async (subscriber) => {
-      const unsubscribeUrl = `${baseUrl}/unsubscribe?token=${subscriber.unsubscribe_token}`;
-      const manageUrl = `${baseUrl}/manage-subscription?token=${subscriber.unsubscribe_token}`;
+      const unsubscribeUrl = `${baseUrl}/unsubscribe?token=${encodeURIComponent(subscriber.unsubscribe_token)}`;
+      const manageUrl = `${baseUrl}/manage-subscription?token=${encodeURIComponent(subscriber.unsubscribe_token)}`;
       try {
         await resend.emails.send({
           from: "EHDS Explorer <notifications@ehdsexplorer.eu>",
           to: [subscriber.email],
-          subject: `EHDS Implementing Act Status Update: ${title}`,
+          subject: `EHDS Implementing Act Status Update: ${String(act.title).replace(/[\r\n]+/g, ' ')}`,
           html: `
             <!DOCTYPE html>
             <html>
@@ -105,10 +119,10 @@ const handler = async (req: Request): Promise<Response> => {
             </html>
           `,
         });
-        console.log(`Email sent to ${subscriber.email}`);
+        console.log("Alert email sent");
         return { email: subscriber.email, success: true };
       } catch (emailError) {
-        console.error(`Failed to send email to ${subscriber.email}:`, emailError);
+        console.error("Failed to send alert email:", emailError);
         return { email: subscriber.email, success: false, error: emailError };
       }
     });

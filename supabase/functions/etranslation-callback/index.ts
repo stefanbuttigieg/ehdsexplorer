@@ -24,6 +24,12 @@ Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
     const refFromQuery = url.searchParams.get("ref");
+    const callbackToken = url.searchParams.get("cbt");
+    const ignore = () => new Response(JSON.stringify({ received: true, matched: false }), {
+      status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+    // Only callbacks carrying the job id and its private token are accepted.
+    if (!refFromQuery || !callbackToken) return ignore();
 
     let payload: any = null;
     let translatedText: string | null = null;
@@ -84,26 +90,17 @@ Deno.serve(async (req) => {
     const adminClient = createClient(supabaseUrl, serviceKey);
 
     // Locate the job: prefer external-reference (job id), fall back to ec_request_id metadata
-    let jobQuery = adminClient.from("translation_jobs").select("*").limit(1);
-    if (externalRef) {
-      jobQuery = adminClient
-        .from("translation_jobs")
-        .select("*")
-        .eq("id", externalRef)
-        .limit(1);
-    } else if (ecRequestId) {
-      jobQuery = adminClient
-        .from("translation_jobs")
-        .select("*")
-        .eq("metadata->>ec_request_id", ecRequestId)
-        .limit(1);
-    }
-
-    const { data: jobs, error: findErr } = await jobQuery;
+    const { data: jobs, error: findErr } = await adminClient
+      .from("translation_jobs")
+      .select("*")
+      .eq("id", refFromQuery)
+      .eq("status", "pending")
+      .limit(1);
     if (findErr) {
       console.error("Job lookup error", findErr);
     }
-    const job = jobs?.[0];
+    const candidate = jobs?.[0];
+    const job = candidate && candidate.metadata?.callback_token === callbackToken ? candidate : null;
 
     if (!job) {
       console.warn("No matching translation job found", { externalRef, ecRequestId });
@@ -129,7 +126,8 @@ Deno.serve(async (req) => {
     const { error: updateErr } = await adminClient
       .from("translation_jobs")
       .update(updates)
-      .eq("id", job.id);
+      .eq("id", job.id)
+      .eq("status", "pending");
 
     if (updateErr) {
       console.error("Job update failed", updateErr);

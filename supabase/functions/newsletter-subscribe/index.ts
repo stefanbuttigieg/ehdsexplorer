@@ -39,11 +39,11 @@ serve(async (req: Request) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const verificationToken = crypto.randomUUID();
+    let verificationToken = crypto.randomUUID();
 
     const { data: existing } = await supabase
       .from("newsletter_subscriptions")
-      .select("id, is_verified, unsubscribed_at")
+      .select("id, is_verified, unsubscribed_at, verification_token")
       .eq("email", email.toLowerCase())
       .maybeSingle();
 
@@ -55,18 +55,18 @@ serve(async (req: Request) => {
         );
       }
 
-      const { error: updateError } = await supabase
-        .from("newsletter_subscriptions")
-        .update({
-          unsubscribed_at: null,
-          verification_token: verificationToken,
-          is_verified: false,
-          source: safeSource,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", existing.id);
-
-      if (updateError) throw updateError;
+      // Never change an existing record's state from an unauthenticated request:
+      // re-send the link it already has, so nobody can reset another person's subscription.
+      if (existing.verification_token) {
+        verificationToken = existing.verification_token;
+      } else {
+        const { error: updateError } = await supabase
+          .from("newsletter_subscriptions")
+          .update({ verification_token: verificationToken, updated_at: new Date().toISOString() })
+          .eq("id", existing.id)
+          .is("verification_token", null);
+        if (updateError) throw updateError;
+      }
     } else {
       const { error: insertError } = await supabase
         .from("newsletter_subscriptions")
@@ -128,7 +128,7 @@ serve(async (req: Request) => {
       if (emailResponse.error) {
         console.error("Resend API error for newsletter verification:", JSON.stringify(emailResponse.error));
       } else {
-        console.log(`Newsletter verification email sent to ${email}, ID: ${emailResponse.data?.id}`);
+        console.log(`Newsletter verification email sent, ID: ${emailResponse.data?.id}`);
       }
     } catch (emailError) {
       console.error("Failed to send newsletter verification email:", emailError);

@@ -127,7 +127,7 @@ serve(async (req) => {
       // Don't fail the unsubscribe if email fails
     }
 
-    console.log(`Successfully unsubscribed: ${subscription.email}`);
+    console.log("Successfully unsubscribed a subscription");
 
     return new Response(
       JSON.stringify({ success: true, message: "Successfully unsubscribed" }),

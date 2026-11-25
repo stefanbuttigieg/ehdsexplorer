@@ -28,8 +28,13 @@ function generateApiKey(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   const prefix = 'ehds_';
   let key = prefix;
-  for (let i = 0; i < 32; i++) {
-    key += chars.charAt(Math.floor(Math.random() * chars.length));
+  // Cryptographically secure randomness; rejection sampling avoids modulo bias.
+  const limit = 256 - (256 % chars.length);
+  while (key.length < prefix.length + 32) {
+    const bytes = crypto.getRandomValues(new Uint8Array(48));
+    for (const b of bytes) {
+      if (b < limit && key.length < prefix.length + 32) key += chars[b % chars.length];
+    }
   }
   return key;
 }

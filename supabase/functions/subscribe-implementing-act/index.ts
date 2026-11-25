@@ -126,10 +126,10 @@ serve(async (req: Request) => {
       if (emailResponse.error) {
         console.error("Resend API error for subscription verification:", JSON.stringify(emailResponse.error));
       } else {
-        console.log(`Verification email sent to ${email}, Resend ID: ${emailResponse.data?.id}`);
+        console.log(`Verification email sent, Resend ID: ${emailResponse.data?.id}`);
       }
     } catch (emailError) {
-      console.error("Failed to send verification email to", email, ":", emailError);
+      console.error("Failed to send verification email:", emailError);
     }
 
     return new Response(

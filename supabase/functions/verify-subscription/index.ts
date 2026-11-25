@@ -30,9 +30,8 @@ serve(async (req: Request) => {
     if (type === "newsletter") {
       const { data, error } = await supabase
         .from("newsletter_subscriptions")
-        .update({ is_verified: true, verified_at: new Date().toISOString() })
+        .update({ is_verified: true, verified_at: new Date().toISOString(), unsubscribed_at: null })
         .eq("verification_token", token)
-        .is("unsubscribed_at", null)
         .select("id")
         .single();
 

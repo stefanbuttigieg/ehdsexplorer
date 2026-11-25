@@ -57,3 +57,23 @@ export function columnKeys(headers: string[]): string[] {
     return base;
   });
 }
+
+/**
+ * Join tables split across pages. Keeps the first table's headers.
+ * A continuation whose header row repeats the first headers is dropped;
+ * otherwise its "header" row was really a data row and is kept.
+ * Rows are padded/trimmed to the first table's column count.
+ */
+export function mergeTables(tables: ExtractedTable[]): ExtractedTable {
+  const [first, ...rest] = tables;
+  const width = first.headers.length;
+  const norm = (r: string[]) => r.map((c) => c.trim().toLowerCase()).join("|");
+  const fit = (r: string[]) => Array.from({ length: width }, (_, i) =>
+    i < width - 1 ? r[i] ?? "" : r.slice(width - 1).filter(Boolean).join(" "));
+  const rows = [...first.rows.map(fit)];
+  for (const t of rest) {
+    if (norm(t.headers) !== norm(first.headers) && !t.headers.every((h) => /^Column \d+$/.test(h))) rows.push(fit(t.headers));
+    rows.push(...t.rows.map(fit));
+  }
+  return { headers: first.headers, rows, context: first.context };
+}

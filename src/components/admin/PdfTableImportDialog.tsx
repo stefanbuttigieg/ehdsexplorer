@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileUp, Loader2 } from "lucide-react";
+import { FileUp, Loader2, Merge } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { extractMarkdownTables, columnKeys, type ExtractedTable } from "@/lib/pdf-table-extract";
+import { extractMarkdownTables, columnKeys, mergeTables, type ExtractedTable } from "@/lib/pdf-table-extract";
 
 interface Candidate extends ExtractedTable { selected: boolean; name: string }
 
@@ -74,6 +74,19 @@ export function PdfTableImportDialog({ actId, open, onOpenChange, startOrder }: 
     } finally { setBusy(null); }
   };
 
+  const joined = candidates.filter((c) => c.selected);
+  const joinSelected = () => {
+    const idx = candidates.map((c, i) => (c.selected ? i : -1)).filter((i) => i >= 0);
+    if (idx.length < 2) return;
+    const merged = { ...mergeTables(idx.map((i) => candidates[i])), selected: true, name: candidates[idx[0]].name };
+    setCandidates((cs) => cs.flatMap((c, i) => (i === idx[0] ? [merged] : idx.includes(i) ? [] : [c])));
+    toast({ title: `Joined ${idx.length} tables`, description: "Rows follow page order under the first table's columns." });
+  };
+  const joinWithPrevious = (i: number) => {
+    const merged = { ...mergeTables([candidates[i - 1], candidates[i]]), selected: true, name: candidates[i - 1].name };
+    setCandidates((cs) => cs.flatMap((c, j) => (j === i - 1 ? [merged] : j === i ? [] : [c])));
+  };
+
   const update = (i: number, patch: Partial<Candidate>) =>
     setCandidates((cs) => cs.map((c, j) => (j === i ? { ...c, ...patch } : c)));
 
@@ -89,6 +102,14 @@ export function PdfTableImportDialog({ actId, open, onOpenChange, startOrder }: 
           onChange={(e) => { const f = e.target.files?.[0]; if (f) readPdf(f); e.target.value = ""; }} />
         {busy === "read" && <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Reading {fileName}… this can take a minute.</p>}
 
+        {candidates.length > 1 && (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-muted p-3 text-sm">
+            <span>Table split across pages? Tick the parts and join them, or use "Join with above".</span>
+            <Button size="sm" variant="secondary" disabled={!!busy || joined.length < 2} onClick={joinSelected}>
+              <Merge className="h-4 w-4 mr-1" /> Join {joined.length >= 2 ? joined.length : ""} ticked tables
+            </Button>
+          </div>
+        )}
         <div className="space-y-4">
           {candidates.map((c, i) => (
             <div key={i} className="rounded-md border p-3 space-y-2">
@@ -96,6 +117,11 @@ export function PdfTableImportDialog({ actId, open, onOpenChange, startOrder }: 
                 <Checkbox checked={c.selected} onCheckedChange={(v) => update(i, { selected: !!v })} aria-label={`Import table ${i + 1}`} />
                 <Input value={c.name} onChange={(e) => update(i, { name: e.target.value })} aria-label="Table name" />
                 <span className="text-xs text-muted-foreground whitespace-nowrap">{c.headers.length} cols · {c.rows.length} rows</span>
+                {i > 0 && (
+                  <Button size="sm" variant="outline" disabled={!!busy} onClick={() => joinWithPrevious(i)} title="Add these rows to the end of the table above">
+                    <Merge className="h-4 w-4 mr-1" /> Join with above
+                  </Button>
+                )}
               </div>
               <div className="overflow-x-auto max-h-56">
                 <Table>

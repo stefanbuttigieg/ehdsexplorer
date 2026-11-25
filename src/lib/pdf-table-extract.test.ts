@@ -24,3 +24,21 @@ describe("columnKeys", () => {
     expect(columnKeys(["Data category", "Data category", ""])).toEqual(["data_category", "data_category_2", "column_3"]);
   });
 });
+
+import { mergeTables } from "./pdf-table-extract";
+describe("mergeTables", () => {
+  const a = { headers: ["Code", "Name"], rows: [["1", "A"]], context: "Annex I" };
+  it("drops a repeated header row on the next page", () => {
+    const m = mergeTables([a, { headers: ["Code", "Name"], rows: [["2", "B"]] }]);
+    expect(m.rows).toEqual([["1", "A"], ["2", "B"]]);
+    expect(m.context).toBe("Annex I");
+  });
+  it("keeps a continuation's first line as data when headers differ", () => {
+    const m = mergeTables([a, { headers: ["2", "B"], rows: [["3", "C"]] }]);
+    expect(m.rows).toEqual([["1", "A"], ["2", "B"], ["3", "C"]]);
+  });
+  it("fits rows to the first table's column count", () => {
+    const m = mergeTables([a, { headers: ["Code", "Name"], rows: [["4"], ["5", "E", "x"]] }]);
+    expect(m.rows.slice(1)).toEqual([["4", ""], ["5", "E x"]]);
+  });
+});

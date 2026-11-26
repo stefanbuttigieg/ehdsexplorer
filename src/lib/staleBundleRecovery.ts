@@ -11,11 +11,15 @@ export function shouldReload(lastReloadAt: number | null, now: number): boolean 
   return lastReloadAt === null || now - lastReloadAt > GUARD_MS;
 }
 
-async function recover() {
+function claimReload(): boolean {
   let last: number | null = null;
   try { last = Number(sessionStorage.getItem(KEY)) || null; } catch { /* storage blocked */ }
-  if (!shouldReload(last, Date.now())) return;
-  try { sessionStorage.setItem(KEY, String(Date.now())); } catch { /* ignore */ }
+  if (!shouldReload(last, Date.now())) return false;
+  try { sessionStorage.setItem(KEY, String(Date.now())); } catch { return false; }
+  return true;
+}
+
+async function recover() {
   try {
     const regs = (await navigator.serviceWorker?.getRegistrations()) ?? [];
     await Promise.all(regs.map((r) => r.update().catch(() => undefined)));
@@ -26,13 +30,18 @@ async function recover() {
 }
 
 export function installStaleBundleRecovery() {
-  window.addEventListener("vite:preloadError", (e) => { e.preventDefault(); void recover(); });
+  window.addEventListener("vite:preloadError", (e) => {
+    // Only swallow the error when we really reload; otherwise let it surface.
+    if (!claimReload()) return;
+    e.preventDefault();
+    void recover();
+  });
   window.addEventListener("unhandledrejection", (e) => {
     const msg = String((e.reason as Error | undefined)?.message ?? e.reason ?? "");
-    if (isStaleBundleError(msg)) void recover();
+    if (isStaleBundleError(msg) && claimReload()) void recover();
   });
   window.addEventListener("error", (e) => {
-    if (isStaleBundleError(String(e.message ?? ""))) void recover();
+    if (isStaleBundleError(String(e.message ?? "")) && claimReload()) void recover();
   });
 }
 

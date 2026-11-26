@@ -2,6 +2,9 @@ import { createRoot } from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import App from "./App.tsx";
 import "./index.css";
+import { installStaleBundleRecovery } from "./lib/staleBundleRecovery";
+
+installStaleBundleRecovery();
 
 // --- Preview / iframe SW guard ---
 // Prevent service workers from caching stale bundles inside Lovable's

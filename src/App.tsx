@@ -1,3 +1,4 @@
+import { PageLoadErrorBoundary } from "@/components/PageLoadErrorBoundary";
 import OAuthConsent from "./pages/OAuthConsent";
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
@@ -195,6 +196,7 @@ const App = () => (
                 <LevelUpModalWrapper />
                 <MaintenanceGuard>
                 <KidsModeGuard />
+          <PageLoadErrorBoundary>
           <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<PublicHome />} />
@@ -323,6 +325,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
+          </PageLoadErrorBoundary>
           </MaintenanceGuard>
           </BetaExperienceProvider>
           </BrowserRouter>

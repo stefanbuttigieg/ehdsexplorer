@@ -1,3 +1,4 @@
+// @ts-ignore Bun runs this focused test; browser dependencies omit Bun types.
 import { describe, expect, test } from "bun:test";
 import { isStaleBundleError, shouldReload } from "./staleBundleRecovery";
 

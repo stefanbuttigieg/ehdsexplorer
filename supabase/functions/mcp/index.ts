@@ -211,19 +211,107 @@ var get_feedback_insights_default = defineTool7({
   })
 });
 
+// src/lib/mcp/tools/get-implementing-act.ts
+import { defineTool as defineTool8 } from "npm:@lovable.dev/mcp-js@3.1.1";
+import { z as z8 } from "npm:zod@^3.25.76";
+var get_implementing_act_default = defineTool8({
+  name: "get_implementing_act",
+  title: "Get implementing act",
+  description: "Read one EHDS implementing act (e.g. 'art-15-1' for the EEHRxF exchange format): details, articles, recitals and its published data tables list.",
+  inputSchema: {
+    id: z8.string().min(1).max(60).describe("Implementing act id, e.g. 'art-15-1'. Use list_implementing_acts to find ids."),
+    include_text: z8.boolean().optional().describe("Include full article and recital text (default true).")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ id, include_text }, ctx) => {
+    if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
+    const db = supabaseForUser(ctx);
+    const full = include_text !== false;
+    const [act, articles, recitals, tables] = await Promise.all([
+      db.from("implementing_acts").select("*").eq("id", id).maybeSingle(),
+      db.from("implementing_act_articles").select(full ? "article_number, title, content" : "article_number, title").eq("implementing_act_id", id).order("article_number"),
+      full ? db.from("implementing_act_recitals").select("recital_number, content").eq("implementing_act_id", id).order("recital_number") : Promise.resolve({ data: [], error: null }),
+      db.from("implementing_act_data_tables").select("id, name, description").eq("implementing_act_id", id).eq("is_published", true).order("sort_order")
+    ]);
+    const err = act.error ?? articles.error ?? recitals.error ?? tables.error;
+    if (err) return { content: [{ type: "text", text: err.message }], isError: true };
+    if (!act.data) return { content: [{ type: "text", text: `No implementing act with id '${id}'` }], isError: true };
+    const result = JSON.parse(JSON.stringify({ act: act.data, articles: articles.data ?? [], recitals: recitals.data ?? [], data_tables: tables.data ?? [] }));
+    return { content: [{ type: "text", text: JSON.stringify(result) }], structuredContent: result };
+  }
+});
+
+// src/lib/mcp/tools/list-data-tables.ts
+import { defineTool as defineTool9 } from "npm:@lovable.dev/mcp-js@3.1.1";
+import { z as z9 } from "npm:zod@^3.25.76";
+var list_data_tables_default = defineTool9({
+  name: "list_implementing_act_data_tables",
+  title: "List implementing act data tables",
+  description: "List published data tables from implementing acts (e.g. EEHRxF data sets in 'art-15-1'), with their columns.",
+  inputSchema: {
+    implementing_act_id: z9.string().max(60).optional().describe("Only tables of this act, e.g. 'art-15-1' (EEHRxF)."),
+    query: z9.string().max(100).optional().describe("Filter by words in the table name or description.")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: ({ implementing_act_id, query }, ctx) => runQuery(ctx, "tables", (db) => {
+    let q = db.from("implementing_act_data_tables").select("id, implementing_act_id, name, description, implementing_act_data_columns(name, column_key, sort_order)").eq("is_published", true).order("implementing_act_id").order("sort_order").limit(200);
+    if (implementing_act_id) q = q.eq("implementing_act_id", implementing_act_id);
+    if (query) {
+      const s = query.replace(/[%,()*]/g, " ").trim();
+      if (s) q = q.or(`name.ilike.%${s}%,description.ilike.%${s}%`);
+    }
+    return q;
+  })
+});
+
+// src/lib/mcp/tools/get-data-table.ts
+import { defineTool as defineTool10 } from "npm:@lovable.dev/mcp-js@3.1.1";
+import { z as z10 } from "npm:zod@^3.25.76";
+var get_data_table_default = defineTool10({
+  name: "get_implementing_act_data_table",
+  title: "Get implementing act data table",
+  description: "Read a published implementing act data table (columns and rows in their set order), optionally keeping only rows containing a search term.",
+  inputSchema: {
+    table_id: z10.string().uuid().describe("Table id from list_implementing_act_data_tables."),
+    search: z10.string().max(100).optional().describe("Keep only rows where any cell contains this text (case-insensitive)."),
+    limit: z10.number().int().min(1).max(1e3).optional().describe("Maximum rows to return (default 500).")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ table_id, search, limit }, ctx) => {
+    if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
+    const db = supabaseForUser(ctx);
+    const t = await db.from("implementing_act_data_tables").select("id, implementing_act_id, name, description").eq("id", table_id).eq("is_published", true).maybeSingle();
+    if (t.error) return { content: [{ type: "text", text: t.error.message }], isError: true };
+    if (!t.data) return { content: [{ type: "text", text: "Table not found or not published" }], isError: true };
+    const [cols, rows] = await Promise.all([
+      db.from("implementing_act_data_columns").select("name, column_key").eq("table_id", table_id).order("sort_order"),
+      db.from("implementing_act_data_rows").select("values").eq("table_id", table_id).order("sort_order").limit(5e3)
+    ]);
+    const err = cols.error ?? rows.error;
+    if (err) return { content: [{ type: "text", text: err.message }], isError: true };
+    const needle = search?.toLowerCase();
+    let list = (rows.data ?? []).map((r) => r.values);
+    if (needle) list = list.filter((v) => JSON.stringify(v ?? {}).toLowerCase().includes(needle));
+    const total = list.length;
+    const max = limit ?? 500;
+    const result = JSON.parse(JSON.stringify({ table: t.data, columns: cols.data ?? [], rows: list.slice(0, max), total_matching_rows: total, truncated: total > max }));
+    return { content: [{ type: "text", text: JSON.stringify(result) }], structuredContent: result };
+  }
+});
+
 // src/lib/mcp/index.ts
 var projectRef = "lmjjghvrjgffmbidajih";
 var mcp_default = defineMcp({
   name: "ehds-explorer",
   title: "EHDS Explorer",
-  version: "0.1.0",
-  instructions: "Tools for exploring the European Health Data Space Regulation (EU) 2025/327: search and read articles and recitals, look up definitions and official Commission FAQs, list implementing acts and their consultation status, and read public feedback insights.",
+  version: "0.2.0",
+  instructions: "Tools for exploring the European Health Data Space Regulation (EU) 2025/327: search and read articles and recitals, look up definitions and official Commission FAQs, list implementing acts and read their full text, browse and read implementing act data tables (such as the EEHRxF data sets in act art-15-1), and read public feedback insights.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     resource: "https://mcp.ehdsexplorer.eu",
     acceptedAudiences: "authenticated"
   }),
-  tools: [search_articles_default, get_article_default, get_recital_default, search_definitions_default, search_faqs_default, list_implementing_acts_default, get_feedback_insights_default]
+  tools: [search_articles_default, get_article_default, get_recital_default, search_definitions_default, search_faqs_default, list_implementing_acts_default, get_implementing_act_default, list_data_tables_default, get_data_table_default, get_feedback_insights_default]
 });
 
 // lovable-mcp-supabase-entry.ts

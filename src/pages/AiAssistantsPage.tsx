@@ -17,6 +17,9 @@ const TOOLS = [
   { name: 'search_definitions', desc: 'Look up defined terms from the glossary.' },
   { name: 'search_faqs', desc: 'Search the official Commission FAQs.' },
   { name: 'list_implementing_acts', desc: 'List implementing acts and their feedback status.' },
+  { name: 'get_implementing_act', desc: 'Read an implementing act in full: articles, recitals and its data tables.' },
+  { name: 'list_implementing_act_data_tables', desc: 'List published implementing act data tables, such as the EEHRxF data sets.' },
+  { name: 'get_implementing_act_data_table', desc: 'Read a data table\'s columns and rows, optionally filtered by a search term.' },
   { name: 'get_feedback_insights', desc: 'Read public feedback insights for an act.' },
 ];
 

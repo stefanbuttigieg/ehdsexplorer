@@ -13,7 +13,7 @@
   "mcp": {
     "server": {
       "name": "ehds-explorer",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "title": "EHDS Explorer"
     },
     "tools": [
@@ -188,6 +188,102 @@
               "description": "Status filter, e.g. 'feedback', 'feedback-closed', 'adopted', 'pending'."
             }
           },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_implementing_act",
+        "title": "Get implementing act",
+        "description": "Read one EHDS implementing act (e.g. 'art-15-1' for the EEHRxF exchange format): details, articles, recitals and its published data tables list.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60,
+              "description": "Implementing act id, e.g. 'art-15-1'. Use list_implementing_acts to find ids."
+            },
+            "include_text": {
+              "type": "boolean",
+              "description": "Include full article and recital text (default true)."
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_implementing_act_data_tables",
+        "title": "List implementing act data tables",
+        "description": "List published data tables from implementing acts (e.g. EEHRxF data sets in 'art-15-1'), with their columns.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "implementing_act_id": {
+              "type": "string",
+              "maxLength": 60,
+              "description": "Only tables of this act, e.g. 'art-15-1' (EEHRxF)."
+            },
+            "query": {
+              "type": "string",
+              "maxLength": 100,
+              "description": "Filter by words in the table name or description."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_implementing_act_data_table",
+        "title": "Get implementing act data table",
+        "description": "Read a published implementing act data table (columns and rows in their set order), optionally keeping only rows containing a search term.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "table_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Table id from list_implementing_act_data_tables."
+            },
+            "search": {
+              "type": "string",
+              "maxLength": 100,
+              "description": "Keep only rows where any cell contains this text (case-insensitive)."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "description": "Maximum rows to return (default 500)."
+            }
+          },
+          "required": [
+            "table_id"
+          ],
           "additionalProperties": false,
           "$schema": "http://json-schema.org/draft-07/schema#"
         },

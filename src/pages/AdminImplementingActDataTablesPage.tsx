@@ -166,9 +166,23 @@ function EditTableForm({ table, onSave }: { table: DataTable; onSave: (name: str
 
 function ColumnManager({ tableId }: { tableId: string }) {
   const { data: columns = [], isLoading } = useDataColumns(tableId);
-  const { createColumn, deleteColumn } = useDataColumnMutations(tableId);
+  const { createColumn, updateColumn, deleteColumn } = useDataColumnMutations(tableId);
   const [newName, setNewName] = useState("");
   const [newKey, setNewKey] = useState("");
+  const [editingColumn, setEditingColumn] = useState<DataColumn | null>(null);
+  const [editedName, setEditedName] = useState("");
+  const { toast } = useToast();
+
+  const handleRename = async () => {
+    if (!editingColumn || !editedName.trim() || updateColumn.isPending) return;
+    try {
+      await updateColumn.mutateAsync({ id: editingColumn.id, name: editedName.trim() });
+      setEditingColumn(null);
+      toast({ title: "Column name saved" });
+    } catch (error) {
+      toast({ title: "Couldn't save column name", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" });
+    }
+  };
 
   const handleAdd = () => {
     if (!newName.trim() || !newKey.trim()) return;
@@ -200,7 +214,7 @@ function ColumnManager({ tableId }: { tableId: string }) {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Key</TableHead>
-                <TableHead className="w-16">Actions</TableHead>
+                <TableHead className="w-24">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -209,6 +223,12 @@ function ColumnManager({ tableId }: { tableId: string }) {
                   <TableCell className="text-sm">{col.name}</TableCell>
                   <TableCell className="font-mono text-xs text-muted-foreground">{col.column_key}</TableCell>
                   <TableCell>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Edit column name: ${col.name}`} title="Edit column name" onClick={() => {
+                      setEditingColumn(col);
+                      setEditedName(col.name);
+                    }}>
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
                     <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteColumn.mutate(col.id)}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
@@ -219,6 +239,21 @@ function ColumnManager({ tableId }: { tableId: string }) {
           </Table>
         </div>
       )}
+      <Dialog open={!!editingColumn} onOpenChange={(open) => { if (!open && !updateColumn.isPending) setEditingColumn(null); }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Edit Column Name</DialogTitle></DialogHeader>
+          <form onSubmit={event => { event.preventDefault(); void handleRename(); }} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-column-name">Column name</Label>
+              <Input id="edit-column-name" value={editedName} onChange={event => setEditedName(event.target.value)} disabled={updateColumn.isPending} autoFocus />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" disabled={updateColumn.isPending} onClick={() => setEditingColumn(null)}>Cancel</Button>
+              <Button type="submit" disabled={!editedName.trim() || updateColumn.isPending}>{updateColumn.isPending ? "Saving…" : "Save"}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

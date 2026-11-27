@@ -149,7 +149,7 @@ export function useDataColumnMutations(tableId: string) {
   const updateColumn = useMutation({
     mutationFn: async (input: { id: string; name?: string; column_key?: string }) => {
       const { id, ...rest } = input;
-      const { error } = await supabase.from("implementing_act_data_columns").update(rest).eq("id", id);
+      const { error } = await supabase.from("implementing_act_data_columns").update(rest).eq("id", id).eq("table_id", tableId).select("id").single();
       if (error) throw error;
     },
     onSuccess: invalidate,

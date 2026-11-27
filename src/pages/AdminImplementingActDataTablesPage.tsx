@@ -171,16 +171,18 @@ function ColumnManager({ tableId }: { tableId: string }) {
   const [newKey, setNewKey] = useState("");
   const [editingColumn, setEditingColumn] = useState<DataColumn | null>(null);
   const [editedName, setEditedName] = useState("");
+  const [editedKey, setEditedKey] = useState("");
+  const duplicateKey = columns.some(col => col.id !== editingColumn?.id && col.column_key === editedKey.trim());
   const { toast } = useToast();
 
   const handleRename = async () => {
-    if (!editingColumn || !editedName.trim() || updateColumn.isPending) return;
+    if (!editingColumn || !editedName.trim() || !editedKey.trim() || duplicateKey || updateColumn.isPending) return;
     try {
-      await updateColumn.mutateAsync({ id: editingColumn.id, name: editedName.trim() });
+      await updateColumn.mutateAsync({ id: editingColumn.id, name: editedName.trim(), column_key: editedKey.trim() });
       setEditingColumn(null);
-      toast({ title: "Column name saved" });
+      toast({ title: "Column saved" });
     } catch (error) {
-      toast({ title: "Couldn't save column name", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" });
+      toast({ title: "Couldn't save column", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" });
     }
   };
 
@@ -223,9 +225,10 @@ function ColumnManager({ tableId }: { tableId: string }) {
                   <TableCell className="text-sm">{col.name}</TableCell>
                   <TableCell className="font-mono text-xs text-muted-foreground">{col.column_key}</TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Edit column name: ${col.name}`} title="Edit column name" onClick={() => {
+                    <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Edit column: ${col.name}`} title="Edit column" onClick={() => {
                       setEditingColumn(col);
                       setEditedName(col.name);
+                      setEditedKey(col.column_key);
                     }}>
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
@@ -241,15 +244,20 @@ function ColumnManager({ tableId }: { tableId: string }) {
       )}
       <Dialog open={!!editingColumn} onOpenChange={(open) => { if (!open && !updateColumn.isPending) setEditingColumn(null); }}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Edit Column Name</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Edit Column</DialogTitle></DialogHeader>
           <form onSubmit={event => { event.preventDefault(); void handleRename(); }} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="edit-column-name">Column name</Label>
               <Input id="edit-column-name" value={editedName} onChange={event => setEditedName(event.target.value)} disabled={updateColumn.isPending} autoFocus />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-column-key">Column key</Label>
+              <Input id="edit-column-key" value={editedKey} onChange={event => setEditedKey(event.target.value)} disabled={updateColumn.isPending} aria-invalid={duplicateKey} aria-describedby={duplicateKey ? "column-key-error" : undefined} className="font-mono" />
+              {duplicateKey && <p id="column-key-error" className="text-sm text-destructive">This key is already used by another column.</p>}
+            </div>
             <DialogFooter>
               <Button type="button" variant="outline" disabled={updateColumn.isPending} onClick={() => setEditingColumn(null)}>Cancel</Button>
-              <Button type="submit" disabled={!editedName.trim() || updateColumn.isPending}>{updateColumn.isPending ? "Saving…" : "Save"}</Button>
+              <Button type="submit" disabled={!editedName.trim() || !editedKey.trim() || duplicateKey || updateColumn.isPending}>{updateColumn.isPending ? "Saving…" : "Save"}</Button>
             </DialogFooter>
           </form>
         </DialogContent>

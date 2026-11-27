@@ -78,6 +78,13 @@
       "when": 1795610922885,
       "tag": "0010_tighten_internal_table_access",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1795776069947,
+      "tag": "0011_preserve_ia_rows_on_column_key_change",
+      "breakpoints": true
     }
   ]
 }

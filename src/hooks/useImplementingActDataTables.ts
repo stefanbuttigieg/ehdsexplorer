@@ -134,7 +134,10 @@ export function useDataTableMutations(implementingActId: string) {
 
 export function useDataColumnMutations(tableId: string) {
   const qc = useQueryClient();
-  const invalidate = () => qc.invalidateQueries({ queryKey: ["ia-data-columns", tableId] });
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["ia-data-columns", tableId] });
+    qc.invalidateQueries({ queryKey: ["ia-data-rows", tableId] });
+  };
 
   const createColumn = useMutation({
     mutationFn: async (input: { name: string; column_key: string; sort_order?: number }) => {

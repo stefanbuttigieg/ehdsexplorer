@@ -1,6 +1,6 @@
 # Agent rules
 
-- IA data-table column renaming updates only the display name, keeping column keys and stored row values unchanged — prevents data loss when headings are edited.
+- IA column name edits leave data unchanged; key edits use a security-invoker database trigger to migrate row values atomically and reject collisions under existing verified-staff policies — prevents orphaned or overwritten cells.
 
 - Two-step verification uses native TOTP or server-only, keyed, session/purpose-bound email challenges consumed atomically; restrictive RLS and authenticated edge actions check the server-owned verified session, never browser flags — prevents password-only bypass and code replay without changing public reads.
 - MFA preference mutations return only granted public preference columns; post-verification redirects wait for refreshed server-verified roles — preserves secret isolation and avoids stale role routing.

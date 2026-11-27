@@ -174,7 +174,18 @@ export function useDataTableMutations(implementingActId: string) {
     },
   });
 
-  return { createTable, updateTable, deleteTable, splitTable };
+  const reorderTables = useMutation({
+    mutationFn: async (orderedIds: string[]) => {
+      for (let i = 0; i < orderedIds.length; i++) {
+        const { error } = await supabase.from("implementing_act_data_tables").update({ sort_order: i }).eq("id", orderedIds[i]);
+        if (error) throw error;
+      }
+    },
+    onSuccess: invalidate,
+    onError: invalidate,
+  });
+
+  return { createTable, updateTable, deleteTable, splitTable, reorderTables };
 }
 
 export function useDataColumnMutations(tableId: string) {

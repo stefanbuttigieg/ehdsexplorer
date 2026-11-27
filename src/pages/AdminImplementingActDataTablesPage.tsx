@@ -26,7 +26,16 @@ import { FileUp } from "lucide-react";
 
 function TableManager({ actId, actTitle }: { actId: string; actTitle: string }) {
   const { data: tables = [], isLoading } = useDataTables(actId);
-  const { createTable, updateTable, deleteTable } = useDataTableMutations(actId);
+  const { createTable, updateTable, deleteTable, reorderTables } = useDataTableMutations(actId);
+  const [dragT, setDragT] = useState<number | null>(null);
+  const [overT, setOverT] = useState<number | null>(null);
+  const saveOrder = (from: number, to: number) => {
+    if (from === to || to < 0 || to >= tables.length) return;
+    const ids = tables.map(t => t.id);
+    const [m] = ids.splice(from, 1);
+    ids.splice(to, 0, m);
+    reorderTables.mutate(ids, { onError: (e: any) => toast({ title: "Couldn't save order", description: e.message, variant: "destructive" }) });
+  };
   const [showCreate, setShowCreate] = useState(false);
   const [showPdf, setShowPdf] = useState(false);
   const [newName, setNewName] = useState("");
@@ -71,14 +80,29 @@ function TableManager({ actId, actTitle }: { actId: string; actTitle: string }) 
         <Card><CardContent className="p-6 text-center text-muted-foreground text-sm">No data tables yet.</CardContent></Card>
       ) : (
         <div className="space-y-2">
-          {tables.map(t => (
-            <Card key={t.id} className={activeTableId === t.id ? "ring-2 ring-primary" : ""}>
+          {tables.map((t, ti) => (
+            <Card
+              key={t.id}
+              draggable={!reorderTables.isPending}
+              onDragStart={e => { setDragT(ti); e.dataTransfer.effectAllowed = "move"; }}
+              onDragOver={e => { e.preventDefault(); if (overT !== ti) setOverT(ti); }}
+              onDrop={e => { e.preventDefault(); if (dragT !== null) saveOrder(dragT, ti); setDragT(null); setOverT(null); }}
+              onDragEnd={() => { setDragT(null); setOverT(null); }}
+              className={`${activeTableId === t.id ? "ring-2 ring-primary" : ""} ${dragT === ti ? "opacity-50" : ""} ${overT === ti && dragT !== null && dragT !== ti ? "border-t-2 border-t-primary" : ""}`}
+            >
               <CardContent className="p-4 flex items-center justify-between gap-3">
+                <span className="cursor-grab text-muted-foreground shrink-0" title="Drag to reorder"><GripVertical className="h-4 w-4" /></span>
                 <button className="text-left flex-1 min-w-0" onClick={() => setActiveTableId(activeTableId === t.id ? null : t.id)}>
                   <p className="font-medium text-sm truncate">{t.name}</p>
                   {t.description && <p className="text-xs text-muted-foreground truncate">{t.description}</p>}
                 </button>
                 <div className="flex items-center gap-2 shrink-0">
+                  <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Move table up" disabled={ti === 0 || reorderTables.isPending} onClick={() => saveOrder(ti, ti - 1)}>
+                    <ArrowUp className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Move table down" disabled={ti === tables.length - 1 || reorderTables.isPending} onClick={() => saveOrder(ti, ti + 1)}>
+                    <ArrowDown className="h-3.5 w-3.5" />
+                  </Button>
                   <Switch
                     checked={t.is_published}
                     onCheckedChange={(v) => updateTable.mutate({ id: t.id, is_published: v })}

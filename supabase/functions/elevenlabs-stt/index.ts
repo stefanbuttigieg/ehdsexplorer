@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { requireUser } from "../_shared/auth-guard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,6 +9,11 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  const auth = await requireUser(req);
+  if (auth instanceof Response) {
+    return new Response(JSON.stringify({ error: "Sign in required" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 
   try {
@@ -23,8 +29,11 @@ serve(async (req) => {
     if (!audioFile) {
       throw new Error("Audio file is required");
     }
+    if (audioFile.size > 10 * 1024 * 1024) {
+      throw new Error("Audio file too large");
+    }
 
-    console.log("Processing STT for file:", audioFile.name, "size:", audioFile.size);
+    console.log("Processing STT, size:", audioFile.size);
 
     const apiFormData = new FormData();
     apiFormData.append("file", audioFile);
@@ -47,7 +56,7 @@ serve(async (req) => {
 
     const transcription = await response.json();
 
-    console.log("STT transcription completed:", transcription.text?.substring(0, 100));
+    console.log("STT transcription completed");
 
     return new Response(JSON.stringify(transcription), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

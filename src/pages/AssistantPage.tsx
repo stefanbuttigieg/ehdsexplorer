@@ -148,8 +148,10 @@ const AssistantPage: React.FC = () => {
     try {
       const formData = new FormData();
       formData.append('audio', audioBlob, 'recording.webm');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Sign in required');
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-stt`, {
-        method: 'POST', headers: { 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` }, body: formData,
+        method: 'POST', headers: { 'Authorization': `Bearer ${session.access_token}` }, body: formData,
       });
       if (!response.ok) throw new Error('Transcription failed');
       const data = await response.json();

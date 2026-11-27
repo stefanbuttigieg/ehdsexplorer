@@ -1,3 +1,4 @@
+import { supabase } from "@/integrations/supabase/client";
 import { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Volume2, Square, Loader2 } from "lucide-react";
@@ -40,14 +41,16 @@ function buildSegments(panel: ComicPanel): Segment[] {
 }
 
 async function fetchTTSBlob(text: string, voiceId: string): Promise<Blob> {
-  const response = await fetch(
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Sign in required');
+      const response = await fetch(
     `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: `Bearer ${session.access_token}`,
       },
       body: JSON.stringify({ text, voiceId }),
     }

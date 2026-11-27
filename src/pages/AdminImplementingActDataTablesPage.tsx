@@ -22,7 +22,8 @@ import {
 } from "@/hooks/useImplementingActDataTables";
 import { useToast } from "@/hooks/use-toast";
 import { PdfTableImportDialog } from "@/components/admin/PdfTableImportDialog";
-import { FileUp } from "lucide-react";
+import { FileUp, Download } from "lucide-react";
+import { buildAllTablesWorkbook } from "@/lib/ia-tables-workbook";
 
 function TableManager({ actId, actTitle }: { actId: string; actTitle: string }) {
   const { data: tables = [], isLoading } = useDataTables(actId);
@@ -660,6 +661,7 @@ const AdminImplementingActDataTablesPage = () => {
       description="Manage structured data tables (e.g., data element definitions, logical models) for each implementing act"
     >
       <div className="space-y-6">
+        <ExportAllButton acts={acts} />
         {/* Act selector */}
         <Card>
           <CardHeader>
@@ -692,5 +694,31 @@ const AdminImplementingActDataTablesPage = () => {
     </AdminPageLayout>
   );
 };
+
+function ExportAllButton({ acts }: { acts: { id: string; articleReference?: string; title: string }[] }) {
+  const [busy, setBusy] = useState(false);
+  const { toast } = useToast();
+  const run = async () => {
+    setBusy(true);
+    try {
+      const blob = await buildAllTablesWorkbook(acts);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `ehds-implementing-act-data-tables-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+    } catch (e: any) {
+      toast({ title: "Export failed", description: e.message, variant: "destructive" });
+    } finally { setBusy(false); }
+  };
+  return (
+    <div className="flex justify-end">
+      <Button variant="outline" size="sm" onClick={run} disabled={busy}>
+        <Download className="h-4 w-4 mr-1" /> {busy ? "Preparing workbook…" : "Export all tables (Excel)"}
+      </Button>
+    </div>
+  );
+}
 
 export default AdminImplementingActDataTablesPage;

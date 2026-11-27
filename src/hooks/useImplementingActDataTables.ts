@@ -129,7 +129,52 @@ export function useDataTableMutations(implementingActId: string) {
     onSuccess: invalidate,
   });
 
-  return { createTable, updateTable, deleteTable };
+  /** Split a table: rows from `fromIndex` onward move into a new hidden table with the same columns. */
+  const splitTable = useMutation({
+    mutationFn: async (input: { table: DataTable; rowIds: string[]; fromIndex: number; newName: string }) => {
+      const moving = input.rowIds.slice(input.fromIndex);
+      if (input.fromIndex < 1 || moving.length === 0) throw new Error("Choose a row after the first one to split at.");
+      const { data: cols, error: colErr } = await supabase
+        .from("implementing_act_data_columns").select("name, column_key, sort_order").eq("table_id", input.table.id);
+      if (colErr) throw colErr;
+      const { data: created, error: tErr } = await supabase
+        .from("implementing_act_data_tables")
+        .insert({
+          implementing_act_id: implementingActId,
+          name: input.newName,
+          description: input.table.description,
+          is_published: false,
+          sort_order: (input.table.sort_order ?? 0) + 1,
+        })
+        .select().single();
+      if (tErr) throw tErr;
+      try {
+        if (cols && cols.length) {
+          const { error } = await supabase.from("implementing_act_data_columns")
+            .insert(cols.map((c) => ({ ...c, table_id: created.id })));
+          if (error) throw error;
+        }
+        for (let i = 0; i < moving.length; i++) {
+          const { error } = await supabase.from("implementing_act_data_rows")
+            .update({ table_id: created.id, sort_order: i }).eq("id", moving[i]).eq("table_id", input.table.id);
+          if (error) throw error;
+        }
+      } catch (e) {
+        // Put any moved rows back and remove the half-made table.
+        await supabase.from("implementing_act_data_rows").update({ table_id: input.table.id }).eq("table_id", created.id);
+        await supabase.from("implementing_act_data_tables").delete().eq("id", created.id);
+        throw e;
+      }
+      return created;
+    },
+    onSuccess: () => {
+      invalidate();
+      qc.invalidateQueries({ queryKey: ["ia-data-rows"] });
+      qc.invalidateQueries({ queryKey: ["ia-data-columns"] });
+    },
+  });
+
+  return { createTable, updateTable, deleteTable, splitTable };
 }
 
 export function useDataColumnMutations(tableId: string) {

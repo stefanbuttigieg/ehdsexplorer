@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { ClipboardPaste } from "lucide-react";
-import { Plus, Pencil, Trash2, Eye, EyeOff, ArrowLeft, Table2, Columns, Rows3, ArrowUp, ArrowDown, GripVertical } from "lucide-react";
+import { Plus, Pencil, Trash2, Scissors, Eye, EyeOff, ArrowLeft, Table2, Columns, Rows3, ArrowUp, ArrowDown, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -113,7 +113,7 @@ function TableManager({ actId, actTitle }: { actId: string; actTitle: string }) 
                 <ColumnManager tableId={activeTable.id} />
               </TabsContent>
               <TabsContent value="rows">
-                <RowManager tableId={activeTable.id} />
+                <RowManager tableId={activeTable.id} table={activeTable} actId={actId} />
               </TabsContent>
             </Tabs>
           </CardContent>
@@ -266,7 +266,10 @@ function ColumnManager({ tableId }: { tableId: string }) {
   );
 }
 
-function RowManager({ tableId }: { tableId: string }) {
+function RowManager({ tableId, table, actId }: { tableId: string; table: DataTable; actId: string }) {
+  const { splitTable } = useDataTableMutations(actId);
+  const [splitAt, setSplitAt] = useState<number | null>(null);
+  const [splitName, setSplitName] = useState("");
   const { data: columns = [] } = useDataColumns(tableId);
   const { data: rows = [], isLoading } = useDataRows(tableId);
   const { createRow, updateRow, deleteRow, reorderRows } = useDataRowMutations(tableId);
@@ -426,6 +429,11 @@ function RowManager({ tableId }: { tableId: string }) {
                       <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Move row down" disabled={index === rows.length - 1 || reorderRows.isPending} onClick={() => moveRow(index, 1)}>
                         <ArrowDown className="h-3.5 w-3.5" />
                       </Button>
+                      {index > 0 && (
+                        <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Split table here" title="Split table here: this row and below become a new table" onClick={() => { setSplitAt(index); setSplitName(`${table.name} (part 2)`); }}>
+                          <Scissors className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
                       <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditingRow({ id: row.id, values: { ...row.values } })}>
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
@@ -440,6 +448,37 @@ function RowManager({ tableId }: { tableId: string }) {
           </Table>
         </div>
       )}
+
+      {/* Split Table Dialog */}
+      <Dialog open={splitAt !== null} onOpenChange={(v) => { if (!v) setSplitAt(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Split table</DialogTitle></DialogHeader>
+          {splitAt !== null && (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Row {splitAt + 1} and the {rows.length - splitAt - 1} row{rows.length - splitAt - 1 === 1 ? "" : "s"} below it ({rows.length - splitAt} in total) will move into a new table with the same columns. The new table stays hidden until you publish it.
+              </p>
+              <div>
+                <Label className="text-xs">New table name</Label>
+                <Input value={splitName} onChange={e => setSplitName(e.target.value)} />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSplitAt(null)}>Cancel</Button>
+            <Button disabled={!splitName.trim() || splitTable.isPending} onClick={async () => {
+              if (splitAt === null) return;
+              try {
+                await splitTable.mutateAsync({ table, rowIds: rows.map(r => r.id), fromIndex: splitAt, newName: splitName.trim() });
+                toast({ title: "Table split", description: `"${splitName.trim()}" created (hidden until published).` });
+                setSplitAt(null);
+              } catch (e: any) {
+                toast({ title: "Couldn't split table", description: e.message, variant: "destructive" });
+              }
+            }}>Split</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Add Row Dialog */}
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
